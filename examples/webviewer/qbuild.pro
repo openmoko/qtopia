@@ -1,0 +1,12 @@
+TEMPLATE=app
+CONFIG+=qtopia
+TARGET=webviewer
+
+QTOPIA*=pim mail phone
+CONFIG+=quicklaunch
+
+include(webviewer.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES

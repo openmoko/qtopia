@@ -1,10 +1,11 @@
+!qbuild{
 qtopia_project(theme)
+}
 
 classicconf.files=$$QTOPIA_DEPOT_PATH/etc/themes/classic.conf
 classicconf.path=/etc/themes
-classicconf.trtarget=Qtopia
+classicconf.trtarget=Theme-Classic
 classicconf.hint=themecfg
-classicconf.outdir=$$PWD
 INSTALLS+=classicconf
 classicdata.files=$$QTOPIA_DEPOT_PATH/etc/themes/classic/*.xml $$QTOPIA_DEPOT_PATH/etc/themes/classic/*rc
 classicdata.path=/etc/themes/classic

@@ -1,0 +1,8 @@
+[Translation]
+File=QtopiaServices
+Context=UsbGadget/Ethernet
+[Service]
+Actions="startUsbService(QString)"
+Name[]="USB Ethernet Service"
+Multiple=1
+Gadget=QUsbEthernetGadget

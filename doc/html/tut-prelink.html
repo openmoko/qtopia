@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Tutorial: Using prelink<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Tutorial: Using prelink<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#prerequisites">Prerequisites</a></li>
@@ -27,23 +27,26 @@
 <h2>Prerequisites</h2>
 <p>This tutorial assumes that</p>
 <ul>
-<li>You can successfully build and run Qtopia on your device.</li>
+<li>You can successfully build and run Qt Extended on your device.</li>
 <li>You have the prelink binaries compiled for your device.</li>
-<li>All file systems containing Qtopia and system libraries are writable.</li>
+<li>All file systems containing Qt Extended and system libraries are writable.</li>
 </ul>
 <a name="process"></a>
 <h2>Process</h2>
 <p>The process of preparing your device for prelinking is as follows:</p>
 <ol type="1">
-<li>Build Qtopia using the <tt>-fPIC</tt> compiler flag.</li>
-<li>Install Qtopia onto your device.</li>
+<li>Build Qt Extended using the <tt>-fPIC</tt> compiler flag.</li>
+<li>Install Qt Extended onto your device.</li>
 <li>Copy <tt>prelink</tt> and <tt>prelink-rtld</tt> binaries to <tt>/usr/bin</tt> on your device.</li>
 <li>Copy <tt>prelink.conf</tt> to <tt>/etc</tt> on your device.</li>
 </ol>
-<p>Once the above steps have been completed run the following command on your device to prelink all programs and libraries:</p>
-<pre>    prelink -amR</pre>
+<p>Once the above steps have been completed run the following commands on your device to prelink all programs and libraries:</p>
+<pre>    export LD_LIBRARY_PATH=/opt/Qtopia/lib:/lib:/usr/lib
+    prelink -amR</pre>
 <p>This will take some time to run so be patient! Once it has completed check that <tt>/etc/prelink.cache</tt> exists and contains information.</p>
 <p>The <tt>prelink</tt> command should be rerun each time programs and shared libraries (including plug-ins) are updated.</p>
+<p>To undo the prelinking, run the command:</p>
+<pre>    prelink -au</pre>
 <a name="example-configuration-file"></a>
 <h2>Example Configuration File</h2>
 <p>The following is an example <tt>prelink.conf</tt> file which is appropriate for most system:</p>
@@ -67,15 +70,15 @@
     -l /usr/sbin
     -l /usr/local/sbin
 
-    # Qtopia
+    # Qt Extended
     -l /opt/Qtopia/lib
     -l /opt/Qtopia/bin
     -l /opt/Qtopia/plugins
     -l /opt/Qtopia/qt_plugins</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

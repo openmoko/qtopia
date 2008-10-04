@@ -10,9 +10,10 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QMediaVideoControl Class Reference</h1>
-<p>The QMediaVideoControl class is an interface to videos playing through the Qtopia Media System. <a href="#details">More...</a></p>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QMediaVideoControl Class Reference<br /><span class="small-subtitle">[<a href="qtmediamodule.html">QtMediaModule</a>]</span>
+</h1>
+<p>The QMediaVideoControl class is an interface to videos playing through the Qt Extended Media System. <a href="#details">More...</a></p>
 <pre>    #include &lt;QMediaVideoControl&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qmediavideocontrol-members.html">List of all members, including inherited members</a></li>
@@ -26,6 +27,15 @@
 </ul>
 <ul>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qmediavideocontrol.html#setVideoRotation">setVideoRotation</a></b> ( QtopiaVideo::VideoRotation <i>rotation</i> )</li>
+<li><div class="fn"/>void <b><a href="qmediavideocontrol.html#setVideoScaleMode">setVideoScaleMode</a></b> ( QtopiaVideo::VideoScaleMode <i>scaleMode</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -49,7 +59,6 @@
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
@@ -57,7 +66,7 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The QMediaVideoControl class is an interface to videos playing through the Qtopia Media System.</p>
+<p>The QMediaVideoControl class is an interface to videos playing through the Qt Extended Media System.</p>
 <p>If a prepared media resource has associated video content, when that content is available to be played, this inteface can be used to contruct a <a href="qwidget.html">QWidget</a> which will contain the rendering of the video content.</p>
 <p>Use the <a href="qmediacontrolnotifier.html">QMediaControlNotifier</a> class to listen for when video content is available.</p>
 <pre>    QMediaControlNotifier *notifier = new QMediaControlNotifier( QMediaVideoControl::name() );
@@ -86,6 +95,12 @@
 <p>Signal that is emitted when the control is invalid and no longer available for use.</p>
 <h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QMediaVideoControl::name ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return the name of this control.</p>
+<h3 class="fn"><a name="setVideoRotation"></a>void QMediaVideoControl::setVideoRotation ( <a href="qtopiavideo.html#VideoRotation-enum">QtopiaVideo::VideoRotation</a> <i>rotation</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Set video image <i>rotation</i> mode.</p>
+<p>See also <a href="qtopiavideo.html#VideoRotation-enum">QtopiaVideo::VideoRotation</a>.</p>
+<h3 class="fn"><a name="setVideoScaleMode"></a>void QMediaVideoControl::setVideoScaleMode ( <a href="qtopiavideo.html#VideoScaleMode-enum">QtopiaVideo::VideoScaleMode</a> <i>scaleMode</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Set the video using <i>scaleMode</i> to be scaled to fit the window size ( <a href="qtopiavideo.html#VideoScaleMode-enum">QtopiaVideo::FitWindow</a> ) or stay unchanged ( QtopiaMedia::NoScale ).</p>
+<p>See also <a href="qtopiavideo.html#VideoScaleMode-enum">QtopiaVideo::VideoScaleMode</a>.</p>
 <h3 class="fn"><a name="valid"></a>void QMediaVideoControl::valid ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the control is valid and available for use.</p>
 <h3 class="fn"><a name="videoTargetAvailable"></a>void QMediaVideoControl::videoTargetAvailable ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -96,8 +111,8 @@
 <p>See also <a href="qmediavideocontrol.html#createVideoWidget">createVideoWidget</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

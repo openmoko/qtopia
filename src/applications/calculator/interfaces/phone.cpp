@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -77,10 +75,8 @@ FormPhone::FormPhone(QWidget *parent)
     helper_eval->setFocusPolicy(Qt::NoFocus);
     helper_cycle->setFocusPolicy(Qt::NoFocus);
 
-#if defined(QTOPIA_PHONE)
     QtopiaApplication::setInputMethodHint( this, QtopiaApplication::Number );
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
-#endif
 
     // DPad shortcuts
     QVector<int> keyIdents(13);
@@ -167,11 +163,9 @@ void FormPhone::plus(){
     if (negate_action) negate_action->setVisible(false);
     lastInstruction=1;
     firstNumber = false;
-#if defined(QTOPIA_PHONE)
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
     if ( systemEngine->error() )
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
-#endif
     lockEvaluation = true;
 }
 void FormPhone::minus(){
@@ -179,11 +173,9 @@ void FormPhone::minus(){
     if (negate_action) negate_action->setVisible(false);
     lastInstruction=2;
     firstNumber = false;
-#if defined(QTOPIA_PHONE)
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
     if ( systemEngine->error() )
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
-#endif
     lockEvaluation = true;
 }
 void FormPhone::times(){
@@ -191,11 +183,9 @@ void FormPhone::times(){
     if (negate_action) negate_action->setVisible(false);
     lastInstruction=3;
     firstNumber = false;
-#if defined(QTOPIA_PHONE)
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
     if ( systemEngine->error() )
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
-#endif
     lockEvaluation = true;
 }
 void FormPhone::div(){
@@ -203,29 +193,19 @@ void FormPhone::div(){
     if (negate_action) negate_action->setVisible(false);
     lastInstruction=0;
     firstNumber = false;
-#if defined(QTOPIA_PHONE)
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
     if ( systemEngine->error() )
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
-#endif
     lockEvaluation = true;
 }
 void FormPhone::eval(){
-    if (
-#if defined(QTOPIA_PHONE)
-            !lockEvaluation
-#else
-            true
-#endif
-    ) {
+    if (!lockEvaluation) {
         systemEngine->evaluate();
         if (negate_action) negate_action->setVisible(false);
         firstNumber = true;
-#if defined(QTOPIA_PHONE)
         QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
         if ( systemEngine->error() )
             QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
-#endif
         lockEvaluation = true;
     }
 }
@@ -254,13 +234,9 @@ void FormPhone::changeResetButtonText ( ResetState drs ) {
     displayedState = drs;
     if (drs == drNone || drs == drHard) {
         firstNumber = true;
-#if defined(QTOPIA_PHONE)
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
-#endif
     } else {
-#if defined(QTOPIA_PHONE)
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
-#endif
     }
     if (negate_action) negate_action->setVisible(true);
 }
@@ -274,7 +250,6 @@ void FormPhone::keyReleaseEvent(QKeyEvent *e){
             killTimer(tid_hold);
             tid_hold = 0;
             systemEngine->delChar();
-#if defined(QTOPIA_PHONE)
             int numDataOps = systemEngine->numOps();
             if ((numDataOps % 2 == 1)) {
                 QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
@@ -285,14 +260,11 @@ void FormPhone::keyReleaseEvent(QKeyEvent *e){
                 QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Ok);
                 lockEvaluation = false;
             }
-#endif
-
         } else {
             if (e->key() == Qt::Key_Back)
             close();
         }
     }
-#if defined(QTOPIA_PHONE)
     switch (e->key())
     {
         case Qt::Key_0:
@@ -313,7 +285,6 @@ void FormPhone::keyReleaseEvent(QKeyEvent *e){
                 lockEvaluation = false;
             }
     }
-#endif
 
     e->accept();
 
@@ -368,25 +339,19 @@ void FormPhone::clearAll(){
     }
     else
         systemEngine->hardReset();
-#ifdef QTOPIA_PHONE
     if( !Qtopia::mousePreferred() )
         setEditFocus(true);
-#endif
 
-#if defined(QTOPIA_PHONE)
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
     lockEvaluation = true;
-#endif
 }
 
 void FormPhone::timerEvent(QTimerEvent *e){
-#ifdef QTOPIA_PHONE
    if (e->timerId() == tid_hold) {
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
         killTimer(tid_hold);
         tid_hold = 0;
    }
-#endif
 }
 
 void FormPhone::negateAction(QAction* action)

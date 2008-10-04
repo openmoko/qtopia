@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,6 +23,11 @@
 
 #include <QAtUtils>
 #include <QPhoneCall>
+
+#ifdef QTOPIA_CELL
+#include <QCallSettings>
+#endif
+
 #include <QPhoneProfile>
 #include <QCallVolume>
 #include <QSoundControl>
@@ -32,12 +35,6 @@
 #include <QVibrateAccessory>
 #include <QPhoneProfileManager>
 #include <QGsm0710Multiplexer>
-
-// may not need these??
-//#include <QCommServiceManager>
-//#include <QValueSpace>
-//#include <QContactModel>
-//#include <QUniqueId>
 
 AtGsmNonCellCommands::AtGsmNonCellCommands( AtCommands * parent ) : QObject( parent )
 {
@@ -65,6 +62,20 @@ AtGsmNonCellCommands::AtGsmNonCellCommands( AtCommands * parent ) : QObject( par
     multiplexer = 0;
     underlying = 0;
 
+    requestingCallWaiting = false;
+    settingCallWaiting = false;
+#ifdef QTOPIA_CELL
+    callSettings = new QCallSettings();
+    connect( callSettings, SIGNAL(callWaiting(QTelephony::CallClass)),
+             this, SLOT(callWaitingState(QTelephony::CallClass)) );
+    connect( callSettings, SIGNAL(setCallWaitingResult(QTelephony::Result)),
+             this, SLOT(setCallWaitingResult(QTelephony::Result)) );
+#endif
+
+    callIndicatorsReady = false;
+    connect( atc->manager()->callManager(), SIGNAL(callStateInitialized()),
+             this, SLOT(callIndicatorsStatusReady()) );
+
     //-----------------------------------------
 
     connect( serviceNumbers,
@@ -91,6 +102,7 @@ AtGsmNonCellCommands::AtGsmNonCellCommands( AtCommands * parent ) : QObject( par
     atc->add( "+CBC",     this, SLOT(atcbc(QString)) );
     atc->add( "+CBST",    this, SLOT(atcbst(QString)) );
     atc->add( "+CCLK",    this, SLOT(atcclk(QString)) );
+    atc->add( "+CCWA",    this, SLOT(atccwa(QString)) );
     atc->add( "+CEER",    this, SLOT(atceer(QString)) );
     atc->add( "+CGDATA",  this, SLOT(atcgdata(QString)) );
     atc->add( "+CGDCONT", this, SLOT(atcgdcont(QString)) );
@@ -605,6 +617,209 @@ void AtGsmNonCellCommands::atcclk( const QString& params )
     }
 }
 
+
+/*!
+    \ingroup ModemEmulator::SupplementaryServices
+    \bold{AT+CCWA Call Waiting}
+    \compat
+
+    The \c{AT+CCWA} command allows control of the Call Waiting supplementary
+    service according to 3GPP TS 22.083.
+
+    \table
+    \header \o Command \o Possible Responses
+    \row \o \c{AT+CCWA=[<n>[,<mode>[,<class>]]]}
+         \o when \c{<mode>}=2 and command successful:
+            \code
+            +CCWA: <status>,<class1>
+            +CCWA: <status>,<class2>
+            ...
+            \endcode
+    \row \o \c{AT+CCWA?} \o \c{+CCWA: <n>}
+    \row \o \c{AT+CCWA=?} \o \c{+CCWA: (0,1)}
+    \endtable
+
+    Activation, deactivation, and status query are supported.
+    When querying the status of a network service (\c{<mode>}=2) the
+    response line for the "not active" case (\c{<status>}=0) should be
+    returned only if the service is not active for any \c{<class>}.
+
+    Parameter \c{<n>} is used to disable/enable the presentation
+    of an unsolicited result code \c{+CCWA: <number>,<type>,<class>,[<alpha>][,<CLI validity>[,<subaddr>,<satype>[,<priority>]]]} to the TE when the call
+    waiting service is enabled.
+
+    Test command returns the supported unsolicited presentation values.
+
+    \table
+    \row \o \c{<n>}
+         \o Unsolicited presentation status value.
+            \list
+                \o 0 Disable
+                \o 1 Enable
+            \endlist
+    \row \o \c{<mode>}
+         \o Mode of call waiting operation to perform.
+            \list
+                \o 0 Disable call waiting
+                \o 1 Enable call waiting
+                \o 2 Query status
+            \endlist
+    \row \o \c{<class>}
+         \o Sum of integers representing a class of information (default 7).
+            \list
+                \o 1 voice (telephony)
+                \o 2 data (refers to all bearer services)
+                \o 4 reserved for future use: fax
+                \o 8 short message service
+                \o 16 data circuit sync
+                \o 32 data circuit async
+                \o 64 dedicated packet access
+                \o 128 dedicated PAD access
+            \endlist
+    \row \o \c{<status>}
+         \o \list
+                \o 0 not active
+                \o 1 active
+            \endlist
+    \row \o \c{<number>}
+         \o String type phone number of calling address in format
+            specified by \c{<type>}.
+    \row \o \c{<type>}
+         \o Type of address octet in integer format (refer 3GPP TS 24.008).
+    \row \o \c{<alpha>}
+         \o String indicating the name of a phonebook entry
+            corresponding to \c{<number>}.  Usually this is empty.
+    \row \o \c{<CLI validity>}
+         \o \list
+                \o 0 CLI valid
+                \o 1 CLI has been withheld by the originator
+                \o 2 CLI is not available due to interworking problems or
+                     limitations of originating network.
+            \endlist
+    \row \o \c{<subaddr>}
+         \o String type subaddress of format specified by \c{<satype>}.
+    \row \o \c{<satype>}
+         \o Type of subaddress octet in integer format (refer 3GPP TS 24.008).
+    \row \o \c{<priority>}
+         \o Digit indicating eMLPP priority level of incoming call
+            (refer 3GPP TS 22.067).
+    \endtable
+
+    Conforms with: 3GPP TS 27.007.
+*/
+
+void AtGsmNonCellCommands::atccwa( const QString& params )
+{
+    switch ( AtParseUtils::mode( params ) ) {
+
+        case AtParseUtils::Get:
+        {
+            atc->send( atc->frontEnd()->options()->ccwa ? "+CCWA: 1" : "+CCWA: 0" );
+            atc->done();
+        }
+        break;
+
+        case AtParseUtils::Support:
+        {
+            atc->send( "+CCWA: (0,1)" );
+            atc->done();
+        }
+        break;
+
+        case AtParseUtils::Set:
+        {
+            uint posn = 1;
+            uint n = QAtUtils::parseNumber( params, posn );
+            if ( n == 0 ) {
+                atc->options()->ccwa = false;
+            } else if ( n == 1 ) {
+                atc->options()->ccwa = true;
+            } else {
+                // Invalid value for "n".
+                atc->done( QAtResult::OperationNotAllowed );
+                return;
+            }
+            if ( posn < (uint)(params.length()) ) {
+#ifdef QTOPIA_CELL
+                uint mode = QAtUtils::parseNumber( params, posn );
+                uint classx = 7;
+                if ( posn < (uint)(params.length()) ) {
+                    classx = QAtUtils::parseNumber( params, posn );
+                }
+                switch ( mode ) {
+                   case 0:
+                    {
+                        // Disable call waiting for the specified call classes.
+                        if ( callSettings->available() ) {
+                            settingCallWaiting = true;
+                            callSettings->setCallWaiting
+                                ( false, (QTelephony::CallClass)classx );
+                        } else {
+                            // We don't have call settings support on this
+                            // system at all, so report not supported.
+                            atc->done( QAtResult::OperationNotSupported );
+                        }
+                        return;
+                    }
+                    // Not reached.
+
+                    case 1:
+                    {
+                        // Enable call waiting for the specified call classes.
+                        if ( callSettings->available() ) {
+                            settingCallWaiting = true;
+                            callSettings->setCallWaiting
+                                ( true, (QTelephony::CallClass)classx );
+                        } else {
+                            // We don't have call settings support on this
+                            // system at all, so report not supported.
+                            atc->done( QAtResult::OperationNotSupported );
+                        }
+                        return;
+                    }
+                    // Not reached.
+
+                    case 2:
+                    {
+                        // Query the current call waiting classes.
+                        if ( callSettings->available() ) {
+                            requestingCallWaiting = true;
+                            callSettings->requestCallWaiting();
+                            return;
+                        } else {
+                            // We don't have call settings support on this
+                            // system at all, so report no classes enabled.
+                            atc->send( "+CCWA: 0" );
+                        }
+                    }
+                    break;
+
+                    default:
+                    {
+                        // Invalid mode parameter.
+                        atc->done( QAtResult::OperationNotAllowed );
+                        return;
+                    }
+                    // Not reached.
+                }
+#else
+                atc->done( QAtResult::OperationNotSupported );
+                return;
+#endif
+            }
+            atc->done();
+        }
+        break;
+
+        default:
+        {
+            atc->done( QAtResult::OperationNotAllowed );
+        }
+        break;
+
+    }
+}
+
 /*!
     \ingroup ModemEmulator::ControlAndStatus
     \bold{AT+CEER Extended error report}
@@ -935,13 +1150,13 @@ void AtGsmNonCellCommands::atcgsn( const QString& params )
             \list
                 \o 0 voice
                 \o 1 data
-                \o 2 fax
+                \o 2 reserved for future use: fax
                 \o 3 voice followed by data, voice mode
                 \o 4 alternating voice/data, voice mode
-                \o 5 alternating voice/fax, voice mode
+                \o 5 reserved for future use: alternating voice/fax, voice mode
                 \o 6 voice followed by data, data mode
                 \o 7 alternating voice/data, data mode
-                \o 8 alternating voice/fax, fax mode
+                \o 8 reserved for future use: alternating voice/fax, fax mode
                 \o 9 unknown - used to indicate video calls
             \endlist
     \row \o <mpty> \o Multiparty indicator: 1 = multi-party, 0 = no multi-party.
@@ -1181,7 +1396,7 @@ void AtGsmNonCellCommands::atchld( const QString& params )
             // Report all of the arguments that we support.  We actually
             // support more than the 9 call identifiers listed here, but
             // it isn't easy to express it in a GSM-compatible fashion.
-            atc->send( "+CHLD: (0-4,11-19,21-29)" );
+            atc->send( "+CHLD: (0,1,1x,2,2x,3,4,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29)" );
             atc->done();
         }
         break;
@@ -1221,17 +1436,27 @@ void AtGsmNonCellCommands::atchld( const QString& params )
                 case 0:
                 {
                     // Release all held calls or set busy for a waiting call.
-                    result = atc->manager()->callManager()->hangupHeldCalls();
+                    if ( atc->manager()->callManager()->ringing() )
+                        result = atc->manager()->callManager()->hangupIncomingCall();
+                    else
+                        result = atc->manager()->callManager()->hangupHeldCalls();
                 }
                 break;
 
                 case 1:
                 {
-                    // Hangup all active calls or just the selected call.
-                    if ( !callID )
-                        result = atc->manager()->callManager()->hangup();
-                    else
+                    // Hangup all active calls and accept the held or waiting
+                    // call, or just hang up the selected call.
+                    if ( !callID ) {
+                        if ( atc->manager()->callManager()->callInProgress() )
+                            atc->manager()->callManager()->hangup();
+                        if ( atc->manager()->callManager()->ringing() )
+                            result = atc->manager()->callManager()->accept();
+                        else
+                            result = atc->manager()->callManager()->activateHeldCalls();
+                    } else {
                         result = atc->manager()->callManager()->hangup( callID );
+                    }
                 }
                 break;
 
@@ -1239,10 +1464,15 @@ void AtGsmNonCellCommands::atchld( const QString& params )
                 {
                     // Place all calls on hold and activate one or more that
                     // were held or waiting.
-                    if ( !callID )
-                        result = atc->manager()->callManager()->activateHeldCalls();
-                    else
+                    if ( !callID ) {
+                        atc->manager()->callManager()->activateHeldCalls();
+                        if ( atc->manager()->callManager()->ringing() )
+                            result = atc->manager()->callManager()->accept();
+                        else
+                            result = atc->manager()->callManager()->activateHeldCalls();
+                    } else {
                         result = atc->manager()->callManager()->activate( callID );
+                    }
                 }
                 break;
 
@@ -1351,7 +1581,7 @@ void AtGsmNonCellCommands::atchup( const QString& params )
                 \o 2 outgoing call setup in progress
                 \o 3 outgoing call setup in the "alerting" phase
             \endlist
-    \row \o \c{callhold}
+    \row \o \c{callheld}
          \o Call hold state \o
             \list
                 \o 0 no calls are held
@@ -1360,7 +1590,7 @@ void AtGsmNonCellCommands::atchup( const QString& params )
             \endlist
     \endtable
 
-    The \c{callsetup} and \c{callhold} indicators are from the
+    The \c{callsetup} and \c{callheld} indicators are from the
     Bluetooth Hands-Free Profile version 1.5.  The rest are from
     3GPP TS 27.007.
 
@@ -1368,6 +1598,11 @@ void AtGsmNonCellCommands::atchup( const QString& params )
 */
 void AtGsmNonCellCommands::atcind( const QString& params )
 {
+    if (!callIndicatorsReady) {
+        m_pendingAtCindParams.enqueue(params);
+        return;
+    }
+
     needIndicators();
     switch ( AtParseUtils::mode( params ) ) {
 
@@ -2012,7 +2247,7 @@ void AtGsmNonCellCommands::atcmer( const QString& params )
     Possible values for \c{<mode>} are:
     \table
       \row \o 0 \o Single mode (default)
-      \row \o 1 \o Alternating voice/fax (teleservice 61)
+      \row \o 1 \o Reserved for future use: Alternating voice/fax (teleservice 61)
       \row \o 2 \o Alternating voice/data (bearer service 61)
       \row \o 3 \o Voice followed by data (bearer service 81)
     \endtable
@@ -2265,7 +2500,7 @@ void AtGsmNonCellCommands::atcmux( const QString& params )
                 \o PAD access
                 \o Packet access
                 \o Voice
-                \o Fax
+                \o Reserved for future use: Fax
             \endlist
     \row \o \c{<itc>}
          \o \list
@@ -2654,7 +2889,7 @@ void AtGsmNonCellCommands::atcr( const QString& params )
 
     \table
     \row \o \c{ASYNC} \o Asynchronous data
-    \row \o \c{FAX} \o Fascimile
+    \row \o \c{FAX} \o Reserved for future use: Fascimile
     \row \o \c{VOICE} \o Normal voice
     \endtable
 
@@ -3433,11 +3668,11 @@ int AtGsmNonCellCommands::getSilentPhoneProfileId()
     The following values are defined for \c{<mode>}:
     \table
       \row \o 0 \o Voice (default)
-      \row \o 1 \o Alternating voice/fax - voice first
-      \row \o 2 \o Facsimile
+      \row \o 1 \o Reserved for future use: Alternating voice/fax - voice first
+      \row \o 2 \o Reserved for future use: Facsimile
       \row \o 3 \o Alternating voice/data - voice first
       \row \o 4 \o Data
-      \row \o 5 \o Alternating voice/fax - fax first
+      \row \o 5 \o Reserved for future use: Alternating voice/fax - fax first
       \row \o 6 \o Alternating voice/data - data first
       \row \o 7 \o Voice followed by Data
     \endtable
@@ -4199,7 +4434,7 @@ void AtGsmNonCellCommands::atqbc( const QString& params )
             \list
                 \o 1 voice
                 \o 2 data
-                \o 4 fax
+                \o 4 reserved for future use: fax
                 \o 32 video
             \endlist
     \row \o \c{<number>}
@@ -4343,7 +4578,13 @@ void AtGsmNonCellCommands::atvts( const QString& params )
         case AtParseUtils::Set:
         {
             uint posn = 1;
-            QString tones = QAtUtils::nextString( params, posn );
+            QString tones;
+            if (params[posn] == QChar('"') )
+                tones = QAtUtils::nextString( params, posn );
+            else {
+                tones = params.mid(posn, 1);
+                ++posn;
+            }
             if ( posn < (uint)(params.length()) ) {
                 // We only support the single-argument form of tone generation.
                 atc->done( QAtResult::OperationNotSupported );
@@ -4416,6 +4657,9 @@ void AtGsmNonCellCommands::needIndicators()
     connect( atc->manager()->callManager(),
              SIGNAL(setCallHold(AtCallManager::CallHoldState)),
              indicators, SLOT(setCallHold(AtCallManager::CallHoldState)) );
+
+    // get initial values for indicators
+    atc->manager()->callManager()->notifyCallStates();
 }
 
 // Report that an indicator has changed value.
@@ -4635,6 +4879,13 @@ void AtGsmNonCellCommands::signalQualityChanged( int value )
         sendSignalQuality( value );
 }
 
+void AtGsmNonCellCommands::callIndicatorsStatusReady()
+{
+    callIndicatorsReady = true;
+    while (m_pendingAtCindParams.size() > 0)
+        atcind(m_pendingAtCindParams.dequeue());
+}
+
 // Used by the AT+CKPD command to send the given key code to the keypad VxD.
 void AtGsmNonCellCommands::sendNextKey()
 {
@@ -4665,6 +4916,43 @@ void AtGsmNonCellCommands::sendNextKey()
         press.send();
         sendRelease = true;
         QTimer::singleShot( keyPressTime * 100, this, SLOT(sendNextKey()) );
+    }
+}
+
+// This slot is called when the QCallWaiting instance emits
+// the call waiting state.  If we requested the call waiting
+// state, we send the solicited result code notification
+// and return.
+void AtGsmNonCellCommands::callWaitingState( QTelephony::CallClass cls )
+{
+    if ( requestingCallWaiting ) {
+        requestingCallWaiting = false;
+        if ( cls == QTelephony::CallClassNone ) {
+            // The only time we report status=0 is for no call classes enabled.
+            atc->send( "+CCWA: 0,7" );
+        } else {
+            // Break the class mask up into individual bits and report them.
+            int bit = 1;
+            while ( bit <= 65536 ) {
+                if ( (((int)cls) & bit) != 0 ) {
+                    atc->send( "+CCWA: 1," + QString::number(bit) );
+                }
+                bit <<= 1;
+            }
+        }
+        atc->done();
+    }
+}
+
+// This slot is called when the QCallWaiting instance emits
+// the result of the an attempt to set call waiting.
+// If we attempted to set call waiting, we return this
+// result code.
+void AtGsmNonCellCommands::setCallWaitingResult( QTelephony::Result result )
+{
+    if ( settingCallWaiting ) {
+        settingCallWaiting = false;
+        atc->done( (QAtResult::ResultCode)result );
     }
 }
 

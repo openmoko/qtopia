@@ -1,893 +1,709 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "cleanupwizard.h"
 
-#include <qsoftmenubar.h>
-#include <qtopiaservices.h>
-#include <qdatetimeedit.h>
-#include <qtopiaipcenvelope.h>
-
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qcheckbox.h>
-#include <qspinbox.h>
-#include <qlistview.h>
-#include <qfileinfo.h>
-#include <qlist.h>
-#include <qpushbutton.h>
-#include <qgroupbox.h>
-#include <qtimer.h>
-#include <qmessagebox.h>
-#include <qprogressbar.h>
-#include <qgrid.h>
-#include <QContent>
+#include <QSoftMenuBar>
+#include <QtopiaApplication>
+#include <qtopialog.h>
+#include <QtopiaServiceRequest>
+#include <QTimeString>
+#include <QPushButton>
+#include <QHeaderView>
+#include <QAbstractItemModel>
+#include <QTableView>
+#include <QCheckBox>
+#include <QSpinBox>
 #include <QContentSet>
+#include <QProgressBar>
+#include <QMessageBox>
+#include <QTimer>
+#include <QVBoxLayout>
+#include <QDateEdit>
+#include <QScrollArea>
+#include <QWaitWidget>
+#include <QKeyEvent>
 
-class FinalCleanupWidget : public QWidget
+static QString sizeUnit(int size)
 {
-    Q_OBJECT
-    public:
-        FinalCleanupWidget(QWidget *p = 0, const char* name = 0, WFlags f = 0)
-            :QWidget(p, name, f)
-        {
-            QVBoxLayout* vl = new QVBoxLayout(this);
-            vl->setSpacing( 6 );
-            vl->setMargin( 2 );
+    if (size < 1024)
+        return QCoreApplication::translate("CleanupWizard", "%n bytes", "", QCoreApplication::CodecForTr, size);
 
-            summary = new QLabel(this, "summaryLabel");
-            summary->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-            summary->setTextFormat(Qt::RichText);
-            vl->addWidget(summary);
+    if (size < 1024 * 1024)
+        return QCoreApplication::translate("CleanupWizard", "%1 kB", "kilobyte").arg(size / 1024);
 
-            text = "";
-        };
+    if (size < 10 * 1024 * 1024)
+        return QCoreApplication::translate("CleanupWizard", "%1 MB", "megabyte").arg(double(size) / 1024 / 1024, 0, 'f', 1);
 
-        void setResult(const QString& newResult)
-        {
-            text = newResult;
-        };
-
-        void appendResult(const QString& result)
-        {
-            if (text.isEmpty())
-                text = "<ul>"; // no tr
-            text = text.append(result);
-        };
-
-        void reset() { text = ""; };
-
-    protected:
-        void showEvent(QShowEvent* se)
-        {
-            if (text.isEmpty())
-                text = tr("No actions have been taken to cleanup the device.");
-            else {
-                text = text.append("</ul>"); //no tr
-                text = text.prepend(tr("The following items have been deleted:"));
-            }
-            summary->setText(text);
-            setFocus();
-            QWidget::showEvent(se);
-        };
-
-    private:
-        QString text;
-        QLabel *summary;
-};
-
-class PreselectionWidget : public QWidget
-{
-    Q_OBJECT
-    public:
-        PreselectionWidget(QWidget *p = 0, const char* name = 0, WFlags f =0)
-            :QWidget(p, name, f)
-        {
-            QVBoxLayout* vl = new QVBoxLayout(this);
-            vl->setSpacing( 6 );
-            vl->setMargin( 2 );
-
-            vl->addWidget(new QLabel("<qt>" + tr("What would you like to clean up?") + "</qt>", this));
-
-            doc = new QCheckBox(tr("Documents"), this, "doc_checkbox");
-            vl->addWidget( doc );
-            mail = new QCheckBox(tr("Messages"), this, "mail_checkbox");
-            vl->addWidget( mail );
-            datebook = new QCheckBox(tr("Events"), this, "datebook_checkbox");
-            vl->addWidget( datebook );
-            init();
-
-            QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-                    QSizePolicy::Expanding);
-            vl->addItem(spacer);
-        };
-
-        void init() {
-            doc->setChecked( false );
-            mail->setChecked( false );
-            datebook->setChecked( false );
-        };
-
-    private:
-        QCheckBox *doc, *mail, *datebook;
-
-    friend class CleanupWizard;
-};
-
-class DocSummaryWidget : public QWidget
-{
-    Q_OBJECT
-    public:
-        DocSummaryWidget(QWidget* p = 0, const char* name = 0, WFlags f = 0)
-            :QWidget(p, name, f)
-        {
-            QVBoxLayout* l = new QVBoxLayout(this);
-            l->setSpacing( 6 );
-            l->setMargin( 2 );
-
-            progress = new QProgressBar(this, "Progressbar" );
-            progress->setFrameStyle( QFrame::Panel | QFrame::Sunken );
-            progress->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred));
-            progress->setIndicatorFollowsStyle( true );
-            progress->setCenterIndicator( true );
-            l->addWidget(progress);
-
-            desc = new QLabel("", this); //no tr
-            desc->setAlignment(Qt::AlignHCenter);
-            l->addWidget(desc);
-            pb = new QPushButton(this);
-            l->addWidget(pb);
-
-            QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-                    QSizePolicy::Expanding);
-            l->addItem(spacer);
-        };
-
-        virtual ~DocSummaryWidget() {};
-
-        void monitorFileDeletion(int fileSize) {
-            if (fileSize) {
-                pb->setText(tr("Cancel"));
-                pb->show();
-                desc->setText(tr("Starting Cleanup"));
-                progress->reset();
-                progress->setTotalSteps(fileSize);
-                progress->show();
-            } else {
-                pb->hide();
-                progress->hide();
-                desc->setText(tr("<qt>No action was selected.</qt>"));
-                desc->setFocus(); //update QSoftMenuBar
-            }
-        };
-
-    public slots:
-        void docDeleted(const QString& fileName, int fileSize) {
-            static int docCount = 0;
-            if (!deleted)
-                docCount = 0;
-            if (fileSize > 0) {
-                docCount++;
-                deleted+=fileSize;
-                progress->setProgress( deleted );
-                desc->setText(tr("Deleting... ") + fileName);
-            } else {
-                desc->setText(fileName);
-                pb->hide();
-                desc->setFocus(); //update QSoftMenuBar
-                if (deleted)
-                    emit docCleanupFinished(docCount);
-            }
-        };
-
-    signals:
-        void startDocCleanup();
-        void docCleanupFinished(int docCount);
-
-    protected:
-        void showEvent(QShowEvent *se) {
-            QTimer::singleShot(1000, this, SIGNAL(startDocCleanup()));
-            deleted=0;
-            pb->show();
-            QWidget::showEvent(se);
-        };
-
-    private:
-        QLabel * desc;
-        QPushButton * pb;
-        QProgressBar * progress;
-        int deleted;
-
-    friend class CleanupWizard;
-};
-
-class DocCleanWidget: public QWidget
-{
-    Q_OBJECT
-    public:
-        DocCleanWidget(QWidget* p = 0, const char* name = 0, WFlags f = 0)
-            :QWidget(p, name, f)
-        {
-            QVBoxLayout* vl = new QVBoxLayout(this);
-            vl->setSpacing( 6 );
-            vl->setMargin( 2 );
-
-            vl->addWidget(new QLabel(tr("<qt>Cleanup Documents</qt>"), this));
-
-            QFrame *line = new QFrame( this, "Line");
-            line->setFrameStyle(QFrame::HLine | QFrame::Sunken );
-            vl->addWidget(line);
-
-            QGrid* grid = new QGrid(2, this ) ;
-            new QLabel(tr("bigger than"), grid);
-            sizeBox = new QSpinBox(grid);
-            sizeBox->setButtonSymbols(QSpinBox::UpDownArrows);
-            sizeBox->setSuffix(" " + tr("kB", "KiloByte"));
-            sizeBox->setMinValue( 0 );
-            sizeBox->setMaxValue( 100000 );
-            sizeBox->setValue( 10 );
-            sizeBox->setLineStep( 10 );
-            vl->addWidget(grid);
-
-            QGroupBox* mediatypes = new QGroupBox(tr("Document types"), this);
-            mediatypes->setColumnLayout( 0, Qt::Vertical );
-            mediatypes->layout()->setSpacing( 1 );
-            QGridLayout *mediaLayout = new QGridLayout(mediatypes->layout(), 2, 2, 1);
-            audio = new QCheckBox(tr("Audio"), mediatypes);
-            mediaLayout->addWidget(audio, 0, 0);
-            audio->setChecked(false);
-
-            pictures = new QCheckBox(tr("Pictures"), mediatypes);
-            mediaLayout->addWidget(pictures, 1, 0);
-            pictures->setChecked(false);
-
-            text = new QCheckBox(tr("Text"), mediatypes);
-            mediaLayout->addWidget(text, 1, 1);
-            text->setChecked(false);
-
-            video = new QCheckBox(tr("Video"), mediatypes);
-            mediaLayout->addWidget(video, 0, 1);
-            video->setChecked(false);
-
-            vl->addWidget(mediatypes);
-            QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-                    QSizePolicy::Expanding);
-            vl->addItem(spacer);
-        };
-
-        virtual ~DocCleanWidget() {};
-
-    private:
-        QSpinBox *sizeBox;
-        QCheckBox* audio, *video, *text, *pictures;
-
-    friend class CleanupWizard;
-};
-
-class DocCheckListItem: public QObject, public QCheckListItem {
-    Q_OBJECT
-    public:
-        DocCheckListItem(QListView* list, const QString& text, Type tt, QContent& lnk)
-            : QObject(list), QCheckListItem(list, text, tt)
-        {
-            content = lnk;
-            setPixmap(0, content.pixmap());
-        };
-
-        QContent& docLink() {
-            return content;
-        };
-    protected:
-        void stateChange(bool b) {
-            int size = QFileInfo(content.fileName()).size();
-            if (b)
-                emit selectionChanged(size);
-            else
-                emit selectionChanged(-size);
-        };
-    signals:
-        void selectionChanged(int size);
-    private:
-        QContent content;
-};
-
-class DocResultWidget: public QWidget
-{
-    Q_OBJECT
-    public:
-        DocResultWidget(QWidget*p = 0, const char* name = 0, WFlags f = 0)
-            : QWidget(p, name, f)
-            , tooltip(0)
-            , timer(0)
-            , cleanupStopped( false )
-        {
-            QVBoxLayout * vl = new QVBoxLayout(this);
-            vl->setSpacing( 6 );
-            vl->setMargin( 2 );
-
-            summary = new QLabel("", this); //no tr
-            vl->addWidget(summary);
-            details = new QPushButton(this);
-            vl->addWidget(details);
-
-            list = new QListView(this, "DocumentListView");
-            list->addColumn(tr("Document"));
-            list->addColumn(tr("Size"));
-            list->header()->hide();
-            list->setMinimumHeight(60);
-
-            connect(list , SIGNAL(selectionChanged(QListViewItem*)),
-                    this, SLOT(documentSelected(QListViewItem*)));
-
-            vl->addWidget(list);
-
-            QSpacerItem *spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-                    QSizePolicy::Expanding);
-            vl->addItem(spacer);
-
-            tooltip = new QLabel(this, "TooltipLabel");
-            tooltip->setFrameStyle(QFrame::Panel|QFrame::Raised);
-            tooltip->setAlignment(Qt::AlignCenter | Qt::WordBreak);
-            tooltip->setBackgroundMode(QWidget::PaletteHighlightedText);
-            tooltip->setAutoResize(true);
-            tooltip->hide();
-
-            timer = new QTimer(this, "TooltipTimer");
-        }
-
-        virtual ~DocResultWidget() { };
-
-        void performSearch()
-        {
-            list->clear();
-            QContent *dl;
-            QContentSet allDocs;
-            selectedFileSize = 0;
-            uint hits = 0;
-            int width = (list->width()- list->style().scrollBarExtent().width()) /2  ;
-
-            QFontMetrics fmt = list->fontMetrics();
-            for (QStringList::ConstIterator fit=filter.begin(); fit != filter.end(); ++fit) {
-                QContentSet resultDocs;
-                QContentSet::findDocuments( &resultDocs, *fit );
-
-                const QList<DocLnk> doclist = resultDocs.children();
-                QListIterator<DocLnk> it(doclist);
-                DocCheckListItem *item = 0;
-                QString unit;
-                int displayedSize;
-                while ((dl=it.current())) {
-                    QFileInfo fInfo(dl->file());
-                    if (minFileSize*1024 < (int)fInfo.size()){
-                        item = new DocCheckListItem(list,
-                                calcVisibleStrg(dl->name(), fmt, width),
-                                QCheckListItem::CheckBox, *dl);
-                        selectedFileSize += fInfo.size(); //ignore size of link file (insignificant size)
-                        item->setOn(true);
-                        sizeUnit(fInfo.size(), unit, &displayedSize);
-                        bool isMB = false;
-                        if ( fInfo.size()/1024 > 10000 )
-                            isMB = true;
-                        item->setText(1, tr("%1 %2").arg(displayedSize).arg(unit));
-
-                        list->insertItem(item);
-                        connect(item, SIGNAL(selectionChanged(int)), this, SLOT(selectionChanged(int)) );
-                        hits++;
-                    }
-                    ++it;
-                }
-            }
-            qLog(CleanupWizxard) << hits << "documents found";
-
-            if (!hits) {
-                summary->setText(tr("<qt>There are no documents on this device"
-                    " that match the given filter critieria.</qt>"));
-                list->hide();
-                details->hide();
-                summary->setFocus();//update QSoftMenuBar
-            } else {
-                QString unit;
-                int displayedSize = 0;
-                sizeUnit(selectedFileSize, unit, &displayedSize);
-
-                summary->setText(tr("<qt>%1 documents have been found. "
-                           "Deleting these documents would free up %2 %3 of "
-                           "storage.</qt>", "%1 = number, %2 = number, %3 = MB/kB/Bytes" )
-                        .arg(hits)
-                        .arg(displayedSize).arg(unit));
-
-                details->setText(tr("Show details"));
-                details->disconnect();
-                connect(details, SIGNAL(clicked()), this, SLOT(showDetails()));
-                list->hide();
-                details->setFocus();
-                details->show();
-            }
-        };
-
-    public slots:
-        void cleanup() {
-            DocCheckListItem *item = (DocCheckListItem *) list->firstChild();
-            if (!item) //empty list
-                return;
-
-            qLog(CleanupWizard) << "Deleting Documents...";
-            while (item && !cleanupStopped) {
-                if (item->isOn()) {
-                    QFileInfo info(item->docLink().fileName());
-                    emit docDeleted(item->docLink().name(), info.size());
-                    qApp->processEvents();
-                    item->docLink().removeFiles();
-                    item->setOn(false); // uncheck to keep track what was done
-                }
-                item = (DocCheckListItem *) item->nextSibling();
-            }
-
-            if (cleanupStopped)
-                emit docDeleted(tr("Aborted"), -1);
-            else {
-                emit docDeleted(tr("Done"), -1);
-                list->clear();
-            }
-        };
-
-        void stopCleanup() {
-            cleanupStopped = true;
-        };
-    public:
-
-        void setMinimalFileSize(int minSize) { minFileSize = minSize; };
-
-        void setFilter(QStringList& filterList) { filter = filterList; };
-
-        uint hasDocumentsToRemove(){ return selectedFileSize; };
-
-    signals:
-        void docDeleted(const QString & fileName, int fileSize);
-
-    protected:
-        void showEvent(QShowEvent *se) {
-            cleanupStopped = false;
-            QWidget::showEvent(se);
-        };
-
-        void hideEvent(QHideEvent *) {
-            tooltip->hide();
-            timer->stop();
-        };
-
-    private slots:
-        void showDetails() {
-            details->hide();
-            selectionChanged(0);
-            list->show();
-            list->setFocus();
-        };
-
-        //fileSize in Bytes - display in unit
-        void sizeUnit(int fileSize, QString& unit, int* display)
-        {
-            if (fileSize < 1024){
-                unit = tr("bytes");
-                *display=fileSize;
-            } else if (fileSize / 1024 < 10240) {// < 10MB
-                unit = tr("kB", "KiloByte");
-                *display = fileSize/1024;
-            } else {
-                unit = tr("MB", "MegaByte");
-                *display = fileSize/1024/1024;
-            }
-        };
-
-        void selectionChanged(int size) {
-            selectedFileSize += size;
-            QString unit;
-            int displayedSize;
-            sizeUnit(selectedFileSize, unit, &displayedSize);
-            summary->setText(tr("<qt>Uncheck documents you want to "
-                        "keep (%1 %2 selected)</qt>")
-                    .arg(displayedSize).arg(unit));
-            tooltip->hide();
-        };
-        void documentSelected(QListViewItem * item) {
-            tooltip->hide();
-            if (!item)
-                return;
-            DocCheckListItem * dcli = (DocCheckListItem*) item;
-
-            connect(timer, SIGNAL(timeout()), this, SLOT(showToolTip()));
-            timer->start(1000, true);
-
-            tooltip->setText(dcli->docLink().name());
-
-            int x = (width() - tooltip->width())/2;
-
-            tooltip->move(x, 0);
-        };
-
-        void showToolTip() {
-            tooltip->raise();
-            tooltip->show();
-            timer->disconnect();
-            connect(timer, SIGNAL(timeout()), this, SLOT(hideToolTip()));
-            timer->start(2000, true);
-        };
-
-        void hideToolTip() {
-            tooltip->hide();
-        };
-
-    private:
-        QString calcVisibleStrg(const QString& text, QFontMetrics& fmt, int availSpace) {
-            int i = 1;
-            int length = text.length();
-            while (i <= length && fmt.width(text, i) < availSpace)
-                i++;
-            if (i <= length)
-                return text.left(i-3)+"..."; //no tr
-            else
-                return text;
-        };
-
-        QLabel * tooltip;
-        QTimer * timer;
-        QListView *list;
-        QLabel *summary ;
-        QPushButton *details;
-        int minFileSize;
-        QStringList filter;
-        uint selectedFileSize;
-        bool cleanupStopped;
-
-        enum SizeCategory { Bytes, KBytes, MBytes };
-        friend class CleanupWizard;
-};
-
-
-class MailCleanWidget : public QWidget {
-    Q_OBJECT
-    public:
-        MailCleanWidget(QWidget* p = 0, const char* name = 0, WFlags f = 0)
-            :QWidget(p, name, f)
-        {
-            QVBoxLayout* vl = new QVBoxLayout(this);
-            vl->setSpacing( 6 );
-            vl->setMargin( 2 );
-            vl->addWidget(new QLabel(tr("<qt>Cleanup Messages</qt>"), this));
-
-            QFrame *line = new QFrame( this, "Line");
-            line->setFrameStyle(QFrame::HLine | QFrame::Sunken );
-            vl->addWidget(line);
-
-            QGridLayout *grid = new QGridLayout(vl, 2, 2, 3);
-            grid->addWidget(new QLabel(tr("older than"), this), 0, 0);
-            dp = new DateEdit( this, 0, false, true );
-            grid->addWidget( dp, 0, 1 );
-
-            grid->addWidget(new QLabel(tr("bigger than"), this), 1, 0);
-            sizeBox = new QSpinBox( 0, 10000, 10, this );
-            sizeBox->setButtonSymbols(QSpinBox::UpDownArrows);
-            sizeBox->setSuffix(" " + tr("kB", "KiloByte"));
-            sizeBox->setMinValue( 0 );
-            sizeBox->setMaxValue( 100000 );
-            sizeBox->setValue( 10 );
-            sizeBox->setLineStep( 10 );
-            grid->addWidget(sizeBox, 1, 1);
-
-            QSpacerItem *spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-                    QSizePolicy::Expanding);
-            vl->addItem(spacer);
-        };
-
-    private:
-        QSpinBox *sizeBox;
-        DateEdit *dp;
-    friend class CleanupWizard;
-};
-
-class DatebookCleanWidget : public QWidget {
-    Q_OBJECT
-    public:
-        DatebookCleanWidget(QWidget* p = 0, const char* name = 0, WFlags f = 0)
-            :QWidget(p, name, f)
-        {
-            QVBoxLayout* vl = new QVBoxLayout(this);
-            vl->setSpacing( 6 );
-            vl->setMargin( 2 );
-            vl->addWidget(new QLabel(tr("<qt>Cleanup Events</qt>"), this));
-
-            QFrame *line = new QFrame( this, "Line");
-            line->setFrameStyle(QFrame::HLine | QFrame::Sunken );
-            vl->addWidget(line);
-
-            QGridLayout *grid = new QGridLayout(vl, 2, 2, 3);
-            grid->addWidget(new QLabel(tr("older than"), this), 0, 0);
-
-            dp = new DateEdit( this, 0, false, true );
-            grid->addWidget( dp, 0, 1 );
-
-            QSpacerItem *spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-                    QSizePolicy::Expanding);
-            vl->addItem(spacer);
-        };
-
-    private:
-        QSpinBox *dayBox;
-        DateEdit *dp;
-    friend class CleanupWizard;
-};
-
-CleanupWizard::CleanupWizard(QWidget * parent, const char* name, WFlags fl)
-    : QWidget(parent, name, fl ), wStack(0)
-{
-    QTimer::singleShot(10, this, SLOT(init()));
+    return QCoreApplication::translate("CleanupWizard", "%1 MB", "megabyte").arg(size / 1024 / 1024);
 }
 
-CleanupWizard::~CleanupWizard()
+ /*********************************************************************/
+//                   CleanupWizard    Methods                         //
+/*********************************************************************/
+
+CleanupWizard::CleanupWizard(QWidget* parent) :QWizard(parent)
 {
+    setObjectName("cleanupWizard"); //set the name to find the html help file
+
+    setPage(preselectionID, new PreselectionPage);
+    setPage(documentTypeSelectionID, new DocumentTypeSelectionPage);
+    setPage(documentListSelectionID, new DocumentListSelectionPage);
+    setPage(mailSelectionID, new MailSelectionPage);
+    setPage(eventSelectionID, new EventSelectionPage);
+    setPage(finalSummaryID, new FinalSummaryPage);
+
+    setStartId(preselectionID);
+    setWindowTitle(tr("Cleanup Wizard"));
+
+    connect(page(documentListSelectionID),SIGNAL(documentsDeleted(int,bool)),
+            page(finalSummaryID),SLOT(documentsDeleted(int,bool)));
+
+    // update the buttons layout each time a new page is shown
+    connect(this,SIGNAL(currentIdChanged(int)),this,SLOT(updateWizard(int)));
 }
 
-void CleanupWizard::init()
+void CleanupWizard::updateWizard(int id)
 {
-    setCaption(tr("Cleanup Wizard"));
-
-    QVBoxLayout* vb = new QVBoxLayout(this) ;
-    wStack = new QWidgetStack(this);
-    vb->addWidget(wStack);
-
-    m_PreselectionWidget = new PreselectionWidget(this);
-    m_PreselectionWidget->installEventFilter(this);
-    m_DocCleanWidget = new DocCleanWidget(this);
-    m_DocResultWidget = new DocResultWidget(this);
-    m_DocSummaryWidget = new DocSummaryWidget(this);
-    m_MailCleanWidget = new MailCleanWidget(this);
-    m_DatebookCleanWidget = new DatebookCleanWidget(this);
-    m_FinalCleanupWidget = new FinalCleanupWidget(this);
-
-    wStack->addWidget(m_PreselectionWidget, 0);
-    wStack->addWidget(m_DocCleanWidget, 1);
-    wStack->addWidget(m_DocResultWidget, 2);
-    wStack->addWidget(m_DocSummaryWidget, 3);
-    wStack->addWidget(m_MailCleanWidget, 4);
-    wStack->addWidget(m_DatebookCleanWidget, 5);
-    wStack->addWidget(m_FinalCleanupWidget, 6);
-
-    wStack->raiseWidget(m_PreselectionWidget);
-
-    connect(m_DocSummaryWidget, SIGNAL(startDocCleanup()),
-            m_DocResultWidget, SLOT(cleanup()));
-    connect(m_DocResultWidget, SIGNAL(docDeleted(QString,int)),
-            m_DocSummaryWidget, SLOT(docDeleted(QString,int)));
-    connect(m_DocSummaryWidget->pb, SIGNAL(clicked()),
-            m_DocResultWidget, SLOT(stopCleanup()));
-    connect(m_DocSummaryWidget, SIGNAL(docCleanupFinished(int)),
-            this, SLOT(addToFinalSummary(int)));
-}
-
-void CleanupWizard::keyPressEvent(QKeyEvent* ke)
-{
-   if (ke->key() == Key_Context1) {
-        setContextBar(Default);
-        if (wStack->visibleWidget() == m_DocCleanWidget
-                    || wStack->visibleWidget() == m_FinalCleanupWidget) {
-            wStack->raiseWidget(m_PreselectionWidget);
-        } else if (wStack->visibleWidget() == m_DocSummaryWidget
-                    || wStack->visibleWidget() == m_DocResultWidget) {
-            wStack->raiseWidget(m_DocCleanWidget);
-        } else if (wStack->visibleWidget() == m_MailCleanWidget) {
-            if (m_PreselectionWidget->doc->isChecked())
-                wStack->raiseWidget(m_DocCleanWidget);
-            else {
-                wStack->raiseWidget(m_PreselectionWidget);
-            }
-        } else if ( wStack->visibleWidget() == m_DatebookCleanWidget ){
-            if (m_PreselectionWidget->mail->isChecked())
-                wStack->raiseWidget(m_MailCleanWidget);
-            else if (m_PreselectionWidget->doc->isChecked())
-                wStack->raiseWidget(m_DocCleanWidget);
-            else {
-                wStack->raiseWidget(m_PreselectionWidget);
-            }
-        } else if ( wStack->visibleWidget() == m_PreselectionWidget)
-            setContextBar(NoBack);
-        ke->accept();
-        return;
+    // this method update the wizard objectname in order to display the html help file
+    // for each page
+    switch(id) {
+        case preselectionID:
+            setObjectName("cleanupPreselection");
+            break;
+        case mailSelectionID:
+            setObjectName("cleanupMail");
+            break;
+        case eventSelectionID:
+            setObjectName("cleanupEvent");
+            break;
+        case documentTypeSelectionID:
+            setObjectName("cleanupTypeSelection");
+            break;
+        case documentListSelectionID:
+            setObjectName("cleanupListSelection");
+            break;
+        case finalSummaryID:
+            setObjectName("cleanupSummary");
+            break;
+        default:
+            setObjectName("cleanupWizard");
     }
-    if (ke->key() == Key_Back) {
-            ke->accept();
-            setContextBar(Default);
-            if (wStack->visibleWidget() == m_PreselectionWidget) {
-                if (m_PreselectionWidget->doc->isChecked())
-                    wStack->raiseWidget(m_DocCleanWidget) ;
-                else if (m_PreselectionWidget->mail->isChecked())
-                    wStack->raiseWidget(m_MailCleanWidget);
-                else if (m_PreselectionWidget->datebook->isChecked())
-                    wStack->raiseWidget(m_DatebookCleanWidget);
-                else {
-                    setContextBar(NoForward);
-                    wStack->raiseWidget(m_FinalCleanupWidget);
-                }
-            } else if (wStack->visibleWidget() == m_DocCleanWidget){
-                m_DocResultWidget->setMinimalFileSize(m_DocCleanWidget->sizeBox->value());
 
-                QStringList filter;
-                if (m_DocCleanWidget->audio->isChecked())
-                    filter.append("audio/*"); //no tr
-                if (m_DocCleanWidget->video->isChecked())
-                    filter.append("video/*"); //no tr
-                if (m_DocCleanWidget->text->isChecked())
-                    filter.append("text/*"); //no tr
-                if (m_DocCleanWidget->pictures->isChecked())
-                    filter.append("image/*"); //no tr
-                m_DocResultWidget->setFilter(filter);
-
-                m_DocResultWidget->performSearch();
-                wStack->raiseWidget(m_DocResultWidget);
-            } else if (wStack->visibleWidget() == m_DocResultWidget){
-                if (m_DocResultWidget->hasDocumentsToRemove()) {
-                    switch (QMessageBox::warning(this, tr("WARNING"),
-                            tr("<qt>Are you sure you want to delete these files?</qt>"),
-                            QMessageBox::Yes,
-                            QMessageBox::No|QMessageBox::Default))
-                    {
-                        case QMessageBox::Yes:
-                            m_DocSummaryWidget->monitorFileDeletion(
-                                    m_DocResultWidget->hasDocumentsToRemove());
-                            break;
-                        default:
-                            m_DocSummaryWidget->monitorFileDeletion(0);
-                            return;
-                            break;
-                    }
-                    wStack->raiseWidget(m_DocSummaryWidget);
-                } else {
-                    m_DocSummaryWidget->monitorFileDeletion(0);
-                    setContextBar(Default);
-                    if (m_PreselectionWidget->mail->isChecked())
-                        wStack->raiseWidget(m_MailCleanWidget);
-                    else if (m_PreselectionWidget->datebook->isChecked())
-                        wStack->raiseWidget(m_DatebookCleanWidget);
-                    else {
-                        setContextBar(NoForward);
-                        wStack->raiseWidget(m_FinalCleanupWidget);
-                    }
-               }
-            } else if (wStack->visibleWidget() == m_DocSummaryWidget){
-                if (m_PreselectionWidget->mail->isChecked())
-                    wStack->raiseWidget(m_MailCleanWidget);
-                else if (m_PreselectionWidget->datebook->isChecked())
-                    wStack->raiseWidget(m_DatebookCleanWidget);
-                else {
-                    setContextBar(NoForward);
-                    wStack->raiseWidget(m_FinalCleanupWidget);
-                }
-            } else if (wStack->visibleWidget() == m_MailCleanWidget) {
-                QDate date = m_MailCleanWidget->dp->date();
-                if (!date.isNull()) {
-                    int size = m_MailCleanWidget->sizeBox->value();
-                    switch (QMessageBox::warning(this, tr("WARNING"),
-                            tr("<qt>Are you sure you want to delete messages older than %1?</qt>")
-                                .arg(QTimeString::localYMD(date, QTimeString::Short)),
-                            QMessageBox::Yes,
-                            QMessageBox::No|QMessageBox::Default))
-                    {
-                        case QMessageBox::Yes:
-                            break;
-                        default:
-                            return;
-                            break;
-                    }
-
-
-                    qLog(CleanupWizard) << "Deleting events older than" << date.toString();
-
-                    m_FinalCleanupWidget->appendResult(tr("<li>Messages (%1)</li>")
-                            .arg(QTimeString::localYMD(date, QTimeString::Short)));
-                    QtopiaServiceRequest req("Email", "cleanupMessages(QDate,int)");
-                    req << date.addDays(-1);
-                    req << size;
-                    req.send();
-                }
-                if (m_PreselectionWidget->datebook->isChecked())
-                    wStack->raiseWidget(m_DatebookCleanWidget);
-                else {
-                    setContextBar(NoForward);
-                    wStack->raiseWidget(m_FinalCleanupWidget);
-                }
-            } else if (wStack->visibleWidget() == m_DatebookCleanWidget) {
-                QDate date = m_DatebookCleanWidget->dp->date();
-                if (!date.isNull()) {
-                    switch (QMessageBox::warning(this, tr("WARNING"),
-                            tr("<qt>Are you sure you want to delete events older than %1?</qt>")
-                                .arg(QTimeString::localYMD(date, QTimeString::Short)),
-                            QMessageBox::Yes,
-                            QMessageBox::No|QMessageBox::Default))
-                    {
-                        case QMessageBox::Yes:
-                            break;
-                        default:
-                            return;
-                            break;
-                    }
-
-                    qLog(CleanupWizard) << "Deleting events older than" << date.toString();
-
-                    QtopiaServiceRequest req("Calendar", "cleanByDate(QDate)");
-                    req << date.addDays(-1);
-                    req.send();
-                    m_FinalCleanupWidget->appendResult(tr("<li>Events (%1)</li>", "e.g. %1 = 20 Aug 2004")
-                            .arg(QTimeString::localYMD(date, QTimeString::Short)));
-                }
-                setContextBar(NoForward);
-                wStack->raiseWidget(m_FinalCleanupWidget);
-            } else if (wStack->visibleWidget() == m_FinalCleanupWidget)
-                close();
-            return;
-    }
-    ke->ignore();
-}
-
-void CleanupWizard::setContextBar(WizardStyle style)
-{
-    switch (style) {
-        case Default:
-            QSoftMenuBar::setLabel(this, Key_Back, QSoftMenuBar::Next);
-            QSoftMenuBar::setLabel(this, Key_Context1, QSoftMenuBar::Previous);
-            break;
-        case NoBack:
-            QSoftMenuBar::setLabel(this, Key_Back, QSoftMenuBar::Next);
-            QSoftMenuBar::setLabel(this, Key_Context1, QSoftMenuBar::NoLabel);
-            break;
-        case NoForward:
-            QSoftMenuBar::setLabel(this, Key_Back, QSoftMenuBar::Back);
-            QSoftMenuBar::setLabel(this, Key_Context1, QSoftMenuBar::Previous);
-            break;
+    // QWizard automatically gives focus to the first child of the new page,
+    // but it is somehow edit focus instead of navigation focus, so refocus it
+    QWizardPage *currPage = page(id);
+    if (currPage) {
+        QWidget *focusWidget = currPage->focusWidget();
+        if (focusWidget)
+            focusWidget->setEditFocus(false);
     }
 }
 
-void CleanupWizard::addToFinalSummary(int docCount)
-{
-    if (!docCount)
-        return;
+ /*********************************************************************/
+//                   PreselectionPage   Methods                       //
+/*********************************************************************/
 
-    m_FinalCleanupWidget->appendResult(tr("<li>%1 document(s)</li>")
-            .arg(docCount));
+PreselectionPage::PreselectionPage(QWidget* parent) : QWizardPage(parent)
+{
+    QVBoxLayout* vb = new QVBoxLayout(this);
+    QLabel* title = new QLabel(tr("What would you like to cleanup?"));
+    title->setWordWrap(true);
+    vb->addWidget(title);
+    QFrame *line = new QFrame( this);
+    line->setFrameStyle(QFrame::HLine | QFrame::Sunken );
+    vb->addWidget(line);
+    mailCheckBox     = new QCheckBox(tr("Messages"));
+    vb->addWidget(mailCheckBox);
+    eventCheckBox    = new QCheckBox(tr("Events"));
+    vb->addWidget(eventCheckBox);
+    documentCheckBox = new QCheckBox(tr("Documents"));
+    vb->addWidget(documentCheckBox);
+    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
+    QSizePolicy::Expanding);
+    vb->addItem(spacer);
+    registerField("documentToCleanup", documentCheckBox);
+    registerField("mailToCleanup",mailCheckBox);
+    registerField("eventToCleanup",eventCheckBox);
+
+    connect(mailCheckBox,SIGNAL(clicked()),this,SIGNAL(completeChanged()));
+    connect(eventCheckBox,SIGNAL(clicked()),this,SIGNAL(completeChanged()));
+    connect(documentCheckBox,SIGNAL(clicked()),this,SIGNAL(completeChanged()));
 }
 
-void CleanupWizard::showEvent(QShowEvent *se)
+bool PreselectionPage::isComplete() const
 {
-    m_PreselectionWidget->init();
-    wStack->raiseWidget(m_PreselectionWidget);
-    QWidget::showEvent(se);
+    // enable the Next> button only if the user has selected
+    // Documents or Messages or Events
+    if(mailCheckBox->checkState() == Qt::Unchecked  &&
+        eventCheckBox->checkState() == Qt::Unchecked &&
+         documentCheckBox->checkState() == Qt::Unchecked ) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
-bool CleanupWizard::eventFilter(QObject *o, QEvent *e)
+int PreselectionPage::nextId() const
 {
-    if (e->type() == QEvent::Show ) {
-        if (o == m_PreselectionWidget) {
-            setContextBar(NoBack);
-            m_FinalCleanupWidget->reset();
+    if (mailCheckBox->isChecked()) {
+        return CleanupWizard::mailSelectionID;
+    } else {
+        if(eventCheckBox->isChecked()) {
+            return CleanupWizard::eventSelectionID;
+        } else {
+           if(documentCheckBox->isChecked()) {
+               return CleanupWizard::documentTypeSelectionID;
+           } else {
+               return CleanupWizard::finalSummaryID;
+           }
         }
     }
-    return false;
 }
+
+ /*********************************************************************/
+//               DocumentTypeSelectionPage   Methods                  //
+/*********************************************************************/
+
+DocumentTypeSelectionPage::DocumentTypeSelectionPage(QWidget* parent) : QWizardPage(parent)
+{
+    QVBoxLayout *vb = new QVBoxLayout;
+    QScrollArea *scroll = new QScrollArea;
+    scroll->setWidgetResizable(true);
+    scroll->setFocusPolicy(Qt::NoFocus);
+    scroll->setFrameShape(QFrame::NoFrame);
+    scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    m_ui = new Ui::DocumentTypeSelector;
+    m_ui->setupUi(scroll);
+
+    vb->addWidget(scroll);
+
+    setLayout(vb);
+
+    registerField("documentsTypeSelectionPage_minimumSize", m_ui->minimumSize);
+    registerField("documentsTypeSelectionPage_location", m_ui->location, "installationPath");
+    registerField("documentsTypeSelectionPage_allDocuments", m_ui->allDocuments);
+    registerField("documentsTypeSelectionPage_audioDocuments", m_ui->audioDocuments);
+    registerField("documentsTypeSelectionPage_imageDocuments", m_ui->imageDocuments);
+    registerField("documentsTypeSelectionPage_textDocuments", m_ui->textDocuments);
+    registerField("documentsTypeSelectionPage_videoDocuments", m_ui->videoDocuments);
+
+    connect(m_ui->allDocuments, SIGNAL(clicked(bool)), this, SLOT(alltypes(bool)));
+    connect(m_ui->allDocuments, SIGNAL(clicked()), this, SIGNAL(completeChanged()));
+    connect(m_ui->audioDocuments, SIGNAL(clicked()), this, SIGNAL(completeChanged()));
+    connect(m_ui->imageDocuments, SIGNAL(clicked()), this, SIGNAL(completeChanged()));
+    connect(m_ui->textDocuments, SIGNAL(clicked()), this, SIGNAL(completeChanged()));
+    connect(m_ui->videoDocuments, SIGNAL(clicked()), this, SIGNAL(completeChanged()));
+}
+
+bool DocumentTypeSelectionPage::isComplete() const
+{
+    return (m_ui->imageDocuments->isChecked() || m_ui->audioDocuments->isChecked() ||
+            m_ui->textDocuments->isChecked() || m_ui->videoDocuments->isChecked() ||
+            m_ui->allDocuments->isChecked());
+}
+
+void DocumentTypeSelectionPage::alltypes(bool allChecked)
+{
+    m_ui->audioDocuments->setEnabled(!allChecked);
+    m_ui->imageDocuments->setEnabled(!allChecked);
+    m_ui->textDocuments->setEnabled(!allChecked);
+    m_ui->videoDocuments->setEnabled(!allChecked);
+}
+
+int DocumentTypeSelectionPage::nextId() const
+{
+    return CleanupWizard::documentListSelectionID;
+}
+
+ /*********************************************************************/
+//               DocumentListSelectionpage Methods                    //
+/*********************************************************************/
+
+class DocumentListModel : public QContentSetModel
+{
+public:
+    DocumentListModel(const QContentSet *cls, QObject *parent = 0);
+    ~DocumentListModel();
+
+    Qt::ItemFlags flags(const QModelIndex &index) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+private:
+    QMap<QContentId, Qt::CheckState> checkState;
+};
+
+DocumentListModel::DocumentListModel(const QContentSet *cls, QObject *parent)
+    : QContentSetModel(cls, parent)
+{
+}
+
+DocumentListModel::~DocumentListModel()
+{
+}
+
+Qt::ItemFlags DocumentListModel::flags(const QModelIndex &index) const
+{
+    return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
+}
+
+QVariant DocumentListModel::data(const QModelIndex &index, int role) const
+{
+    if (index.column() == 1) {
+        if (role == Qt::DisplayRole)
+            return qVariantFromValue(sizeUnit(content(index).size()));
+
+        return QVariant();
+    }
+
+    if (role == Qt::CheckStateRole)
+        return qVariantFromValue(int(checkState.value(contentId(index), Qt::Checked)));
+
+    return QContentSetModel::data(index, role);
+}
+
+bool DocumentListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (role == Qt::CheckStateRole && index.column() == 0) {
+        checkState.insert(contentId(index), Qt::CheckState(value.toInt()));
+        emit dataChanged(index, index);
+        return true;
+    }
+
+    return QContentSetModel::setData(index, value, role);
+}
+
+int DocumentListModel::columnCount(const QModelIndex &) const
+{
+    return 2;
+}
+
+DocumentListSelectionPage::DocumentListSelectionPage(QWidget* parent)
+    : QWizardPage(parent), waitWidget(0)
+{
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    header = new QLabel;
+    header->setWordWrap(true);
+    mainLayout->addWidget(header);
+
+    documents = new QContentSet(QContentSet::Asynchronous, this);
+    model = new QContentSetModel(documents, this);
+    connect(model, SIGNAL(updateFinished()), this, SLOT(updateFinished()));
+
+    largeDocuments = new QContentSet(this);
+    largeModel = new DocumentListModel(largeDocuments, this);
+    connect(largeModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            this, SLOT(dataChanged(QModelIndex,QModelIndex)));
+
+    list = new QTableView();
+    list->setModel(largeModel);
+    list->setAlternatingRowColors(true);
+    list->setShowGrid(false);
+    list->horizontalHeader()->setStretchLastSection(true);
+    list->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    list->horizontalHeader()->hide();
+    list->verticalHeader()->hide();
+    list->setSelectionBehavior(QAbstractItemView::SelectRows);
+    list->setSelectionMode(QAbstractItemView::SingleSelection);
+    mainLayout->addWidget(list);
+
+    documentsCleanupDialog = new DocumentsCleanupDialog();
+}
+
+void DocumentListSelectionPage::initializePage()
+{
+    selectedSize = 0;
+    selectedDocuments = 0;
+    docDeleted = 0;
+    cleanupStopped = false;
+
+    waitWidget = new QWaitWidget(this);
+    waitWidget->show();
+
+    documents->clear();
+
+    if (!field("documentsTypeSelectionPage_allDocuments").toBool()) {
+        documents->setCriteria(QContentFilter::MimeType, "none");
+
+        if (field("documentsTypeSelectionPage_audioDocuments").toBool())
+            documents->addCriteria(QContentFilter::MimeType, "audio/*", QContentFilter::Or);
+        if (field("documentsTypeSelectionPage_textDocuments").toBool())
+            documents->addCriteria(QContentFilter::MimeType, "text/*", QContentFilter::Or);
+        if (field("documentsTypeSelectionPage_videoDocuments").toBool())
+            documents->addCriteria(QContentFilter::MimeType, "video/*", QContentFilter::Or);
+        if (field("documentsTypeSelectionPage_imageDocuments").toBool())
+            documents->addCriteria(QContentFilter::MimeType, "image/*", QContentFilter::Or);
+    }
+
+    documents->addCriteria(QContentFilter::Location,
+                           field("documentsTypeSelectionPage_location").toString(),
+                           QContentFilter::And);
+}
+
+int DocumentListSelectionPage::nextId() const
+{
+    return CleanupWizard::finalSummaryID;
+}
+
+void DocumentListSelectionPage::updateHeader()
+{
+    if (largeDocuments->isEmpty()) {
+        qLog(CleanupWizard) << "No documents found";
+
+        header->setText(tr("There are no documents matching the specified criteria."));
+        header->setAlignment(Qt::AlignCenter);
+
+        list->hide();
+    } else {
+        qLog(CleanupWizard) << largeDocuments->count() << "documents found";
+
+        header->setText(tr("%n document(s) using %1.", "%n=number,%1=filesize (ie 5 kB)",
+                        selectedDocuments).arg(sizeUnit(selectedSize)));
+        header->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+        list->show();
+    }
+
+    header->show();
+}
+
+void DocumentListSelectionPage::cleanup()
+{
+    connect(documentsCleanupDialog->pushButton, SIGNAL(clicked()), this, SLOT(stopCleanup()));
+
+    documentsCleanupDialog->progressBar->setRange(0, selectedSize);
+
+    if (largeModel->rowCount() == 0)
+        return;
+
+    qLog(CleanupWizard) << "Deleting Documents...";
+    for (int i = 0; i < largeModel->rowCount(); i++) {
+        if (cleanupStopped)
+            break;
+
+        QModelIndex index = largeModel->index(i, 0);
+
+        if (largeModel->data(index, Qt::CheckStateRole) == Qt::Checked) {
+            QContent content = largeModel->content(index);
+
+            documentsCleanupDialog->label->setText(tr("Deleting %1").arg(content.name()));
+
+            qApp->processEvents();
+
+            int contentSize = content.size();
+
+            content.removeFiles();
+
+            if (!content.isValid()) {
+                documentsCleanupDialog->progressBar->setValue(
+                    documentsCleanupDialog->progressBar->value() + contentSize);
+
+                docDeleted++;
+            }
+        }
+    }
+
+    documentsCleanupDialog->pushButton->hide();
+    if (cleanupStopped) {
+        documentsCleanupDialog->label->setText(tr("Aborted"));
+    } else {
+        documentsCleanupDialog->progressBar->setValue(
+            documentsCleanupDialog->progressBar->maximum());
+        documentsCleanupDialog->label->setText(tr("Done"));
+        documents->clear();
+    }
+
+    QTimer::singleShot(1000, documentsCleanupDialog, SLOT(close()));
+    emit documentsDeleted(docDeleted, cleanupStopped);
+}
+
+
+
+bool DocumentListSelectionPage::validatePage()
+{
+    if(selectedSize) {
+        QMessageBox box(QMessageBox::Question, tr("Warning"),
+                        tr("Are you sure you want to delete these files?"),
+                        (QMessageBox::Yes | QMessageBox::No | QMessageBox::Default), this);
+        switch (QtopiaApplication::execDialog(&box, true))
+        {
+            case QMessageBox::Yes: 
+                documentsCleanupDialog->showMaximized();
+                cleanup();
+                break;
+            case QMessageBox::No: 
+            default:
+                return false;
+        }
+     }
+     return true;
+}
+
+void DocumentListSelectionPage::updateFinished()
+{
+    largeDocuments->clear();
+
+    selectedSize = 0;
+    selectedDocuments = 0;
+    for (int i = 0; i < documents->count(); i++) {
+        const QContent content = documents->content(i);
+        if (content.size() >= field("documentsTypeSelectionPage_minimumSize").toInt() * 1024) {
+            largeDocuments->add(content);
+
+            selectedSize += content.size();
+            selectedDocuments++;
+        }
+    }
+
+    list->resizeColumnsToContents();
+    list->setColumnWidth(0, list->viewport()->size().width() - list->columnWidth(1) - 10);
+    list->setCurrentIndex(largeModel->index(0, 0));
+
+    updateHeader();
+
+    if (waitWidget) {
+        delete waitWidget;
+        waitWidget = 0;
+    }
+}
+
+void DocumentListSelectionPage::dataChanged(const QModelIndex &topLeft,
+                                            const QModelIndex &bottomRight)
+{
+    for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
+        QModelIndex index = largeModel->index(i, 0);
+
+        qint64 fileSize = largeModel->content(index).size();
+
+        if (largeModel->data(index, Qt::CheckStateRole) == Qt::Checked) {
+            selectedSize += fileSize;
+            selectedDocuments++;
+        } else {
+            selectedSize -= fileSize;
+            selectedDocuments--;
+        }
+    }
+
+    updateHeader();
+}
+
+ /*********************************************************************/
+//                 DocumentsCleanupDialog Methods                     //
+/*********************************************************************/
+
+DocumentsCleanupDialog::DocumentsCleanupDialog(QWidget* parent) : QDialog(parent)
+{
+    setObjectName("cleanupDialog");
+
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    progressBar = new QProgressBar(this);
+    layout->addWidget(progressBar);
+    label = new QLabel(tr("Starting cleanup"), this);
+    layout->addWidget(label);
+    pushButton = new QPushButton(tr("Cancel"), this);
+    layout->addWidget(pushButton);
+    QSpacerItem *spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,QSizePolicy::Expanding);
+    layout->addItem(spacer);
+}
+
+ /*********************************************************************/
+//                      MailSelectionPage  Methods                    //
+/*********************************************************************/
+
+
+MailSelectionPage::MailSelectionPage(QWidget* parent) : QWizardPage(parent)
+{
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setSpacing( 6 );
+    mainLayout->setMargin( 2 );
+    mainLayout->addWidget(new QLabel(tr("Cleanup Messages"), this));
+
+    QFrame *line = new QFrame( this);
+    line->setFrameStyle(QFrame::HLine | QFrame::Sunken );
+    mainLayout->addWidget(line);
+
+    QGridLayout *grid = new QGridLayout();
+    grid->addWidget(new QLabel(tr("Older than"), this), 0, 0);
+    QDate date;
+    dp = new QDateEdit(date.currentDate(),this);
+    grid->addWidget( dp, 0, 1 );
+
+    grid->addWidget(new QLabel(tr("Larger than"), this), 1, 0);
+    sizeBox = new QSpinBox(this);
+    sizeBox->setButtonSymbols(QSpinBox::UpDownArrows);
+    sizeBox->setSuffix(' ' + tr("kB", "kilobyte"));
+    sizeBox->setMinimum( 0 );
+    sizeBox->setMaximum( 100000 );
+    sizeBox->setValue( 10 );
+    sizeBox->setSingleStep( 10 );
+    grid->addWidget(sizeBox, 1, 1);
+    QSpacerItem *spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,QSizePolicy::Expanding);
+    mainLayout->addLayout(grid);
+    mainLayout->addItem(spacer);
+    registerField("MailSelectionPage_sizeBox",sizeBox);
+    registerField("MailSelectionPage_dateBox",dp);
+}
+
+int MailSelectionPage::nextId() const
+{
+    if(field("eventToCleanup").toBool()) {
+        return CleanupWizard::eventSelectionID;
+    } else {
+        if(field("documentToCleanup").toBool()) {
+            return CleanupWizard::documentTypeSelectionID;
+        } else {
+            return CleanupWizard::finalSummaryID;
+        }
+    }
+}
+
+bool MailSelectionPage::validatePage()
+{
+    QtopiaServiceRequest req("Email", "cleanupMessages(QDate,int)");
+
+    QMessageBox box(QMessageBox::Question, tr("Warning"),
+                    tr("Are you sure you want to delete messages older than %1?").arg(QTimeString::localYMD(dp->date(), QTimeString::Long)),
+                    (QMessageBox::Yes | QMessageBox::No | QMessageBox::Default), this);
+    switch (QtopiaApplication::execDialog(&box, true))
+    {
+        case QMessageBox::Yes:
+            req << field("MailSelectionPage_dateBox").toDate().addDays(-1);
+            req << field("MailSelectionPage_sizeBox").toInt();
+            req.send();
+           break;
+        case QMessageBox::No: 
+        default: return false;
+    }
+    return true;
+}
+ /*********************************************************************/
+//                   EventSelectionPage Methods                       //
+/*********************************************************************/
+
+EventSelectionPage::EventSelectionPage(QWidget* parent) : QWizardPage(parent)
+{
+    QVBoxLayout* vl = new QVBoxLayout(this);
+    vl->setSpacing( 6 );
+    vl->setMargin( 2 );
+    vl->addWidget(new QLabel(tr("Cleanup Events"), this));
+
+    QFrame *line = new QFrame(this);
+    line->setFrameStyle(QFrame::HLine | QFrame::Sunken );
+    vl->addWidget(line);
+
+    QGridLayout *grid = new QGridLayout();
+    grid->addWidget(new QLabel(tr("Older than"), this), 0, 0);
+    QDate date;
+    dp = new QDateEdit(date.currentDate(),this);
+    grid->addWidget( dp, 0, 1 );
+    vl->addLayout(grid);
+    QSpacerItem *spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,QSizePolicy::Expanding);
+    vl->addItem(spacer);
+    registerField("EventSelectionPage_dateBox",dp);
+}
+
+int EventSelectionPage::nextId() const
+{
+    if(field("documentToCleanup").toBool()) {
+        return CleanupWizard::documentTypeSelectionID;
+    } else {
+        return CleanupWizard::finalSummaryID;
+    }
+}
+
+bool EventSelectionPage::validatePage()
+{
+    QtopiaServiceRequest req("Calendar", "cleanByDate(QDate)");
+
+    QMessageBox box(QMessageBox::Question, tr("Warning"),
+                    tr("Are you sure you want to delete events older than %1?").arg(QTimeString::localYMD(dp->date(), QTimeString::Long)),
+                    (QMessageBox::Yes | QMessageBox::No | QMessageBox::Default), this);
+    switch (QtopiaApplication::execDialog(&box, true))
+    {
+        case QMessageBox::Yes:
+           req << field("EventSelectionPage_dateBox").toDate().addDays(-1);
+           req.send();
+           break;
+        case QMessageBox::No: 
+        default: return false;
+    }
+    return true;
+}
+
+ /*********************************************************************/
+//                    FinalSummaryPage  Methods                       //
+/*********************************************************************/
+
+FinalSummaryPage::FinalSummaryPage(QWidget* parent) : QWizardPage(parent)
+{
+    QVBoxLayout* vb = new QVBoxLayout(this);
+    header = new QLabel;
+    header->setWordWrap(true);
+    vb->addWidget(header);
+    QFrame *line = new QFrame(this);
+    line->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+    vb->addWidget(line);
+    summary = new QLabel;
+    vb->addWidget(summary);
+    registerField("FinalSummaryPage_summary", summary);
+
+    docDeleted = 0;
+    cleanupAborted = false;
+}
+
+int FinalSummaryPage::nextId() const
+{
+    return -1;
+}
+
+void FinalSummaryPage::initializePage()
+{
+    QString summaryText;
+
+    if(docDeleted) {
+        summaryText.append(tr("<li>%n document(s)", "", docDeleted));
+        if(cleanupAborted)
+            summaryText.append("<br/>"+tr( "( cleanup aborted )"));
+        summaryText.append("</li>");
+    }
+    if(field("mailToCleanup").toBool()) {
+        // add "events deleted (MM/DD/YYYY)" to the list
+        summaryText.append(tr("<li>mails (%1) </li>").arg(QTimeString::localYMD(field("MailSelectionPage_dateBox").toDate(), QTimeString::Short)));
+    }
+    if(field("eventToCleanup").toBool()) {
+        // add "events deleted (MM/DD/YYYY)" to the summary
+        summaryText.append(tr("<li>events (%1) </li>").arg(QTimeString::localYMD(field("EventSelectionPage_dateBox").toDate(), QTimeString::Short)));
+    }
+    if (!summaryText.isEmpty()) {
+        summaryText.prepend("<ul>");
+        summaryText.append("</ul>");
+        summary->setText(summaryText);
+        header->setText(tr("The following items have been deleted:"));
+    } else {
+        // reset header and summary
+        header->setText(tr("No cleanup actions has been taken."));
+        summary->setText(QString());
+    }
+}
+
 
 #include "cleanupwizard.moc"

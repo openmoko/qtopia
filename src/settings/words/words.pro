@@ -1,11 +1,12 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=words
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+depends(3rdparty/libraries/inputmatch)
+}
 
 HEADERS		= words.h
 SOURCES		= words.cpp main.cpp
-
-depends(3rdparty/libraries/inputmatch)
 
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=words*

@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QValueSpaceItem Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QValueSpaceItem Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QValueSpaceItem class allows access to Value Space items. <a href="#details">More...</a></p>
 <pre>    #include &lt;QValueSpaceItem&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -78,7 +79,7 @@
     /Device/Buttons/2/Usable = false
     /Device/Buttons/3/Name = Back
     /Device/Buttons/3/Usable = true</pre>
-<p>Any application in Qtopia can read values from the Value Space, or be notified asynchronously when they change using the QValueSpaceItem class.</p>
+<p>Any application in Qt Extended can read values from the Value Space, or be notified asynchronously when they change using the QValueSpaceItem class.</p>
 <p>Items in the Value Space can be thought of as representing &quot;objects&quot; adhering to a well known schema. This is a conceptual differentiation, not a physical one, as internally the Value Space is treated as one large tree. In the sample above, the <tt>/Device/Buttons</tt> schema can be defined as containing a value representing the number of mappable buttons on a device, and a sub-item for each. Likewise, the sub-item object schema contains two attributes - <tt>Name</tt> and <tt>Usable</tt>.</p>
 <p>Applications may use the <a href="qvaluespaceobject.html">QValueSpaceObject</a> class to create a schema object within the Value Space. Objects remain in the Value Space as long as the <a href="qvaluespaceobject.html">QValueSpaceObject</a> instance exists - that is, they are not persistant. If the object is destroyed, or the application containing it exits (or crashes) the items are removed.</p>
 <p>Change notification is modelled in a similar way. Applications subscribe to notifications at a particular object (ie. item) in the tree. If anything in that object (ie. under that item) changes, the application is notified. This allows, for example, subscription to just the <tt>/Device/Buttons</tt> item to receive notification when anything &quot;button&quot; related changes.</p>
@@ -179,8 +180,8 @@
 <p>Assign <i>other</i> to this.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

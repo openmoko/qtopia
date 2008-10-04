@@ -3,15 +3,15 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qtopia Style Guide: Application Design</title>
+  <title>Qt Extended Style Guide: Application Design</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Qtopia Style Guide: Application Design<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Qt Extended Style Guide: Application Design<br /><span class="subtitle"></span>
 </h1>
 <ul><li><a href="#application-styles">Application Styles</a></li>
 <ul><li><a href="#item-based-applications">Item-based Applications</a></li>
@@ -46,7 +46,7 @@
 </ul>
 <a name="list-of-lists"></a>
 <h4>List of Lists</h4>
-<p>This is rarely needed. It is used when there are a number of lists that behave differently or have some incompatible properties. An example application is the Qtopia <tt>Messaging</tt> application. This application shows folders that have specific functions. The <tt>Outbox</tt>, <tt>Trash</tt>, <tt>Inbox</tt>, etc. folders have specific properties that preclude grouping their items into one list.</p>
+<p>This is rarely needed. It is used when there are a number of lists that behave differently or have some incompatible properties. An example application is the Qt Extended <tt>Messaging</tt> application. This application shows folders that have specific functions. The <tt>Outbox</tt>, <tt>Trash</tt>, <tt>Inbox</tt>, etc. folders have specific properties that preclude grouping their items into one list.</p>
 <p>The context menu should contain entries that act on all of the lists, and optionally a <i>New</i> entry.</p>
 <p>Highlighting a list and pressing <tt>Select</tt> displays the list of items. Pressing <tt>Back</tt> or <tt>Done</tt> should close the application.</p>
 <a name="list-of-items"></a>
@@ -79,7 +79,7 @@
 </ul>
 <a name="form-layout"></a>
 <h4>Form Layout</h4>
-<p>An input form provides a simple and familiar way for the user to input data. If your application includes an input form, consider using <a href="qformlayout.html">QFormLayout</a> to arrange your form, as this will help ensure a consistent look and feel with other input forms in Qtopia.</p>
+<p>An input form provides a simple and familiar way for the user to input data. If your application includes an input form, consider using <a href="qformlayout.html">QFormLayout</a> to arrange your form, as this will help ensure a consistent look and feel with other input forms in Qt Extended.</p>
 <p>It is recommended that the same input form be used when creating and editing an item.</p>
 <a name="task-based-applications"></a>
 <h3>Task-based applications</h3>
@@ -87,8 +87,8 @@
 <p><b>Note</b>: While task-based applications do not operate on items, they may generate items that are then accessed in other applications. For example, <tt>Camera</tt> is a task-based application that produces photos which can be used by <tt>Pictures</tt>, an item-based application.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

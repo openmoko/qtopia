@@ -1,6 +1,8 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=systemtime
 CONFIG+=qtopia_main
+}
 
 HEADERS		= settime.h
 SOURCES		= settime.cpp main.cpp

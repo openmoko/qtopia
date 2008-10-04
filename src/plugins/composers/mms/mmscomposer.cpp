@@ -1,34 +1,31 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "mmscomposer.h"
-
+#include <private/accountconfiguration_p.h>
 #include <qsoftmenubar.h>
 #include <qtopiaapplication.h>
 #include <qcolorselector.h>
-#include <qtopia/mail/qmailmessage.h>
+#include <qmailmessage.h>
 #include <qmimetype.h>
 #include <qaudiosourceselector.h>
 #include <qimagesourceselector.h>
-
 #include <QAction>
 #include <QBuffer>
 #include <QPainter>
@@ -44,26 +41,164 @@
 #include <QTextStream>
 #include <QDataStream>
 #include <QBitArray>
-#include <QXmlDefaultHandler>
 #include <QMouseEvent>
 #include <QDesktopWidget>
 #include <QMenu>
+#include <QXmlStreamReader>
+#include <private/detailspage_p.h>
+#include <QMailAccount>
+#include <QPushButton>
+#include "videoselector.h"
+#include <QFlags>
+
+static const unsigned int kilobyte = 1024;
+static const unsigned int maxMessageSize = 300; //kB
+
+class NoMediaButton : public QPushButton
+{
+    Q_OBJECT
+public:
+    NoMediaButton(QWidget* parent = 0);
+
+signals:
+    void leftPressed();
+    void rightPressed();
+
+protected:
+    void keyPressEvent(QKeyEvent* e);
+};
+
+NoMediaButton::NoMediaButton(QWidget* parent)
+:
+    QPushButton(parent)
+{
+    setText("No media");
+}
+
+void NoMediaButton::keyPressEvent(QKeyEvent* e)
+{
+    switch( e->key() )
+    {
+    case Qt::Key_Left:
+        emit leftPressed();
+        e->accept();
+        break;
+    case Qt::Key_Right:
+        emit rightPressed();
+        e->accept();
+        break;
+    default:
+        QPushButton::keyPressEvent(e);
+        break;
+    }
+}
+
+class MediaSelectionDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    enum Action{ None = 0x0, SelectVideo=0x01, SelectImage=0x02 };
+    Q_DECLARE_FLAGS(Actions,Action);
+
+public:
+    MediaSelectionDialog(Actions availableActions, QWidget* parent = 0);
+    Action action() const;
+
+private slots:
+    void buttonClicked();
+
+private:
+    QPushButton* m_imageMediaButton;
+    QPushButton* m_videoMediaButton;
+    Action m_action;
+};
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(MediaSelectionDialog::Actions);
+
+MediaSelectionDialog::MediaSelectionDialog(Actions availableActions, QWidget* parent)
+:
+    QDialog(parent),
+    m_imageMediaButton(new QPushButton("Image",this)),
+    m_videoMediaButton(new QPushButton("Video",this)),
+    m_action(None)
+{
+    QVBoxLayout* l = new QVBoxLayout(this);
+    l->addWidget(m_imageMediaButton);
+    l->addWidget(m_videoMediaButton);
+    QWidget::setTabOrder(m_imageMediaButton,m_videoMediaButton);
+    connect(m_imageMediaButton,SIGNAL(clicked()),this,SLOT(buttonClicked()));
+    connect(m_videoMediaButton,SIGNAL(clicked()),this,SLOT(buttonClicked()));
+
+    Q_ASSERT(availableActions != None);
+    m_videoMediaButton->setVisible(availableActions & SelectVideo);
+    m_imageMediaButton->setVisible(availableActions & SelectImage);
+
+    this->setWindowTitle("Slide media");
+}
+
+MediaSelectionDialog::Action MediaSelectionDialog::action() const
+{
+    return m_action;
+}
+
+void MediaSelectionDialog::buttonClicked()
+{
+    if(sender() == m_imageMediaButton)
+        m_action =  SelectImage;
+    else if(sender() == m_videoMediaButton)
+        m_action = SelectVideo;
+    else m_action = None;
+
+    accept();
+}
 
 MMSSlideImage::MMSSlideImage(QWidget *parent)
     : QLabel(parent)
 {
     setAlignment( Qt::AlignCenter );
     connect( this, SIGNAL(clicked()), this, SLOT(select()) );
-    setImage( QContent() );
     setFocusPolicy( Qt::StrongFocus );
     setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     // would like to specify a value relative to parent here but Qt makes it hard..
     setMinimumSize( 0, 30 );
+    loadQueue().enqueue(this);
+}
+
+MMSSlideImage::~MMSSlideImage()
+{
+    loadQueue().removeAll(this);
 }
 
 QContent& MMSSlideImage::document()
 {
     return m_content;
+}
+
+QString MMSSlideImage::mimeType() const
+{
+    //TODO this needs to be more robust. We need to be given the correct mimetype from QContent
+    QString id;
+    if(m_image.isNull())
+        id = QMimeType(m_content).id();
+    else
+        id = "image/jpeg"; //written out as JPEG later
+    return id;
+}
+
+quint64 MMSSlideImage::numBytes() const
+{
+    QImage m = m_image.toImage();
+    return m.numBytes();
+}
+
+void MMSSlideImage::loadImages(const QSize& maxSize)
+{
+    //preload all known image slides based on maxSize
+    while(!loadQueue().isEmpty())
+    {
+        MMSSlideImage* s = loadQueue().dequeue();
+        s->loadImage(maxSize);
+    }
 }
 
 void MMSSlideImage::mousePressEvent( QMouseEvent *event )
@@ -115,25 +250,6 @@ void MMSSlideImage::paintEvent( QPaintEvent *event )
     }
 }
 
-void MMSSlideImage::showEvent(QShowEvent* event)
-{
-    QLabel::showEvent(event);
-
-    if (m_content.isValid() && m_image.isNull())
-    {
-        // We have deferred loading this image
-        QPixmap pixmap(loadImage());
-        m_contentSize = pixmap.size();
-        setImage( pixmap );
-    }
-
-    if (!m_image.isNull())
-    {
-        m_image = scale( m_image );
-        setPixmap( m_image );
-    }
-}
-
 QRect MMSSlideImage::contentsRect() const
 {
     if (isEmpty())
@@ -166,8 +282,12 @@ void MMSSlideImage::select()
     selector->setWindowTitle(tr("Slide photo"));
 
     int result = QtopiaApplication::execDialog( selector );
-    if( result == QDialog::Accepted ) {
-        setImage( selector->content() );
+    if( result == QDialog::Accepted )
+    {
+        bool ok = true;
+        emit aboutToChange(ok,selector->content().size()-numBytes());
+        if(ok)
+            setImage( selector->content() );
     }
     delete selector;
 }
@@ -195,15 +315,34 @@ QPixmap MMSSlideImage::scale( const QPixmap &src ) const
     return src;
 }
 
-QPixmap MMSSlideImage::loadImage() const
+QQueue<MMSSlideImage*>& MMSSlideImage::loadQueue()
 {
-    // Load the image to fit our display
+    static QQueue<MMSSlideImage*> loadqueue;
+    return loadqueue;
+}
+
+void MMSSlideImage::loadImage(const QSize& explicitSize)
+{
+    bool preloadContext = !explicitSize.isEmpty();
+
+    if(!m_content.isValid())
+    {
+        if(!preloadContext)
+            setImage(QPixmap());
+        return;
+    }
+
+    // Load the image to fit our display or the provided explicit size
     QImageReader imageReader( m_content.open() );
 
     if (imageReader.supportsOption(QImageIOHandler::Size)) {
         QSize fileSize(imageReader.size());
 
-        QSize bounds(isVisible() ? size() : QApplication::desktop()->availableGeometry().size());
+        QSize bounds;
+        if(preloadContext)
+            bounds = explicitSize;
+        else
+            bounds = (isVisible() ? size() : QApplication::desktop()->availableGeometry().size());
 
         // See if the image needs to be scaled during load
         if ((fileSize.width() > bounds.width()) || (fileSize.height() > bounds.height()))
@@ -214,49 +353,31 @@ QPixmap MMSSlideImage::loadImage() const
             imageReader.setScaledSize(imageSize);
         }
     }
-
-    return QPixmap::fromImage( imageReader.read() );
+    QPixmap m = QPixmap::fromImage(imageReader.read());
+    setImage(m);
 }
 
 void MMSSlideImage::setImage( const QContent& document )
 {
     m_content = document;
-
-    QPixmap pixmap;
-    if (!m_content.isValid())
-    {
-        m_contentSize = QSize();
-    }
-    else if (isVisible())
-    {
-        pixmap = loadImage();
-        m_contentSize = pixmap.size();
-    }
-
-    setImage( pixmap );
+    loadImage();
 }
 
 void MMSSlideImage::setImage( const QPixmap& image )
 {
-    m_image = (isVisible() ? scale( image ) : image);
+    m_image = image;
+    m_contentSize = m_image.size();
 
-    if( m_image.isNull() && !m_content.isValid() ) {
+    if( m_image.isNull() && !m_content.isValid() )
         setText( tr("Slide image") );
-    } else if (isVisible()) {
-        setPixmap( m_image );
-    }
+    else setPixmap( m_image );
 
     emit changed();
 }
 
 QPixmap MMSSlideImage::image() const
 {
-    if (m_content.isValid()) {
-        QImageReader imageReader( m_content.open() );
-        return QPixmap::fromImage( imageReader.read() );
-    }
-
-    return QPixmap();
+    return m_image;
 }
 
 bool MMSSlideImage::isEmpty() const
@@ -264,6 +385,113 @@ bool MMSSlideImage::isEmpty() const
     return (m_image.isNull() && !m_content.isValid());
 }
 
+MMSSlideVideo::MMSSlideVideo(QWidget* parent)
+:
+    QWidget(parent),
+    m_videoWidget(0)
+{
+    QVBoxLayout* l = new QVBoxLayout(this);
+    l->setSpacing(0);
+    l->setContentsMargins(0,0,0,0);
+
+    m_videoWidget = new QPushButton(this);
+    m_videoWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    l->addWidget(m_videoWidget);
+    connect(m_videoWidget,SIGNAL(clicked()),this,SLOT(select()));
+    setFocusProxy(m_videoWidget);
+
+    setFocusPolicy( Qt::StrongFocus );
+}
+
+MMSSlideVideo::~MMSSlideVideo()
+{
+}
+
+bool MMSSlideVideo::isEmpty() const
+{
+    return !m_videoMedia.isValid();
+}
+
+QContent MMSSlideVideo::document() const
+{
+    return m_videoMedia;
+}
+
+void MMSSlideVideo::setVideo(const QContent& c)
+{
+    m_videoMedia = c;
+    m_videoWidget->setText(tr("Video File\n") + m_videoMedia.name());
+    emit changed();
+}
+
+void MMSSlideVideo::setVideo(const QByteArray& data, const QString& name)
+{
+    //TODO set the video content for videos made available outside of content system
+    Q_UNUSED(data);
+    Q_UNUSED(name);
+}
+
+QByteArray MMSSlideVideo::video() const
+{
+    //TODO return the byte content for videos made available outside of content system
+    return QByteArray();
+}
+
+QString MMSSlideVideo::mimeType() const
+{
+    //TODO this needs to be more robust. We need to be given the correct mimetype from QContent.
+    QString id = QMimeType(m_videoMedia).id();
+    if(id.contains("audio/"))
+            id.replace("audio","video",Qt::CaseInsensitive);
+    return id;
+}
+
+quint64 MMSSlideVideo::numBytes() const
+{
+    if(!m_videoMedia.isNull())
+        return m_videoMedia.size();
+    return 0;
+}
+
+void MMSSlideVideo::select()
+{
+    VideoSourceSelectorDialog selector(this);
+    selector.setContent(m_videoMedia);
+    selector.setModal(true);
+    selector.setWindowTitle(tr("Slide video"));
+
+    int result = QtopiaApplication::execDialog(&selector);
+    if(result == QDialog::Accepted)
+    {
+        bool ok = true;
+        emit aboutToChange(ok,selector.content().size()-numBytes());
+        if(ok)
+            setVideo(selector.content());
+    }
+}
+
+void MMSSlideVideo::keyPressEvent(QKeyEvent* e)
+{
+    if( e->type() == QEvent::KeyPress )
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
+        switch( keyEvent->key() )
+        {
+            case Qt::Key_Left:
+                emit leftPressed();
+                break;
+            case Qt::Key_Right:
+                emit rightPressed();
+                break;
+            case Qt::Key_Select:
+                emit clicked();
+                break;
+            default:
+                QWidget::keyPressEvent(e);
+                break;
+        }
+    }
+}
 
 MMSSlideText::MMSSlideText(QWidget *parent)
     : QTextEdit(parent), defaultText( QObject::tr("Your text here...") ), m_hasFocus( false )
@@ -272,6 +500,7 @@ MMSSlideText::MMSSlideText(QWidget *parent)
                                             QSizePolicy::MinimumExpanding ) );
     setWordWrapMode(QTextOption::WordWrap);
     setText( QString() );
+    connect(this,SIGNAL(textChanged()),this,SIGNAL(changed()));
 }
 
 bool MMSSlideText::event( QEvent *e )
@@ -280,7 +509,7 @@ bool MMSSlideText::event( QEvent *e )
     if( e->type() == QEvent::EnterEditFocus && text().isNull() ) {
         clear();
     } else if( ( ( e->type() == QEvent::LeaveEditFocus ) ||
-                 ( e->type() == QEvent::FocusOut && m_hasFocus ) ) && 
+                 ( e->type() == QEvent::FocusOut && m_hasFocus ) ) &&
                ( text().isEmpty() ) ) {
         // Reset the text back to the placeholder
         setText( QString() );
@@ -317,6 +546,18 @@ void MMSSlideText::keyPressEvent( QKeyEvent *e )
             //else fall through
         }
     }
+
+    //check if we can accomodate text.
+
+    QString text = e->text();
+    if(!text.isEmpty() && hasEditFocus())
+    {
+        bool ok = true;
+        emit aboutToChange(ok,text.toUtf8().count());
+        if(!ok)
+            e->accept();
+    }
+
     QTextEdit::keyPressEvent( e );
     updateGeometry();
 }
@@ -329,6 +570,12 @@ QRect MMSSlideText::contentsRect() const
     QPoint pnt = rect().topLeft();
     pnt = mapToParent( pnt );
     return QRect( pnt.x(), pnt.y(), rect().width()-2, rect().height() - 2 );
+}
+
+quint64 MMSSlideText::numBytes() const
+{
+    QByteArray data = text().toUtf8();
+    return data.count();
 }
 
 void MMSSlideText::setText( const QString &txt )
@@ -364,9 +611,6 @@ bool MMSSlideText::isEmpty() const
     return text().isEmpty();
 }
 
-
-//---------------------------------------------------------------------------
-
 MMSSlideAudio::MMSSlideAudio(QWidget *parent)
     : QPushButton(parent)
 {
@@ -377,6 +621,15 @@ MMSSlideAudio::MMSSlideAudio(QWidget *parent)
 QContent& MMSSlideAudio::document()
 {
     return audioContent;
+}
+
+quint64 MMSSlideAudio::numBytes() const
+{
+    if(!audioData.isEmpty())
+        return audioData.count();
+    else if(!audioContent.isNull())
+        return audioContent.size();
+    return 0;
 }
 
 void MMSSlideAudio::setAudio( const QContent &doc )
@@ -398,6 +651,8 @@ void MMSSlideAudio::setAudio( const QByteArray &d, const QString &loc )
     audioName = loc;
 
     setText(loc.toLatin1());
+
+    emit changed();
 }
 
 QByteArray MMSSlideAudio::audio() const
@@ -426,7 +681,10 @@ void MMSSlideAudio::select()
 
     int result = QtopiaApplication::execDialog( selector );
     if ( result == QDialog::Accepted ) {
-        setAudio(selector->content());
+        bool ok = true;
+        emit aboutToChange(ok,selector->content().size()-numBytes());
+        if(ok)
+            setAudio(selector->content());
     }
     delete selector;
 }
@@ -468,32 +726,58 @@ bool MMSSlideAudio::isEmpty() const
     return !audioContent.isValid();
 }
 
-
-//===========================================================================
-
 MMSSlide::MMSSlide(QWidget *parent)
     : QWidget(parent), m_duration( 5000 )
 {
-    setFocusPolicy( Qt::NoFocus );
     setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     QVBoxLayout *l = new QVBoxLayout( this );
     l->setMargin(0);
     l->setSpacing(0);
 
-    m_imageContent = new MMSSlideImage( this );
-    l->addWidget( m_imageContent, 6 );
-    connect( m_imageContent, SIGNAL(leftPressed()), this, SIGNAL(leftPressed()) );
-    connect( m_imageContent, SIGNAL(rightPressed()), this, SIGNAL(rightPressed()) );
+    m_mediaStack = new QStackedWidget(this);
+    m_mediaStack->setFrameStyle(QFrame::Box);
+    m_mediaStack->setFocusPolicy(Qt::StrongFocus);
+    l->addWidget(m_mediaStack,6);
+
+    m_noMediaButton = new NoMediaButton(this);
+    connect(m_noMediaButton,SIGNAL(clicked()),this,SLOT(selectMedia()));
+    connect(m_noMediaButton, SIGNAL(leftPressed()), this, SIGNAL(leftPressed()) );
+    connect(m_noMediaButton, SIGNAL(rightPressed()), this, SIGNAL(rightPressed()) );
+
+    m_mediaStack->addWidget(m_noMediaButton);
+    m_mediaStack->setFocusProxy(m_noMediaButton);
+    m_mediaStack->addWidget(m_noMediaButton);
+
+    m_imageContent = new MMSSlideImage(this);
+    m_mediaStack->addWidget( m_imageContent);
+    connect(m_imageContent, SIGNAL(leftPressed()), this, SIGNAL(leftPressed()) );
+    connect(m_imageContent, SIGNAL(rightPressed()), this, SIGNAL(rightPressed()) );
+    connect(m_imageContent, SIGNAL(changed()),this, SLOT(mediaChanged()));
+    connect(m_imageContent, SIGNAL(changed()),this, SIGNAL(changed()));
+    connect(m_imageContent, SIGNAL(aboutToChange(bool&,quint64)),this, SIGNAL(aboutToChange(bool&,quint64)));
+
+    m_videoContent = new MMSSlideVideo(this);
+    m_mediaStack->addWidget(m_videoContent);
+    connect(m_videoContent,SIGNAL(leftPressed()),this,SIGNAL(leftPressed()));
+    connect(m_videoContent,SIGNAL(rightPressed()),this,SIGNAL(rightPressed()));
+    connect(m_videoContent,SIGNAL(changed()),this,SLOT(mediaChanged()));
+    connect(m_videoContent, SIGNAL(changed()),this, SIGNAL(changed()));
+    connect(m_videoContent,SIGNAL(aboutToChange(bool&,quint64)),this, SIGNAL(aboutToChange(bool&,quint64)));
 
     m_textContent = new MMSSlideText( this );
-    l->addWidget( m_textContent, 3 );
-    connect( m_textContent, SIGNAL(leftPressed()), this, SIGNAL(leftPressed()) );
-    connect( m_textContent, SIGNAL(rightPressed()), this, SIGNAL(rightPressed()) );
+    l->addWidget(m_textContent);
+    connect(m_textContent, SIGNAL(leftPressed()), this, SIGNAL(leftPressed()) );
+    connect(m_textContent, SIGNAL(rightPressed()), this, SIGNAL(rightPressed()) );
+    connect(m_textContent, SIGNAL(changed()),this, SIGNAL(changed()));
+    connect(m_textContent, SIGNAL(aboutToChange(bool&,quint64)),this, SIGNAL(aboutToChange(bool&,quint64)));
 
     m_audioContent = new MMSSlideAudio( this );
-    l->addWidget( m_audioContent, 1 );
-    connect( m_audioContent, SIGNAL(leftPressed()), this, SIGNAL(leftPressed()) );
-    connect( m_audioContent, SIGNAL(rightPressed()), this, SIGNAL(rightPressed()) );
+    l->addWidget(m_audioContent);
+    connect(m_audioContent, SIGNAL(leftPressed()), this, SIGNAL(leftPressed()) );
+    connect(m_audioContent, SIGNAL(rightPressed()), this, SIGNAL(rightPressed()) );
+    connect(m_audioContent, SIGNAL(changed()), this, SLOT(mediaChanged()));
+    connect(m_audioContent, SIGNAL(changed()), this, SIGNAL(changed()));
+    connect(m_audioContent, SIGNAL(aboutToChange(bool&,quint64)),this, SIGNAL(aboutToChange(bool&,quint64)));
 }
 
 void MMSSlide::setDuration( int t )
@@ -508,6 +792,80 @@ void MMSSlide::setDuration( int t )
 int MMSSlide::duration() const
 {
     return m_duration;
+}
+
+quint64 MMSSlide::numBytes() const
+{
+    quint64 size = 0;
+    size += m_textContent->numBytes();
+    size += m_imageContent->numBytes();
+    size += m_videoContent->numBytes();
+    size += m_audioContent->numBytes();
+
+    return size;
+}
+
+void MMSSlide::selectMedia()
+{
+    //MMS conformance spec 1.2 stipulates video content
+    //and slide audio content are mutually exclusive.
+
+    if(audioContent()->isEmpty())
+    {
+        MediaSelectionDialog::Actions actions = MediaSelectionDialog::SelectImage | MediaSelectionDialog::SelectVideo;
+        MediaSelectionDialog selector(actions,this);
+        selector.setModal(true);
+
+        if(QtopiaApplication::execDialog(&selector) == QDialog::Accepted)
+        {
+            switch(selector.action())
+            {
+            case MediaSelectionDialog::SelectImage:
+                m_imageContent->select();
+                break;
+            case MediaSelectionDialog::SelectVideo:
+                m_videoContent->select();
+                break;
+            case MediaSelectionDialog::None:
+                break;
+            }
+        }
+    }
+    else
+        m_imageContent->select();
+
+    m_audioContent->setVisible(m_videoContent->isEmpty());
+}
+
+void MMSSlide::mediaChanged()
+{
+    if(sender() == m_imageContent)
+    {
+        if(!m_imageContent->isEmpty())
+        {
+            m_mediaStack->setCurrentWidget(m_imageContent);
+            return;
+        }
+    }
+    else if(sender() == m_videoContent)
+    {
+        if(!m_videoContent->isEmpty())
+        {
+            m_mediaStack->setCurrentWidget(m_videoContent);
+            return;
+        }
+    }
+    else if(sender() == m_audioContent)
+        return;
+
+    m_mediaStack->setCurrentWidget(m_noMediaButton);
+    m_audioContent->setVisible(m_videoContent->isEmpty());
+}
+
+void MMSSlide::showEvent(QShowEvent* e)
+{
+    QWidget::showEvent(e);
+    MMSSlideImage::loadImages(m_mediaStack->size());
 }
 
 MMSSlideImage *MMSSlide::imageContent() const
@@ -525,359 +883,79 @@ MMSSlideAudio *MMSSlide::audioContent() const
     return m_audioContent;
 }
 
-//==============================================================================
-
-MMSComposer::MMSComposer(QWidget *parent)
-    : QWidget(parent), m_curSlide(-1), m_internalUpdate(false)
+MMSSlideVideo* MMSSlide::videoContent() const
 {
-    setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
-    setFocusPolicy( Qt::NoFocus );
-
-    m_durationLabel = new QLabel( this );
-
-    m_slideLabel = new QLabel( this );
-    m_slideLabel->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
-
-    m_slideStack = new QStackedWidget( this );
-    m_slideStack->setFocusPolicy( Qt::NoFocus );
-
-    m_removeSlide = new QAction(tr("Remove Slide"), this);
-    connect( m_removeSlide, SIGNAL(triggered()), this, SLOT(removeSlide()) );
-
-    QHBoxLayout *labelLayout = new QHBoxLayout;
-    labelLayout->addWidget( m_durationLabel );
-    labelLayout->addWidget( m_slideLabel );
-
-    QVBoxLayout *l = new QVBoxLayout( this );
-    l->setMargin(0);
-    l->addLayout( labelLayout );
-    l->addWidget( m_slideStack, 1 );
-
-    connect( this, SIGNAL(currentChanged(uint)), this, SLOT(updateLabels()) );
-
-    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel);
-
-    addSlide();
+    return m_videoContent;
 }
 
-MMSComposer::~MMSComposer()
-{
-    qDeleteAll(m_slides);
-}
-
-void MMSComposer::addActions(QMenu* menu)
-{
-    QAction *add = new QAction(tr("Add Slide"), this);
-    connect( add, SIGNAL(triggered()), this, SLOT(addSlide()) );
-
-    QAction* options = new QAction(tr("Slide Options..."), this);
-    connect( options, SIGNAL(triggered()), this, SLOT(slideOptions()) );
-
-    menu->addAction(add);
-    menu->addAction(m_removeSlide);
-    menu->addSeparator();
-    menu->addAction(options);
-}
-
-void MMSComposer::slideOptions()
-{
-    MMSSlide *cur = slide( currentSlide() );
-    if( !cur )
-        return;
-    QDialog *dlg = new QDialog(this);
-    dlg->setModal(true);
-    dlg->setWindowTitle( tr("Slide options") );
-    QGridLayout *l = new QGridLayout( dlg );
-    int rowCount = 0;
-
-    QSpinBox *durBox = new QSpinBox( dlg );
-    durBox->setMinimum( 1 );
-    durBox->setMaximum( 10 );
-    durBox->setValue( cur->duration()/1000 );
-    durBox->setSuffix( tr("secs") );
-    QLabel *la = new QLabel( tr("Duration", "duration between images in a slide show"), dlg );
-    la->setBuddy( durBox );
-    l->addWidget( la, rowCount, 0 );
-    l->addWidget( durBox, rowCount, 1 );
-    ++rowCount;
-
-    QColorButton *bg = new QColorButton( dlg );
-    bg->setColor( backgroundColor() );
-    la = new QLabel( tr("Slide color"), dlg );
-    la->setBuddy( bg );
-    l->addWidget( la, rowCount, 0 );
-    l->addWidget( bg, rowCount, 1 );
-
-    int r = QtopiaApplication::execDialog( dlg );
-    if( r == QDialog::Accepted )
-    {
-        setBackgroundColor( bg->color() );
-
-        cur->setDuration( durBox->value()*1000 );
-    }
-}
-
-QRect MMSComposer::contentsRect() const
-{
-    QRect r = rect();
-    r.setHeight( r.height() - qMax( m_slideLabel->height(), m_durationLabel->height() ) );
-    return r;
-}
-
-void MMSComposer::addSlide()
-{
-    addSlide( -1 );
-}
-
-void MMSComposer::addSlide( int a_slide )
-{
-    if( a_slide < 0 )
-    {
-        if( currentSlide() == -1 )
-            a_slide = 0;
-        else
-            a_slide = currentSlide();
-    }
-    else if( a_slide >= static_cast<int>(slideCount()) )
-    {
-        a_slide = slideCount() - 1;
-    }
-    if( slideCount() )
-        ++a_slide; // add to the next slide
-
-    MMSSlide *newSlide = new MMSSlide( m_slideStack );
-    connect( newSlide, SIGNAL(leftPressed()), this, SLOT(previousSlide()) );
-    connect( newSlide, SIGNAL(rightPressed()), this, SLOT(nextSlide()) );
-    connect( newSlide, SIGNAL(durationChanged(int)), this, SLOT(updateLabels()) );
-    m_slides.insert( a_slide, newSlide );
-    m_slideStack->addWidget(newSlide);
-
-    QMenu *thisMenu = QSoftMenuBar::menuFor( this );
-    QSoftMenuBar::addMenuTo( newSlide, thisMenu );
-    QSoftMenuBar::addMenuTo( newSlide->m_textContent, thisMenu );
-    QSoftMenuBar::addMenuTo( newSlide->m_imageContent, thisMenu );
-
-    connect( newSlide->m_textContent, SIGNAL(textChanged()), this, SLOT(elementChanged()) );
-    connect( newSlide->m_imageContent, SIGNAL(changed()), this, SLOT(elementChanged()) );
-    connect( newSlide->m_audioContent, SIGNAL(changed()), this, SLOT(elementChanged()) );
-
-    m_removeSlide->setVisible(slideCount() > 1);
-
-    m_internalUpdate = true;
-    setCurrentSlide( a_slide );
-}
-
-void MMSComposer::removeSlide()
-{
-    removeSlide( -1 );
-}
-
-void MMSComposer::removeSlide( int a_slide )
-{
-    if( slideCount() <= 1 )
-        return;
-    int s = a_slide;
-    if( s == -1 )
-        s = currentSlide();
-    if( s < 0 || s >= static_cast<int>(slideCount()) )
-        return;
-    m_slideStack->removeWidget( slide( s ) );
-    delete m_slides.takeAt( s );
-    if( s >= static_cast<int>(slideCount()) )
-        s = slideCount() - 1;
-    if( s >= 0 )
-        m_internalUpdate = true;
-    setCurrentSlide( s );
-
-    m_removeSlide->setVisible(slideCount() > 1);
-}
-
-void MMSComposer::setTextColor( const QColor &col )
-{
-    m_textColor = col;
-    QPalette pal = m_slideStack->palette();
-    pal.setColor( QPalette::Foreground, m_textColor );
-    pal.setColor( QPalette::Text, m_textColor );
-    m_slideStack->setPalette( pal );
-}
-
-QColor MMSComposer::textColor() const
-{
-    return m_textColor;
-}
-
-QColor MMSComposer::backgroundColor() const
-{
-    return m_backgroundColor;
-}
-
-void MMSComposer::setBackgroundColor( const QColor &col )
-{
-    m_backgroundColor = col;
-
-    // Set the FG to a contrasting colour
-    int r, g, b;
-    col.getRgb(&r, &g, &b);
-    m_textColor = (((r + g + b) / 3) > 128 ? Qt::black : Qt::white);
-
-    QPalette pal = m_slideStack->palette();
-    pal.setColor( QPalette::Background, m_backgroundColor );
-    pal.setColor( QPalette::Base, m_backgroundColor );
-    pal.setColor( QPalette::Foreground, m_textColor );
-    pal.setColor( QPalette::Text, m_textColor );
-    m_slideStack->setPalette( pal );
-}
-
-void MMSComposer::setCurrentSlide( int a_slide )
-{
-    if( a_slide >= static_cast<int>(slideCount()) )
-        return;
-    if( a_slide < 0 )
-    {
-        m_curSlide = -1;
-        return;
-    }
-    if( m_internalUpdate || a_slide != m_curSlide )
-    {
-        m_internalUpdate = false;
-        m_curSlide = a_slide;
-        m_slideStack->setCurrentWidget( slide( m_curSlide ) );
-        emit currentChanged( m_curSlide );
-    }
-}
-
-void MMSComposer::nextSlide()
-{
-    if( !slideCount() )
-        return;
-    int cur = currentSlide();
-    if( cur == -1 || ++cur >= static_cast<int>(slideCount()) )
-        cur = 0;
-    setCurrentSlide( cur );
-}
-
-void MMSComposer::previousSlide()
-{
-    if( !slideCount() )
-        return;
-    int cur = currentSlide();
-    --cur;
-    if( cur < 0 )
-        cur = slideCount() - 1;
-    setCurrentSlide( cur );
-}
-
-void MMSComposer::updateLabels()
-{
-    QString baseLabel = tr("Slide %1 of %2");
-    m_slideLabel->setText( baseLabel.arg( QString::number( currentSlide()+1 ) )
-                               .arg( QString::number( slideCount() ) ) );
-    baseLabel = tr("Duration: %1secs", "duration between images in a slide show");
-    m_durationLabel->setText(
-    baseLabel.arg( QString::number( slide( currentSlide() )->duration()/1000 ) ) );
-}
-
-int MMSComposer::currentSlide() const
-{
-    return m_curSlide;
-}
-
-uint MMSComposer::slideCount() const
-{
-    return m_slides.count();
-}
-
-MMSSlide *MMSComposer::slide( uint slide ) const
-{
-    if( slide >= slideCount() )
-        return 0;
-    return m_slides.at(slide);
-}
-
-void MMSComposer::keyPressEvent(QKeyEvent *e)
-{
-    if (e->key() == Qt::Key_Back) {
-        e->accept();
-        emit finished();
-        return;
-    }
-
-    QWidget::keyPressEvent(e);
-}
-
-void MMSComposer::elementChanged()
-{
-    QSoftMenuBar::setLabel(this, Qt::Key_Back, (isEmpty() ? QSoftMenuBar::Cancel : QSoftMenuBar::Next));
-
-    emit contentChanged();
-}
-
-class SmilHandler : public QXmlDefaultHandler
+class SmilHandler
 {
 public:
     QList<MMSSmilPart> parts;
     MMSSmil smil;
     SmilHandler() : m_insidePart( false ) {}
 
-    bool startElement( const QString &, const QString &, const QString &qName,
-                                                const QXmlAttributes & atts )
+    bool parse( QXmlStreamReader& xml )
     {
-        if( qName == "smil" )
-        {
-            smil.fgColor = QColor();
-            smil.bgColor = QColor();
-            smil.parts.clear();
-        }
-        else if( qName == "par" )
-        {
-            m_insidePart = true;
-            MMSSmilPart newPart;
-            if( atts.value( "duration" ).length() )
-                newPart.duration = atts.value( "duration" ).toInt();
-            smil.parts.append( newPart );
-        }
-        else if( qName == "region" )
-        {
-            if( atts.value("background-color").length() )
-                smil.bgColor.setNamedColor( atts.value("background-color") );
-        }
-        else if( m_insidePart )
-        {
-            if( qName == "img" && atts.value( "src" ).length() )
-                smil.parts.last().image = atts.value( "src" );
+        while ( !xml.atEnd() ) {
+            xml.readNext();
 
-            else if( qName == "text" && atts.value( "src" ).length() )
-                smil.parts.last().text = atts.value( "src" );
+            if ( xml.isStartElement() ) {
+                const QStringRef& name = xml.name();
+                const QXmlStreamAttributes& atts = xml.attributes();
 
-            else if( qName == "audio" && atts.value( "src" ).length() )
-                smil.parts.last().audio = atts.value( "src" );
+                if ( name == "smil" ) {
+                    smil.fgColor = QColor();
+                    smil.bgColor = QColor();
+                    smil.parts.clear();
+                } else if ( name == "par" ) {
+                    m_insidePart = true;
+                    MMSSmilPart newPart;
+                    QString duration = atts.value( "dur" ).toString();
+                    if ( duration.length() ) {
+                        QRegExp exp( "(\\d*)(\\w*)" );
+                        if ( exp.indexIn( duration ) == 0 ) {
+                            newPart.duration = exp.cap( 1 ).toInt();
+                            if ( exp.cap( 2 ).toLower() == "s" )
+                                newPart.duration *= 1000;
+                        }
+                    }
+                    smil.parts.append( newPart );
+                } else if ( name == "region" ) {
+                    if ( atts.value( "background-color" ).length() )
+                        smil.bgColor.setNamedColor( atts.value( "background-color" ).toString() );
+                } else if ( m_insidePart ) {
+                    QString src = atts.value( "src" ).toString();
+                    if ( src.length() ) {
+                        if ( name == "img" )
+                            smil.parts.last().image = src;
+                        else if ( name == "text" )
+                            smil.parts.last().text = src;
+                        else if ( name == "audio" )
+                            smil.parts.last().audio = src;
+                        else if (name == "video" )
+                            smil.parts.last().text = src;
+                    }
+                }
+            } else if ( xml.isEndElement() ) {
+                if ( xml.name() == "par" ) {
+                    m_insidePart = false;
+                }
+            }
         }
-        return true;
-    }
 
-    bool endElement( const QString &, const QString &, const QString &qName )
-    {
-        if( qName == "par" )
-            m_insidePart = false;
-        return true;
+        return !xml.hasError();
     }
 
 private:
     bool m_insidePart;
 };
 
-MMSSmil MMSComposer::parseSmil( const QString &smil )
+static void addActionsFromWidget(QWidget* sourceWidget, QMenu* targetMenu)
 {
-    QXmlInputSource input;
-    input.setData( smil );
-    QXmlSimpleReader reader;
-    SmilHandler *handler = new SmilHandler;
-    reader.setContentHandler( handler );
-    if( !reader.parse( input ) )
-        qWarning( "MMSComposer unable to parse smil message." );
-    MMSSmil s = handler->smil;
-    delete handler;
-    return s;
+    if(!sourceWidget) return;
+    foreach(QAction* a,sourceWidget->actions())
+        targetMenu->addAction(a);
 }
 
 // This logic is replicated in the SMIL viewer...
@@ -917,12 +995,135 @@ static bool smilPartMatch(const QString identifier, const QMailMessagePart& part
     return ((part.contentID() == id) || (part.displayName() == id) || (part.contentLocation() == id));
 }
 
-void MMSComposer::setMessage( const QMailMessage &mail )
+MMSComposerInterface::MMSComposerInterface( QWidget *parent )
+    : QMailComposerInterface( parent ),
+    m_widgetStack(0), m_composerWidget(0), m_detailsWidget(0),
+    m_slideLabel(0), m_sizeLabel(0), m_slideStack(0),
+    m_curSlide(-1), m_internalUpdate(false), m_removeSlide(0),
+    m_nextSlide(0), m_previousSlide(0)
+{
+    init();
+}
+
+MMSComposerInterface::~MMSComposerInterface()
+{
+    qDeleteAll(m_slides);
+}
+
+void MMSComposerInterface::init()
+{
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setSpacing(0);
+    layout->setContentsMargins(0,0,0,0);
+    QWidget::setLayout(layout);
+
+    //widget stack
+    m_widgetStack = new QStackedWidget(this);
+    layout->addWidget(m_widgetStack);
+
+    //composer widget
+    m_composerWidget = new QWidget(m_widgetStack);
+    m_widgetStack->addWidget(m_composerWidget);
+
+    QVBoxLayout *l = new QVBoxLayout(m_composerWidget);
+    l->setMargin(0);
+
+    //duration label
+    m_sizeLabel= new QLabel(m_composerWidget);
+    m_sizeLabel->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
+
+    //slide number label
+    m_slideLabel = new QLabel(m_composerWidget);
+    m_slideLabel->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
+
+    //slide stack
+    m_slideStack = new QStackedWidget(m_composerWidget);
+    l->addWidget( m_slideStack );
+
+    QHBoxLayout *labelLayout = new QHBoxLayout;
+    labelLayout->addWidget( m_slideLabel );
+    labelLayout->addWidget( m_sizeLabel);
+    l->addLayout( labelLayout );
+
+    //details widget
+    m_detailsWidget = new DetailsPage(m_widgetStack);
+    m_detailsWidget->setType(QMailMessage::Mms);
+    connect( m_detailsWidget, SIGNAL(changed()), this, SIGNAL(changed()));
+    connect( m_detailsWidget, SIGNAL(sendMessage()), this, SIGNAL(sendMessage()));
+    connect( m_detailsWidget, SIGNAL(cancel()), this, SIGNAL(cancel()));
+    connect( m_detailsWidget, SIGNAL(editMessage()), this, SLOT(composePage()));
+    m_widgetStack->addWidget(m_detailsWidget);
+
+    QWidget::setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
+    connect( this, SIGNAL(currentChanged(uint)), this, SLOT(updateLabels()) );
+    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel);
+
+    //menus
+    m_removeSlide = new QAction(tr("Remove slide"), this);
+    connect(m_removeSlide, SIGNAL(triggered()), this, SLOT(removeSlide()));
+
+    m_nextSlide = new QAction(tr("Next slide"), this);
+    connect(m_nextSlide, SIGNAL(triggered()), this, SLOT(nextSlide()));
+
+    m_previousSlide = new QAction(tr("Previous slide"), this);
+    connect(m_previousSlide, SIGNAL(triggered()), this, SLOT(previousSlide()));
+
+    QAction *add = new QAction(tr("Add slide"), this);
+    connect(add, SIGNAL(triggered()), this, SLOT(addSlide()));
+
+    QAction* options = new QAction(tr("Slide options..."), this);
+    connect(options, SIGNAL(triggered()), this, SLOT(slideOptions()));
+
+    QMenu* menu = QSoftMenuBar::menuFor(this);
+    menu->addSeparator();
+    menu->addAction(add);
+    menu->addAction(m_removeSlide);
+    menu->addAction(m_nextSlide);
+    menu->addAction(m_previousSlide);
+    menu->addSeparator();
+    menu->addAction(options);
+    addActionsFromWidget(QWidget::parentWidget(),menu);
+
+    setContext("Create " + displayName(QMailMessage::Mms));
+    composePage();
+    addSlide();
+}
+
+MMSSmil MMSComposerInterface::parseSmil( const QString &smil )
+{
+    QXmlStreamReader reader;
+    reader.addData( smil );
+
+    SmilHandler handler;
+    if( !handler.parse( reader ) )
+        qWarning( "MMSComposer unable to parse smil message." );
+    return handler.smil;
+}
+
+void MMSComposerInterface::setContext(const QString& title)
+{
+    m_title = title;
+    emit contextChanged();
+}
+
+bool MMSComposerInterface::isEmpty() const
+{
+    for( uint i = 0 ; i < slideCount() ; ++i )
+        if( !slide(i)->imageContent()->isEmpty() ||
+            !slide(i)->textContent()->isEmpty() ||
+            !slide(i)->audioContent()->isEmpty() ||
+            !slide(i)->videoContent()->isEmpty()) {
+            return false;
+        }
+    return true;
+}
+
+void MMSComposerInterface::setMessage( const QMailMessage &mail )
 {
     clear();
     MMSSlide *curSlide = slide( currentSlide() );
 
-    if (mail.partCount() > 1) 
+    if (mail.partCount() > 1)
     {
         // This message must contain SMIL
         uint smilPartIndex = smilStartIndex(mail);
@@ -936,6 +1137,7 @@ void MMSComposer::setMessage( const QMailMessage &mail )
                 addSlide();
 
             MMSSlide *curSlide = slide( slideCount() -1 );
+            curSlide->setDuration( smilPart.duration );
 
             // ...for each part in the message...
             for( uint i = 0 ; i < mail.partCount(); ++i ) {
@@ -957,6 +1159,16 @@ void MMSComposer::setMessage( const QMailMessage &mail )
                         pix.loadFromData(part.body().data(QMailMessageBody::Decoded));
                         curSlide->imageContent()->setImage( pix );
                     }
+                } else if(smilPartMatch(smilPart.video, part)) {
+
+                    if(!fileName.isEmpty())
+                        curSlide->videoContent()->setVideo(QContent(fileName));
+                    else
+                    {
+                        QByteArray data = part.body().data(QMailMessageBody::Decoded);
+                        curSlide->videoContent()->setVideo( data, part.displayName() );
+                    }
+
                 } else if (smilPartMatch(smilPart.audio, part)) {
                     if (!fileName.isEmpty()) {
                         curSlide->audioContent()->setAudio( QContent(fileName) );
@@ -972,7 +1184,6 @@ void MMSComposer::setMessage( const QMailMessage &mail )
             setBackgroundColor( smil.bgColor );
         if( smil.fgColor.isValid() )
             setTextColor( smil.fgColor );
-        setCurrentSlide( 0 );
     } else {
         QString bodyData(mail.body().data());
         if (!bodyData.isEmpty()) {
@@ -1001,6 +1212,13 @@ void MMSComposer::setMessage( const QMailMessage &mail )
                     QByteArray data = part.body().data(QMailMessageBody::Decoded);
                     curSlide->audioContent()->setAudio( data, part.displayName() );
                 }
+            } else if(contentType.type().toLower() == "video") {
+                if (!fileName.isEmpty()) {
+                    curSlide->videoContent()->setVideo( QContent(fileName) );
+                } else {
+                    QByteArray data = part.body().data(QMailMessageBody::Decoded);
+                    curSlide->videoContent()->setVideo( data, part.displayName() );
+                }
             } else {
                 qWarning() << "Unhandled MMS part:" << part.displayName();
             }
@@ -1008,65 +1226,55 @@ void MMSComposer::setMessage( const QMailMessage &mail )
     }
 
     m_removeSlide->setVisible(slideCount() > 1);
+    m_nextSlide->setVisible(slideCount() > 1);
+    m_previousSlide->setVisible(false);
+    setCurrentSlide(0);
+
+    //set the details
+    m_detailsWidget->setDetails(mail);
 }
 
-bool MMSComposer::isEmpty() const
+typedef struct PartDetailsData
 {
-    for( uint i = 0 ; i < slideCount() ; ++i )
-        if( !slide( i )->imageContent()->isEmpty() ||
-            !slide( i )->textContent()->isEmpty() ||
-            !slide( i )->audioContent()->isEmpty()) {
-            return false;
-        }
-    return true;
-}
+    QString filename;
+    QByteArray contentType;
+    QByteArray name;
+    QByteArray data;
 
-void MMSComposer::clear()
-{
-    while( slideCount() > 1 )
-        removeSlide( slideCount() - 1 );
-    if( slideCount() )
+    bool operator==(const PartDetailsData& other)
     {
-        MMSSlide *cur = slide( currentSlide() );
-        cur->imageContent()->setImage( QContent() );
-        cur->textContent()->setText( QString() );
-        cur->audioContent()->setAudio( QContent() );
+        return filename == other.filename &&
+               contentType == other.contentType &&
+               name == other.name &&
+               data == other.data;
+    };
+
+    static PartDetailsData fromFile(const QString& filename, const QString& contentType)
+    {
+        PartDetailsData d;
+        d.filename = filename;
+        d.contentType = contentType.toLatin1();
+        return d;
     }
-}
 
-MMSComposerInterface::MMSComposerInterface( QWidget *parent )
-    : QMailComposerInterface( parent )
-{
-    m_composer = new MMSComposer(parent);
-    connect( m_composer, SIGNAL(contentChanged()), this, SIGNAL(contentChanged()) );
-    connect( m_composer, SIGNAL(finished()), this, SIGNAL(finished()) );
-}
+    static PartDetailsData fromData(const QString& contentType, const QString& name, const QByteArray& data)
+    {
+        PartDetailsData d;
+        d.contentType = contentType.toLatin1();
+        d.name = name.toLatin1();
+        d.data = data;
+        return d;
+    }
 
-MMSComposerInterface::~MMSComposerInterface()
-{
-    delete m_composer;
-}
+    bool isFileData() const { return !filename.isEmpty(); };
 
-bool MMSComposerInterface::isEmpty() const
-{
-    return m_composer->isEmpty();
-}
-
-void MMSComposerInterface::setMessage( const QMailMessage &mail )
-{
-    m_composer->setMessage( mail );
-}
-
-// Inline parts: <<content-type, name>, data>
-typedef QPair<QPair<QByteArray, QByteArray>, QByteArray> InlinePartDetails;
-typedef QPair<QString, InlinePartDetails> PartDetails;
+} PartDetails;
 
 QMailMessage MMSComposerInterface::message() const
 {
     QMailMessage mmsMail;
 
     QList<PartDetails> partDetails;
-    InlinePartDetails nullPart(qMakePair(qMakePair(QByteArray(), QByteArray()), QByteArray()));
 
     //clean slate, generate document
     static const QString docTemplate =
@@ -1085,7 +1293,7 @@ QMailMessage MMSComposerInterface::message() const
     ; // 1.author 2.rootlayout&regions 3.parts
     static const QString rootLayoutTemplate =
     "           <root-layout width=\"%1\" height=\"%2\"/>\n"
-    ; // 1.width 2.height 
+    ; // 1.width 2.height
     static const QString regionTemplate =
     "           <region id=\"%1\" width=\"%2\" height=\"%3\" left=\"%4\" top=\"%5\"%6/>\n"
     ; // 1.id 2.width 3.height 4.left 5.top 6.background-color-spec
@@ -1096,6 +1304,10 @@ QMailMessage MMSComposerInterface::message() const
     ; // 1.duration 2.contentitems
     static const QString imageTemplate =
     "         <img src=\"%1\" region=\"%2\"/>\n"
+    ; // 1.src 2.region
+    static const QString videoTemplate =
+    "         <video src=\"%1\" region=\"%2\"/>\n"
+
     ; // 1.src 2.region
     static const QString textTemplate =
     "         <text src=\"%1\" region=\"%2\"/>\n"
@@ -1113,9 +1325,10 @@ QMailMessage MMSComposerInterface::message() const
     MMSSlideImage *imageContent = 0;
     MMSSlideText *textContent = 0;
     MMSSlideAudio *audioContent = 0;
-    for( uint s = 0 ; s < m_composer->slideCount() ; ++s )
+    MMSSlideVideo* videoContent = 0;
+    for( uint s = 0 ; s < slideCount() ; ++s )
     {
-        MMSSlide *curSlide = m_composer->slide( s );
+        MMSSlide *curSlide = slide( s );
         if( !curSlide->imageContent()->isEmpty() )
         {
             imageContent = curSlide->imageContent();
@@ -1131,6 +1344,12 @@ QMailMessage MMSComposerInterface::message() const
             audioContent = curSlide->audioContent();
             ++contentCount;
         }
+        if( !curSlide->videoContent()->isEmpty() )
+        {
+            videoContent = curSlide->videoContent();
+            ++contentCount;
+        }
+
         if( contentCount > 1 )
             break;
     }
@@ -1145,21 +1364,42 @@ QMailMessage MMSComposerInterface::message() const
             if (imageContent->document().isValid()) {
                 // Add the image as an attachment
                 mmsMail.setMultipartType(QMailMessagePartContainer::MultipartMixed);
-                partDetails.append(qMakePair(imageContent->document().fileName(), nullPart));
+                PartDetails imagePartDetails = PartDetails::fromFile(imageContent->document().fileName(),
+                                                                         imageContent->mimeType());
+                partDetails.append(imagePartDetails);
             } else {
                 // Write the image out to a buffer in JPEG format
                 QBuffer buffer;
                 imageContent->image().save(&buffer, "JPEG");
-                
+
                 // Add the image data as the message body
                 QMailMessageContentType type("image/jpeg");
                 mmsMail.setBody(QMailMessageBody::fromData(buffer.data(), type, QMailMessageBody::Base64));
             }
-        } else if (audioContent) {
+        } else if(videoContent) {
+            if (videoContent->document().isValid()) {
+                // Add the image as an attachment
+                mmsMail.setMultipartType(QMailMessagePartContainer::MultipartMixed);
+                PartDetails videoPartDetails = PartDetails::fromFile(videoContent->document().fileName(),
+                                                                         videoContent->mimeType());
+                partDetails.append(videoPartDetails);
+            } else {
+                //assumes that the video content is not contained within the content system therefore cannot be added as
+                //an attachment and must be added from byte data.
+
+                // Add the video data as the message body
+                QMailMessageContentType type( videoContent->mimeType().toLatin1() );
+                mmsMail.setBody(QMailMessageBody::fromData(videoContent->video(), type, QMailMessageBody::Base64));
+            }
+
+        }
+        else if (audioContent) {
             if (audioContent->document().isValid()) {
                 // Add the audio as an attachment
                 mmsMail.setMultipartType(QMailMessagePartContainer::MultipartMixed);
-                partDetails.append(qMakePair(audioContent->document().fileName(), nullPart));
+                PartDetails audioPartDetails = PartDetails::fromFile(audioContent->document().fileName(),
+                                                                         audioContent->mimeType());
+                partDetails.append(audioPartDetails);
             } else {
                 // Add the audio data as the message body
                 QMailMessageContentType type( audioContent->mimeType().toLatin1() );
@@ -1173,12 +1413,13 @@ QMailMessage MMSComposerInterface::message() const
         QString parts;
         QRect largestText, largestImage;
 
-        for( int s = 0 ; s < static_cast<int>(m_composer->slideCount()) ; ++s )
+        for( int s = 0 ; s < static_cast<int>(slideCount()) ; ++s )
         {
-            MMSSlide *curSlide = m_composer->slide( s );
+            MMSSlide *curSlide = slide( s );
             imageContent = curSlide->imageContent();
             textContent = curSlide->textContent();
             audioContent = curSlide->audioContent();
+            videoContent = curSlide->videoContent();
 
             QString part;
             if( !textContent->isEmpty() )
@@ -1199,9 +1440,38 @@ QMailMessage MMSComposerInterface::message() const
                 }
 
                 const QByteArray type("text/plain; charset=UTF-8");
-                PartDetails details(qMakePair(QString(), qMakePair(qMakePair(type, textFileName.toLatin1()), buffer)));
+
+                PartDetails details = PartDetails::fromData(type,textFileName,buffer);
                 if (!partDetails.contains(details))
                     partDetails.append(details);
+            }
+
+            if( !videoContent->isEmpty())
+            {
+                //TODO
+                //check if we need to do something with the video dimensions etc as in the image section
+                QString videoFileName;
+                if (videoContent->document().isValid()) {
+                    videoFileName = videoContent->document().fileName();
+
+                    PartDetails details = PartDetails::fromFile(videoFileName,videoContent->mimeType());
+                    if (!partDetails.contains(details))
+                        partDetails.append(details);
+
+                    QFileInfo fi(videoFileName);
+                    videoFileName = fi.fileName();
+
+                } else {
+                    QMimeType mimeType(videoContent->mimeType());
+                    QString ext = mimeType.extension();
+                    videoFileName = "mmsvideo" + QString::number( s ) + '.' + ext;
+
+                    PartDetails details = PartDetails::fromData(mimeType.id(), videoFileName, videoContent->video());
+                    if (!partDetails.contains(details))
+                        partDetails.append(details);
+                }
+                //add the smil part with the region identifier
+                part += videoTemplate.arg( Qt::escape(videoFileName) ).arg("image");
             }
             if( !imageContent->isEmpty() )
             {
@@ -1215,7 +1485,7 @@ QMailMessage MMSComposerInterface::message() const
                 if (imageContent->document().isValid()) {
                     imgFileName = imageContent->document().fileName();
 
-                    PartDetails details(qMakePair(imgFileName, nullPart));
+                    PartDetails details = PartDetails::fromFile(imgFileName,imageContent->mimeType());
                     if (!partDetails.contains(details))
                         partDetails.append(details);
 
@@ -1228,8 +1498,9 @@ QMailMessage MMSComposerInterface::message() const
                     QBuffer buffer;
                     imageContent->image().save(&buffer, "JPEG");
 
-                    const QByteArray type("image/jpeg");
-                    PartDetails details(qMakePair(QString(), qMakePair(qMakePair(type, imgFileName.toLatin1()), buffer.data())));
+                    const QString type("image/jpeg");
+
+                    PartDetails details = PartDetails::fromData(type,imgFileName,buffer.data());
                     if (!partDetails.contains(details))
                         partDetails.append(details);
                 }
@@ -1241,7 +1512,7 @@ QMailMessage MMSComposerInterface::message() const
                 if (audioContent->document().isValid()) {
                     audioFileName = audioContent->document().fileName();
 
-                    PartDetails details(qMakePair(audioFileName, nullPart));
+                    PartDetails details = PartDetails::fromFile(audioFileName,audioContent->mimeType());
                     if (!partDetails.contains(details))
                         partDetails.append(details);
 
@@ -1252,7 +1523,7 @@ QMailMessage MMSComposerInterface::message() const
                     QString ext = mimeType.extension();
                     audioFileName = "mmsaudio" + QString::number( s ) + '.' + ext;
 
-                    PartDetails details(qMakePair(QString(), qMakePair(qMakePair(mimeType.id().toLatin1(), audioFileName.toLatin1()), audioContent->audio())));
+                    PartDetails details = PartDetails::fromData(mimeType.id(),audioFileName,audioContent->audio());
                     if (!partDetails.contains(details))
                         partDetails.append(details);
                 }
@@ -1269,20 +1540,20 @@ QMailMessage MMSComposerInterface::message() const
         QRect imageRect;
         imageRect.setX( 0 );
         imageRect.setY( 0 );
-        imageRect.setWidth( m_composer->contentsRect().width() );
-        imageRect.setHeight( m_composer->contentsRect().height() - largestText.height() );
+        imageRect.setWidth( contentsRect().width() );
+        imageRect.setHeight( contentsRect().height() - largestText.height() );
 
         largestText.setX( 0 );
         int h = largestText.height();
         largestText.setY( imageRect.height() );
         largestText.setHeight( h );
-        largestText.setWidth(m_composer->contentsRect().width());
+        largestText.setWidth(contentsRect().width());
 
         QString regions;
         QString backgroundParam;
-        if( m_composer->backgroundColor().isValid() )
+        if( backgroundColor().isValid() )
         {
-            backgroundParam = QString(" background-color=\"%1\"").arg(m_composer->backgroundColor().name().toUpper());
+            backgroundParam = QString(" background-color=\"%1\"").arg(backgroundColor().name().toUpper());
         }
         if( imageRect.width() > 0 && imageRect.height() > 0 )
         {
@@ -1303,7 +1574,7 @@ QMailMessage MMSComposerInterface::message() const
                                      .arg( backgroundParam );
         }
 
-        QString rootLayout = rootLayoutTemplate.arg( m_composer->contentsRect().width() ).arg( m_composer->contentsRect().height() );
+        QString rootLayout = rootLayoutTemplate.arg( contentsRect().width() ).arg( contentsRect().height() );
         QString doc = docTemplate.arg( Qtopia::ownerName() ) .arg( rootLayout + regions ) .arg( parts );
 
         // add the smil document to the message
@@ -1319,15 +1590,16 @@ QMailMessage MMSComposerInterface::message() const
     }
 
     mmsMail.setMessageType( QMailMessage::Mms );
+    mmsMail.setHeaderField( "X-Mms-Message-Type", "m-send-req" );
 
     // add binary data as mail attachments
     foreach (const PartDetails& details, partDetails) {
         QMailMessagePart part;
         QByteArray identifier;
 
-        if (!details.first.isNull()) {
+        if (details.isFileData()) {
             // Ensure that the nominated file is accessible
-            QFileInfo fi( details.first );
+            QFileInfo fi(details.filename);
             QString path = fi.absoluteFilePath();
 
             {
@@ -1344,22 +1616,22 @@ QMailMessage MMSComposerInterface::message() const
             QMailMessageContentDisposition disposition(QMailMessageContentDisposition::Attachment);
             disposition.setFilename(identifier);
 
-            QMailMessageContentType type( QMimeType(path).id().toLatin1() );
+            //set content type explicity
+            QMailMessageContentType type(details.contentType);
             type.setName(identifier);
 
             part = QMailMessagePart(QMailMessagePart::fromFile(path, disposition, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding));
         } else {
             // Add the part from the data
-            const InlinePartDetails& inlineDetails(details.second);
-            identifier = inlineDetails.first.second;
+            identifier = details.name;
 
             QMailMessageContentDisposition disposition(QMailMessageContentDisposition::Attachment);
             disposition.setFilename(identifier);
 
-            QMailMessageContentType type(inlineDetails.first.first);
+            QMailMessageContentType type(details.contentType);
             type.setName(identifier);
 
-            part = QMailMessagePart(QMailMessagePart::fromData(inlineDetails.second, disposition, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding));
+            part = QMailMessagePart(QMailMessagePart::fromData(details.data, disposition, type, QMailMessageBody::Base64, QMailMessageBody::RequiresEncoding));
         }
 
         // Set the Content-ID and Content-Location fields to prevent them being synthesized by MMSC
@@ -1368,6 +1640,8 @@ QMailMessage MMSComposerInterface::message() const
 
         mmsMail.appendPart(part);
     }
+
+    m_detailsWidget->getDetails(mmsMail);
 
     return mmsMail;
 }
@@ -1380,36 +1654,45 @@ void MMSComposerInterface::attach( const QContent &lnk, QMailMessage::Attachment
         return;
     }
 
-    if (!m_composer->slideCount())
-        m_composer->addSlide();
+    if (!slideCount())
+        addSlide();
 
-    MMSSlide *curSlide = m_composer->slide( m_composer->slideCount()-1 );
+    MMSSlide *curSlide = slide( slideCount()-1 );
 
     if (lnk.type().startsWith("image/")) {
         if (lnk.isValid()) {
             if (!curSlide->imageContent()->isEmpty()) {
                 // If there is already an image in the last slide, add a new one
-                m_composer->addSlide();
-                curSlide = m_composer->slide( m_composer->slideCount()-1 );
+                addSlide();
+                curSlide = slide( slideCount()-1 );
             }
             curSlide->imageContent()->setImage(lnk);
         }
+    } else if(lnk.type() == "video/"){
+
+        if (!curSlide->videoContent()->isEmpty()) {
+            // If there is already audio in the last slide, add a new one
+            addSlide();
+            curSlide = slide( slideCount()-1 );
+        }
+        curSlide->videoContent()->setVideo(lnk);
+
     } else if (lnk.type() == "text/plain") {
         QFile file(lnk.fileName());
         if (file.open(QIODevice::ReadOnly)) {
             QTextStream ts(&file);
             if (!curSlide->textContent()->isEmpty()) {
                 // If there is already text in the last slide, add a new one
-                m_composer->addSlide();
-                curSlide = m_composer->slide( m_composer->slideCount()-1 );
+                addSlide();
+                curSlide = slide( slideCount()-1 );
             }
             curSlide->textContent()->setText(ts.readAll());
         }
     } else if (lnk.type().startsWith("audio/")) {
         if (!curSlide->audioContent()->isEmpty()) {
             // If there is already audio in the last slide, add a new one
-            m_composer->addSlide();
-            curSlide = m_composer->slide( m_composer->slideCount()-1 );
+            addSlide();
+            curSlide = slide( slideCount()-1 );
         }
         curSlide->audioContent()->setAudio(lnk);
     } else {
@@ -1419,18 +1702,477 @@ void MMSComposerInterface::attach( const QContent &lnk, QMailMessage::Attachment
 
 void MMSComposerInterface::clear()
 {
-    m_composer->clear();
+    while( slideCount() > 1 )
+        removeSlide( slideCount() - 1 );
+    if( slideCount() )
+    {
+        MMSSlide *cur = slide(currentSlide());
+        cur->imageContent()->setImage(QContent());
+        cur->textContent()->setText(QString());
+        cur->audioContent()->setAudio(QContent());
+        cur->videoContent()->setVideo(QContent());
+    }
 }
 
-QWidget *MMSComposerInterface::widget() const
+int MMSComposerInterface::currentSlide() const
 {
-    return m_composer;
+    return m_curSlide;
 }
 
-void MMSComposerInterface::addActions(QMenu* menu) const
+uint MMSComposerInterface::slideCount() const
 {
-    m_composer->addActions(menu);
+    return m_slides.count();
 }
+
+MMSSlide *MMSComposerInterface::slide( uint slide ) const
+{
+    if( slide >= slideCount() )
+        return 0;
+    return m_slides.at(slide);
+}
+
+QRect MMSComposerInterface::contentsRect() const
+{
+    QRect r = rect();
+    r.setHeight( r.height() - qMax( m_slideLabel->height(), m_sizeLabel->height() ) );
+    return r;
+}
+
+
+void MMSComposerInterface::setDefaultAccount(const QMailAccountId& id)
+{
+    m_detailsWidget->setDefaultAccount(id);
+}
+
+void MMSComposerInterface::setTo(const QString& toAddress)
+{
+    m_detailsWidget->setTo(toAddress);
+}
+
+void MMSComposerInterface::setFrom(const QString& fromAddress)
+{
+    m_detailsWidget->setFrom(fromAddress);
+}
+
+void MMSComposerInterface::setCc(const QString& ccAddress)
+{
+    m_detailsWidget->setCc(ccAddress);
+}
+
+void MMSComposerInterface::setBcc(const QString& bccAddress)
+{
+    m_detailsWidget->setBcc(bccAddress);
+}
+
+void MMSComposerInterface::setSubject(const QString& subject)
+{
+    m_detailsWidget->setSubject(subject);
+}
+
+QString MMSComposerInterface::from() const
+{
+    return m_detailsWidget->from();
+}
+
+QString MMSComposerInterface::to() const
+{
+    return m_detailsWidget->to();
+}
+
+QString MMSComposerInterface::cc() const
+{
+    return m_detailsWidget->cc();
+}
+
+QString MMSComposerInterface::bcc() const
+{
+    return m_detailsWidget->bcc();
+}
+
+bool MMSComposerInterface::isReadyToSend() const
+{
+    return !to().trimmed().isEmpty() ||
+           !cc().trimmed().isEmpty() ||
+           !bcc().trimmed().isEmpty();
+}
+
+bool MMSComposerInterface::isDetailsOnlyMode() const
+{
+    return m_detailsWidget->isDetailsOnlyMode();
+}
+
+void MMSComposerInterface::setDetailsOnlyMode(bool val)
+{
+    m_detailsWidget->setDetailsOnlyMode(val);
+    if(val)
+        detailsPage();
+}
+
+QString MMSComposerInterface::contextTitle() const
+{
+    return m_title;
+}
+
+QMailAccount MMSComposerInterface::fromAccount() const
+{
+    return m_detailsWidget->fromAccount();
+}
+
+quint64 MMSComposerInterface::numBytes() const
+{
+    quint64 size = 0;
+    foreach(MMSSlide* slide, m_slides)
+        size += slide->numBytes();
+
+    return size;
+}
+
+void MMSComposerInterface::addSlide()
+{
+    addSlide( -1 );
+}
+
+void MMSComposerInterface::addSlide( int slideIndex )
+{
+    int count = static_cast<int>(slideCount());
+
+    if (slideIndex < 0) {
+        if (currentSlide() == -1)
+            slideIndex = 0;
+        else
+            slideIndex = currentSlide();
+    } else if (slideIndex >= count) {
+        slideIndex = count - 1;
+    }
+
+    if (count)
+        ++slideIndex; // add to the next slide
+
+    MMSSlide *newSlide = new MMSSlide(m_slideStack);
+    connect(newSlide, SIGNAL(leftPressed()), this, SLOT(previousSlide()));
+    connect(newSlide, SIGNAL(rightPressed()), this, SLOT(nextSlide()));
+    connect(newSlide, SIGNAL(durationChanged(int)), this, SLOT(updateLabels()));
+    connect(newSlide, SIGNAL(aboutToChange(bool&,quint64)),this,SLOT(slideAboutToChange(bool&,quint64)));
+    connect(newSlide, SIGNAL(changed()),this,SLOT(updateLabels()));
+
+    m_slideStack->addWidget(newSlide);
+    m_slides.insert(slideIndex, newSlide);
+    ++count;
+
+    QMenu *thisMenu = QSoftMenuBar::menuFor(this);
+    QSoftMenuBar::addMenuTo(newSlide, thisMenu);
+    QSoftMenuBar::addMenuTo(newSlide->m_textContent, thisMenu);
+    QSoftMenuBar::addMenuTo(newSlide->m_imageContent, thisMenu);
+
+    connect(newSlide->m_textContent, SIGNAL(textChanged()), this, SLOT(elementChanged()));
+    connect(newSlide->m_imageContent, SIGNAL(changed()), this, SLOT(elementChanged()));
+    connect(newSlide->m_audioContent, SIGNAL(changed()), this, SLOT(elementChanged()));
+    connect(newSlide->m_videoContent, SIGNAL(changed()), this, SLOT(elementChanged()));
+
+    m_removeSlide->setVisible(count > 1);
+    m_nextSlide->setVisible(slideIndex < (count - 1));
+    m_previousSlide->setVisible(slideIndex > 0);
+
+    m_internalUpdate = true;
+    setCurrentSlide(slideIndex);
+}
+
+void MMSComposerInterface::setCurrentSlide( int slideIndex )
+{
+    int count = static_cast<int>(slideCount());
+    if (slideIndex >= count)
+        return;
+
+    if (slideIndex < 0) {
+        m_curSlide = -1;
+        return;
+    }
+
+    if (m_internalUpdate || slideIndex != m_curSlide) {
+        m_internalUpdate = false;
+        m_curSlide = slideIndex;
+        MMSSlide* currentSlide = slide(m_curSlide);
+        m_slideStack->setCurrentWidget(currentSlide);
+        m_composerWidget->setFocusProxy(currentSlide->m_mediaStack->currentWidget());
+        emit currentChanged(m_curSlide);
+    }
+}
+
+void MMSComposerInterface::setBackgroundColor( const QColor &col )
+{
+    m_backgroundColor = col;
+
+    // Set the FG to a contrasting colour
+    int r, g, b;
+    col.getRgb(&r, &g, &b);
+    m_textColor = (((r + g + b) / 3) > 128 ? Qt::black : Qt::white);
+
+    QPalette pal = m_slideStack->palette();
+    pal.setColor( QPalette::Background, m_backgroundColor );
+    pal.setColor( QPalette::Base, m_backgroundColor );
+    pal.setColor( QPalette::Foreground, m_textColor );
+    pal.setColor( QPalette::Text, m_textColor );
+    m_slideStack->setPalette( pal );
+}
+
+void MMSComposerInterface::setTextColor( const QColor &col )
+{
+    m_textColor = col;
+    QPalette pal = m_slideStack->palette();
+    pal.setColor( QPalette::Foreground, m_textColor );
+    pal.setColor( QPalette::Text, m_textColor );
+    m_slideStack->setPalette( pal );
+}
+
+QColor MMSComposerInterface::backgroundColor() const
+{
+    return m_backgroundColor;
+}
+
+void MMSComposerInterface::removeSlide()
+{
+    removeSlide(-1);
+}
+
+void MMSComposerInterface::removeSlide( int slideIndex )
+{
+    int count = static_cast<int>(slideCount());
+    if (count <= 1)
+        return;
+
+    if (slideIndex == -1)
+        slideIndex = currentSlide();
+    if (slideIndex < 0 || slideIndex >= count)
+        return;
+
+    m_slideStack->removeWidget(slide(slideIndex));
+    delete m_slides.takeAt(slideIndex);
+    --count;
+
+    if (slideIndex >= count)
+        slideIndex = count - 1;
+    if (slideIndex >= 0)
+        m_internalUpdate = true;
+    setCurrentSlide(slideIndex);
+
+    m_removeSlide->setVisible(count > 1);
+    m_nextSlide->setVisible(slideIndex < (count - 1));
+    m_previousSlide->setVisible(slideIndex > 0);
+}
+
+void MMSComposerInterface::updateLabels()
+{
+    QString baseLabel = tr("Slide %1 of %2");
+
+    float messageSize = numBytes() / static_cast<float>(kilobyte);
+
+    m_slideLabel->setText( baseLabel.arg( QString::number( currentSlide()+1 ) )
+                           .arg( QString::number( slideCount() ) ));
+    m_sizeLabel->setText(QString("(%1kB)").arg(messageSize,0,'f',1));
+}
+
+void MMSComposerInterface::slideOptions()
+{
+    MMSSlide *cur = slide( currentSlide() );
+    if( !cur )
+        return;
+    QDialog *dlg = new QDialog(this);
+    dlg->setModal(true);
+    dlg->setWindowTitle( tr("Slide options") );
+    QGridLayout *l = new QGridLayout( dlg );
+    int rowCount = 0;
+
+    QSpinBox *durBox = new QSpinBox( dlg );
+    durBox->setMinimum( 1 );
+    durBox->setMaximum( 10 );
+    durBox->setValue( cur->duration()/1000 );
+    durBox->setSuffix( tr("secs") );
+    QLabel *la = new QLabel( tr("Duration", "duration between images in a slide show"), dlg );
+    la->setBuddy( durBox );
+    l->addWidget( la, rowCount, 0 );
+    l->addWidget( durBox, rowCount, 1 );
+    ++rowCount;
+
+    QColorButton *bg = new QColorButton( dlg );
+    bg->setColor( backgroundColor() );
+    la = new QLabel( tr("Slide color"), dlg );
+    la->setBuddy( bg );
+    l->addWidget( la, rowCount, 0 );
+    l->addWidget( bg, rowCount, 1 );
+
+    int r = QtopiaApplication::execDialog( dlg );
+    if( r == QDialog::Accepted )
+    {
+        setBackgroundColor( bg->color() );
+
+        cur->setDuration( durBox->value()*1000 );
+    }
+}
+
+void MMSComposerInterface::elementChanged()
+{
+    QSoftMenuBar::setLabel(this, Qt::Key_Back, (isEmpty() ? QSoftMenuBar::Cancel : QSoftMenuBar::Next));
+
+    emit changed();
+}
+
+void MMSComposerInterface::detailsPage()
+{
+    if(isEmpty() && !isDetailsOnlyMode())
+        emit cancel();
+    else
+    {
+        m_widgetStack->setCurrentWidget(m_detailsWidget);
+        QWidget::setFocusProxy(m_detailsWidget);
+        setContext(displayName(QMailMessage::Mms) + " " + tr("details", "<MMS> details" ));
+    }
+}
+
+void MMSComposerInterface::composePage()
+{
+    m_widgetStack->setCurrentWidget(m_composerWidget);
+    QWidget::setFocusProxy(m_composerWidget);
+    setContext("Create " + displayName(QMailMessage::Mms));
+}
+
+void MMSComposerInterface::slideAboutToChange(bool& ok, quint64 sizeDelta)
+{
+    //determine if the message will exceed maximum size for its class
+
+    quint64 predictedSize = numBytes() + sizeDelta;
+    static const quint64 maxSize = maxMessageSize * kilobyte;
+
+    ok = predictedSize <= maxSize;
+    if(!ok)
+    {
+        static const QString msg("Unable to insert media. Maximum message size is %1kB.");
+        QMessageBox::critical(this, "Error",msg.arg(maxMessageSize));
+    }
+}
+
+void MMSComposerInterface::nextSlide()
+{
+    int count = static_cast<int>(slideCount());
+    if (!count)
+        return;
+
+    int cur = currentSlide();
+    if (cur == -1 || ++cur >= count)
+        cur = 0;
+    setCurrentSlide(cur);
+
+    m_nextSlide->setVisible(cur != (count - 1));
+    m_previousSlide->setVisible(cur != 0);
+}
+
+void MMSComposerInterface::previousSlide()
+{
+    int count = static_cast<int>(slideCount());
+    if (!count)
+        return;
+
+    int cur = currentSlide();
+    --cur;
+    if (cur < 0)
+        cur = count - 1;
+    setCurrentSlide(cur);
+
+    m_nextSlide->setVisible(cur != (count - 1));
+    m_previousSlide->setVisible(cur != 0);
+}
+
+void MMSComposerInterface::reply(const QMailMessage& source, int action)
+{
+    const QString fwdIndicator(tr("Fwd"));
+    const QString shortFwdIndicator(tr("Fw", "2 letter short version of Fwd for forward"));
+    const QString replyIndicator(tr("Re"));
+
+    const QString subject = source.subject().toLower();
+
+    QString toAddress;
+    QString fromAddress;
+    QString ccAddress;
+    QString subjectText;
+
+    QMailMessage mail;
+
+    if (source.parentAccountId().isValid()) {
+        QMailAccount sendingAccount(source.parentAccountId());
+
+        if (sendingAccount.id().isValid()) {
+            AccountConfiguration config(sendingAccount.id());
+            fromAddress = config.emailAddress();
+        }
+    }
+
+    // work out the kind of mail to response
+    // type of reply depends on the type of message
+    // a reply to an mms is just a new mms message with the sender as recipient
+    // a reply to an sms is a new sms message with the sender as recipient
+
+
+    // MMS
+    if (action == Forward) {
+        // Copy the existing mail
+        mail = source;
+        mail.setId(QMailMessageId());
+
+        if ((subject.left(fwdIndicator.length() + 1) == (fwdIndicator.toLower() + ":")) ||
+            (subject.left(shortFwdIndicator.length() + 1) == (shortFwdIndicator.toLower() + ":"))) {
+            subjectText = source.subject();
+        } else {
+            subjectText = fwdIndicator + ": " + source.subject();
+        }
+        setMessage( mail );
+
+        detailsPage();
+    } else {
+        if (subject.left(replyIndicator.length() + 1) == (replyIndicator.toLower() + ":")) {
+            subjectText = source.subject();
+        } else {
+            subjectText = replyIndicator + ": " + source.subject();
+        }
+
+        QMailAddress replyAddress(source.replyTo());
+        if (replyAddress.isNull())
+            replyAddress = source.from();
+
+        toAddress = replyAddress.address();
+    }
+
+    if (!toAddress.isEmpty())
+        setTo( toAddress );
+    if (!fromAddress.isEmpty())
+        setFrom( fromAddress );
+    if (!ccAddress.isEmpty())
+        setCc( ccAddress );
+    if (!subjectText.isEmpty())
+        setSubject( subjectText );
+
+    QString task;
+    if ((action == Create) || (action == Forward)) {
+        task = (action == Create ? tr("Create") : tr("Forward"));
+        task += " " + displayName(QMailMessage::Mms);
+    } else if (action == Reply) {
+        task = tr("Reply");
+    } else if (action == ReplyToAll) {
+        task = tr("Reply to all");
+    }
+    setContext(task);
+
+}
+
+void MMSComposerInterface::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Back) {
+        e->accept();
+        detailsPage();
+        return;
+    }
+
+    QWidget::keyPressEvent(e);
+}
+
 
 QTOPIA_EXPORT_PLUGIN( MMSComposerPlugin )
 
@@ -1439,34 +2181,10 @@ MMSComposerPlugin::MMSComposerPlugin()
 {
 }
 
-QString MMSComposerPlugin::key() const
-{
-    return "MMSComposer";
-}
-
-QMailMessage::MessageType MMSComposerPlugin::messageType() const
-{
-    return QMailMessage::Mms;
-}
-
-QString MMSComposerPlugin::name() const
-{
-    return tr("Multimedia message");
-}
-
-QString MMSComposerPlugin::displayName() const
-{
-    return tr("MMS");
-}
-
-QIcon MMSComposerPlugin::displayIcon() const
-{
-    static QIcon icon(":icon/multimedia");
-    return icon;
-}
-
 QMailComposerInterface* MMSComposerPlugin::create( QWidget *parent )
 {
     return new MMSComposerInterface( parent );
 }
+
+#include <mmscomposer.moc>
 

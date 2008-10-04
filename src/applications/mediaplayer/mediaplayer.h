@@ -1,36 +1,36 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #ifndef MEDIAPLAYER_H
 #define MEDIAPLAYER_H
 
-#include "playlist.h"
-
 #include <QtGui>
+#include <QMediaPlaylist>
 
 class PlayerControl;
 class PlayerWidget;
 class MediaBrowser;
 class RequestHandler;
 class QMediaContentContext;
+#ifdef USE_PICTUREFLOW
+class PictureFlow;
+#endif
 
 class MediaPlayer : public QWidget
 {
@@ -43,8 +43,8 @@ public:
     void setPlayerVisible( bool visible );
 
     // Open playlist in player
-    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
-    QExplicitlySharedDataPointer<Playlist> playlist() const { return m_playlist; }
+    void setPlaylist( const QMediaPlaylist &playlist );
+    const QMediaPlaylist &playlist() const { return m_playlist; }
 
     // Open url in player
     void openUrl( const QString& url );
@@ -52,6 +52,8 @@ public:
     static MediaPlayer *instance();
 
     PlayerWidget *playerWidget();
+
+    MediaBrowser *mediabrowser();
 
 public slots:
     // Load and parse playlist from file
@@ -73,7 +75,7 @@ private:
 
     RequestHandler *m_requesthandler;
     MediaBrowser *m_mediabrowser;
-    QExplicitlySharedDataPointer< Playlist > m_playlist;
+    QMediaPlaylist m_playlist;
 };
 
-#endif // MEDIAPLAYER_H
+#endif

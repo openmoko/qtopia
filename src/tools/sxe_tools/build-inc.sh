@@ -3,8 +3,8 @@
 #
 # If the `dnsdomainname` is in $LOCAL_DOMAIN then any downloads will be fetched
 # from the $LOCAL_DL mirror if they are required, instead of the above sites
-LOCAL_DOMAIN=trolltech
-LOCAL_DL=http://aurochs.trolltech.com.au/dist/vte/src
+LOCAL_DOMAIN=
+LOCAL_DL=
 
 # Display a message with some space around, if $VERBOSE is set
 function msg()

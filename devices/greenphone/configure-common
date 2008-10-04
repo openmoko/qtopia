@@ -1,0 +1,45 @@
+# This device uses the mobile UI
+-ui-type mobile
+
+# Turn on features.
+-ssl
+-dbus
+-libamr
+
+# Features that are controlled via modules.
+-add-modules ipcomms
+-add-modules location
+-add-modules media
+-add-mediaengines cruxus
+-add-mediaengines helix
+-allow-fail mediaengines,helix
+-add-modules telephony
+-add-modules cell
+-add-modules bluetooth
+-add-modules pkgmanagement
+
+# Additional modules.
+-add-modules connectivity
+-add-modules devtools
+-add-modules essentials
+-add-modules games
+-add-modules inputmethods
+-add-modules messaging
+-add-modules pim
+-add-modules ui
+
+# System info (common between device and QVFb)
+-displaysize 240x320
+
+# These fonts are selected because they match the screen size and DPI
+-font dejavu_sans_condensed:10,12,13,16,28:50
+-font dejavu_sans_condensed:13,14,15,16,20,21,23,32,36:75
+
+# Webkit doesn't fit on the device. Turn it off for the
+# desktop too (for consistency)
+-extra-qtopiacore-config "-no-webkit"
+
+# The Greenphone has multiple paths that Qtopia apps can be run from.
+# It uses LD_LIBRARY_PATH but that doesn't work when an RPATH exists.
+-no-rpath
+

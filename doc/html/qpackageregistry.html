@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QPackageRegistry Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QPackageRegistry Class Reference<br /><span class="small-subtitle">[<a href="qtpkgmanagementmodule.html">QtPkgManagementModule</a>]</span>
+</h1>
 <p>The QPackageRegistry class provides a mechanism for managing software installed on the qtopia device <a href="#details">More...</a></p>
 <pre>    #include &lt;QPackageRegistry&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -78,8 +79,8 @@
 <h3>Program Management</h3>
 <p>All programs installed on the device are assigned a <b>program id</b>. A program will often consist of a number of binaries providing related functionality, for example a game may contain a small server, a gui client and a map editor which make up the package. In Qtopia, binaries which provide similar functionality and require the same security domain, are grouped into one program id.</p>
 <p>The program id is always written into the binary at install time, along with a secret key.</p>
-<p>For <u>Qtopia programs</u> when the image is created the sxe_installer is run which calls the packageRegistry in bootstrap mode to setup the database files and install the program id, and keys for those Qtopia programs. This occurs prior to shipping &amp; delivery of the Qtopia device.</p>
-<p>For <u>downloaded programs</u> the package installer will call the <a href="qpackageregistry.html#registerBinary">registerBinary</a>() method to install the program id. This occurs during normal runtime of the Qtopia device.</p>
+<p>For <u>Qt Extended programs</u> when the image is created the sxe_installer is run which calls the packageRegistry in bootstrap mode to setup the database files and install the program id, and keys for those Qt Extended programs. This occurs prior to shipping &amp; delivery of the Qt Extended device.</p>
+<p>For <u>downloaded programs</u> the package installer will call the <a href="qpackageregistry.html#registerBinary">registerBinary</a>() method to install the program id. This occurs during normal runtime of the Qt Extended device.</p>
 <p>When the program id and key is created and installed, these are recorded in the <b>Keyfile</b>, and the <b>Sequence</b> file is used to track issue of new program ids.</p>
 <p>Note that rekeying and key time-outs are no longer used. This mechanism has been superseded by the /proc/lids/keys method.</p>
 <p>See <a href="#key-file-change-notes">Key File Change Notes</a> for important details on these changes.</p>
@@ -96,7 +97,7 @@
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Keyfile</th><th>Sequence</th><th>Manifest</th><th>Installs</th></tr></thead>
 <tr valign="top" class="odd"><td>$QPEDIR/etc/keyfile</td><td>$QPEDIR/etc/keyfile.sequence</td><td>$QPEDIR/etc/manifest</td><td>$QPEDIR/etc/installs</td></tr>
-<tr valign="top" class="even"><td colspan="4" rowspan=" 1">Pseudo-code for binary file data record formats: See <tt>$QT_SOURCE_PATH/src/gui/embedded/qtransportauth_qws_p.h</tt> for concrete details. <tt>usr_key_entry</tt> is from the kernel file include/linux/lidsext.h and is duplicated in the qtransportauth_qws_p.h</td></tr>
+<tr valign="top" class="even"><td colspan="4" rowspan=" 1">Pseudo-code for binary file data record formats: See <tt>$QT_SOURCE_PATH/src/gui/embedded/qtransportauthdefs_qws.h</tt> for concrete details. <tt>usr_key_entry</tt> is from the kernel file include/linux/lidsext.h and is duplicated in the qtransportauthdefs_qws.h</td></tr>
 <tr valign="top" class="odd"><td><pre>    struct usr_key_entry
         char key[QSXE_KEY_LEN];
         ino_t ino;              <span class="comment">// typically 4 bytes</span>
@@ -117,7 +118,7 @@
         &quot;:&quot;
         path</pre>
 </td></tr>
-<tr valign="top" class="even"><td>Contains the mapping between keys and files on disk.<p>When the kernel contains the LIDS MAC Trolltech patch the key file is implemented as the kernel /proc pseudo-file /proc/lids/keys.</p>
+<tr valign="top" class="even"><td>Contains the mapping between keys and files on disk.<p>When the kernel contains the LIDS MAC Qt Extended patch the key file is implemented as the kernel /proc pseudo-file /proc/lids/keys.</p>
 <p>In this case this keyfile on disk storage is ignored.</p>
 </td><td>This file is used simply to ensure a sequence of program id numbers.<p>For historical and compatibility reasons, the first key issued with a number and the time are also recorded in this file.</p>
 </td><td>Map Installed binaries by inode &amp; device id to their program id - many binaries can map to a single program id. Records an install id for each binary.</td><td>Map install id to installed path of the binary.<p>This is required mainly for uninstallation of packages.</p>
@@ -137,7 +138,7 @@
 <p><b>It is not supported on the device to operate without /proc/lids/keys</b></p>
 <p>Where binary files are writeable (all downloaded programs must be writeable) the key is embedded in the binary at install time.</p>
 <p>In the development and testing case, the embedded key is used by the binary to authenticate itself to the server.</p>
-<p>When the kernel contains the LIDS MAC Trolltech patch the binary reads its key from the /proc pseudo-file /proc/self/lids_key.</p>
+<p>When the kernel contains the LIDS MAC Qt Extended patch the binary reads its key from the /proc pseudo-file /proc/self/lids_key.</p>
 <p>See also <a href="qpackageregistry.html#RegistryFile-enum">RegistryFile</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -219,8 +220,8 @@
 <p>See also <a href="qtopia.html#installPaths">Qtopia::installPaths</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

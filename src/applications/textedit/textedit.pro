@@ -1,6 +1,8 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=textedit
 CONFIG+=qtopia_main
+}
 
 HEADERS		= textedit.h
 SOURCES		= textedit.cpp main.cpp

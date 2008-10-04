@@ -1,40 +1,39 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-
-
 #include "searchview.h"
-#include "accountlist.h"
-#include "emailfolderlist.h"
 
-
-#include <qtopiaapplication.h>
-#include <qsoftmenubar.h>
+#include <QtopiaApplication>
+#include <QSoftMenuBar>
 #include <QMenu>
 #include <QDesktopWidget>
+#include <QScrollArea>
+#include <QGridLayout>
+#include <QApplication>
+#include <QDateTimeEdit>
+#include <QComboBox>
+#include <QMailFolder>
+#include <QMailMessage>
+#include <QContactSelector>
 
-
-
-SearchView::SearchView(bool query,  QWidget* parent, Qt::WFlags fl )
-    : QDialog(parent, fl)
+SearchView::SearchView(QWidget* parent)
+    : QDialog(parent)
 {
     setupUi( this );
 
@@ -47,23 +46,20 @@ SearchView::SearchView(bool query,  QWidget* parent, Qt::WFlags fl )
     sv->setWidget(searchFrame);
     sv->setFocusPolicy(Qt::NoFocus);
     g->addWidget(sv, 0, 0);
-
     int dw = QApplication::desktop()->availableGeometry().width();
     searchFrame->setMaximumWidth(dw - qApp->style()->pixelMetric(QStyle::PM_SliderLength) + 4 );
     sv->setMaximumWidth(dw);
-
-    queryType = query;
-
-    if ( queryType ) {
-        setWindowTitle( tr("Query") );
-        nameLabel->show();
-        nameLine->show();
-    } else {
-        setWindowTitle( tr("Search") );
-        nameLabel->hide();
-        nameLine->hide();
-    }
-
+    setWindowTitle( tr("Search") );
+    QMenu *searchContext = QSoftMenuBar::menuFor(this);
+    connect(searchContext, SIGNAL(aboutToShow()), this, SLOT(updateActions()));
+    QIcon abicon(":icon/addressbook/AddressBook");
+    pickAddressAction = new QAction(abicon,
+                                    tr("From contacts",
+                                       "Find email address "
+                                       "from Contacts application"),
+                                    this);
+    searchContext->addAction(pickAddressAction);
+    connect(pickAddressAction, SIGNAL(triggered()), this, SLOT(editRecipients()));
     init();
 }
 
@@ -73,163 +69,154 @@ SearchView::~SearchView()
 
 void SearchView::init()
 {
-    /*  Set up dateBookMonth popups */
     dateAfter = QDate::currentDate();
     dateAfterButton->setDate( dateAfter );
-    connect( dateAfterButton, SIGNAL(dateChanged(QDate)),
-            this, SLOT(dateAfterChanged(QDate)) );
-
     dateBefore = QDate::currentDate();
     dateBeforeButton->setDate( dateBefore );
-    connect( dateBeforeButton, SIGNAL(dateChanged(QDate)),
-            this, SLOT(dateBeforeChanged(QDate)) );
-
-    /*  Fix tab order   */
     setTabOrder(mailbox, status);
     setTabOrder(status, fromLine);
     setTabOrder(fromLine, toLine);
     setTabOrder(toLine,subjectLine);
-    setTabOrder(subjectLine, bodyLine);
-    setTabOrder(bodyLine, dateAfterBox);
+    setTabOrder(subjectLine,bodyLine);
     setTabOrder(dateAfterBox, dateAfterButton);
     setTabOrder(dateAfterButton, dateBeforeBox);
     setTabOrder(dateBeforeBox, dateBeforeButton);
 }
 
-void SearchView::setQueryBox(QString box)
+QMailMessageKey SearchView::searchKey() const
 {
-    if (box.isEmpty()) {
-        mailbox->setCurrentIndex(0);
-    } else {
-        box = MailboxList::mailboxTrName(box).toLower();
-        for (int i = 1; i < mailbox->count(); i++) {
-            if (mailbox->itemText(i).toLower() == box ) {
-                mailbox->setCurrentIndex(i);
-                break;
-            }
-        }
+    QMailMessageKey resultKey;
+
+    static QMailMessageKey inboxFolderKey(QMailMessageKey::ParentFolderId,QMailFolderId(QMailFolder::InboxFolder));
+    static QMailMessageKey outboxFolderKey(QMailMessageKey::ParentFolderId,QMailFolderId(QMailFolder::OutboxFolder));
+    static QMailMessageKey draftsFolderKey(QMailMessageKey::ParentFolderId,QMailFolderId(QMailFolder::DraftsFolder));
+    static QMailMessageKey sentFolderKey(QMailMessageKey::ParentFolderId,QMailFolderId(QMailFolder::SentFolder));
+    static QMailMessageKey trashFolderKey(QMailMessageKey::ParentFolderId,QMailFolderId(QMailFolder::TrashFolder));
+    static QMailMessageKey inboxWithImapKey(inboxFolderKey | ~(outboxFolderKey | draftsFolderKey | sentFolderKey | trashFolderKey)); 
+
+    //folder
+
+    switch(mailbox->currentIndex())
+    {
+        case 1: //inbox with imap subfolders 
+            resultKey &= inboxWithImapKey; 
+            break;
+        case 2: //outbox
+            resultKey &= outboxFolderKey;
+            break;
+        case 3: //drafts
+            resultKey &= draftsFolderKey; 
+            break;
+        case 4: //sent
+            resultKey &= sentFolderKey; 
+            break;
+        case 5: //trash
+            resultKey &= trashFolderKey; 
+            break;
     }
 
-    mailbox->setEnabled(false);
+    //status
+
+    switch(status->currentIndex())
+    {
+         case 1: //read
+            resultKey &= (QMailMessageKey(QMailMessageKey::Status,QMailMessage::Read,QMailDataComparator::Includes) |
+                          QMailMessageKey(QMailMessageKey::Status,QMailMessage::ReadElsewhere,QMailDataComparator::Includes));
+            break;
+        case 2: //unread
+            resultKey &= (~QMailMessageKey(QMailMessageKey::Status,QMailMessage::Read,QMailDataComparator::Includes) &
+                          ~QMailMessageKey(QMailMessageKey::Status,QMailMessage::ReadElsewhere,QMailDataComparator::Includes));
+            break;
+        case 3: //replied
+            resultKey &= ~QMailMessageKey(QMailMessageKey::Status,QMailMessage::Replied,QMailDataComparator::Includes);
+            break;
+        case 4: //replied
+            resultKey &= QMailMessageKey(QMailMessageKey::Status,QMailMessage::Removed,QMailDataComparator::Includes);
+            break;
+    }
+
+    if(!fromLine->text().isEmpty())
+        resultKey &= QMailMessageKey(QMailMessageKey::Sender,fromLine->text(),QMailDataComparator::Includes);
+
+    if(!toLine->text().isEmpty())
+        resultKey &= QMailMessageKey(QMailMessageKey::Recipients,toLine->text(),QMailDataComparator::Includes);
+
+    if(!subjectLine->text().isEmpty())
+        resultKey &= QMailMessageKey(QMailMessageKey::Subject,subjectLine->text(),QMailDataComparator::Includes);
+
+    //dates
+
+    if(dateAfterBox->isChecked())
+    {
+        QDate afterDate= dateAfterButton->date();
+        resultKey &= QMailMessageKey(QMailMessageKey::TimeStamp,afterDate,QMailDataComparator::GreaterThan);
+    }
+
+    if(dateBeforeBox->isChecked())
+    {
+        QDate beforeDate = dateBeforeButton->date();
+        resultKey &= QMailMessageKey(QMailMessageKey::TimeStamp,beforeDate,QMailDataComparator::LessThan);
+    }
+
+    return resultKey;
 }
 
-// this function is assumed call directly after the constructor
-void SearchView::setSearch(Search *in)
+QString SearchView::bodyText() const
 {
-    QString str = in->mailbox();
-    if ( str.isEmpty() )
-        mailbox->setCurrentIndex(0);
-    else if ( str == MailboxList::InboxString )
-        mailbox->setCurrentIndex(1);
-    else if ( str == MailboxList::OutboxString )
-        mailbox->setCurrentIndex(2);
-    else if ( str == MailboxList::DraftsString )
-        mailbox->setCurrentIndex(3);
-    else if ( str == MailboxList::SentString )
-        mailbox->setCurrentIndex(4);
-    else if ( str == MailboxList::TrashString )
-        mailbox->setCurrentIndex(5);
-
-    switch( in->status() ) {
-        case Search::Read: {
-        status->setCurrentIndex( 1 );
-            break;
-        }
-        case Search::Unread: {
-        status->setCurrentIndex( 2 );
-            break;
-        }
-        case Search::Replied: {
-        status->setCurrentIndex( 3 );
-            break;
-        }
-    }
-
-    fromLine->setText( in->getFrom() );
-    toLine->setText( in->getTo() );
-    subjectLine->setText( in->getSubject() );
-    bodyLine->setText( in->getBody() );
-
-    dateBefore = in->getBeforeDate();
-    dateAfter = in->getAfterDate();
-
-    if ( !dateAfter.isNull() ) {
-        dateAfterBox->setChecked(true);
-        dateAfterButton->setDate( dateAfter );
-
-    } else {
-        dateAfter = QDate::currentDate();
-    }
-
-    if ( !dateBefore.isNull() ) {
-        dateBeforeBox->setChecked(true);
-        dateBeforeButton->setDate( dateBefore );
-
-    } else {
-        dateBefore = QDate::currentDate();
-    }
-
-    nameLine->setText( in->name() );
+    return bodyLine->text();
 }
 
-// creates a new Search object, and returns.  Caller assumes
-// ownership of search object
-Search* SearchView::getSearch()
+void SearchView::reset() 
 {
-    Search *search = new Search();
+    mailbox->setCurrentIndex(0);
+    status->setCurrentIndex(0);
+    fromLine->clear();
+    toLine->clear();
+    subjectLine->clear();
+    bodyLine->clear();
+    dateAfterBox->setChecked(false);
+    dateBeforeBox->setChecked(false); 
 
-    int i = mailbox->currentIndex();
-    switch(i) {
-        case 0: search->setMailbox(QString()); break;
-        case 1: search->setMailbox(MailboxList::InboxString); break;
-        case 2: search->setMailbox(MailboxList::OutboxString); break;
-        case 3: search->setMailbox(MailboxList::DraftsString); break;
-        case 4: search->setMailbox(MailboxList::SentString); break;
-        case 5: search->setMailbox(MailboxList::TrashString); break;
-    }
-
-    search->setMailFrom( fromLine->text() );
-    search->setMailTo( toLine->text() );
-    search->setMailSubject( subjectLine->text() );
-    search->setMailBody( bodyLine->text() );
-
-    int statusNum = status->currentIndex();
-    switch( statusNum ) {
-        case 1: {
-            search->setStatus( Search::Read );
-            break;
-        }
-        case 2: {
-            search->setStatus( Search::Unread );
-            break;
-        }
-        case 3: {
-            search->setStatus( Search::Replied );
-            break;
-        }
-        default: search->setStatus( Search::Any );
-    }
-
-    if ( dateAfterBox->isChecked() ) {
-        search->setAfterDate(dateAfter);
-    }
-    if ( dateBeforeBox->isChecked() ) {
-        search->setBeforeDate(dateBefore);
-    }
-
-    if ( !nameLine->text().isEmpty() ) {
-        search->setName( nameLine->text() );
-    }
-
-    return search;
+    mailbox->setFocus();
 }
 
-void SearchView::dateAfterChanged(const QDate &ymd)
+void SearchView::updateActions()
 {
-    dateAfter = ymd;
+    pickAddressAction->setVisible(fromLine->hasFocus() || toLine->hasFocus());
 }
 
-void SearchView::dateBeforeChanged(const QDate &ymd)
+void SearchView::editRecipients()
 {
-    dateBefore = ymd;
+    QString txt;
+    QLineEdit *edit = fromLine;
+    if (toLine->hasFocus())
+        edit = toLine;
+    QContactSelector selector;
+    selector.setObjectName("select-contact");
+    
+    QContactModel model(&selector);
+    
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "default" );
+    if (config.contains("SelectedSources/size")) {
+        int count = config.beginReadArray("SelectedSources");
+        QSet<QPimSource> set;
+        for(int i = 0; i < count; ++i) {
+            config.setArrayIndex(i);
+            QPimSource s;
+            s.context = QUuid(config.value("context").toString());
+            s.identity = config.value("identity").toString();
+            set.insert(s);
+        }
+        config.endArray();
+        model.setVisibleSources(set);
+    }
+    
+    selector.setModel(&model);
+    selector.setAcceptTextEnabled(false);
+    
+    if (QtopiaApplication::execDialog(&selector) == QDialog::Accepted) {
+        QContact contact(selector.selectedContact());
+        edit->setText(contact.defaultEmail());
+    }
 }

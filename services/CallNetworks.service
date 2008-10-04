@@ -2,5 +2,5 @@
 File=QtopiaServices
 Context=CallNetworks
 [Service]
-Icon = phonenetworks/phonenetworks
+Icon=phonenetworks/PhoneNetworks
 Name[]=Call Networks

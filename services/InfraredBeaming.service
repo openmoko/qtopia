@@ -3,7 +3,8 @@ File=QtopiaServices
 Context=InfraredBeaming
 [Service]
 Actions = "beamPersonalBusinessCard();beamBusinessCard(QContact);beamBusinessCard(QDSActionRequest);beamFile(QString,QString,QString,bool);beamCalendar(QDSActionRequest);beamFile(QContentId);"
-Name[]=VCard via Infrared
+Name[]=Send via Infrared
+Icon=beam
 [beamPersonalBusinessCard()]
 Icon=beam
 Name[]="Beam business card"

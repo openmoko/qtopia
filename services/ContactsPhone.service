@@ -4,7 +4,7 @@ Context=ContactsPhone
 [Service]
 Actions = "smsBusinessCard();pushVCard(QDSActionRequest)"
 Icon = service/Contacts/AddressBook
-Name[]=Contacts
+Name[]=SMS Business Card
 [smsBusinessCard()]
 Icon = phone/sms
 Name[]=SMS Business Card

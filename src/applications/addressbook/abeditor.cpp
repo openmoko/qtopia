@@ -1,32 +1,32 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 
-#include <qtopia/pim/qcontactmodel.h>
+#include <qcontactmodel.h>
 
 #include "abeditor.h"
 #include "addressbook.h"
 #include "emaildialogphone.h"
-#include "../todo/qdelayedscrollarea.h"
+#include "../todolist/qdelayedscrollarea.h"
 #include "groupview.h"
+#include "qfielddefinition.h"
+#include "fieldlist.h"
 
 
 #include <qcategorymanager.h>
@@ -67,13 +67,13 @@
 #include <QDL>
 #include <QDLEditClient>
 
-#include "../todo/reminderpicker.h"
+#include "../todolist/reminderpicker.h"
 #include "qappointmentmodel.h"
 
 #include "qmailaddress.h"
 
 #if defined(QTOPIA_TELEPHONY)
-#include "../../settings/ringprofile/ringtoneeditor.h"
+#include "../../settings/profileedit/ringtoneeditor.h"
 #endif
 
 // helper functions, convert our comma delimited list to proper
@@ -84,500 +84,6 @@ static void parseEmailFrom( const QString &txt, QString &strDefaultEmail,
 // helper convert from file format to comma delimited...
 static void parseEmailTo( const QString &strDefaultEmail,
                    const QStringList &emails, QString &strBack );
-
-
-//-----------------------------------------------------------------------
-
-PhoneFieldType::PhoneFieldType()
-{
-}
-
-PhoneFieldType::PhoneFieldType( const QString& type_id, const QString &str )
-{
-    id = type_id;
-    icon = QIcon(":icon/"+id);
-    name = str;
-}
-
-PhoneFieldType::PhoneFieldType( const PhoneFieldType &other )
-{
-    *this = other;
-}
-
-PhoneFieldType &PhoneFieldType::operator=( const PhoneFieldType &other )
-{
-    id = other.id;
-    icon = other.icon;
-    name = other.name;
-    return *this;
-}
-
-bool  PhoneFieldType::operator==( const PhoneFieldType &other ) const
-{
-    return id == other.id;
-}
-
-bool PhoneFieldType::operator!=( const PhoneFieldType &other ) const
-{
-    return !(*this == other);
-}
-
-//-----------------------------------------------------------------------
-
-PhoneFieldManager::PhoneFieldManager( QWidget *parent, QGridLayout *layout, int rc, AbFullEditor *editor )
-    : QObject( parent ), parLayout(layout), rowCount(rc), firstRow(rc), mEditor(editor)
-{
-    setObjectName("phoneFieldManager");
-    mEmitFieldChanged = true;
-}
-
-PhoneFieldManager::~PhoneFieldManager()
-{
-    phoneFields.clear();
-}
-
-bool PhoneFieldManager::isFull() const
-{
-    bool full = false;
-    if ( phoneFields.count() && (phoneFields.count() >= mTypes.count()) ) {
-        // if there are no blank fields, we're full
-        full = true;
-        QListIterator<PhoneField*> it(phoneFields);
-        while(it.hasNext()) {
-            PhoneField *f = it.next();
-            if( f->isEmpty() ) {
-                full = false;
-                break;
-            }
-        }
-
-    }
-    return full;
-}
-
-bool PhoneFieldManager::isEmpty() const
-{
-    QListIterator<PhoneField*> it(phoneFields);
-    while(it.hasNext()) {
-        PhoneField *f = it.next();
-        if( !f->isEmpty() )
-            return false;
-    }
-    return true;
-}
-
-void PhoneFieldManager::add( const QString &number, const PhoneFieldType &type )
-{
-    if(number.isEmpty() || isFull())
-        return;
-
-    PhoneField *eField = 0;
-    QListIterator<PhoneField *> it(phoneFields);
-    while(it.hasNext())
-    {
-        PhoneField *f = it.next();
-        if( f->type() == type )
-        {
-            eField = f;
-            break;
-        }
-    }
-
-    if( eField )
-        eField->setNumber( number );
-    else
-    {
-        // masks earlier it and f.
-        QListIterator<PhoneField *> it(phoneFields);
-        while(it.hasNext())
-        {
-            PhoneField *f = it.next();
-            if( f->isEmpty() )
-            {
-                f->setType( type );
-                f->setNumber( number );
-                break;
-            }
-        }
-    }
-}
-
-bool PhoneFieldManager::removeNumber(PhoneFieldType type)
-{
-    QMutableListIterator<PhoneField *> it(phoneFields);
-    QWidget *focusee = 0;
-
-    while(it.hasNext())
-    {
-        PhoneField *f = it.next();
-
-        if (f->type() == type) {
-
-            emitFieldChanged(QString(), f->type());
-
-            f->remove();
-            it.remove();
-            delete f;
-
-            if (it.hasNext()) {
-                PhoneField *next = it.next();
-                focusee = next->numberLE;
-            }
-
-            if (focusee)
-                focusee->setFocus();
-            else {
-                // Presumably no fields left
-                checkForAdd();
-                phoneFields.first()->numberLE->setFocus();
-            }
-            return true;
-        } else
-            focusee = f->numberLE;
-    }
-
-    return false;
-}
-
-bool PhoneFieldManager::removeNumber(QWidget *w)
-{
-    // The supplied widget is the line edit in a phone field
-    QMutableListIterator<PhoneField *> it(phoneFields);
-    QWidget *focusee = 0;
-
-    while(it.hasNext())
-    {
-        PhoneField *f = it.next();
-
-        if (f->numberLE == w) {
-
-            emitFieldChanged(QString(), f->type());
-
-            f->remove();
-            it.remove();
-            delete f;
-
-            if (it.hasNext()) {
-                PhoneField *next = it.next();
-                focusee = next->numberLE;
-            }
-
-            if (focusee)
-                focusee->setFocus();
-            else {
-                // Presumably no fields left
-                checkForAdd();
-                phoneFields.first()->numberLE->setFocus();
-            }
-
-            return true;
-        } else
-            focusee = f->numberLE;
-    }
-
-    return false;
-}
-
-void PhoneFieldManager::addEmpty()
-{
-    if( isFull() )
-        return;
-
-    QList<PhoneFieldType> availTypes = mTypes;
-
-    QListIterator<PhoneField *> it(phoneFields);
-
-    while(it.hasNext())
-    {
-        PhoneField *f = it.next();
-        availTypes.removeAll( f->type() );
-    }
-
-    PhoneField *nf = new PhoneField( parLayout, rowCount, (QWidget *)parent());
-    phoneFields.append( nf );
-    mEditor->addRemoveNumberMenu(nf->numberLE);
-    nf->setTypes( mTypes );
-    nf->setType( availTypes.first() );
-
-    connect( nf, SIGNAL(userChangedType(PhoneFieldType)),
-        this, SLOT(updateTypes(PhoneFieldType)) );
-    connect( nf, SIGNAL(numberChanged(QString)),
-        this, SLOT(checkForAdd()) );
-    connect( nf, SIGNAL(fieldChanged(QString,PhoneFieldType)),
-        this, SLOT(emitFieldChanged(QString,PhoneFieldType)) );
-}
-
-void PhoneFieldManager::clear()
-{
-    while(phoneFields.count() > 0)
-    {
-        PhoneField *f = phoneFields.takeAt(0);
-        // have to be separate as together will
-        // double delete on object deletion,
-        // field does not own the widgets deleted
-        // in the remove function
-        f->remove(); // remove from widget();
-        delete f; // stop poluting.
-    }
-
-    rowCount = firstRow;
-
-    addEmpty();
-}
-
-void PhoneFieldManager::emitFieldChanged( const QString &str, const PhoneFieldType &type )
-{
-    if( mEmitFieldChanged )
-        emit fieldChanged( str, type );
-}
-
-void PhoneFieldManager::setTypes( const QList<PhoneFieldType> &newTypes )
-{
-    if( phoneFields.count() > newTypes.count() )
-    {
-        qWarning("PhoneFieldManager::setTypes: phoneFields.count() > newTypes.count()\n");
-        return;
-    }
-
-    mTypes = newTypes;
-
-    QList<PhoneFieldType> availTypes = newTypes;
-
-    QListIterator<PhoneField *> it(phoneFields);
-    while(it.hasNext())
-    {
-        PhoneField *f = it.next();
-        f->setTypes(mTypes);
-        if( !availTypes.contains(f->type()))
-        {
-            if(!availTypes.count())
-                qWarning("PhoneFieldManager::setTypes: Not enough types for phone fields.");
-
-            PhoneFieldType nt = availTypes.first();
-            f->setType(nt);
-            availTypes.removeAll(nt);
-        }
-    }
-}
-
-QList<PhoneFieldType> PhoneFieldManager::types() const
-{
-    return mTypes;
-}
-
-void PhoneFieldManager::updateTypes( const PhoneFieldType &newType )
-{
-    const QObject *s = sender(); // the phone field whose type has changed
-
-    QList<PhoneFieldType> availTypes = mTypes;
-    QList<PhoneField *> changedFields;
-
-    foreach(PhoneField *r, phoneFields)
-        availTypes.removeAll(r->type());
-
-    mEmitFieldChanged = false;
-    QListIterator<PhoneField *> it(phoneFields);
-    while(it.hasNext())
-    {
-        PhoneField *f = it.next();
-        if( (QObject *)f == s ) continue;
-
-        if( f->type() == newType )
-        {
-            if( !availTypes.count() )
-                qWarning("PhoneFieldManager::updateTypes: Not enough types for phone fields.");
-
-            PhoneFieldType nt = availTypes.first();
-            f->setType( nt );
-            availTypes.removeAll( nt );
-            changedFields.append( f );
-        }
-    }
-    mEmitFieldChanged = true;
-    //emit field changed signals only after we've rearranged
-
-    foreach (PhoneField *cit, changedFields)
-        emitFieldChanged( cit->number(), cit->type() );
-}
-
-void PhoneFieldManager::checkForAdd()
-{
-    QListIterator<PhoneField *> it(phoneFields);
-    while(it.hasNext())
-    {
-        PhoneField *f = it.next();
-        if( f->isEmpty() )
-            return;
-    }
-    addEmpty();
-}
-
-void PhoneFieldManager::setNumberFromType(const PhoneFieldType &type, const QString &newNumber)
-{
-    QListIterator<PhoneField *> it(phoneFields);
-    while(it.hasNext())
-    {
-        PhoneField *f = it.next();
-        if( f->type() == type )
-        {
-            f->setNumber(newNumber);
-            break;
-        }
-    }
-    //no fields matching, add a field
-    add( newNumber, type );
-}
-
-QString PhoneFieldManager::numberFromType( const PhoneFieldType &type )
-{
-    QListIterator<PhoneField *> it(phoneFields);
-    while(it.hasNext())
-    {
-        PhoneField *f = it.next();
-        if( f->type() == type )
-            return f->number();
-    }
-    return QString();
-}
-
-PhoneFieldLineEdit::PhoneFieldLineEdit( QWidget *typeSibling, QWidget *parent )
-    : QLineEdit( parent ), mTypeSibling( typeSibling )
-{
-    mTypeSibling->installEventFilter( this );
-}
-
-bool PhoneFieldLineEdit::eventFilter( QObject *o, QEvent *e )
-{
-    if( o == mTypeSibling && e->type() == QEvent::KeyPress )
-    {
-        QKeyEvent *ke = (QKeyEvent *)e;
-        if( !ke->text().isEmpty() )
-        {
-            setFocus();
-            appendText( ke->text() );
-            return true;
-        }
-    }
-    return false;
-}
-
-void PhoneFieldLineEdit::appendText( const QString &txt )
-{
-    if( !Qtopia::mousePreferred() )
-    {
-        if( !hasEditFocus() )
-            setEditFocus( true );
-    }
-    setText( text()+txt );
-}
-
-//-----------------------------------------------------------------------
-
-PhoneField::PhoneField( QGridLayout *l, int &rowCount, QWidget *parent )
-    : QObject( parent )
-{
-    typeIS = new QIconSelector(parent);
-    typeIS->setFocusPolicy(Qt::NoFocus);
-
-
-    connect( typeIS, SIGNAL(activated(int)), this, SLOT(userChangedType(int)) );
-    numberLE = new PhoneFieldLineEdit( typeIS, parent );
-
-    QMenu *contextMenu = QSoftMenuBar::menuFor( numberLE, QSoftMenuBar::AnyFocus );
-    contextMenu->addAction( tr("Type"), typeIS, SIGNAL(clicked()));
-
-    connect( numberLE, SIGNAL(textChanged(QString)), this, SIGNAL(numberChanged(QString)) );
-    QtopiaApplication::setInputMethodHint(numberLE,QtopiaApplication::PhoneNumber);
-
-    l->addWidget( typeIS, rowCount, 0, Qt::AlignHCenter );
-    l->addWidget( numberLE, rowCount, 2 );
-    ++rowCount;
-
-    parent->setTabOrder(typeIS, numberLE);
-
-    numberLE->show();
-    typeIS->show();
-
-    connect( this, SIGNAL(numberChanged(QString)), this, SLOT(emitFieldChanged()) );
-    connect( this, SIGNAL(internalChangedType(PhoneFieldType)),
-        this, SIGNAL(typeChanged(PhoneFieldType)) );
-    connect( this, SIGNAL(userChangedType(PhoneFieldType)),
-        this, SIGNAL(typeChanged(PhoneFieldType)) );
-    connect( this, SIGNAL(typeChanged(PhoneFieldType)), this, SLOT(emitFieldChanged()) );
-}
-
-PhoneField::~PhoneField()
-{
-}
-
-void PhoneField::remove()
-{
-    disconnect( typeIS, SIGNAL(activated(int)), this, SLOT(userChangedType(int)) );
-    disconnect( numberLE, SIGNAL(textChanged(QString)), this, SIGNAL(numberChanged(QString)) );
-    typeIS->hide();
-    numberLE->hide();
-    typeIS->deleteLater();
-    numberLE->deleteLater();
-}
-
-void PhoneField::userChangedType( int /* idx */)
-{
-    emit userChangedType( mTypes[typeIS->currentIndex()] );
-}
-
-void PhoneField::setTypes( const QList<PhoneFieldType> &types )
-{
-    typeIS->clear();
-    bool first = true;
-    mTypes = types;
-    QList<PhoneFieldType>::ConstIterator it;
-    for( it = mTypes.begin() ; it != mTypes.end() ; ++it )
-    {
-        QIcon icon = (*it).icon;
-        typeIS->insertItem( icon, (*it).name );
-        if(first)
-            typeIS->setIcon(icon);
-        first = false;
-    }
-
-    emit internalChangedType( mTypes[typeIS->currentIndex()] );
-}
-
-void PhoneField::setType( const PhoneFieldType &newType )
-{
-    PhoneFieldType t(newType);
-    int idx = mTypes.indexOf( t );
-    if( idx != -1 )
-        typeIS->setCurrentIndex( idx );
-
-}
-
-PhoneFieldType PhoneField::type()
-{
-    return mTypes[typeIS->currentIndex()];
-}
-
-QString PhoneField::number() const
-{
-    return numberLE->text();
-}
-
-bool PhoneField::isEmpty() const
-{
-    return number().trimmed().isEmpty();
-}
-
-void PhoneField::setNumber( const QString &newNumber )
-{
-    numberLE->setText( newNumber );
-}
-
-void PhoneField::emitFieldChanged()
-{
-    emit fieldChanged( numberLE->text(), mTypes[typeIS->currentIndex()] );
-}
-
-//-----------------------------------------------------------------------
 
 static void adjustPronWidgets(QLabel* label, QLineEdit* le)
 {
@@ -1024,6 +530,7 @@ void AbstractName::textChanged()
         mModified = true;
 }
 
+
 //----------------------------------------------------------------------
 
 AbFullEditor::AbFullEditor(QWidget *parent, Qt::WFlags fl)
@@ -1037,7 +544,7 @@ AbFullEditor::AbFullEditor(QWidget *parent, Qt::WFlags fl)
 
     mImageModified = false;
     mNewEntry = false;
-    phoneMan = 0;
+    phoneNumbers = 0;
     specCompanyLA = 0;
     lastUpdateInternal = false;
     wBusinessTab = 0;
@@ -1070,31 +577,6 @@ AbFullEditor::~AbFullEditor()
 
 void AbFullEditor::init()
 {
-    //
-    // NOTE : If you change these, you also need to change
-    // AbFullEditor::phoneFieldsToDetailsFilter() and
-    // AbFullEditor::detailsToPhoneFieldsFilter()
-    //
-
-    mHPType = PhoneFieldType("homephone", tr("Home Phone"));
-    mHMType = PhoneFieldType("homemobile", tr("Home Mobile"));
-    mHFType = PhoneFieldType("homefax", tr("Home Fax"));
-    mBPType = PhoneFieldType("businessphone", tr("Business Phone"));
-    mBMType = PhoneFieldType("businessmobile", tr("Business Mobile"));
-    mBFType = PhoneFieldType("businessfax", tr("Business Fax"));
-    mBPAType = PhoneFieldType("businesspager", tr("Business Pager"));
-    mHVType = PhoneFieldType("homevoip", tr("Home VOIP"));
-    mBVType = PhoneFieldType("businessvoip", tr("Business VOIP"));
-
-    phoneTypes.append(mHPType);
-    phoneTypes.append(mHMType);
-    phoneTypes.append(mHVType);
-    phoneTypes.append(mHFType);
-    phoneTypes.append(mBPType);
-    phoneTypes.append(mBMType);
-    phoneTypes.append(mBVType);
-    phoneTypes.append(mBFType);
-    phoneTypes.append(mBPAType);
 
     mainVBox = new QVBoxLayout(this);
     mainVBox->setSpacing(0);
@@ -1106,8 +588,6 @@ void AbFullEditor::init()
 
 void AbFullEditor::initMainUI()
 {
-    actionRemoveNumber = new QAction(QIcon(":icon/trash"), tr("Remove number"), this);
-    connect(actionRemoveNumber, SIGNAL(triggered()), this, SLOT(removeNumber()));
     setupTabs();
 }
 
@@ -1157,14 +637,6 @@ void AbFullEditor::prepareTab(int tab)
     }
 }
 
-void AbFullEditor::addRemoveNumberMenu(QWidget *w)
-{
-    Q_ASSERT(w);
-    QMenu* contextMenu = QSoftMenuBar::menuFor(w, QSoftMenuBar::AnyFocus );
-    contextMenu->addAction(actionRemoveNumber);
-    connect(contextMenu, SIGNAL(aboutToShow()), this, SLOT(updateContextMenu()));
-}
-
 #include "abeditor.moc"
 
 void AbFullEditor::setupTabs()
@@ -1211,8 +683,6 @@ void AbFullEditor::setupTabCommon()
     //
     //  Contact Tab
     //
-    int rowCount = 0;
-
     QWidget *wContactTab = new QWidget;
     contactTab->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     contactTab->viewport()->setAutoFillBackground(false); // transparent window color
@@ -1278,18 +748,31 @@ void AbFullEditor::setupTabCommon()
     //    Phone fields
     //
 
-    QGridLayout *gridLayout = new QGridLayout();
-    formLayout->addRow(gridLayout);
-    phoneMan = new PhoneFieldManager(wContactTab, gridLayout, rowCount, this);
-    phoneMan->setTypes(phoneTypes);
-    phoneMan->addEmpty();
+    QStringList commonNumbers = QContactFieldDefinition::fields("phone selected");
+    commonNumbers += QContactFieldDefinition::fields("chat -phone selected");
+    QStringList allNumbers;
+    allNumbers += QContactFieldDefinition::fields("phone");
+    allNumbers += QContactFieldDefinition::fields("chat -phone");
+#ifdef QTOPIA_CELL
+    if (allNumbers.contains("othermobile")) {
+        // This is a mobile phone... make that the first choice.
+        allNumbers.removeAll("othermobile");
+        allNumbers.prepend("othermobile");
+    }
+#endif
+
+    phoneNumbers = new QContactFieldList(wContactTab);
+    phoneNumbers->setAllowedFields(allNumbers);
+    phoneNumbers->setCommonFields(commonNumbers);
+
+    connect(phoneNumbers, SIGNAL(fieldActivated(QString,QString)),
+            this, SLOT(activateFieldAction(QString,QString)));
+
+    formLayout->addRow(phoneNumbers);
 
     // We try to make sure the fields have at least some useable width,
     // since QLineEdit::minimumWidth isn't really that useable.
     emailLE->setMinimumWidth(100);
-
-    connect( phoneMan, SIGNAL(fieldChanged(QString,PhoneFieldType)),
-            this, SLOT(phoneFieldsToDetailsFilter(QString,PhoneFieldType)) );
 
     contactTab->setWidget(wContactTab);
     contactTab->setWidgetResizable(true);
@@ -1344,24 +827,26 @@ void AbFullEditor::setupTabWork()
     //    Phone
     //
 
-    busPhoneLE = new QLineEdit();
-    addRemoveNumberMenu(busPhoneLE);
-    lineEdits[QContactModel::BusinessPhone] = busPhoneLE;
-    QtopiaApplication::setInputMethodHint(busPhoneLE,QtopiaApplication::PhoneNumber);
-    connect( busPhoneLE, SIGNAL(textChanged(QString)), this,
-            SLOT(detailsToPhoneFieldsFilter(QString)) );
+    busPhoneLE = new FieldLineEdit("businessphone");
+    busPhoneLE->setText(phoneNumbers->field("businessphone"));
+    connect( busPhoneLE, SIGNAL(textChanged(QString,QString)),
+            phoneNumbers, SLOT(setField(QString,QString)) );
+    connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+            busPhoneLE, SLOT(updateText(QString,QString)) );
+
     formLayout->addRow(tr("Phone"), busPhoneLE);
 
     //
     //    Mobile
     //
 
-    busMobileLE = new QLineEdit();
-    addRemoveNumberMenu(busMobileLE);
-    lineEdits[QContactModel::BusinessMobile] = busMobileLE;
-    QtopiaApplication::setInputMethodHint(busMobileLE,QtopiaApplication::PhoneNumber);
-    connect( busMobileLE, SIGNAL(textChanged(QString)), this,
-            SLOT(detailsToPhoneFieldsFilter(QString)) );
+    busMobileLE = new FieldLineEdit("businessmobile");
+    busMobileLE->setText(phoneNumbers->field("businessmobile"));
+    connect( busMobileLE, SIGNAL(textChanged(QString,QString)),
+            phoneNumbers, SLOT(setField(QString,QString)) );
+    connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+            busMobileLE, SLOT(updateText(QString,QString)) );
+
     formLayout->addRow(tr("Mobile"), busMobileLE);
 
 #if defined(QTOPIA_VOIP)
@@ -1369,36 +854,39 @@ void AbFullEditor::setupTabWork()
     //    Business e voip
     //
 
-    busVoipLE = new QLineEdit();
-    addRemoveNumberMenu(busVoipLE);
-    lineEdits[QContactModel::BusinessVOIP] = busVoipLE;
-    QtopiaApplication::setInputMethodHint(busVoipLE, "email");
-    connect( busVoipLE, SIGNAL(textChanged(QString)), this,
-            SLOT(detailsToPhoneFieldsFilter(QString)) );
+    busVoipLE = new FieldLineEdit("businessvoip");
+    busVoipLE->setText(phoneNumbers->field("businessvoip"));
+    connect( busVoipLE, SIGNAL(textChanged(QString,QString)),
+            phoneNumbers, SLOT(setField(QString,QString)) );
+    connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+            busVoipLE, SLOT(updateText(QString,QString)) );
+
     formLayout->addRow(tr("VOIP"), busVoipLE);
 #endif
     //
     //    Fax
     //
 
-    busFaxLE = new QLineEdit();
-    addRemoveNumberMenu(busFaxLE);
-    lineEdits[QContactModel::BusinessFax] = busFaxLE;
-    QtopiaApplication::setInputMethodHint(busFaxLE,QtopiaApplication::PhoneNumber);
-    connect( busFaxLE, SIGNAL(textChanged(QString)), this,
-            SLOT(detailsToPhoneFieldsFilter(QString)) );
+    busFaxLE = new FieldLineEdit("businessfax");
+    busFaxLE->setText(phoneNumbers->field("businessfax"));
+    connect( busFaxLE, SIGNAL(textChanged(QString,QString)),
+            phoneNumbers, SLOT(setField(QString,QString)) );
+    connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+            busFaxLE, SLOT(updateText(QString,QString)) );
+
     formLayout->addRow(tr("Fax"), busFaxLE);
 
     //
     //    Pager
     //
 
-    busPagerLE = new QLineEdit();
-    addRemoveNumberMenu(busPagerLE);
-    lineEdits[QContactModel::BusinessPager] = busPagerLE;
-    QtopiaApplication::setInputMethodHint(busPagerLE,QtopiaApplication::PhoneNumber);
-    connect( busPagerLE, SIGNAL(textChanged(QString)), this,
-            SLOT(detailsToPhoneFieldsFilter(QString)) );
+    busPagerLE = new FieldLineEdit("businesspager");
+    busPagerLE->setText(phoneNumbers->field("businesspager"));
+    connect( busPagerLE, SIGNAL(textChanged(QString,QString)),
+            phoneNumbers, SLOT(setField(QString,QString)) );
+    connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+            busPagerLE, SLOT(updateText(QString,QString)) );
+
     formLayout->addRow(tr("Pager"), busPagerLE);
 
     //
@@ -1501,37 +989,58 @@ void AbFullEditor::setupTabHome()
     //    Home phone
     //
 
-    homePhoneLE = new QLineEdit();
-    addRemoveNumberMenu(homePhoneLE);
-    lineEdits[QContactModel::HomePhone] = homePhoneLE;
-    QtopiaApplication::setInputMethodHint(homePhoneLE,QtopiaApplication::PhoneNumber);
-    connect( homePhoneLE, SIGNAL(textChanged(QString)), this,
-            SLOT(detailsToPhoneFieldsFilter(QString)) );
+    homePhoneLE = new FieldLineEdit("homephone");
+    homePhoneLE->setText(phoneNumbers->field("homephone"));
+
+    connect( homePhoneLE, SIGNAL(textChanged(QString,QString)),
+            phoneNumbers, SLOT(setField(QString,QString)) );
+    connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+            homePhoneLE, SLOT(updateText(QString,QString)) );
+
     formLayout->addRow(tr("Phone"), homePhoneLE);
 
     //
     //    Home mobile
     //
 
-    homeMobileLE = new QLineEdit();
-    addRemoveNumberMenu(homeMobileLE);
-    lineEdits[QContactModel::HomeMobile] = homeMobileLE;
-    QtopiaApplication::setInputMethodHint(homeMobileLE,QtopiaApplication::PhoneNumber);
-    connect( homeMobileLE, SIGNAL(textChanged(QString)), this,
-            SLOT(detailsToPhoneFieldsFilter(QString)) );
+    homeMobileLE = new FieldLineEdit("homemobile");
+    homeMobileLE->setText(phoneNumbers->field("homemobile"));
+
+    connect( homeMobileLE, SIGNAL(textChanged(QString,QString)),
+            phoneNumbers, SLOT(setField(QString,QString)) );
+    connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+            homeMobileLE, SLOT(updateText(QString,QString)) );
+
     formLayout->addRow(tr("Mobile"), homeMobileLE);
+
+    // Chuck some chat fields in here too
+
+    QStringList chatFields = QContactFieldDefinition::fields("chat");
+
+    foreach(QString field, chatFields) {
+        QContactFieldDefinition def(field);
+        FieldLineEdit *fle = new FieldLineEdit(field);
+        fle->setText(phoneNumbers->field(field));
+        connect( fle, SIGNAL(textChanged(QString,QString)),
+                phoneNumbers, SLOT(setField(QString,QString)) );
+        connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+                fle, SLOT(updateText(QString,QString)) );
+        formLayout->addRow(def.label(), fle);
+    }
 
 #if defined(QTOPIA_VOIP)
     //
     //    Home voip
     //
 
-    homeVoipLE = new QLineEdit();
-    addRemoveNumberMenu(homeVoipLE);
-    lineEdits[QContactModel::HomeVOIP] = homeVoipLE;
-    QtopiaApplication::setInputMethodHint(homeVoipLE, "email");
-    connect( homeVoipLE, SIGNAL(textChanged(QString)), this,
-            SLOT(detailsToPhoneFieldsFilter(QString)) );
+    homeVoipLE = new FieldLineEdit("homevoip");
+    homeVoipLE->setText(phoneNumbers->field("homevoip"));
+
+    connect( homeVoipLE, SIGNAL(textChanged(QString,QString)),
+            phoneNumbers, SLOT(setField(QString,QString)) );
+    connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+            homeVoipLE, SLOT(updateText(QString,QString)) );
+
     formLayout->addRow(tr("VOIP"), homeVoipLE);
 #endif
 
@@ -1539,12 +1048,13 @@ void AbFullEditor::setupTabHome()
     //    Home fax
     //
 
-    homeFaxLE = new QLineEdit();
-    addRemoveNumberMenu(homeFaxLE);
-    lineEdits[QContactModel::HomeFax] = homeFaxLE;
-    QtopiaApplication::setInputMethodHint(homeFaxLE,QtopiaApplication::PhoneNumber);
-    connect( homeFaxLE, SIGNAL(textChanged(QString)), this,
-            SLOT(detailsToPhoneFieldsFilter(QString)) );
+    homeFaxLE = new FieldLineEdit("homefax");
+    homeFaxLE->setText(phoneNumbers->field("homefax"));
+    connect( homeFaxLE, SIGNAL(textChanged(QString,QString)),
+            phoneNumbers, SLOT(setField(QString,QString)) );
+    connect( phoneNumbers, SIGNAL(fieldChanged(QString,QString)),
+            homeFaxLE, SLOT(updateText(QString,QString)) );
+
     formLayout->addRow(tr("Fax"), homeFaxLE);
 
     //
@@ -1743,27 +1253,6 @@ void AbFullEditor::editPhoto()
     delete iface;
 }
 
-void AbFullEditor::removeNumber()
-{
-    // Find out what has focus
-    QWidget *w = focusWidget();
-
-    if (!phoneMan->removeNumber(w)) {
-        // rely on the contentsChanged signal to update everything
-        QLineEdit *le = qobject_cast<QLineEdit*>(w);
-        if (le) {
-            le->clear();
-            if (le->hasEditFocus())
-                le->setEditFocus(false);
-        }
-
-        // Now try to remove the corresponding phoneman field
-        PhoneFieldType type = findPhoneField(le);
-        if (!type.icon.isNull())
-            phoneMan->removeNumber(type);
-    }
-}
-
 void AbFullEditor::catCheckBoxChanged( bool  b )
 {
     QString bcatid = QLatin1String("Business"); // no tr
@@ -1776,8 +1265,10 @@ void AbFullEditor::catCheckBoxChanged( bool  b )
         mCatMan->ensureSystemCategory(bcatid, bcatid);
         if (!mGroupList.contains(bcatid))
             mGroupList.append(bcatid);
+        phoneNumbers->setSuggestedFields(QStringList() << "businessphone" << "othermobile");
     } else {
         mGroupList.removeAll(bcatid);
+        phoneNumbers->setSuggestedFields(QStringList() << "homephone" << "othermobile");
     }
     updateGroupButton();
     showSpecWidgets( b );
@@ -1823,91 +1314,6 @@ void AbFullEditor::specFieldsFilter( const QString &newValue )
     }
 }
 
-// when phone fields changed, this slot gets called and sets the corresponding
-// phone widgets in other tabs
-void AbFullEditor::phoneFieldsToDetailsFilter( const QString &newNumber,
-                                                    const PhoneFieldType &newType )
-{
-    QLineEdit *detail = 0;
-    if (wPersonalTab) {
-        if( newType == mHPType ) //phone
-            detail = homePhoneLE;
-        else if( newType == mHMType )//mobile
-            detail = homeMobileLE;
-#if defined(QTOPIA_VOIP)
-        else if( newType == mHVType )//voip
-            detail = homeVoipLE;
-#endif
-        else if( newType == mHFType )//fax
-            detail = homeFaxLE;
-    }
-
-    if (!detail && wBusinessTab) {
-        if( newType == mBPType )//phone
-            detail = busPhoneLE;
-        else if( newType == mBMType )//mobile
-            detail = busMobileLE;
-#if defined(QTOPIA_VOIP)
-        else if( newType == mBVType )//voip
-            detail = busVoipLE;
-#endif
-        else if( newType == mBFType )//fax
-            detail = busFaxLE;
-        else if( newType == mBPAType )//pager
-            detail = busPagerLE;
-    }
-
-    if( detail )
-    {
-        //avoid recursion
-        if( newNumber == detail->text() )
-            return;
-
-        lastUpdateInternal = true;
-        detail->setText( newNumber );
-
-    }
-}
-
-PhoneFieldType AbFullEditor::findPhoneField(QLineEdit *detail)
-{
-    PhoneFieldType type;
-
-    if( detail == busPhoneLE )
-        type = mBPType ;
-    else if( detail == busMobileLE )
-        type = mBMType ;
-#if defined(QTOPIA_VOIP)
-    else if( detail == busVoipLE )
-        type = mBVType ;
-    else if( detail == homeVoipLE )
-        type = mHVType;
-#endif
-    else if( detail == busFaxLE )
-        type = mBFType ;
-    else if( detail == busPagerLE )
-        type = mBPAType;
-    else if( detail == homePhoneLE )
-        type = mHPType ;
-    else if( detail == homeMobileLE )
-        type = mHMType ;
-    else if( detail == homeFaxLE )
-        type = mHFType ;
-
-    return type;
-}
-
-// when details of phone fields changed, this updates the phone field manager
-void AbFullEditor::detailsToPhoneFieldsFilter( const QString &newNumber )
-{
-    PhoneFieldType type = findPhoneField((QLineEdit*) sender());
-
-    if( !type.icon.isNull() && !lastUpdateInternal )
-        phoneMan->setNumberFromType( type, newNumber );
-
-    lastUpdateInternal = false;
-}
-
 void AbFullEditor::editGroups()
 {
     if (!mGroupPicker) {
@@ -1917,7 +1323,7 @@ void AbFullEditor::editGroups()
         vl->addWidget(mGroupPicker);
         mGroupDialog->setLayout(vl);
         mGroupDialog->setWindowTitle(tr("Groups"));
-        connect(mGroupPicker, SIGNAL(backClicked()), mGroupDialog, SLOT(accept()));
+        connect(mGroupPicker, SIGNAL(closeView()), mGroupDialog, SLOT(accept()));
 
         // Actions!
         actionAddGroup = new QAction(QIcon(":icon/new"), QApplication::translate("AddressbookWindow", "New group"), this);
@@ -1977,12 +1383,6 @@ void AbFullEditor::updateContextMenu()
         actionRemoveGroup->setVisible( groupSelected && !groupSystem);
         actionRenameGroup->setVisible( groupSelected && !groupSystem);
     }
-
-    // Note that actionRemoveNumber is only present on phone number fields,
-    // but we don't need to be that specific to update this
-    QLineEdit *le = qobject_cast<QLineEdit *>(focusWidget());
-    if (le)
-        actionRemoveNumber->setVisible(!le->text().isEmpty());
 }
 
 void AbFullEditor::setEntry( const QContact &entry, bool newEntry)
@@ -1992,7 +1392,7 @@ void AbFullEditor::setEntry( const QContact &entry, bool newEntry)
 
     QMap<QContactModel::Field, QString> abNameMap;
 
-    phoneMan->clear();
+    phoneNumbers->setEntry(ent, newEntry);
 
     if( newEntry )
         setWindowTitle(tr("New Contact"));
@@ -2010,7 +1410,7 @@ void AbFullEditor::setEntry( const QContact &entry, bool newEntry)
        force an update to category select, even if the checkbox is already
        checked the right way (wouldn't emit toggled() signal)
        saves wasting an extra Categories load when we don't need it
-     */
+   */
 
     if(busCat == categoryCB->isChecked())
         catCheckBoxChanged(busCat);
@@ -2041,17 +1441,6 @@ void AbFullEditor::setEntry( const QContact &entry, bool newEntry)
     //
 
     emailLE->home( false );
-
-    // set phoneMan numbers
-    phoneMan->add( ent.homePhone(), mHPType);
-    phoneMan->add( ent.homeMobile(), mHMType );
-    phoneMan->add( ent.homeVOIP(), mHVType );
-    phoneMan->add( ent.homeFax(), mHFType );
-    phoneMan->add( ent.businessPhone(), mBPType );
-    phoneMan->add( ent.businessMobile(), mBMType );
-    phoneMan->add( ent.businessVOIP(), mBVType );
-    phoneMan->add( ent.businessFax(), mBFType );
-    phoneMan->add( ent.businessPager(), mBPAType );
 
     // Spec fields on the common tab
     specCompanyLE->setText(ent.company());
@@ -2155,15 +1544,6 @@ void AbFullEditor::setEntryHome()
     homeZipLE->setText( ent.homeZip() );
     homeCountryLE->setText( ent.homeCountry() );
 
-    // mirrored one 'common' screen, may have changed
-    // so take from there rather than entry
-    homePhoneLE->setText( phoneMan->numberFromType( mHPType ) );
-    homeFaxLE->setText( phoneMan->numberFromType( mHFType ) );
-    homeMobileLE->setText( phoneMan->numberFromType( mHMType ) );
-#if defined(QTOPIA_VOIP)
-    homeVoipLE->setText( phoneMan->numberFromType( mHVType ) );
-#endif
-
     homeWebPageLE->setText( ent.homeWebpage() );
 
     birthdayRP->updateUI(!bday.isNull());
@@ -2186,15 +1566,6 @@ void AbFullEditor::setEntryWork()
     deptLE->setText( ent.department() );
     officeLE->setText( ent.office() );
 
-    // mirrored on 'common' screen, may have changed
-    // so take from there rather than entry
-    busPhoneLE->setText( phoneMan->numberFromType( mBPType ) );
-    busFaxLE->setText( phoneMan->numberFromType( mBFType ) );
-    busMobileLE->setText( phoneMan->numberFromType( mBMType ) );
-#if defined(QTOPIA_VOIP)
-    busVoipLE->setText( phoneMan->numberFromType( mBVType) );
-#endif
-    busPagerLE->setText( phoneMan->numberFromType( mBPAType ) );
     companyLE->setText( specCompanyLE->text() );
     jobTitleLE->setText( specJobTitleLE->text() );
 
@@ -2347,7 +1718,7 @@ bool AbFullEditor::isEmpty() const
             return false;
     }
 
-    if (!phoneMan->isEmpty())
+    if (!phoneNumbers->isEmpty())
         return false;
 
     if (wBusinessTab) {
@@ -2437,16 +1808,7 @@ void AbFullEditor::contactFromFields(QContact &e)
     e.setDefaultEmail( strDefaultEmail );
     e.setEmailList( emails  );
 
-    e.setHomePhone( phoneMan->numberFromType( mHPType ) );
-    e.setHomeMobile( phoneMan->numberFromType( mHMType ) );
-    e.setHomeVOIP( phoneMan->numberFromType( mHVType ) );
-    e.setHomeFax( phoneMan->numberFromType( mHFType ) );
-
-    e.setBusinessPhone( phoneMan->numberFromType( mBPType ) );
-    e.setBusinessMobile( phoneMan->numberFromType( mBMType ) );
-    e.setBusinessVOIP( phoneMan->numberFromType( mBVType ) );
-    e.setBusinessFax( phoneMan->numberFromType( mBFType ) );
-    e.setBusinessPager( phoneMan->numberFromType( mBPAType ) );
+    e = phoneNumbers->updateEntry( e );
 
     //
     // Home Tab
@@ -2574,6 +1936,14 @@ void AbFullEditor::toneSelected( const QContent &tone )
 #endif
 }
 
+void AbFullEditor::activateFieldAction(const QString &action, const QString &value)
+{
+    QContact c(ent);
+    contactFromFields(c);
+    QtopiaServiceRequest request = QContactFieldDefinition::actionRequest(action, c, value);
+    request.send();
+}
+
 void parseEmailFrom( const QString &txt, QString &strDefaultEmail,
                      QStringList &all )
 {
@@ -2628,47 +1998,36 @@ AbSimEditor::~AbSimEditor()
 
 void AbSimEditor::initSimUI()
 {
-    QVBoxLayout *mainVBox = new QVBoxLayout(this);
-    mainVBox->setSpacing(0);
-    mainVBox->setContentsMargins(0, 0, 0, 0);
-
-    simEditor = new QWidget(0);
-    mainVBox->addWidget(simEditor);
-
-    QGridLayout *gridLayout = new QGridLayout(simEditor);
-
-    gridLayout->addItem(new QSpacerItem(4, 0), 0, 1);
-    gridLayout->setSpacing(0);
-
-    int rowCount = 0;
-
-    //
-    //  Name
-    //
+    QDelayedScrollArea *area = new QDelayedScrollArea(0);
+    area->viewport()->setAutoFillBackground(false);
 
     QLabel *label = new QLabel(tr("Name"));
     label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    gridLayout->addWidget(label, rowCount, 0);
+    simName = new QLineEdit;
 
-    simName = new QLineEdit(0);
-    gridLayout->addWidget(simName, rowCount, 2);
+    QStringList commonNumbers = QContactFieldDefinition::fields("phone selected");
+    QStringList allNumbers = QContactFieldDefinition::fields("phone");
 
-    rowCount++;
+    phoneNumbers = new QContactFieldList;
+    phoneNumbers->setAllowedFields(allNumbers);
+    phoneNumbers->setCommonFields(commonNumbers);
 
-    //
-    //  Phone number
-    //
+    QVBoxLayout *mainLayout = new QVBoxLayout;
 
-    label = new QLabel(tr("Number"));
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    gridLayout->addWidget(label, rowCount, 0);
+    QHBoxLayout *labelLayout = new QHBoxLayout;
+    labelLayout->addWidget(label);
+    labelLayout->addWidget(simName);
 
-    simNumber = new QLineEdit(0);
-    QtopiaApplication::setInputMethodHint(simNumber,QtopiaApplication::PhoneNumber);
-    gridLayout->addWidget(simNumber, rowCount, 2);
+    mainLayout->addLayout(labelLayout);
+    mainLayout->addWidget(phoneNumbers);
+    mainLayout->addStretch();
 
-    rowCount++;
-    gridLayout->addItem(new QSpacerItem(4, 0), rowCount, 1);
+    area->setWidget(new QWidget);
+    area->widget()->setLayout(mainLayout);
+
+    QVBoxLayout *dialogLayout = new QVBoxLayout;
+    dialogLayout->addWidget(area);
+    setLayout(dialogLayout);
 }
 
 void AbSimEditor::setEntry( const QContact &entry, bool newEntry)
@@ -2680,14 +2039,14 @@ void AbSimEditor::setEntry( const QContact &entry, bool newEntry)
         setWindowTitle(tr("Edit SIM Contact"));
 
     simName->setText(entry.firstName());
-    simNumber->setText(entry.homePhone());
+    phoneNumbers->setEntry(entry, newEntry);
 
     mNewEntry = newEntry;
 }
 
 bool AbSimEditor::isEmpty() const
 {
-    return simName->text().trimmed().isEmpty() && simNumber->text().trimmed().isEmpty();
+    return simName->text().trimmed().isEmpty() && phoneNumbers->isEmpty();
 }
 
 void AbSimEditor::accept()
@@ -2699,7 +2058,7 @@ void AbSimEditor::accept()
     {
         QContact tmp(ent); //preserve uid.
         tmp.setFirstName(simName->text());
-        tmp.setHomePhone(simNumber->text());
+        tmp = phoneNumbers->updateEntry(tmp);
 
         if (tmp.label().isEmpty()) {
             if (QMessageBox::warning(this, tr("Contacts"),
@@ -2709,7 +2068,7 @@ void AbSimEditor::accept()
                 reject();
                 return;
             } else {
-                simName->setFocus();
+                phoneNumbers->setFocus();
                 return;
             }
         }

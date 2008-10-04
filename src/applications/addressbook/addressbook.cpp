@@ -1,39 +1,41 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "addressbook.h"
 #include "abeditor.h"
-#include "contactdetails.h"
-#include "contactsource.h"
 #include "contactlistpane.h"
+#ifdef QTOPIA_HOMEUI
+#include "deskphonedetails.h"
+#include "deskphoneeditor.h"
+#else
+#include "contactdetails.h"
+#endif
 
 #include "groupview.h"
 
 #include <qtopiasendvia.h>
 #include <qtopiaapplication.h>
 #include <qdawg.h>
-#include <qtopia/pim/qcontact.h>
-#include <qtopia/pim/qcontactview.h>
-#include <qtopia/pim/qcontactmodel.h>
-#include <qtopia/pim/qappointmentmodel.h>
+#include <qcontact.h>
+#include <qcontactview.h>
+#include <qcontactmodel.h>
+#include <qappointmentmodel.h>
 #include <qtopianamespace.h>
 #include <qcontent.h>
 #include <qthumbnail.h>
@@ -42,7 +44,10 @@
 #ifdef QTOPIA_CELL
 #include <qphonebook.h>
 #include <qsiminfo.h>
+#include <private/qsimcontext_p.h>
 #endif
+
+#include <qfielddefinition.h>
 
 #include "emaildialogphone.h"
 
@@ -76,8 +81,8 @@
 #include <QDSAction>
 #include <QDLLink>
 #include <QItemDelegate>
+#include <QFavoriteServicesModel>
 
-#include <qtopia/qspeeddial.h>
 #include <qtopia/qsoftmenubar.h>
 #include <qtopiaipcenvelope.h>
 #include <qdl.h>
@@ -88,9 +93,19 @@
 #include "ui_actiondialog.h"
 #include "qspeeddial.h"
 
+#include "qcollectivepresence.h"
+
+// Temporary presence testing code
+// #define ADDRESSBOOK_TEST_PRESENCE
+#ifdef ADDRESSBOOK_TEST_PRESENCE
+#include <qtopiacollective/private/dummypresenceservice_p.h>
+#include <qtopiacollective/private/dummypresencecontrol_p.h>
+#include <QValueSpaceObject>
+#endif
+
 static bool constructorDone = false;
 
-typedef enum SpeedDialType {Call = QListWidgetItem::UserType, Text, Email, View};
+typedef enum FavoritesType {Call = QListWidgetItem::UserType, Text, Email, View};
 
 /***************************
 * NameLearner
@@ -282,22 +297,27 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
       mFilterModel(0),
       mCloseAfterView( false ),
       mHasSim( false ),
-#ifdef QTOPIA_CELL
-      mGotSimEntries(false),
-      mShowSimLabel(false),
-#endif
       mContextMenuDirty(true),
       mGroupsListView(0),
       mGroupMemberView(0),
       mDetailsView(0),
+#ifdef QTOPIA_HOMEUI
+      dpEditor(0),
+#else
       abFullEditor(0),
 #ifdef QTOPIA_CELL
       abSimEditor(0),
 #endif
+#endif
       actionPersonal(0),
+      actionShowGroups(0),
+      actionAddGroup(0),
+      actionRemoveGroup(0),
+      actionRenameGroup(0),
+      actionManageMembers(0),
       actionSetPersonal(0),
       actionResetPersonal(0),
-      actionSpeedDial(0),
+      actionFavorites(0),
       syncing(false),
       mCurrentContactDirty(false),
       loadinfo(0)
@@ -305,6 +325,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     QtopiaApplication::loadTranslations( "libqtopiapim" ); //no tr
 
     mModel = new QContactModel(this);
+    mListView = 0;
     mHasSim = !mModel->simSource().isNull();
 
     // Grab the visible sources (before we connect modelReset, to avoid unconstructed stuff)
@@ -327,16 +348,19 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     //
     //  Build the main contact list view
     //
-#ifndef GREENPHONE_EFFECTS
     mListView = new ContactListPane(0, mModel);
-#else
-    mListView = new ContactListPane(centralView, mModel);
+
+#ifdef QTOPIA_HOMEUI
+    if (mSortIndex == 1)
+        mListView->setJumpField(QContactModel::Company);
+    else
+        mListView->setJumpField(QContactModel::Label);
 #endif
 
     connect(mListView, SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(currentContactSelectionChanged()));
 
     connect(mListView, SIGNAL(contactActivated(QContact)), this, SLOT(contactActivated(QContact)));
-    connect(mListView, SIGNAL(backClicked()), this, SLOT(close()));
+    connect(mListView, SIGNAL(closeView()), this, SLOT(close()));
 
     centralView->addWidget(mListView);
 
@@ -359,31 +383,32 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     actionTrash->setWhatsThis(tr("Delete the selected contacts."));
     connect( actionTrash, SIGNAL(triggered()), this, SLOT(deleteContact()));
 
-    /* group actions */
+    actionEdit = new QAction(editIcon, tr("Edit contact"), this);
+    connect(actionEdit, SIGNAL(triggered()), this, SLOT(editCurrentContact()));
 
+    /* group actions */
+#ifndef QTOPIA_HOMEUI
     actionShowGroups = new QAction(QIcon(":icon/contactgroup"), tr("Show Group..."), this);
     actionShowGroups->setWhatsThis(tr("Show the list of contact groups."));
     connect( actionShowGroups, SIGNAL(triggered()), this, SLOT(groupList()));
 
     actionAddGroup = new QAction(newIcon, tr("New group"), this);
     actionAddGroup->setWhatsThis(tr("Add new contact group."));
-
+#endif
 #if defined(QTOPIA_TELEPHONY)
     actionSetRingTone = new QAction(QIcon(), tr("Set group ringtone...", "Set ringtone to current contact group"), this);
     actionSetRingTone->setWhatsThis(tr("Set a ringtone that is played when an incoming call comes in from this group members."));
 #endif
-
+#ifndef QTOPIA_HOMEUI
     actionRemoveGroup = new QAction(trashIcon, tr("Delete", "Delete current contact group"), this);
     actionRemoveGroup->setWhatsThis(tr("Delete highlighted contact group."));
 
     actionRenameGroup = new QAction(editIcon, tr("Rename", "Rename current contact group"), this);
     actionRenameGroup->setWhatsThis(tr("Rename highlighted contact group."));
 
-    actionRemoveFromGroup = new QAction(QIcon(), tr("Remove from group", "Remove contact from current group"), this);
-    actionRemoveFromGroup->setWhatsThis(tr("Remove highlighted contact from current group."));
-
-    actionAddMembers = new QAction(QIcon(), tr("Add members", "Add members to current contact group"), this);
-    actionAddMembers->setWhatsThis(tr("Add contacts to current group."));
+    actionManageMembers = new QAction(QIcon(), tr("Manage group members", "Manage members in the current contact group"), this);
+    actionManageMembers->setWhatsThis(tr("Manage members in the current contact group"));
+#endif
 
     /* End group actions */
 
@@ -399,27 +424,41 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     actionResetPersonal->setWhatsThis(tr("Remove current entry as your business card."));
     connect(actionResetPersonal, SIGNAL(triggered()), this, SLOT(markCurrentAsPersonal()));
 
-    actionImportSim = new QAction(syncIcon, tr("Import to Phone"), this);
-    actionImportSim->setWhatsThis(tr("Import current entry from SIM card to phone."));
-    connect(actionImportSim, SIGNAL(triggered()), this, SLOT(importCurrentFromSim()));
-    if (!mHasSim)
-        actionImportSim->setVisible(false);
+#ifdef QTOPIA_HOMEUI
+    QActionGroup *sortGroup = new QActionGroup(this);
+    QActionGroup *viewGroup = new QActionGroup(this);
+    actionViewLastFirst = new QAction(tr("\"Last, First\""), this);
+    actionViewLastFirst->setCheckable(true);
+    actionViewLastFirst->setActionGroup(viewGroup);
+    connect(actionViewLastFirst, SIGNAL(triggered()), this, SLOT(viewLastFirst()));
 
-    actionExportSim = new QAction(syncIcon, tr("Export to SIM"), this);
-    actionExportSim->setWhatsThis(tr("Export current entry from phone to SIM card."));
-    connect(actionExportSim, SIGNAL(triggered()), this, SLOT(exportCurrentToSim()));
-    if (!mHasSim)
-        actionExportSim->setVisible(false);
+    actionViewFirstLast = new QAction(tr("\"First Last\""), this);
+    actionViewFirstLast->setCheckable(true);
+    actionViewFirstLast->setActionGroup(viewGroup);
+    connect(actionViewFirstLast, SIGNAL(triggered()), this, SLOT(viewFirstLast()));
 
+    actionSortLabel = new QAction(tr("Sort by Name"), this);
+    actionSortLabel->setCheckable(true);
+    actionSortLabel->setActionGroup(sortGroup);
+    connect(actionSortLabel, SIGNAL(triggered()), this, SLOT(sortLabel()));
+
+    actionFilterPresence = new QAction(tr("Hide unavailable contacts"), this);
+    actionFilterPresence->setCheckable(true);
+    connect(actionFilterPresence, SIGNAL(triggered()), this, SLOT(filterPresence()));
+
+    actionSortCompany = new QAction(tr("Sort by Company"), this);
+    actionSortCompany->setCheckable(true);
+    actionSortCompany->setActionGroup(sortGroup);
+    connect(actionSortCompany, SIGNAL(triggered()), this, SLOT(sortCompany()));
+#else
     actionSettings = new QAction(QIcon(":icon/settings"), tr("Display Settings..."), this);
     connect(actionSettings, SIGNAL(triggered()), this, SLOT(configure()));
+#endif
 
-    actionShowSources = new QAction(QIcon(":icon/viewcategory"),
-        tr("Show Contacts From...", "e.g. Show Contacts From Phone/SIM Card"), this);
-    connect(actionShowSources, SIGNAL(triggered()), this, SLOT(selectSources()));
-    if (!mHasSim)
-        actionShowSources->setVisible(false);
-
+#ifdef QTOPIA_HOMEUI
+    actionSend = 0;
+    actionSendCat = 0;
+#else
     actionSend = new QAction(beamIcon, tr("Send..."), this);
     actionSend->setWhatsThis(tr("Send the contact to another person"));
     connect(actionSend, SIGNAL(triggered()), this, SLOT(sendContact()));
@@ -427,6 +466,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     actionSendCat = new QAction(beamIcon, tr("Send All..."), this);
     actionSendCat->setWhatsThis(tr("Send the visible contacts to another person"));
     connect(actionSendCat, SIGNAL(triggered()), this, SLOT(sendContactCat()));
+#endif
 
     //
     //  Create Context Menu
@@ -436,26 +476,42 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     connect(contextMenu, SIGNAL(aboutToShow()), this, SLOT(updateContextMenuIfDirty()));
 
     contextMenu->addAction(actionNew);
+#ifndef QTOPIA_HOMEUI
     contextMenu->addAction(actionSendCat);
+#endif
 
-    actionSpeedDial = new QAction(QIcon(":icon/phone/speeddial"), tr("Add to Speed Dial..."), this);
-    connect(actionSpeedDial, SIGNAL(triggered()), this, SLOT(addToSpeedDial()));
+    actionFavorites = new QAction(QIcon(":icon/favorite"), tr("Add to Favorites..."), this);
+    connect(actionFavorites, SIGNAL(triggered()), this, SLOT(addToFavorites()));
 
     /* groups */
-    contextMenu->addAction(actionShowGroups);
-    contextMenu->addAction(actionAddGroup);
+    if (actionShowGroups)
+        contextMenu->addAction(actionShowGroups);
+    if (actionAddGroup)
+        contextMenu->addAction(actionAddGroup);
 #if defined(QTOPIA_TELEPHONY)
     contextMenu->addAction(actionSetRingTone);
 #endif
-    contextMenu->addAction(actionRemoveGroup);
-    contextMenu->addAction(actionRenameGroup);
-    contextMenu->addAction(actionRemoveFromGroup);
-    contextMenu->addAction(actionAddMembers);
+    if (actionRemoveGroup) {
+        contextMenu->addAction(actionRemoveGroup);
+        contextMenu->addAction(actionRenameGroup);
+        contextMenu->addAction(actionManageMembers);
+    }
     /* end groups */
 
+#ifdef QTOPIA_HOMEUI
+    contextMenu->addAction(actionSortLabel);
+    contextMenu->addAction(actionSortCompany);
+    contextMenu->addSeparator();
+    contextMenu->addAction(actionFilterPresence);
+    contextMenu->addSeparator();
+    QMenu *viewSubMenu = new QMenu(tr("Name format"));
+    viewSubMenu->addAction(actionViewFirstLast);
+    viewSubMenu->addAction(actionViewLastFirst);
+    contextMenu->addMenu(viewSubMenu);
+#else
     contextMenu->addAction(actionSettings);
+#endif
     contextMenu->addAction(actionPersonal);
-    contextMenu->addAction(actionShowSources);
 
     connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
             this, SLOT(appMessage(QString,QByteArray)) );
@@ -467,14 +523,8 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     new ContactsPhoneService(this);
 
 #ifdef QTOPIA_CELL
-    QPhoneBook *phoneBook = new QPhoneBook( QString(), this );
-    connect( phoneBook, SIGNAL(entries(QString,QList<QPhoneBookEntry>)),
-             this, SLOT(phoneBookUpdated(QString)) );
-
-    mSimInfo = new QSimInfo(QString(), this);
-    connect (mSimInfo, SIGNAL(inserted()), this, SLOT(simInserted()));
-    connect (mSimInfo, SIGNAL(notInserted()), this, SLOT(simNotInserted()));
-    connect (mSimInfo, SIGNAL(removed()), this, SLOT(simNotInserted()));
+    connect(mModel, SIGNAL(simLoaded(const QPimSource &)),
+            this, SLOT(updateLoadLabel()));
 #endif
 
     constructorDone = true;
@@ -485,6 +535,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
 
 void AddressbookWindow::delayedInit()
 {
+#ifndef QTOPIA_HOMEUI
     QDSServices vcardServices( QString( "text/x-vcard" ),
                                QString( "" ),
                                QStringList( QString ( "send" ) ) );
@@ -496,12 +547,64 @@ void AddressbookWindow::delayedInit()
         actionSend = 0;
         actionSendCat = 0;
     }
+#endif
 #ifdef QTOPIA_CELL
     /* Show the load labels if we haven't already got the entries */
-    if (!mGotSimEntries) {
-        if (!mSimInfo->identity().isEmpty())
-            simInserted();
-    }
+    updateLoadLabel();
+#endif
+#ifdef ADDRESSBOOK_TEST_PRESENCE
+    DummyPresenceControl *control;
+    DummyPresenceService *service;
+    QMap<QString, QCollectivePresenceInfo::PresenceType> map;
+    QList<QCollectivePresenceInfo> presences;
+
+    QCollectivePresenceInfo p1("test:alice");
+    p1.setPresence("Online", QCollectivePresenceInfo::Online);
+    p1.setMessage("Available");
+    p1.setLastUpdateTime(QDateTime::currentDateTime());
+    p1.setDisplayName("AliceCool73");
+    p1.setCapabilities(QStringList() << "voice" << "email" << "video");
+
+    QCollectivePresenceInfo p2("test:carol");
+    p2.setPresence("Offline", QCollectivePresenceInfo::Offline);
+    p2.setLastUpdateTime(QDateTime::currentDateTime());
+
+    QCollectivePresenceInfo p3("test:supportlist");
+    p3.setPresence("Online", QCollectivePresenceInfo::Online);
+    p3.setMessage("Rocking the suburbs");
+    p3.setLastUpdateTime(QDateTime::currentDateTime());
+    p3.setDisplayName("ProductSupport");
+    p3.setCapabilities(QStringList() << "email" << "im");
+
+    QCollectivePresenceInfo p4("test:nonexistent");
+    p4.setPresence("Away", QCollectivePresenceInfo::Away);
+    p4.setMessage("Away over the weekend - back on Monday");
+    p4.setLastUpdateTime(QDateTime::currentDateTime());
+    p4.setDisplayName("AliceCool73");
+    p4.setCapabilities(QStringList() << "voice" << "email");
+    presences << p1 << p2 << p3 << p4;
+
+    QCollectivePresenceInfo localUser("test:localuser");
+    localUser.setPresence("Online", QCollectivePresenceInfo::Online);
+
+    map.insert("Offline", QCollectivePresenceInfo::Offline);
+    map.insert("Online", QCollectivePresenceInfo::Online);
+    map.insert("Idle", QCollectivePresenceInfo::Away);
+    map.insert("Away", QCollectivePresenceInfo::Away);
+    map.insert("Out to Lunch", QCollectivePresenceInfo::Away);
+    map.insert("On the Phone", QCollectivePresenceInfo::Away);
+    map.insert("Be Right Back", QCollectivePresenceInfo::Away);
+    map.insert("Busy", QCollectivePresenceInfo::Busy);
+
+    service = new DummyPresenceService(map, localUser, presences, "test", this);
+    service->initialize();
+
+    QValueSpaceObject::sync();
+
+    control = new DummyPresenceControl("test", this);
+
+    control->simulateIncomingPublishRequest("foobar@foo.com");
+    control->simulateIncomingPublishRequest("foobar2@foo.com");
 #endif
 }
 
@@ -521,29 +624,38 @@ void AddressbookWindow::createViewMenu()
     QMenu *viewMenu = QSoftMenuBar::menuFor(mDetailsView);
     connect(viewMenu, SIGNAL(aboutToShow()), this, SLOT(updateContextMenuIfDirty()));
 
+#ifdef QTOPIA_HOMEUI
+    viewMenu->addAction(actionEdit);
+#endif
+
     viewMenu->addAction(actionTrash);
 
+#ifndef QTOPIA_HOMEUI
     if( actionSend )
         viewMenu->addAction(actionSend);
 
     viewMenu->addAction(actionSetPersonal);
     viewMenu->addAction(actionResetPersonal);
-    viewMenu->addAction(actionSpeedDial);
-    viewMenu->addAction(actionExportSim);
-    viewMenu->addAction(actionImportSim);
+    viewMenu->addAction(actionFavorites);
+#endif
 }
 
 void AddressbookWindow::createDetailedView()
 {
     if(!mDetailsView)
     {
+#ifndef QTOPIA_HOMEUI
         mDetailsView = new ContactDetails(0);
 //        connect(mDetailsView, SIGNAL(externalLinkActivated()), this, SLOT(close()));
-        connect(mDetailsView, SIGNAL(backClicked()), this, SLOT(previousView()));
+        connect(mDetailsView, SIGNAL(closeView()), this, SLOT(previousView()));
         connect(mDetailsView, SIGNAL(callContact()), this, SLOT(callCurrentContact()));
         connect(mDetailsView, SIGNAL(textContact()), this, SLOT(textCurrentContact()));
         connect(mDetailsView, SIGNAL(emailContact()), this, SLOT(emailCurrentContact()));
         connect(mDetailsView, SIGNAL(editContact()), this, SLOT(editCurrentContact()));
+#else
+        mDetailsView = new DeskphoneContactDetails(0);
+        connect(mDetailsView, SIGNAL(closeView()), this, SLOT(previousView()));
+#endif
 
         centralView->addWidget(mDetailsView);
 
@@ -891,7 +1003,7 @@ void AddressbookWindow::loadMoreVcards()
                 }
 
                 namelearner.learn(curCon);
-                mModel->addContact(curCon);
+                addContact(curCon);
 
                 ++loadednewContactsCursor;
             }
@@ -987,6 +1099,25 @@ void AddressbookWindow::readConfig(void)
     if (count > 0)
         mModel->setVisibleSources(set);
     config.endGroup();
+
+#ifdef QTOPIA_HOMEUI
+    config.beginGroup("Sorting");
+    QString sort = config.value("SortBy", "label").toString();
+    if (sort == "company")
+        sortCompany();
+    else
+        sortLabel();
+
+    QString view = config.value("Label", "firstlast").toString();
+    if (view == "lastfirst")
+        viewLastFirst();
+    else
+        viewFirstLast();
+
+    // Store the opposite, so we can call the toggle function
+    mFilterPresence = !config.value("hideUnavailable", false).toBool();
+    filterPresence();
+#endif
 }
 
 void AddressbookWindow::writeConfig(void)
@@ -1028,20 +1159,18 @@ void AddressbookWindow::updateContextMenuIfDirty()
     bool groupSelected = showingGroups && mGroupsListView->currentIndex().isValid();
     bool groupSystem = groupSelected && mGroupsListView->isCurrentSystemGroup();
 
+#ifdef QTOPIA_HOMEUI
+    actionViewFirstLast->setChecked(mViewIndex == 0);
+    actionViewLastFirst->setChecked(mViewIndex == 1);
+    actionSortLabel->setChecked(mSortIndex == 0);
+    actionSortCompany->setChecked(mSortIndex == 1);
+    actionFilterPresence->setChecked(mFilterPresence);
+#else
     actionSettings->setVisible(!details);
+#endif
 
-    actionSpeedDial->setVisible(details);
+    actionFavorites->setVisible(details);
     actionTrash->setVisible(details && editable);
-
-    if (mHasSim) {
-        if (mModel->isSIMCardContact(currentContact().uid())) {
-            actionExportSim->setVisible(false);
-            actionImportSim->setVisible(true);
-        } else {
-            actionExportSim->setVisible(true);
-            actionImportSim->setVisible(false);
-        }
-    }
 
     if (mModel->isPersonalDetails(currentContact().uid())) {
         actionResetPersonal->setVisible(details);
@@ -1062,15 +1191,18 @@ void AddressbookWindow::updateContextMenuIfDirty()
     actionNew->setVisible(showingContacts || details);
 
     /* group actions */
-    actionShowGroups->setVisible( showingContacts );
-    actionAddGroup->setVisible( showingGroups );
+    if(actionShowGroups)
+        actionShowGroups->setVisible( showingContacts );
+    if (actionAddGroup)
+        actionAddGroup->setVisible( showingGroups );
 #if defined(QTOPIA_TELEPHONY)
     actionSetRingTone->setVisible( showingGroups );
 #endif
-    actionRemoveGroup->setVisible( groupSelected && !groupSystem);
-    actionRenameGroup->setVisible( groupSelected && !groupSystem);
-    actionRemoveFromGroup->setVisible( showingFiltered && hasMembers);
-    actionAddMembers->setVisible( showingFiltered );
+    if (actionRemoveGroup) {
+        actionRemoveGroup->setVisible( groupSelected && !groupSystem);
+        actionRenameGroup->setVisible( groupSelected && !groupSystem);
+        actionManageMembers->setVisible( showingFiltered );
+    }
     /* end group actions */
 }
 
@@ -1108,8 +1240,12 @@ void AddressbookWindow::contactActivated(QContact c)
     if( !c.uid().isNull() ) {
         setCurrentContact(c);
         showDetailsView(true);
+#ifdef QTOPIA_HOMEUI
+    }
+#else
     } else
         createNewContact();
+#endif
 }
 
 void AddressbookWindow::showListView(bool saveState)
@@ -1199,7 +1335,7 @@ void AddressbookWindow::createGroupListView()
 
         connect(mGroupsListView, SIGNAL(groupHighlighted(QString)), this, SLOT(updateContextMenu()));
         connect(mGroupsListView, SIGNAL(groupActivated(QString)), this, SLOT(showCategory(QString)));
-        connect(mGroupsListView, SIGNAL(backClicked()), this, SLOT(previousView()));
+        connect(mGroupsListView, SIGNAL(closeView()), this, SLOT(previousView()));
 
         connect(actionAddGroup, SIGNAL(triggered()), mGroupsListView, SLOT(addGroup()));
 #if defined(QTOPIA_TELEPHONY)
@@ -1207,8 +1343,7 @@ void AddressbookWindow::createGroupListView()
 #endif
         connect(actionRemoveGroup, SIGNAL(triggered()), mGroupsListView, SLOT(removeCurrentGroup()));
         connect(actionRenameGroup, SIGNAL(triggered()), mGroupsListView, SLOT(renameCurrentGroup()));
-        connect(actionRemoveFromGroup, SIGNAL(triggered()), this, SLOT(removeContactFromCurrentGroup()));
-        connect(actionAddMembers, SIGNAL(triggered()), mGroupsListView, SLOT(editCurrentGroup()));
+        connect(actionManageMembers, SIGNAL(triggered()), mGroupsListView, SLOT(editCurrentGroup()));
 
         centralView->addWidget(mGroupsListView);
     }
@@ -1222,10 +1357,10 @@ void AddressbookWindow::createGroupMemberView()
 
         connect(mGroupMemberView, SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(currentContactSelectionChanged()));
         connect(mGroupMemberView, SIGNAL(contactActivated(QContact)), this, SLOT(contactActivated(QContact)));
-        connect(mGroupMemberView, SIGNAL(backClicked()), this, SLOT(previousView()));
+        connect(mGroupMemberView, SIGNAL(closeView()), this, SLOT(previousView()));
 
 #ifdef QTOPIA_CELL
-        mGroupMemberView->showLoadLabel(mShowSimLabel);
+        updateLoadLabel();
 #endif
 
         mGroupMemberView->installEventFilter(this);
@@ -1263,14 +1398,14 @@ QString AddressbookWindow::pickEmailAddress(QStringList emails)
     return QString();
 }
 
-int AddressbookWindow::pickSpeedDialType(QStringList emails, QMap<QContact::PhoneType,QString> numbers)
+int AddressbookWindow::pickFavoritesType(QStringList emails, QMap<QContact::PhoneType,QString> numbers)
 {
     // Provide a list of choices of things to add...
     QDialog diag;
     Ui::ActionDialog ui;
     ui.setupUi(&diag);
 
-    diag.setWindowTitle(tr("Add to Speed Dial"));
+    diag.setWindowTitle(tr("Add to Favorites"));
     QtopiaApplication::setMenuLike(&diag, true);
     ui.actionList->setItemDelegate(new QtopiaItemDelegate());
 
@@ -1311,7 +1446,15 @@ int AddressbookWindow::pickSpeedDialType(QStringList emails, QMap<QContact::Phon
     return -1;
 }
 
-bool AddressbookWindow::updateSpeedDialPhoneServiceDescription(QtopiaServiceDescription* desc, const QContact& ent, QContact::PhoneType phoneType, bool isSms)
+/*
+ * Note: Below functions generate service description labels that
+ * are no longer very descriptive. This is intentional as there
+ * is only enough room on the screen for the name and so the
+ * description of the action is now expected to be interpreted
+ * solely from the icon.
+ */
+
+bool AddressbookWindow::updateFavoritesPhoneServiceDescription(QtopiaServiceDescription* desc, const QContact& ent, QContact::PhoneType phoneType, bool isSms)
 {
     QString number = ent.phoneNumber(phoneType);
     if (!number.simplified().isEmpty()) {
@@ -1346,13 +1489,13 @@ bool AddressbookWindow::updateSpeedDialPhoneServiceDescription(QtopiaServiceDesc
         if (isSms) {
             QtopiaServiceRequest req = QtopiaServiceRequest("SMS", "writeSms(QString,QString)");
             req << ent.label() << number;
-            desc->setLabel(tr("Text %1 (%2)", "Text Mr Jones (12345)").arg(ent.label()).arg(number)); // no tr
+            desc->setLabel(tr("%1 (%2)", "Mr Jones (12345)").arg(ent.label()).arg(number)); // no tr
             desc->setOptionalProperty("addressbook-action", QString("text"));
             desc->setRequest(req);
         } else {
             QtopiaServiceRequest req = QtopiaServiceRequest("Dialer", "dial(QString,QUniqueId)");
             req << number << ent.uid();
-            desc->setLabel(tr("Call %1 (%2)", "Call Mr Jones").arg(ent.label()).arg(number));
+            desc->setLabel(tr("%1 (%2)", "Mr Jones (12345)").arg(ent.label()).arg(number));
             desc->setOptionalProperty("addressbook-action", QString("call")); // no tr
             desc->setRequest(req);
         }
@@ -1361,12 +1504,12 @@ bool AddressbookWindow::updateSpeedDialPhoneServiceDescription(QtopiaServiceDesc
     return false;
 }
 
-bool AddressbookWindow::updateSpeedDialEmailServiceDescription(QtopiaServiceDescription *desc, const QContact &ent, const QString& emailAddress)
+bool AddressbookWindow::updateFavoritesEmailServiceDescription(QtopiaServiceDescription *desc, const QContact &ent, const QString& emailAddress)
 {
     if (!emailAddress.simplified().isEmpty()) {
         QtopiaServiceRequest req = QtopiaServiceRequest("Email", "writeMail(QString,QString)");
         req << ent.label() << emailAddress;
-        desc->setLabel(tr("Email %1 (%2)", "Email Mr Jones").arg(ent.label()).arg(emailAddress));
+        desc->setLabel(tr("%1 (%2)", "Mr Jones (jones@xyz.com)").arg(ent.label()).arg(emailAddress));
         desc->setIconName("email"); // no tr
         desc->setOptionalProperty("addressbook-contactid", QVariant::fromValue(ent.uid())); // no tr
         desc->setOptionalProperty("addressbook-action", QString("email")); // no tr
@@ -1378,11 +1521,11 @@ bool AddressbookWindow::updateSpeedDialEmailServiceDescription(QtopiaServiceDesc
     return false;
 }
 
-bool AddressbookWindow::updateSpeedDialViewServiceDescription(QtopiaServiceDescription *desc, const QContact& ent)
+bool AddressbookWindow::updateFavoritesViewServiceDescription(QtopiaServiceDescription *desc, const QContact& ent)
 {
     QtopiaServiceRequest req = QtopiaServiceRequest("Contacts", "showContact(QUniqueId)");
     req << ent.uid();
-    desc->setLabel(tr("View details of %1", "View details of Mr Jones").arg(ent.label()));
+    desc->setLabel(ent.label());
     desc->setOptionalProperty("addressbook-contactid", QVariant::fromValue(ent.uid())); // no tr
     desc->setOptionalProperty("addressbook-action", QString("view"));
     desc->setIconName("view"); // no tr
@@ -1390,14 +1533,14 @@ bool AddressbookWindow::updateSpeedDialViewServiceDescription(QtopiaServiceDescr
     return true;
 }
 
-void AddressbookWindow::addToSpeedDial()
+void AddressbookWindow::addToFavorites()
 {
     QContact ent = currentContact();
     if ( !ent.uid().isNull() ) {
         QMap<QContact::PhoneType, QString> numbers = ent.phoneNumbers();
         QStringList emails = ent.emailList();
 
-        int type = pickSpeedDialType(emails, numbers);
+        int type = pickFavoritesType(emails, numbers);
         if (type != -1) {
             QtopiaServiceDescription desc;
             bool validSD = false;
@@ -1418,7 +1561,7 @@ void AddressbookWindow::addToSpeedDial()
                         } else {
                             ptype = numbers.begin().key();
                         }
-                        validSD = updateSpeedDialPhoneServiceDescription(&desc, ent, ptype, type == Text);
+                        validSD = updateFavoritesPhoneServiceDescription(&desc, ent, ptype, type == Text);
                         break;
                     }
 
@@ -1426,44 +1569,45 @@ void AddressbookWindow::addToSpeedDial()
                     {
                         QString email = pickEmailAddress(emails);
 
-                        validSD = updateSpeedDialEmailServiceDescription(&desc, ent, email);
+                        validSD = updateFavoritesEmailServiceDescription(&desc, ent, email);
                         break;
                     }
 
                 case View:
                     {
-                        validSD = updateSpeedDialViewServiceDescription(&desc, ent);
+                        validSD = updateFavoritesViewServiceDescription(&desc, ent);
                         break;
                     }
             }
 
             if (validSD) {
-                QString speedDialInput = QSpeedDial::addWithDialog( desc.label(), desc.iconName(), desc.request(), this);
-                if ( !speedDialInput.isEmpty() ) {
-                    QSpeedDial::set(speedDialInput, desc);
-                }
+                QtopiaServiceRequest req("Favorites","addAndEdit(QtopiaServiceDescription)");
+                req << desc;
+                req.send();
             }
         }
     }
 }
 
-void AddressbookWindow::updateSpeedDialEntries(const QContact& cnt)
+void AddressbookWindow::updateFavoritesEntries(const QContact& cnt)
 {
     // We might need to adjust the label of the speed dial entry
     // and perhaps the number dialed (if not the type)
-    QList<QString> entries = QSpeedDial::assignedInputs();
-    foreach (QString s, entries) {
-        QtopiaServiceDescription *desc = QSpeedDial::find(s);
-
-        if (desc) {
+    QFavoriteServicesModel *favorites = new QFavoriteServicesModel(this);
+    for(int pos = 0; pos < favorites->rowCount(); pos++){
+        QModelIndex curIndex = favorites->index(pos);
+        QtopiaServiceDescription *desc =
+            new QtopiaServiceDescription(favorites->description(curIndex));
+        if (!desc->isNull()) {
             QUniqueId id = desc->optionalProperty("addressbook-contactid").value<QUniqueId>();
             bool validDesc = true;
             if (cnt.uid() == id) {
                 QString action = desc->optionalProperty("addressbook-action").toString();
 
                 if (action == "view") {
-                    updateSpeedDialViewServiceDescription(desc, cnt);
-                    QSpeedDial::set(s, *desc);
+                    updateFavoritesViewServiceDescription(desc, cnt);
+		    favorites->remove(curIndex);
+		    favorites->insert(curIndex,*desc);
                 } else if (action == "call" || action == "text") {
                     // Ick.  If they now have no numbers, delete this entry
                     if (cnt.defaultPhoneNumber().isEmpty()) {
@@ -1507,7 +1651,7 @@ void AddressbookWindow::updateSpeedDialEntries(const QContact& cnt)
                                 }
                             }
                         }
-                        validDesc = updateSpeedDialPhoneServiceDescription(desc, cnt, type, sms);
+                        validDesc = updateFavoritesPhoneServiceDescription(desc, cnt, type, sms);
                     }
                 } else if (action == "email") {
                     // If they don't have an email address any more, we delete this entry
@@ -1517,37 +1661,92 @@ void AddressbookWindow::updateSpeedDialEntries(const QContact& cnt)
                         // See if the previous email address exists...
                         QString oldemail = desc->optionalProperty("addressbook-emailaddress").toString();
                         if (!cnt.emailList().contains(oldemail))
-                            validDesc = updateSpeedDialEmailServiceDescription(desc, cnt, cnt.defaultEmail()); // Hmm.. just pick the default email
+                            validDesc = updateFavoritesEmailServiceDescription(desc, cnt, cnt.defaultEmail()); // Hmm.. just pick the default email
                         else
-                            validDesc = updateSpeedDialEmailServiceDescription(desc, cnt, oldemail);
+                            validDesc = updateFavoritesEmailServiceDescription(desc, cnt, oldemail);
                     }
                 } else {
                     validDesc = false;
                 }
 
-                if (validDesc)
-                    QSpeedDial::set(s, *desc);
-                else
-                    QSpeedDial::remove(s);
+                if (validDesc){
+                    QString oldSpeedDial = favorites->speedDialInput(curIndex);
+                    int oldRow = curIndex.row();
+		    favorites->remove(curIndex);
+		    favorites->insert(favorites->index(oldRow), *desc);
+                    if (!oldSpeedDial.isEmpty()){
+                        QSpeedDial::set(oldSpeedDial,*desc);
+                    }
+		}else{
+		    if(favorites->remove(curIndex))
+                        pos--;
+		}
             }
         }
+        delete desc;
     }
 }
 
-void AddressbookWindow::removeSpeedDialEntries(const QContact& cnt)
+void AddressbookWindow::removeChatSubscriptions(const QContact& cnt)
 {
-    QList<QString> entries = QSpeedDial::assignedInputs();
-    foreach (QString s, entries) {
-        QtopiaServiceDescription *desc = QSpeedDial::find(s);
+    /* Find any chat addresses that this contact has */
+    QStringList chatFields = QContactFieldDefinition::fields("chat");
 
-        if (desc) {
+    foreach (QString field, chatFields) {
+        QContactFieldDefinition def(field);
+
+        if (!def.value(cnt).toString().isEmpty())
+            removeChatAddress(def, cnt);
+    }
+}
+
+void AddressbookWindow::removeChatAddress(const QContactFieldDefinition& def, const QContact& cnt)
+{
+    /*
+        See if any other contacts use this address - this is always called after
+        mModel->removeContact on this contact has been called.
+    */
+    QString provider = def.provider();
+    QString uri = def.value(cnt).toString();
+
+    QContact other = mModel->matchChatAddress(uri, provider);
+
+    if (!provider.isEmpty() && other.uid().isNull()) {
+        QCollectivePresence p(provider);
+        p.unsubscribePeer(uri);
+
+        // Also, unsubscribe this person from our presence
+        p.denyPeer(uri);
+    }
+}
+
+void AddressbookWindow::addChatAddress(const QContactFieldDefinition& def, const QContact& cnt)
+{
+    QString provider = def.provider();
+
+    if (!provider.isEmpty()) {
+        QCollectivePresence p(provider);
+        p.subscribePeer(def.value(cnt).toString());
+    }
+}
+
+void AddressbookWindow::removeFavoritesEntries(const QContact& cnt)
+{
+    QFavoriteServicesModel *favorites = new QFavoriteServicesModel(this);
+    for(int pos = 0; pos < favorites->rowCount(); pos++){
+        QModelIndex curIndex = favorites->index(pos);
+        QtopiaServiceDescription *desc = new QtopiaServiceDescription(favorites->description(curIndex));
+
+        if (!desc->isNull()) {
             QUniqueId id = desc->optionalProperty("addressbook-contactid").value<QUniqueId>();
 
             if (cnt.uid() == id) {
                 // Belongs to us, so nuke it from orbit
-                QSpeedDial::remove(s);
+                if(favorites->remove(curIndex))
+                    pos--;
             }
         }
+        delete desc;
     }
 }
 
@@ -1633,7 +1832,8 @@ void AddressbookWindow::deleteContact()
         QUniqueId victim = currentContact().uid();
         QModelIndex idx = mModel->index(victim);
         mModel->removeContact( currentContact() );
-        removeSpeedDialEntries(currentContact());
+        removeFavoritesEntries(currentContact());
+        removeChatSubscriptions(currentContact());
 
         // Try to select the same row (or the last..)
         if (idx.row() >= mModel->rowCount())
@@ -1771,6 +1971,20 @@ void AddressbookWindow::editCurrentContact()
     }
 }
 
+void AddressbookWindow::updateEditDetails(const QContact &contact)
+{
+#ifndef QTOPIA_HOMEUI
+    if (abFullEditor->isVisible()) {
+        if (abFullEditor->entry().uid() == contact.uid())
+            abFullEditor->setEntry(contact, false);
+    } else {
+        editEntry(contact);
+    }
+#else
+    editEntry(contact);
+#endif
+}
+
 /*
   Show item defined by uid, then close once user goes back.
 */
@@ -1811,7 +2025,7 @@ void AddressbookWindow::addPhoneNumberToContact(const QString& phoneNumber)
         pts.showMaximized();
         if(QtopiaApplication::execDialog(&pts)) {
             pts.updateContact(cnt, phoneNumber);
-            mModel->updateContact( cnt );
+            updateContact( cnt );
         }
     }
 }
@@ -1877,6 +2091,27 @@ void AddressbookWindow::setContactImage(const QString& filename)
     }
 }
 
+// hacky static bool
+static bool newPersonal = false;
+
+void AddressbookWindow::setPersonalImage(const QString& filename)
+{
+    if (mModel->hasPersonalDetails()) {
+        QContact contact = mModel->personalDetails();
+        contact.changePortrait(filename);
+        mModel->updateContact(contact);
+    } else {
+        newPersonal = true;
+        QContact contact;
+        contact.changePortrait(filename);
+        newEntry(contact);
+
+        if (!mModel->hasPersonalDetails())
+            contact.changePortrait(QImage());
+    }
+    newPersonal = false;
+}
+
 void AddressbookWindow::createNewContact(const QString& phoneNumber)
 {
     QContact cnt;
@@ -1892,6 +2127,7 @@ void AddressbookWindow::createNewContact(const QString& phoneNumber)
 void AddressbookWindow::appMessage(const QString &msg, const QByteArray &data)
 {
     /*@ \service Contacts
+    \inpublicgroup QtPimModule
     This service provides simple operations on the addressbook that
     are usefully invoked from outside the application.
     */
@@ -1906,53 +2142,13 @@ void AddressbookWindow::appMessage(const QString &msg, const QByteArray &data)
 }
 
 #ifdef QTOPIA_CELL
-void AddressbookWindow::simInserted()
-{
-    if (!mGotSimEntries) {
-        if( mHasSim )
-        {
-            /* See if the sim is in the list of visible sources.
-               Since 4.3 has multiple sim sources under the sim context,
-               we take a slightly convoluted approach, since we can't access
-               the sim context directly.
-               */
-            QSet<QPimSource> vis = mModel->visibleSources();
-            QUuid simContext = mModel->simSource().context;
-            bool showLabel = false;
-            foreach (QPimSource p, vis) {
-                if (p.context == simContext) {
-                    showLabel = true;
-                    break;
-                }
-            }
-            if (showLabel) {
-                mShowSimLabel = true;
-                mListView->showLoadLabel(true);
-                if (mGroupMemberView)
-                    mGroupMemberView->showLoadLabel(true);
-            }
-        }
-    }
-}
 
-void AddressbookWindow::simNotInserted()
+void AddressbookWindow::updateLoadLabel()
 {
-    mGotSimEntries = false;
-    mShowSimLabel = false;
-    mListView->showLoadLabel(false);
+    bool showLabel = mModel->loadingSim();
+    mListView->showLoadLabel(showLabel);
     if (mGroupMemberView)
-        mGroupMemberView->showLoadLabel(false);
-}
-
-void AddressbookWindow::phoneBookUpdated(const QString& store)
-{
-    if ( store == "SM" ) {        // No tr
-        mGotSimEntries = true;
-        mShowSimLabel = false;
-        mListView->showLoadLabel(false);
-        if (mGroupMemberView)
-            mGroupMemberView->showLoadLabel(false);
-    }
+        mGroupMemberView->showLoadLabel(showLabel);
 }
 
 void AddressbookWindow::vcardDatagram( const QByteArray& data )
@@ -1966,6 +2162,7 @@ void AddressbookWindow::vcardDatagram( const QByteArray& data )
 
     if( vcardContacts.count() > 0 )
     {
+        // XXX I18N silliness
         if( vcardContacts.count() == 1 )
         {
             question = tr("<qt>Contact \"%1\" received. Add to "
@@ -1989,11 +2186,10 @@ void AddressbookWindow::vcardDatagram( const QByteArray& data )
                 newEntry = vcardContacts[n];
 
                 NameLearner learner(newEntry);
-                QUniqueId ui = mModel->addContact(newEntry);
+
+                addContact(newEntry);
 
                 updateContextMenu();
-                //abList->reload();
-                //abList->setCurrentEntry(ui);
             }
         }
     }
@@ -2019,9 +2215,6 @@ void AddressbookWindow::showPersonalView()
     setCurrentContact( me );
     showDetailsView(false);
 }
-
-// hacky static bool
-static bool newPersonal = false;
 
 void AddressbookWindow::editPersonal()
 {
@@ -2073,21 +2266,16 @@ void AddressbookWindow::newEntry()
 
 AbEditor *AddressbookWindow::editor(const QUniqueId &id)
 {
-#ifdef QTOPIA_CELL
-    if (mModel->isSIMCardContact(id)) {
-        if (!abSimEditor)
-            abSimEditor = new AbSimEditor;
-        return abSimEditor;
-    }
-    else
-#else
     Q_UNUSED(id);
+#ifdef QTOPIA_HOMEUI
+    if (!dpEditor)
+        dpEditor = new DeskphoneEditor;
+    return dpEditor;
+#else
+    if (!abFullEditor)
+        abFullEditor = new AbFullEditor;
+    return abFullEditor;
 #endif
-    {
-        if (!abFullEditor)
-            abFullEditor = new AbFullEditor;
-        return abFullEditor;
-    }
 }
 
 void AddressbookWindow::updateDependentAppointments(const QContact& src, AbEditor* editor)
@@ -2123,15 +2311,14 @@ void AddressbookWindow::newEntry( const QContact &cnt )
     QContact entry = cnt;
     AbEditor *abEditor = editor(cnt.uid());
 
-    abEditor->setEntry( entry, true );
+    abEditor->setEntry(entry, true);
 
-    if( abEditor->exec() == QDialog::Accepted )
-    {
+    if (QtopiaApplication::execDialog(abEditor) == QDialog::Accepted) {
         setFocus();
         QContact newEntry(abEditor->entry());
 
         NameLearner learner(newEntry);
-        QUniqueId ui = mModel->addContact(newEntry);
+        QUniqueId ui = addContact(newEntry);
         newEntry.setUid(ui);
         if(newPersonal)
             mModel->setPersonalDetails(ui);
@@ -2141,36 +2328,98 @@ void AddressbookWindow::newEntry( const QContact &cnt )
     }
 }
 
+QUniqueId AddressbookWindow::addContact(const QContact &contact)
+{
+    QUniqueId id;
+
+    // Process any chat addresses
+    QStringList chatFields = QContactFieldDefinition::fields("chat");
+
+    foreach(QString field, chatFields) {
+        QContactFieldDefinition def(field);
+        QString newChat = def.value(contact).toString();
+
+        if (!newChat.isEmpty())
+            addChatAddress(def, contact);
+    }
+
+    // Now add it (if these fail, the presence subscription might recreate the contact)
+    id = mModel->addContact(contact, mModel->simSource());
+    if (id.isNull())
+        return mModel->addContact(contact);
+    return id;
+}
+
+void AddressbookWindow::updateContact(const QContact &c)
+{
+    if (!mModel->updateContact(c) && mModel->isSimCardContact(c.uid()))
+    {
+        if (QMessageBox::question(this, tr("SIM Full"),
+                    tr("<qt>This contact will no longer fit on the SIM "
+                        "card, are you sure you want to apply "
+                        "these changes?</qt>"),
+                    QMessageBox::Yes, QMessageBox::No)
+                == QMessageBox::No)
+        {
+            return;
+        }
+
+        mModel->removeContact(c.uid());
+        mModel->addContact(c, mModel->defaultSource());
+    }
+    updateFavoritesEntries(c);
+}
+
 void AddressbookWindow::editEntry( const QContact &cnt )
 {
     QContact entry = cnt;
     AbEditor *abEditor = editor(cnt.uid());
 
-    abEditor->setEntry( entry, false);
+    abEditor->setEntry(entry, false);
 
-    if( abEditor->exec() == QDialog::Accepted )
-    {
+    if (QtopiaApplication::execDialog(abEditor) == QDialog::Accepted) {
         setFocus();
-        QContact editedEntry( abEditor->entry() );
+        QContact editedEntry(abEditor->entry());
 
-        if( !(entry == editedEntry)) {
+        if (!(entry == editedEntry)) {
             // only do update operations if the data has actually changed
             //regular contact, just update
             NameLearner learner(editedEntry);
-            mModel->updateContact(editedEntry);
-            updateSpeedDialEntries(editedEntry);
+            updateContact(editedEntry);
+
+            // Process any chat changes
+            QStringList chatFields = QContactFieldDefinition::fields("chat");
+
+            foreach(QString field, chatFields) {
+                QContactFieldDefinition def(field);
+                QString newChat = def.value(editedEntry).toString();
+                QString oldChat = def.value(entry).toString();
+
+                if (oldChat != newChat) {
+                    if (newChat.isEmpty()) {
+                        // Removed a chat address
+                        removeChatAddress(def, entry);
+                    } else if (oldChat.isEmpty()) {
+                        // Added a chat address
+                        addChatAddress(def, editedEntry);
+                    } else {
+                        // It changed..
+                        removeChatAddress(def, entry);
+                        addChatAddress(def, editedEntry);
+                    }
+                }
+            }
         }
 
         updateDependentAppointments(editedEntry, abEditor);
         setCurrentContact(editedEntry);
 
-        if( mDetailsView && centralView->currentWidget() == mDetailsView)
-        {
+        if (mDetailsView && centralView->currentWidget() == mDetailsView) {
             // don't call slotDetailView because with QDL that would push the same
             // entry onto the view stack again. just refresh
             // need to get entry again for contact list model data.
             editedEntry = mModel->contact(editedEntry.uid());
-            mDetailsView->init( editedEntry );
+            mDetailsView->init(editedEntry);
         }
     }
 }
@@ -2312,6 +2561,86 @@ void AddressbookWindow::configure()
     }
 }
 
+#ifdef QTOPIA_HOMEUI
+// Sorting slots
+void AddressbookWindow::viewFirstLast()
+{
+    QContact::setLabelFormat("title _ firstname _ lastname | firstname _ lastname | title _ firstname | firstname | title _ lastname | lastname | company");
+
+    mViewIndex = 0;
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "Sorting" );
+    config.setValue("Label", "firstlast");
+
+    setContextMenuDirty();
+}
+
+void AddressbookWindow::viewLastFirst()
+{
+    QContact::setLabelFormat("lastname , _ title _ firstname | lastname , _ firstname | lastname , _ title | lastname | title _ firstname | firstname | company");
+
+    mViewIndex = 1;
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "Sorting" );
+    config.setValue("Label", "lastfirst");
+
+    setContextMenuDirty();
+}
+
+void AddressbookWindow::sortLabel()
+{
+    // Sort by label
+    mSortIndex = 0;
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "Sorting" );
+    config.setValue("SortBy", "label");
+
+    mModel->sort(QContactModel::Label);
+    if (mListView)
+        mListView->setJumpField(QContactModel::Label);
+
+    setContextMenuDirty();
+}
+
+void AddressbookWindow::sortCompany()
+{
+    // Sort by company
+    mSortIndex = 1;
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "Sorting" );
+    config.setValue("SortBy", "company");
+
+    QList<QContactModel::SortField> sortList;
+    sortList << qMakePair(QContactModel::Company, Qt::AscendingOrder) << qMakePair(QContactModel::Department, Qt::AscendingOrder);
+
+    mModel->sort(sortList);
+    if (mListView)
+        mListView->setJumpField(QContactModel::Company);
+
+    setContextMenuDirty();
+}
+
+void AddressbookWindow::filterPresence()
+{
+    // Sort by presence
+    mFilterPresence = !mFilterPresence;
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "Sorting" );
+    config.setValue("hideUnavailable", mFilterPresence);
+
+    if (mFilterPresence) {
+        QList<QCollectivePresenceInfo::PresenceType> types;
+        types << QCollectivePresenceInfo::Online << QCollectivePresenceInfo::None; // Include people we know nothing about
+        mModel->setPresenceFilter(types);
+    } else {
+        mModel->clearPresenceFilter();
+    }
+
+    setContextMenuDirty();
+}
+
+#endif
+
 #ifdef QTOPIA_CELL
 void AddressbookWindow::smsBusinessCard()
 {
@@ -2352,62 +2681,6 @@ void AddressbookWindow::smsBusinessCard()
     close();
 }
 #endif // QTOPIA_CELL
-
-void AddressbookWindow::selectSources()
-{
-    ContactSourceDialog diag(this);
-    diag.setPimModel(mModel);
-    diag.showMaximized();
-
-    if (QtopiaApplication::execDialog(&diag)) {
-        QSet<QPimSource> set = mModel->visibleSources();
-        QSettings cfg( "Trolltech", "Contacts" );
-        cfg.beginGroup( "default" );
-        cfg.beginWriteArray("SelectedSources", set.count());
-        int i = 0;
-        foreach(QPimSource s, set) {
-            cfg.setArrayIndex(i++);
-            cfg.setValue("context", s.context.toString());
-            cfg.setValue("identity", s.identity);
-        }
-        cfg.endArray();
-    }
-}
-
-void AddressbookWindow::importAllFromSim()
-{
-    // won't work for 4.2, contexts id's have changed.
-    // possibly error checking would be required.
-    mModel->mirrorAll(mModel->simSource(), mModel->defaultSource());
-}
-
-void AddressbookWindow::exportAllToSim()
-{
-    // won't work for 4.2, contexts id's have changed.
-    // possibly error checking would be required.
-    if (!mModel->mirrorAll(mModel->defaultSource(), mModel->simSource())) {
-        QMessageBox::warning(this, tr("Contacts"),
-                tr("<qt>Could not export contacts to SIM Card.  Please ensure sufficient"
-                    " space is available on SIM Card.</qt>"));
-    }
-}
-
-void AddressbookWindow::importCurrentFromSim()
-{
-    if (!mModel->mirrorToSource(mModel->defaultSource(), currentContact().uid())) {
-        QMessageBox::warning(this, tr("Contacts"),
-                tr("<qt>Could not import contact.</qt>"));
-    }
-}
-
-void AddressbookWindow::exportCurrentToSim()
-{
-    if (!mModel->mirrorToSource(mModel->simSource(), currentContact().uid())) {
-        QMessageBox::warning(this, tr("Contacts"),
-                tr("<qt>Could not export contact to SIM Card.  Please ensure sufficient"
-                    " space is available on SIM Card for all numbers stored in contact.</qt>"));
-    }
-}
 
 void AddressbookWindow::qdlActivateLink( const QDSActionRequest& request )
 {
@@ -2569,20 +2842,6 @@ AbSourcesDialog::AbSourcesDialog(QWidget *parent, const QSet<QPimSource> &availS
     bothButton = new QRadioButton(tr("Both Phone and SIM"));
     bg->addButton(bothButton);
     layout->addWidget(bothButton);
-
-    QMenu* contextMenu = QSoftMenuBar::menuFor(this);
-
-    QAction *actionCopyFromSim = new QAction(QIcon(":icon/sync"), tr("Import from SIM"), this);
-    actionCopyFromSim->setWhatsThis(tr("Copy all entries from the SIM card to the Phone"));
-    connect(actionCopyFromSim, SIGNAL(triggered()), this, SIGNAL(importFromSimTriggered()));
-
-    QAction *actionCopyToSim = new QAction(QIcon(":icon/sync"), tr("Export to SIM"), this);
-    actionCopyToSim->setWhatsThis(tr("<qt>Copy all currently shown entries from the Phone to the SIM card. "
-                "Entries not shown due to category filtering will not be copied.</qt>"));
-    connect(actionCopyToSim, SIGNAL(triggered()), this, SIGNAL(exportToSimTriggered()));
-
-    contextMenu->addAction(actionCopyFromSim);
-    contextMenu->addAction(actionCopyToSim);
 }
 
 void AbSourcesDialog::setSources(const QSet<QPimSource> &sources)
@@ -2710,7 +2969,8 @@ QString AbDisplaySettings::format()
 
 /*!
     \service ContactsService Contacts
-    \brief Provides the Qtopia Contacts service.
+    \inpublicgroup QtPimModule
+    \brief The ContactsService class provides the Contacts service.
 
     The \i Contacts service enables applications to access features of
     the Contacts application.
@@ -2757,9 +3017,8 @@ void ContactsService::editPersonalAndClose()
 */
 void ContactsService::addContact(const QContact& contact)
 {
-    QContact c(contact);
-    NameLearner learner(c);
-    parent->mModel->addContact(c);
+    NameLearner learner(contact);
+    parent->addContact(contact);
 }
 
 /*!
@@ -2773,7 +3032,8 @@ void ContactsService::removeContact(const QContact& contact)
     QContact cnt( contact );
     parent->removeContactQDLLink( cnt );
     parent->mModel->removeContact( contact );
-    parent->removeSpeedDialEntries(contact);
+    parent->removeFavoritesEntries(contact);
+    parent->removeChatSubscriptions(contact);
 }
 
 /*!
@@ -2784,10 +3044,9 @@ void ContactsService::removeContact(const QContact& contact)
 */
 void ContactsService::updateContact(const QContact& contact)
 {
-    QContact c(contact);
-    NameLearner learner(c);
-    parent->mModel->updateContact(c);
-    parent->updateSpeedDialEntries(c);
+    NameLearner learner(contact);
+    parent->updateContact(contact);
+    parent->updateFavoritesEntries(contact);
 }
 
 /*!
@@ -2840,6 +3099,29 @@ void ContactsService::showContact(const QUniqueId& uid)
 {
     parent->showJustItem(uid);
     parent->raise();
+    parent->activateWindow();
+}
+
+/*!
+  Shows the list of contacts.
+
+  This slot corresponds to the QCop service message
+  \c{Contacts::showContacts()}.
+*/
+void ContactsService::showContacts()
+{
+    if (parent->isVisible())
+        parent->showListView(false);
+    else
+        parent->showMaximized();
+    parent->raise();
+    // Don't cover modal dialogs.
+    if (QApplication::activeModalWidget()) {
+        QApplication::activeModalWidget()->raise();
+        QApplication::activeModalWidget()->activateWindow();
+    } else {
+        parent->activateWindow();
+    }
 }
 
 /*!
@@ -2856,6 +3138,21 @@ void ContactsService::showContact(const QUniqueId& uid)
 void ContactsService::setContactImage(const QString& filename)
 {
     parent->setContactImage(filename);
+}
+
+/*!
+    Sets the image in \a filename as the portrait in the user's personal
+    contact details.
+
+    The file is owned by the application that sent it.  The Contacts
+    application will make a copy if it could later delete the image.
+
+    This slot corresponds to the QCop service message
+    \c{Contacts::setPersonalImage(QString)}.
+*/
+void ContactsService::setPersonalImage(const QString& filename)
+{
+    parent->setPersonalImage(filename);
 }
 
 /*!
@@ -2906,8 +3203,77 @@ void ContactsService::requestLinks( const QDSActionRequest& request )
 }
 
 /*!
+    If the edit contact dialog is closed, or open to a contact with
+    the same identifier as the given \a contact then update the
+    details of the contact edit dialog to reflect the data
+    in the given \a contact.
+*/
+void ContactsService::updateEditDetails(const QContact &contact)
+{
+    parent->updateEditDetails(contact);
+}
+
+
+
+/*!
+    A request to add the current user as a subscribed presence
+    has been received.
+
+    The \a provider corresponds to the QCollectivePresence
+    service provider with that name.  Each of the pending
+    publish requests are processed.
+
+    This slot corresponds to the QCop service message
+    \c{Contacts::peerPublishRequest(QString)
+*/
+void ContactsService::peerPublishRequest(const QString& provider)
+{
+    /*
+        Unfortunately, we get multiple of these requests at a time, so this is reentrant.
+        Authorizing/denying a uri can result in another change signal, which results in
+        another peerPublishRequest.
+    */
+    static QSet<QPair<QString, QString> > pending;
+    static bool inUse = false;
+
+    // Add this providers URIs to the set
+    QCollectivePresence p(provider);
+    foreach(QString s, p.pendingPublishRequests()) {
+        pending.insert(qMakePair(provider, s));
+    }
+    // And see if anyone is already annoying the user
+    if (!inUse) {
+        inUse = true;
+
+        while(pending.count() > 0) {
+            QPair<QString,QString> pair = *pending.begin();
+
+            QCollectivePresence presenceProvider(pair.first);
+
+            if (presenceProvider.pendingPublishRequests().contains(pair.second)) {
+                // Ask the user whether they want to allow this person to subscribe..
+                QMessageBox box( tr("Contacts"), tr("A user (%1) has requested access to your presence information.  Do you want to allow them to know when you are availale?").arg(pair.second), QMessageBox::Question,
+                        QMessageBox::Yes | QMessageBox::Default,
+                        QMessageBox::No, QMessageBox::NoButton, 0,
+                        Qt::Dialog | Qt::WindowStaysOnTopHint);
+
+                if(box.exec() == QMessageBox::Yes) {
+                    p.authorizePeer(pair.second);
+                } else {
+                    p.denyPeer(pair.second);
+                }
+            }
+            pending.remove(pair);
+        }
+
+        inUse = false;
+    }
+}
+
+/*!
     \service ContactsPhoneService ContactsPhone
-    \brief Provides the Qtopia ContactsPhone service.
+    \inpublicgroup QtPimModule
+    \brief The ContactsPhoneService class provides the ContactsPhone service.
 
     The \i ContactsPhone service enables applications to access phone-specific
     features of the Contacts application.

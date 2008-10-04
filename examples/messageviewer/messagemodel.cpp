@@ -1,29 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "messagemodel.h"
 #include "messagedelegate.h"
 #include <QIcon>
-#include <QMailId>
-#include <QMailMessage>
+#include <QMailMessageId>
+#include <QMailMessageMetaData>
 #include <QMailMessageKey>
 #include <QMailMessageSortKey>
 #include <QMailStore>
@@ -36,16 +34,16 @@
 class MessageItem : public QStandardItem
 {
 public:
-    explicit MessageItem(const QMailId& id);
+    explicit MessageItem(const QMailMessageId& id);
     virtual ~MessageItem();
 
-    QMailId messageId() const;
+    QMailMessageId messageId() const;
 
 private:
-    QMailId id;
+    QMailMessageId id;
 };
 
-MessageItem::MessageItem(const QMailId& id)
+MessageItem::MessageItem(const QMailMessageId& id)
     : QStandardItem(), id(id)
 {
     static QIcon sentMessageIcon(":icon/qtmail/sendmail");
@@ -53,9 +51,10 @@ MessageItem::MessageItem(const QMailId& id)
     static QIcon smsIcon(":icon/txt");
     static QIcon mmsIcon(":icon/multimedia");
     static QIcon emailIcon(":icon/email");
+    static QIcon instantIcon(":icon/im");
 
-    // Load the header for this message
-    QMailMessage message(id, QMailMessage::Header);
+    // Load the meta data for this message
+    QMailMessageMetaData message(id);
 
     // Determine the properties we want to display
     QIcon* messageIcon = &smsIcon;
@@ -63,6 +62,8 @@ MessageItem::MessageItem(const QMailId& id)
         messageIcon = &mmsIcon;
     if (message.messageType() == QMailMessage::Email)
         messageIcon = &emailIcon;
+    if (message.messageType() == QMailMessage::Instant)
+        messageIcon = &instantIcon;
 
     bool sent(message.status() & QMailMessage::Outgoing);
 
@@ -84,7 +85,7 @@ MessageItem::~MessageItem()
 {
 }
 
-QMailId MessageItem::messageId() const
+QMailMessageId MessageItem::messageId() const
 {
     return id;
 }
@@ -103,6 +104,11 @@ void MessageModel::setContact(const QContact& contact)
 {
     clear();
 
+    if (contact.phoneNumbers().isEmpty() && contact.emailList().isEmpty()) {
+        // Nothing to match for this contact
+        return;
+    }
+
     // Locate messages whose sender is this contact
     QMailMessageKey msgsFrom;
 
@@ -112,32 +118,37 @@ void MessageModel::setContact(const QContact& contact)
     // Match on any of contact's phone numbers
     foreach(const QString& number, contact.phoneNumbers().values()) {
         msgsFrom |= QMailMessageKey(QMailMessageKey::Sender, number);
-        msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, number, QMailMessageKey::Contains);
+        msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, number, QMailDataComparator::Includes);
     }
 
     // Match on any of contact's email addresses
     foreach(const QString& address, contact.emailList()) {
         msgsFrom |= QMailMessageKey(QMailMessageKey::Sender, address);
-        msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, address, QMailMessageKey::Contains);
+        msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, address, QMailDataComparator::Includes);
     }
 
     // Sort messages by timestamp, newest to oldest
     QMailMessageSortKey sort(QMailMessageSortKey::TimeStamp, Qt::DescendingOrder);
 
     // Fetch the messages matching either of our queries, and return them sorted
-    QMailIdList matches(QMailStore::instance()->queryMessages(msgsFrom | msgsTo, sort));
+    QMailMessageIdList matches(QMailStore::instance()->queryMessages(msgsFrom | msgsTo, sort));
 
     // Add each returned message to our data model
-    foreach (const QMailId& id, matches)
+    foreach (const QMailMessageId& id, matches)
         appendRow(new MessageItem(id));
 }
 
-QMailId MessageModel::messageId(const QModelIndex& index)
+bool MessageModel::isEmpty() const
+{
+    return (rowCount() == 0);
+}
+
+QMailMessageId MessageModel::messageId(const QModelIndex& index)
 {
     if (index.isValid())
         if (MessageItem* item = static_cast<MessageItem*>(itemFromIndex(index)))
             return item->messageId();
 
-    return QMailId();
+    return QMailMessageId();
 }
 

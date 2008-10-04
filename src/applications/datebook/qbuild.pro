@@ -1,0 +1,13 @@
+TEMPLATE=app
+CONFIG+=qtopia
+TARGET=datebook
+
+QTOPIA*=pim
+CONFIG+=quicklaunch singleexec
+
+include(datebook.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

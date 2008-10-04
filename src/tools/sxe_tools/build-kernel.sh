@@ -70,8 +70,9 @@ ln -sf $LINUX linux
 ln -sf $LIDS lids
 
 cd $TOP/$LINUX                                 || die "cd $LINUX"
+
+#apply apprpriate set of kernel patches
 patch -p1 < $TOP/$LIDS/$LIDS.patch             || die "applying patch $TOP/$LIDS/$LIDS.patch"
-patch -p1 < $SXE/lids_trolltech.patch          || die "applying patch $SXE/lids_trollech.patch"
 
 cp $SXE/configs/lids-vm-$LINUX.config .config  || die "copy $SXE/configs/lids-vm-$LINUX.config"
 

@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QSignalSource Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QSignalSource Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QSignalSource class provides access to information about signal sources on devices. <a href="#details">More...</a></p>
 <pre>    #include &lt;QSignalSource&gt;</pre><p>Inherits <a href="qhardwareinterface.html">QHardwareInterface</a>.</p>
 <p>Inherited by <a href="qsignalsourceprovider.html">QSignalSourceProvider</a>.</p>
@@ -61,7 +62,7 @@
 <h2>Detailed Description</h2>
 <p>The QSignalSource class provides access to information about signal sources on devices.</p>
 <p>Signal sources are accessories that provide radio signal details to Qtopia. A signal source could be an internal modem monitoring the GSM/3G network signal or a wireless LAN interface on VoIP devices as indicated by <a href="qsignalsource.html#type">type</a>(). QSignalSource allows applications to query the availability through <a href="qsignalsource.html#availability">availability</a>(), the signal level through <a href="qsignalsource.html#signalStrength">signalStrength</a>() and emits signals <a href="qsignalsource.html#availabilityChanged">availabilityChanged</a>() and <a href="qsignalsource.html#signalStrengthChanged">signalStrengthChanged</a>() when those values change.</p>
-<p>In addition to the above hardware related signal sources Qtopia provides a virtual default signal source. This default source is selected from the list of available QSignalSource providers. The selection may be configured in the <tt>Trolltech/HardwareAccessories</tt> configuration file. The following keys apply:</p>
+<p>In addition to the above hardware related signal sources Qt Extended provides a virtual default signal source. This default source is selected from the list of available QSignalSource providers. The selection may be configured in the <tt>Trolltech/HardwareAccessories</tt> configuration file. The following keys apply:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>key</th><th>Decription</th></tr></thead>
 <tr valign="top" class="odd"><td>SignalSources/DefaultSignalSource</td><td>Name (ID) of the QSignalSource to use as the default signal source.</td></tr>
@@ -92,7 +93,7 @@
             <span class="comment">//no signal source available at all</span>
         }
     }</pre>
-<p>New signal sources can be added to Qtopia via the <a href="qsignalsourceprovider.html">QSignalSourceProvider</a> class.</p>
+<p>New signal sources can be added to Qt Extended via the <a href="qsignalsourceprovider.html">QSignalSourceProvider</a> class.</p>
 <p>See also <a href="qsignalsourceprovider.html">QSignalSourceProvider</a>, <a href="qhardwaremanager.html">QHardwareManager</a>, and <a href="defaultsignal.html">DefaultSignal</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -123,8 +124,8 @@
 <p>Returns the type of the signal source, e.g&#x2e; <tt>&quot;wlan&quot;</tt>, <tt>&quot;modem&quot;</tt>, or an empty string if this signal source is invalid.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

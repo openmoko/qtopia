@@ -1,6 +1,8 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=photoedit
 CONFIG+=qtopia_main
+}
 
 HEADERS    = photoeditui.h \
                 imageviewer.h \
@@ -14,7 +16,12 @@ HEADERS    = photoeditui.h \
                 editor/imageio.h \
                 slideshow/slideshowui.h \
                 slideshow/slideshowdialog.h \
-                slideshow/slideshow.h
+                slideshow/slideshow.h \
+                colorpicker.h \
+                effectdialog.h \
+                effectmodel.h \
+                effectsettingswidget.h \
+                photoediteffect.h
 
 SOURCES    = main.cpp \
                 photoeditui.cpp \
@@ -28,7 +35,12 @@ SOURCES    = main.cpp \
                 editor/imageio.cpp \
                 slideshow/slideshowui.cpp \
                 slideshow/slideshowdialog.cpp \
-                slideshow/slideshow.cpp
+                slideshow/slideshow.cpp \
+                colorpicker.cpp \
+                effectdialog.cpp \
+                effectmodel.cpp \
+                effectsettingswidget.cpp \
+                photoediteffect.cpp
 
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=photoedit*

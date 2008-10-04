@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="home" base="themes/smart">
   <group name="background">
-    <image name="background" rect="0,0,0,0" src="background" color="Highlight" tile="yes"/>
-    <plugin name="bgplugin"/>
+    <plugin name="background-plugin"/>
+    <plugin name="homescreen-image-plugin"/>
   </group>
     <text name="datetime" rect="0,11%,0x9pt" align="hcenter,vcenter" short ="yes" size="7" bold="yes" outline="#eeeeee">
         expr:@/UI/DisplayTime/Date . "  " . @/UI/DisplayTime/Time
@@ -22,8 +22,8 @@
       </text>
     </layout>
     <rect name="infobox" rect="5%,50%,90%x20%" color="#eeeeee" brush="#eeeeee" alpha="150" transient="yes" active="no">
-      <image name="infobox" rect="0,0,40x100%"/>
-      <text name="infobox" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter"/>
+      <image name="infobox-image" rect="0,0,40x100%"/>
+      <text name="infobox-text" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter"/>
     </rect>
     <layout name="pinbox" rect="0,21,0,0" orientation="vertical" transient="yes" active="no" keypad="no">
 	<rect name="pinbox" rect="0,0,0,40" color="#72715a" brush="Base">

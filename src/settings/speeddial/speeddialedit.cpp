@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "speeddialedit.h"
@@ -40,12 +38,10 @@ QSpeedDialEdit::QSpeedDialEdit( QWidget* parent, Qt::WFlags fl )
     vbLayout->setSpacing(0);
 
     list = new QSpeedDialList(this);
-    list->setFrameStyle(QFrame::NoFrame);
     vbLayout->addWidget(list);
 
     // Store original settings
-    for ( int i=0; i<list->count(); ++i ) {
-        QString input = list->rowInput( i );
+    foreach(QString input, QSpeedDial::possibleInputs()){
         QtopiaServiceDescription* desc = QSpeedDial::find( input );
         if ( desc != 0 )
             origSet[input] = *desc;
@@ -62,7 +58,13 @@ void QSpeedDialEdit::reject()
 {
     QMap<QString, QtopiaServiceDescription>::const_iterator setCit;
     for ( setCit = origSet.begin(); setCit != origSet.end(); ++setCit ) {
-        QSpeedDial::set( setCit.key(), setCit.value() );
+        QtopiaServiceDescription *found = QSpeedDial::find(setCit.key());
+        if(!found){
+            QSpeedDial::set( setCit.key(), setCit.value() );
+        } else if (!((*found) == setCit.value())) {
+            QSpeedDial::remove( setCit.key());
+            QSpeedDial::set( setCit.key(), setCit.value() );
+        }
     }
 
     QList<QString>::const_iterator emptyCit;

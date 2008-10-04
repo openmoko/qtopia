@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -49,7 +47,7 @@ void IRController::powerStateChanged(QCommDeviceController::PowerState state)
     emit stateChanged(m_st);
 }
 
-IRController::IRController(QObject* parent) : QObject(parent), m_device(0)
+IRController::IRController(QObject* parent) : QObject(parent), m_device(0), m_st(IRController::Off)
 {
     // Load protocols
     QString tdir = Qtopia::qtopiaDir()+"/etc/beam/targets";
@@ -81,6 +79,7 @@ IRController::IRController(QObject* parent) : QObject(parent), m_device(0)
         m_device = new QCommDeviceController(devices[0].toLatin1());
         connect(m_device, SIGNAL(powerStateChanged(QCommDeviceController::PowerState)),
                 SLOT(powerStateChanged(QCommDeviceController::PowerState)));
+        powerStateChanged(m_device->powerState());
     }
 }
 

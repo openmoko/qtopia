@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef Addressbook_H
@@ -27,8 +25,8 @@
 #include <QItemDelegate>
 
 #include <qcategorymanager.h>
-#include <qtopia/pim/qcontact.h>
-#include <qtopia/pim/qpimsource.h>
+#include <qcontact.h>
+#include <qpimsource.h>
 #include <qtopiaabstractservice.h>
 #include "qtopiaserviceselector.h"
 
@@ -53,7 +51,13 @@ class AbSimEditor;
 class GroupView;
 class ContactListPane;
 class ContactDetails;
+class DeskphoneContactDetails;
 class LoadIndicator;
+class QContactSimContext;
+#ifdef QTOPIA_HOMEUI
+class DeskphoneEditor;
+#endif
+class QContactFieldDefinition;
 
 class AddressbookWindow : public QMainWindow
 {
@@ -64,6 +68,9 @@ public:
     AddressbookWindow(QWidget *parent = 0, Qt::WFlags f = 0);
     virtual ~AddressbookWindow();
 
+    QUniqueId addContact(const QContact &c);
+    void updateContact(const QContact &c);
+
 protected:
     void resizeEvent(QResizeEvent * e);
     void newEntry();
@@ -72,10 +79,10 @@ protected:
     void keyPressEvent(QKeyEvent *);
     bool eventFilter(QObject *receiver, QEvent *e);
     QString pickEmailAddress(QStringList emails);
-    int pickSpeedDialType(QStringList emails, QMap<QContact::PhoneType,QString> numbers);
-    bool updateSpeedDialPhoneServiceDescription(QtopiaServiceDescription* desc, const QContact& ent, QContact::PhoneType phoneType, bool isSms);
-    bool updateSpeedDialEmailServiceDescription(QtopiaServiceDescription* desc, const QContact& ent, const QString& emailAddress);
-    bool updateSpeedDialViewServiceDescription(QtopiaServiceDescription* desc, const QContact& ent);
+    int pickFavoritesType(QStringList emails, QMap<QContact::PhoneType,QString> numbers);
+    bool updateFavoritesPhoneServiceDescription(QtopiaServiceDescription* desc, const QContact& ent, QContact::PhoneType phoneType, bool isSms);
+    bool updateFavoritesEmailServiceDescription(QtopiaServiceDescription* desc, const QContact& ent, const QString& emailAddress);
+    bool updateFavoritesViewServiceDescription(QtopiaServiceDescription* desc, const QContact& ent);
 public slots:
     void appMessage(const QString &, const QByteArray &);
     void setDocument(const QString &);
@@ -91,15 +98,21 @@ private slots:
     void sendContactCat();
     void deleteContact();
     void markCurrentAsPersonal();
-    void importCurrentFromSim();
-    void exportCurrentToSim();
-    void selectSources();
-    void addToSpeedDial();
+    void addToFavorites();
     void configure();
     void showPersonalView();
     void createNewContact();
     void previousView();
     void groupList();
+
+#ifdef QTOPIA_HOMEUI
+    // Sorting slots
+    void viewFirstLast();
+    void viewLastFirst();
+    void filterPresence();
+    void sortLabel();
+    void sortCompany();
+#endif
 
     // Details pane slots
     void callCurrentContact();
@@ -115,27 +128,26 @@ private slots:
     void addPhoneNumberToContact(const QString& phoneNumber);
     void createNewContact(const QString& phoneNumber);
     void setContactImage(const QString& filename);
+    void setPersonalImage(const QString& filename);
     void showCategory( const QString &);
     void updateContextMenu();
     void updateContextMenuIfDirty();
     void setContextMenuDirty();
     void setCurrentContact( const QContact &entry );
-    void importAllFromSim();
-    void exportAllToSim();
     void currentContactSelectionChanged();
     void loadMoreVcards();
     void cancelLoad();
 
     void removeContactFromCurrentGroup();
 #ifdef QTOPIA_CELL
-    void simInserted();
-    void simNotInserted();
-    void phoneBookUpdated(const QString&);
+    void updateLoadLabel();
 #endif
 
     void setContactImage( const QDSActionRequest& request );
     void qdlActivateLink( const QDSActionRequest& request );
     void qdlRequestLinks( const QDSActionRequest& request );
+
+    void updateEditDetails(const QContact &);
 
     void contactsChanged();
 
@@ -171,8 +183,12 @@ private:
     void updateGroupNavigation();
 
     void updateDependentAppointments(const QContact& src, AbEditor* editor);
-    void updateSpeedDialEntries(const QContact& c);
-    void removeSpeedDialEntries(const QContact& c);
+    void updateFavoritesEntries(const QContact& c);
+    void removeFavoritesEntries(const QContact& c);
+
+    void removeChatSubscriptions(const QContact& cnt);
+    void removeChatAddress(const QContactFieldDefinition& def, const QContact& cnt);
+    void addChatAddress(const QContactFieldDefinition& def, const QContact& cnt);
 
     bool checkSyncing();
 
@@ -184,11 +200,6 @@ private:
 
     bool mCloseAfterView;
     bool mHasSim;
-#ifdef QTOPIA_CELL
-    QSimInfo *mSimInfo;
-    bool mGotSimEntries;
-    bool mShowSimLabel;
-#endif
 
     mutable bool mContextMenuDirty;
 
@@ -197,12 +208,20 @@ private:
     ContactListPane *mListView;
     GroupView *mGroupsListView;
     ContactListPane *mGroupMemberView;
+#ifndef QTOPIA_HOMEUI
     ContactDetails *mDetailsView;
+#else
+    DeskphoneContactDetails *mDetailsView;
+#endif
 
     AbEditor *editor(const QUniqueId &);
+#ifdef QTOPIA_HOMEUI
+    DeskphoneEditor *dpEditor;
+#else
     AbFullEditor *abFullEditor;
 #ifdef QTOPIA_CELL
     AbSimEditor *abSimEditor;
+#endif
 #endif
 
     QAction *actionNew,
@@ -214,21 +233,29 @@ private:
             *actionAddGroup,
             *actionRemoveGroup,
             *actionRenameGroup,
-            *actionRemoveFromGroup,
-            *actionAddMembers;
+            *actionManageMembers;
 #if defined(QTOPIA_TELEPHONY)
     QAction *actionSetRingTone;
 #endif
 
     QAction *actionSetPersonal,
             *actionResetPersonal,
-            *actionSettings,
             *actionSend,
             *actionSendCat,
-            *actionShowSources,
-            *actionExportSim,
-            *actionImportSim,
-            *actionSpeedDial;
+            *actionFavorites;
+
+#ifdef QTOPIA_HOMEUI
+    QAction *actionViewFirstLast,
+            *actionViewLastFirst,
+            *actionFilterPresence,
+            *actionSortLabel,
+            *actionSortCompany;
+    int mViewIndex;
+    int mSortIndex;
+    bool mFilterPresence;
+#else
+    QAction *actionSettings;
+#endif
 
     bool syncing;
 
@@ -282,10 +309,6 @@ public:
     void setSources(const QSet<QPimSource> &sources);
     QSet<QPimSource> sources() const;
 
-signals:
-    void importFromSimTriggered();
-    void exportToSimTriggered();
-
 protected:
     void keyPressEvent(QKeyEvent* e);
 
@@ -320,10 +343,16 @@ public slots:
     void addPhoneNumberToContact(const QString& phoneNumber);
     void createNewContact(const QString& phoneNumber);
     void showContact(const QUniqueId& uid);
+    void showContacts();
     void setContactImage(const QString& filename);
     void setContactImage( const QDSActionRequest& request );
+    void setPersonalImage(const QString& filename);
     void activateLink( const QDSActionRequest& request );
     void requestLinks( const QDSActionRequest& request );
+    void peerPublishRequest(const QString& provider);
+
+    // for returns from 'external lookup' requests.
+    void updateEditDetails(const QContact &);
 
 private:
     AddressbookWindow *parent;

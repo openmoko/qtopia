@@ -13,10 +13,22 @@
    <string>Search</string>
   </property>
   <layout class="QGridLayout" >
-   <property name="margin" >
+   <property name="leftMargin" >
     <number>0</number>
    </property>
-   <property name="spacing" >
+   <property name="topMargin" >
+    <number>0</number>
+   </property>
+   <property name="rightMargin" >
+    <number>0</number>
+   </property>
+   <property name="bottomMargin" >
+    <number>0</number>
+   </property>
+   <property name="horizontalSpacing" >
+    <number>0</number>
+   </property>
+   <property name="verticalSpacing" >
     <number>0</number>
    </property>
    <item row="0" column="0" >
@@ -31,64 +43,17 @@
       <number>0</number>
      </property>
      <layout class="QGridLayout" >
-      <property name="margin" >
-       <number>0</number>
-      </property>
-      <property name="spacing" >
-       <number>3</number>
-      </property>
-      <item row="6" column="0" colspan="3" >
-       <layout class="QGridLayout" >
-        <property name="margin" >
-         <number>1</number>
+      <item row="0" column="0" >
+       <widget class="QLabel" name="TextLabel1" >
+        <property name="text" >
+         <string>In</string>
         </property>
-        <property name="spacing" >
-         <number>3</number>
-        </property>
-        <item row="0" column="1" >
-         <widget class="QDateEdit" name="dateAfterButton" >
-          <property name="enabled" >
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" >
-         <widget class="QCheckBox" name="dateBeforeBox" >
-          <property name="whatsThis" >
-           <string>Include only mails before this date.</string>
-          </property>
-          <property name="text" >
-           <string comment="Before 20th of July" >Before</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1" >
-         <widget class="QDateEdit" name="dateBeforeButton" >
-          <property name="enabled" >
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0" >
-         <widget class="QCheckBox" name="dateAfterBox" >
-          <property name="whatsThis" >
-           <string>Include only mails after this date.</string>
-          </property>
-          <property name="text" >
-           <string comment="e.g. After 20th of July" >After</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="5" column="1" colspan="2" >
-       <widget class="QLineEdit" name="bodyLine" >
-        <property name="whatsThis" >
-         <string>Input text that must occur in the body.  Bear in mind that searching the body can be very slow.</string>
+        <property name="buddy" >
+         <cstring>mailbox</cstring>
         </property>
        </widget>
       </item>
-      <item row="0" column="1" colspan="2" >
+      <item row="0" column="1" >
        <widget class="QComboBox" name="mailbox" >
         <property name="focusPolicy" >
          <enum>Qt::WheelFocus</enum>
@@ -128,70 +93,17 @@
         </item>
        </widget>
       </item>
-      <item row="3" column="0" >
-       <widget class="QLabel" name="TextLabel1_2_2_2" >
-        <property name="text" >
-         <string>To</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0" >
        <widget class="QLabel" name="TextLabel1_2" >
         <property name="text" >
-         <string>Flag</string>
+         <string>Status</string>
+        </property>
+        <property name="buddy" >
+         <cstring>status</cstring>
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="2" >
-       <widget class="QLineEdit" name="fromLine" >
-        <property name="whatsThis" >
-         <string>Input text that must occur in the from field.</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" >
-       <widget class="QLabel" name="TextLabel1" >
-        <property name="text" >
-         <string>In</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" >
-       <widget class="QLabel" name="nameLabel" >
-        <property name="text" >
-         <string>Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0" >
-       <widget class="QLabel" name="TextLabel1_2_2_3" >
-        <property name="text" >
-         <string>Subj</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1" colspan="2" >
-       <widget class="QLineEdit" name="subjectLine" >
-        <property name="whatsThis" >
-         <string>Input text that must occur in the subject.</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" >
-       <widget class="QLabel" name="TextLabel1_2_2_4" >
-        <property name="text" >
-         <string>Body</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" >
-       <widget class="QLabel" name="TextLabel1_2_2" >
-        <property name="text" >
-         <string>From</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="2" >
+      <item row="1" column="1" >
        <widget class="QComboBox" name="status" >
         <property name="focusPolicy" >
          <enum>Qt::WheelFocus</enum>
@@ -219,19 +131,112 @@
           <string>Replied</string>
          </property>
         </item>
+        <item>
+         <property name="text" >
+          <string>Removed</string>
+         </property>
+        </item>
        </widget>
       </item>
-      <item row="3" column="1" colspan="2" >
+      <item row="2" column="0" >
+       <widget class="QLabel" name="TextLabel1_2_2" >
+        <property name="text" >
+         <string>From</string>
+        </property>
+        <property name="buddy" >
+         <cstring>fromLine</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QLineEdit" name="fromLine" >
+        <property name="whatsThis" >
+         <string>Input text that must occur in the from field.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" >
+       <widget class="QLabel" name="TextLabel1_2_2_2" >
+        <property name="text" >
+         <string>To</string>
+        </property>
+        <property name="buddy" >
+         <cstring>toLine</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" >
        <widget class="QLineEdit" name="toLine" >
         <property name="whatsThis" >
          <string>Input text that must occur in the to field.</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="1" colspan="2" >
-       <widget class="QLineEdit" name="nameLine" >
+      <item row="4" column="0" >
+       <widget class="QLabel" name="TextLabel1_2_2_3" >
+        <property name="text" >
+         <string>Subject</string>
+        </property>
+        <property name="buddy" >
+         <cstring>subjectLine</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1" >
+       <widget class="QLineEdit" name="subjectLine" >
         <property name="whatsThis" >
-         <string>Set the name for your query.</string>
+         <string>Input text that must occur in the subject.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" >
+       <widget class="QLabel" name="TextLabel1_2_2_4" >
+        <property name="text" >
+         <string>Body</string>
+        </property>
+        <property name="buddy" >
+         <cstring>bodyLine</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" >
+       <widget class="QLineEdit" name="bodyLine" >
+        <property name="whatsThis" >
+         <string>Input text that must occur in the subject.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1" >
+       <widget class="QDateEdit" name="dateAfterButton" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1" >
+       <widget class="QDateEdit" name="dateBeforeButton" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0" >
+       <widget class="QCheckBox" name="dateAfterBox" >
+        <property name="whatsThis" >
+         <string>Include only mails after this date.</string>
+        </property>
+        <property name="text" >
+         <string comment="e.g. After 20th of July" >After</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0" >
+       <widget class="QCheckBox" name="dateBeforeBox" >
+        <property name="whatsThis" >
+         <string>Include only mails before this date.</string>
+        </property>
+        <property name="text" >
+         <string comment="Before 20th of July" >Before</string>
         </property>
        </widget>
       </item>
@@ -246,10 +251,6 @@
   <tabstop>fromLine</tabstop>
   <tabstop>toLine</tabstop>
   <tabstop>subjectLine</tabstop>
-  <tabstop>bodyLine</tabstop>
-  <tabstop>dateAfterBox</tabstop>
-  <tabstop>dateBeforeBox</tabstop>
-  <tabstop>nameLine</tabstop>
  </tabstops>
  <resources/>
  <connections>

@@ -1,0 +1,37 @@
+# This device uses the mobile UI
+-ui-type mobile
+
+# Turn on features.
+-dynamic-rotation
+-ssl
+-dbus
+-vpn
+-libamr
+-pictureflow
+
+# Features that are controlled via modules.
+-add-modules ipcomms
+-add-modules drm
+-add-modules location
+-add-modules media
+-add-mediaengines cruxus
+# We want Helix but it might not exist... allow it to fail without error
+-add-mediaengines helix  -allow-fail mediaengines,helix
+-add-mediaengines gstreamer
+-add-modules telephony
+-add-modules cell
+-add-modules bluetooth
+-add-modules qtuitest
+-add-modules pkgmanagement
+-add-modules infrared
+
+# Additional modules.
+-add-modules connectivity
+-add-modules devtools
+-add-modules essentials
+-add-modules games
+-add-modules inputmethods
+-add-modules messaging
+-add-modules pim
+-add-modules ui
+

@@ -1,6 +1,8 @@
+!qbuild{
 qtopia_project(desktop app)
+CONFIG+=no_install no_singleexec
+}
 
-CONFIG+=no_tr no_install no_singleexec
 FORMS*=deviceupdaterbase.ui configurebase.ui
 
 HEADERS+= \
@@ -27,3 +29,7 @@ SOURCES+= \
     configure.cpp \
     configuredata.cpp \
     deviceupdaterdialog.cpp
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES

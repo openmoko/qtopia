@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <QTimer>
@@ -68,7 +66,8 @@ MidiDecoder::MidiDecoder():
     d->outputInfo.frequency = 44100;
     d->outputInfo.bitsPerSample = 16;
     d->outputInfo.channels = 2;
-    d->outputInfo.volume = 100;
+
+    d->outputInfo.volume = 50;
 }
 
 MidiDecoder::~MidiDecoder()
@@ -213,8 +212,11 @@ qint64 MidiDecoder::readData(char *data, qint64 maxlen)
             emit positionChanged(d->position);
         }
 
-        if ((rc = (qint64) mid_song_read_wave(d->song, data, maxlen)) == 0)
+        if ((rc = (qint64) mid_song_read_wave(d->song, data, maxlen)) == 0) {
+            seek(0);
+            mid_song_start(d->song);
             emit playerStateChanged(d->state = QtopiaMedia::Stopped);
+        }
     }
 
     return rc;

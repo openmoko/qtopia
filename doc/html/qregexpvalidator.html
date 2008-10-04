@@ -3,15 +3,15 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.3: QRegExpValidator Class Reference</title>
+  <title>Qt 4.4: QRegExpValidator Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 class="title">QRegExpValidator Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="namespaces.html"><font color="#004faf">All&nbsp;Namespaces</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"></td></tr></table><h1 class="title">QRegExpValidator Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
 </h1>
 <p>The QRegExpValidator class is used to check a string against a regular expression. <a href="#details">More...</a></p>
 <pre> #include &lt;QRegExpValidator&gt;</pre><p>Inherits <a href="qvalidator.html">QValidator</a>.</p>
@@ -57,49 +57,50 @@
 <p>If a string is a prefix of an <a href="qvalidator.html#State-enum">Acceptable</a> string, it is considered <a href="qvalidator.html#State-enum">Intermediate</a>. For example, &quot;&quot; and &quot;A&quot; are <a href="qvalidator.html#State-enum">Intermediate</a> for the regexp <b>[A-Z][0-9]</b> (whereas &quot;_&quot; would be <a href="qvalidator.html#State-enum">Invalid</a>).</p>
 <p>For a brief introduction to Qt's regexp engine, see <a href="qregexp.html">QRegExp</a>.</p>
 <p>Example of use:</p>
-<pre><span class="comment"> //</span> regexp: optional '-' followed by between 1 and 3 digits
+<pre><span class="comment"> // regexp: optional '-' followed by between 1 and 3 digits</span>
  QRegExp rx(&quot;-?\\d{1,3}&quot;);
  QValidator *validator = new QRegExpValidator(rx, this);
 
  QLineEdit *edit = new QLineEdit(this);
  edit-&gt;setValidator(validator);</pre>
 <p>Below we present some examples of validators. In practice they would normally be associated with a widget as in the example above.</p>
-<pre><span class="comment"> //</span> integers 1 to 9999
+<pre><span class="comment"> // integers 1 to 9999</span>
  QRegExp rx(&quot;[1-9]\\d{0,3}&quot;);
-<span class="comment"> //</span> the validator treats the regexp as &quot;^[1-9]\\d{0,3}$&quot;
+<span class="comment"> // the validator treats the regexp as &quot;^[1-9]\\d{0,3}$&quot;</span>
  QRegExpValidator v(rx, 0);
  QString s;
  int pos = 0;
 
- s = &quot;0&quot;;     v.validate(s, pos);    <span class="comment">//</span> returns Invalid
- s = &quot;12345&quot;; v.validate(s, pos);    <span class="comment">//</span> returns Invalid
- s = &quot;1&quot;;     v.validate(s, pos);    <span class="comment">//</span> returns Acceptable
+ s = &quot;0&quot;;     v.validate(s, pos);    <span class="comment">// returns Invalid</span>
+ s = &quot;12345&quot;; v.validate(s, pos);    <span class="comment">// returns Invalid</span>
+ s = &quot;1&quot;;     v.validate(s, pos);    <span class="comment">// returns Acceptable</span>
 
- rx.setPattern(&quot;\\S+&quot;);            <span class="comment">//</span> one or more non-whitespace characters
+ rx.setPattern(&quot;\\S+&quot;);            <span class="comment">// one or more non-whitespace characters</span>
  v.setRegExp(rx);
- s = &quot;myfile.txt&quot;;  v.validate(s, pos); <span class="comment">//</span> Returns Acceptable
- s = &quot;my file.txt&quot;; v.validate(s, pos); <span class="comment">//</span> Returns Invalid
+ s = &quot;myfile.txt&quot;;  v.validate(s, pos); <span class="comment">// Returns Acceptable</span>
+ s = &quot;my file.txt&quot;; v.validate(s, pos); <span class="comment">// Returns Invalid</span>
 
-<span class="comment"> //</span> A, B or C followed by exactly five digits followed by W, X, Y or Z
+<span class="comment"> // A, B or C followed by exactly five digits followed by W, X, Y or Z</span>
  rx.setPattern(&quot;[A-C]\\d{5}[W-Z]&quot;);
  v.setRegExp(rx);
- s = &quot;a12345Z&quot;; v.validate(s, pos);        <span class="comment">//</span> Returns Invalid
- s = &quot;A12345Z&quot;; v.validate(s, pos);        <span class="comment">//</span> Returns Acceptable
- s = &quot;B12&quot;;     v.validate(s, pos);        <span class="comment">//</span> Returns Intermediate
+ s = &quot;a12345Z&quot;; v.validate(s, pos);        <span class="comment">// Returns Invalid</span>
+ s = &quot;A12345Z&quot;; v.validate(s, pos);        <span class="comment">// Returns Acceptable</span>
+ s = &quot;B12&quot;;     v.validate(s, pos);        <span class="comment">// Returns Intermediate</span>
 
-<span class="comment"> //</span> match most 'readme' files
+<span class="comment"> // match most 'readme' files</span>
  rx.setPattern(&quot;read\\S?me(\.(txt|asc|1st))?&quot;);
  rx.setCaseSensitive(false);
  v.setRegExp(rx);
- s = &quot;readme&quot;;      v.validate(s, pos); <span class="comment">//</span> Returns Acceptable
- s = &quot;README.1ST&quot;;  v.validate(s, pos); <span class="comment">//</span> Returns Acceptable
- s = &quot;read me.txt&quot;; v.validate(s, pos); <span class="comment">//</span> Returns Invalid
- s = &quot;readm&quot;;       v.validate(s, pos); <span class="comment">//</span> Returns Intermediate</pre>
+ s = &quot;readme&quot;;      v.validate(s, pos); <span class="comment">// Returns Acceptable</span>
+ s = &quot;README.1ST&quot;;  v.validate(s, pos); <span class="comment">// Returns Acceptable</span>
+ s = &quot;read me.txt&quot;; v.validate(s, pos); <span class="comment">// Returns Invalid</span>
+ s = &quot;readm&quot;;       v.validate(s, pos); <span class="comment">// Returns Intermediate</span></pre>
 <p>See also <a href="qregexp.html">QRegExp</a>, <a href="qintvalidator.html">QIntValidator</a>, <a href="qdoublevalidator.html">QDoubleValidator</a>, and <a href="tools-settingseditor.html">Settings Editor Example</a>.</p>
 <hr />
 <h2>Property Documentation</h2>
 <h3 class="fn"><a name="regExp-prop"></a>regExp : <a href="qregexp.html">QRegExp</a></h3>
 <p>This property holds the regular expression used for validation.</p>
+<p>By default, this property contains a regular expression with the pattern <tt>.*</tt> that matches any string.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>const QRegExp &amp; regExp () const</b></li>
@@ -122,8 +123,8 @@
 <p>See also <a href="qregexp.html#exactMatch">QRegExp::exactMatch</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%" align="left">Copyright &copy; 2008 Nokia</td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.5</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.4.3</div></td>
 </tr></table></div></address></body>
 </html>

@@ -3,7 +3,7 @@ TARGET=example
 # main.cpp uses the QTOPIA_ADD_APPLICATION/QTOPIA_MAIN macros
 CONFIG+=qtopia_main
 # Despite using the QTOPIA_MAIN macro, do not build this app as a
-# quicklaunch plugin unless -force-quicklaunch was passed to configure
+# quicklaunch plugin
 CONFIG+=no_quicklaunch
 # Do not build this app into a singleexec binary
 CONFIG+=no_singleexec
@@ -46,5 +46,5 @@ target.domain=untrusted
 pkg.name=example
 pkg.desc=Example Application
 pkg.version=1.0.0-1
-pkg.maintainer=Trolltech (www.trolltech.com)
+pkg.maintainer=Qt Extended <info@qtextended.org>
 pkg.license=Commercial

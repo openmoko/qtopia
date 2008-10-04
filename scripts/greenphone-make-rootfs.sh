@@ -1189,7 +1189,7 @@ install_package()
         mkdir -p $ROOTFS_IMAGE_DIR/var/run/dbus
 
         install .install/etc/dbus-1 $ROOTFS_IMAGE_DIR/etc/dbus-1 session.conf system.conf
-        strip_install all .install/usr/bin $ROOTFS_IMAGE_DIR/usr/bin dbus-cleanup-sockets dbus-launch dbus-send
+        strip_install all .install/usr/bin $ROOTFS_IMAGE_DIR/usr/bin dbus-cleanup-sockets dbus-launch dbus-send dbus-uuidgen
         strip_install all bus/.libs $ROOTFS_IMAGE_DIR/usr/bin dbus-daemon
         strip_install unneeded .install/usr/lib $ROOTFS_IMAGE_DIR/usr/lib libdbus-1.so.3 libdbus-1.so.3.2.0
         cd ..
@@ -1681,7 +1681,7 @@ ALL_PACKAGES="$ALL_PACKAGES ppp"
 ALL_PACKAGES="$ALL_PACKAGES sxetools armioctl tat getkeycode bootcharger"
 ALL_PACKAGES="$ALL_PACKAGES openssl"
 ALL_PACKAGES="$ALL_PACKAGES dropbear"
-ALL_PACKAGES="$ALL_PACKAGES samba"
+#ALL_PACKAGES="$ALL_PACKAGES samba"
 ALL_PACKAGES="$ALL_PACKAGES strace prelink bootchart"
 ALL_PACKAGES="$ALL_PACKAGES expat dbus"
 ALL_PACKAGES="$ALL_PACKAGES bluez-libs bluez-utils bluez-hcidump bluez-firmware"
@@ -1835,7 +1835,7 @@ export TEAMBUILDER_CC_VERSION=4.1.1
 export TEAMBUILDER=0
 
 # Package location
-[ -z $PACKAGE_LOCATION ] && PACKAGE_LOCATION=http://www.qtopia.net/downloads/greenphone/rootfs
+[ -z $PACKAGE_LOCATION ] && PACKAGE_LOCATION=http://www.qtextended.org/downloads/greenphone/rootfs
 
 # Source and destination
 ROOTFS_SOURCE_PATH=$QTOPIA_SOURCE_PATH/devices/greenphone/rootfs

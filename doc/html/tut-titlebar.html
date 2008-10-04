@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Tutorial: Title Bar Theme<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Tutorial: Title Bar Theme<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#constructing-a-system-title-bar">Constructing a System Title Bar</a></li>
 <ul><li><a href="#basic-title-bar-development">Basic Title Bar Development</a></li>
@@ -20,7 +20,7 @@
 </ul>
 <a name="constructing-a-system-title-bar"></a>
 <h2>Constructing a System Title Bar</h2>
-<p>The Qtopia theme is unique in that it has a different mode of display in the home screen versus application screens.</p>
+<p>The Qt Extended theme is unique in that it has a different mode of display in the home screen versus application screens.</p>
 <p>It is important to note that there is a distinct rectangular area used by the system title bar. This area is not available to applications. It corresponds to the area set aside for the window decoration title of maximized windows. A minimal title bar theme and window decoration configuration may look like:</p>
 <pre>    &lt;page name=&quot;title&quot; base=&quot;themes/qtopia&quot; rect=&quot;0,0,0x21&quot;&gt;
         &lt;image rect=&quot;0,0,0x21&quot; src=&quot;titlebar-gradient&quot; tile=&quot;yes&quot; color=&quot;Highlight&quot;&gt;
@@ -69,10 +69,10 @@
         &lt;/image&gt;
     &lt;/page&gt;</pre>
 <p>This places the window caption to the left, then the white status area is created and populated with the status icons, and time field. Finally, the battery and signal level indicators are placed to the right of the screen. The level indicators are described by an image containing a number of frames, given by the <tt>count</tt> attribute, for example, the battery indicator image is show below:</p>
-<p align="center"><img src="images/battery-small.png" /></p><p>The <tt>inputmethod</tt> element is not mentioned above. This element is a placeholder for the input method status icon and is replaced by the IM status icon when the cursor is placed in a text input field. It is common in Qtopia themes to place this element over the area used by the battery and/or signal level indicators to save space.</p>
+<p align="center"><img src="images/battery-small.png" /></p><p>The <tt>inputmethod</tt> element is not mentioned above. This element is a placeholder for the input method status icon and is replaced by the IM status icon when the cursor is placed in a text input field. It is common in Qt Extended themes to place this element over the area used by the battery and/or signal level indicators to save space.</p>
 <a name="extending-the-title-bar"></a>
 <h3>Extending the Title Bar</h3>
-<p>The Qtopia theme provides two different modes for the title bar. The mode described above is used in most screens with the home screen however, the following design is used:</p>
+<p>The Qt Extended theme provides two different modes for the title bar. The mode described above is used in most screens with the home screen however, the following design is used:</p>
 <p align="center"><img src="images/qtopia_home.png" /></p><p>This version displays the following elements:</p>
 <ul>
 <li>Battery level</li>
@@ -140,8 +140,8 @@
     &lt;/page&gt;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

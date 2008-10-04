@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -40,10 +38,12 @@
 #include <QStorageMetaInfo>
 #include <QDSData>
 #include <QtopiaApplication>
+#include <QtopiaServiceRequest>
 #endif
 
 QDBMigrationEngine::QDBMigrationEngine()
     : mi(this)
+
 {
 }
 
@@ -212,7 +212,13 @@ bool QDBMigrationEngine::ensureSchema(const QStringList &list, bool transact)
             continue;
         // load schema.
         QFile data(QLatin1String(":/QtopiaSql/") + db.driverName() + QLatin1String("/") + table);
-        CHECK(data.open(QIODevice::ReadOnly));
+        //CHECK(data.open(QIODevice::ReadOnly));
+        bool ok = data.open(QIODevice::ReadOnly);
+        if ( !ok ) {
+            qWarning() << "ERROR: Could not open table creation script:" 
+                       << QLatin1String(":/QtopiaSql/") + db.driverName() + QLatin1String("/") + table;
+        }
+        CHECK(ok);
         QTextStream ts(&data);
         // read assuming utf8 encoding.
         ts.setCodec(QTextCodec::codecForName("utf8"));
@@ -267,7 +273,7 @@ bool QDBMigrationEngine::loadSchema(QTextStream &ts, bool transact)
         return true;
 }
 
-bool QDBMigrationEngine::migrate(QSqlDatabase *database)
+bool QDBMigrationEngine::migrate(QSqlDatabase *database, bool system)
 {
     setDatabase(*database);
 
@@ -282,33 +288,40 @@ bool QDBMigrationEngine::migrate(QSqlDatabase *database)
     bool hasChanges=false;
     if (database->driverName() == QLatin1String("QSQLITE")) {
 #ifndef QTOPIA_CONTENT_INSTALLER
-        if (!checkIntegrity(*database, false)) {
-            // Attempt to recover by doing a vacuum.
-            database->exec( "VACUUM" );
+        if (!checkIntegrity(*database)) {
+            // Backup the old database to documents and create a new one.
+            database->close();
 
-            if (!checkIntegrity(*database, true)) {
-                // Still no good, backup the old database to documents and create a new one.
-                database->close();
+            QFileSystem fs = QFileSystem::fromFileName(database->databaseName());
+            QDir backupDir( fs.documents() ? fs.documentsPath() : QFileSystem::documentsFileSystem().documentsPath() );
+            QString backup = QLatin1String( "qtopia_db.sqlite.corrupt000" );
+            for( int i = 0; backupDir.exists( backup ); backup = QString( "qtopia_db.sqlite.corrupt%1" ).arg( ++i, 3, 10, QLatin1Char( '0' ) ) );
 
-                QFileSystem fs = QFileSystem::fromFileName(database->databaseName());
-                QDir backupDir( fs.documents() ? fs.documentsPath() : QFileSystem::documentsFileSystem().documentsPath() );
-                QString backup = QLatin1String( "qtopia_db.sqlite.corrupt000" );
-                for( int i = 0; backupDir.exists( backup ); backup = QString( "qtopia_db.sqlite.corrupt%1" ).arg( ++i, 3, 10, QLatin1Char( '0' ) ) );
+            QFile dbFile( db.databaseName() );
 
-                QFile dbFile( db.databaseName() );
+            dbFile.copy( backupDir.absoluteFilePath( backup ) );
 
-                dbFile.copy( backupDir.absoluteFilePath( backup ) );
+            dbFile.remove();
 
-                dbFile.remove();
+            // Should notify the user at this point that the database is corrupted and unrecoverable.
+            QtopiaServiceRequest request(
+                    QLatin1String("SystemMessages"),
+                    QLatin1String("showDialog(QString,QString)"));
+            request << QObject::tr("Corrupted Database");
+            request << QObject::tr(
+                    "The %1 database has been corrupted and could not be recovered.  "
+                    "A copy of the corrupted database has been copied to %2 and a new "
+                    "database created",
+                    "%1 = Name of file system (HOME, SD Card), "
+                    "%2 = file name of saved copy")
+                    .arg(fs.name())
+                    .arg(backup);
+            request.send();
 
-                // Should notify the user at this point that the database is corrupted and unrecoverable.
-                // Deferred to a later release due to string freeze: Task 193949.
-
-                if (!database->open()) {
-                    QString errString=QString("OPEN DATABASE: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
-                    qCritical(qPrintable(errString));
-                    return false;
-                }
+            if (!database->open()) {
+                QString errString=QString("OPEN DATABASE: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
+                qCritical(qPrintable(errString));
+                return false;
             }
         }
 #endif
@@ -375,7 +388,7 @@ bool QDBMigrationEngine::migrate(QSqlDatabase *database)
                 CHECK(setTableVersion("mapCategoryToContent", 105));
                 CHECK(setTableVersion("locationLookup", 105));
                 CHECK(setTableVersion("mimeTypeLookup", 105));
-                
+
                 user_version = 105;
                 hasChanges=true;
             }
@@ -388,7 +401,7 @@ bool QDBMigrationEngine::migrate(QSqlDatabase *database)
                 }
                 EXEC("CREATE UNIQUE INDEX mCidCatIndex ON mapCategoryToContent ( cid, categoryid )");
                 CHECK(setTableVersion("categories", 106));
-                
+
                 user_version = 106;
                 hasChanges=true;
             }
@@ -460,6 +473,16 @@ bool QDBMigrationEngine::migrate(QSqlDatabase *database)
             CHECK(ensureSchema("mimeTypeMapping"));
             CHECK(setTableVersion("mimeTypeMapping", 100));
         }
+        if(!db.tables().contains("servicehistory"))
+        {
+            CHECK(ensureSchema("servicehistory"));
+            CHECK(setTableVersion("servicehistory", 100));
+        }
+        if(!db.tables().contains("favoriteservices"))
+        {
+            CHECK(ensureSchema("favoriteservices"));
+            CHECK(setTableVersion("favoriteservices", 100));
+        }
     }
     else
 #endif // QTOPIA_CONTENT_INSTALLER
@@ -474,6 +497,10 @@ bool QDBMigrationEngine::migrate(QSqlDatabase *database)
         CHECK(setTableVersion("categoryringtone", 110));
         CHECK(ensureSchema("mimeTypeMapping"));
         CHECK(setTableVersion("mimeTypeMapping", 100));
+        CHECK(ensureSchema("servicehistory"));
+        CHECK(setTableVersion("servicehistory", 100));
+        CHECK(ensureSchema("favoriteservices"));
+        CHECK(setTableVersion("favoriteservices", 100));
 
         if( !tables.contains("databaseProperties") )
         {
@@ -485,7 +512,8 @@ bool QDBMigrationEngine::migrate(QSqlDatabase *database)
 
         hasChanges=true;
     }
-    if (hasChanges) {
+    if(hasChanges)
+    {
         if(!db.commit())
         {
             QString errString=QString("COMMIT: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
@@ -494,15 +522,15 @@ bool QDBMigrationEngine::migrate(QSqlDatabase *database)
             qCritical(qPrintable(errString));
             return false;
         }
-    } else {
-        database->rollback();
     }
+    else
+        db.rollback();
 
-    CHECK(verifyLocale(*database));
+    CHECK(verifyLocale( db ));
 
 #ifndef QTOPIA_CONTENT_INSTALLER
     // do system-database only migrations
-    if (database->databaseName() == QtopiaSql::instance()->systemDatabase().databaseName())
+    if (system)
     {
         if(db.isOpen()==false)
         CHECK(db.open());
@@ -529,6 +557,8 @@ bool QDBMigrationEngine::migrate(QSqlDatabase *database)
             return false;
         }
     }
+#else
+    Q_UNUSED(system);
 #endif
 
     return true;
@@ -626,35 +656,95 @@ QByteArray QDBMigrationEngine::transformString( const QString &string ) const
         return localString;
 }
 
-bool QDBMigrationEngine::checkIntegrity( const QSqlDatabase &database, bool printErrors )
+bool QDBMigrationEngine::checkIntegrity(const QSqlDatabase &database)
 {
-    QSqlQuery query;
+    const QString countQuery(QLatin1String("SELECT COUNT(*) FROM "));
 
-    query.prepare( "PRAGMA integrity_check" );
+    QStringList tables = database.tables();
 
-    if( query.exec() && query.next() )
-    {
-        if( query.value( 0 ).toString() == QLatin1String( "ok" ) )
-        {
-            // Integrity check passes some blatantly broken databases so try setting the synchronous
-            // mode here as that will fail if the database is corrupted.
-            EXEC("PRAGMA synchronous = OFF");
+    if (database.lastError().isValid()) {
+        qWarning() << "Integrity check of" << database.databaseName() << "failed";
+        qWarning() << "Failed to query tables";
+        qWarning() << database.lastError().text();
 
-            return true;
-        }
-        else if( printErrors )
-        {
+        return false;
+    }
+
+    foreach (QString table, tables) {
+        QSqlQuery query(database);
+
+        query.prepare(countQuery + table);
+
+        if (!query.exec() || !query.next()) {
             qWarning() << "Integrity check of" << database.databaseName() << "failed";
-            do
-            {
-                qWarning() << query.value( 0 ).toString().toLatin1().constData();
-            }
-            while( query.next() );
+            qWarning() << "Failed to get count of" << table;
+            qWarning() << query.lastError().text();
+
+            return false;
         }
     }
-    return false;
+
+    if (!tables.contains(QLatin1String("databaseProperties"))) {
+        QSqlQuery query(database);
+
+        if (!query.exec(QLatin1String(
+                "CREATE TABLE databaseProperties("
+                "key NVARCHAR (255) NOT NULL, "
+                "property NVARCHAR (255) NOT NULL)"))) {
+            qWarning() << "Integrity check of" << database.databaseName() << "failed";
+            qWarning() << "Failed to create database properties table";
+            qWarning() << query.lastError().text();
+
+            return false;
+        }
+    }
+
+    {
+        QSqlQuery query(database);
+
+        query.prepare(QLatin1String(
+                "SELECT property "
+                "FROM databaseProperties "
+                "WHERE key = ?"));
+        query.bindValue(0, QLatin1String("last_verified"));
+
+        if (!query.exec()) {
+            qWarning() << "Integrity check of" << database.databaseName() << "failed";
+            qWarning() << "Failed to query last verification date";
+            qWarning() << query.lastError().text();
+
+            return false;
+        }
+
+        if (query.next()) {
+            query.clear();
+            query.prepare(QLatin1String(
+                    "UPDATE databaseProperties "
+                    "SET property = ? "
+                    "WHERE key = ?"));
+        } else {
+            query.clear();
+            query.prepare(QLatin1String(
+                    "INSERT INTO databaseProperties(property, key) "
+                    "VALUES (?, ?)"));
+        }
+
+        query.bindValue(0, QLatin1String("last_verified"));
+        query.bindValue(1, QDateTime::currentDateTime());
+
+        if (!query.exec()) {
+            qWarning() << "Integrity check of" << database.databaseName() << "failed";
+            qWarning() << "Failed to write verification date";
+            qWarning() << query.lastError().text();
+
+            return false;
+        }
+    }
+
+    return true;
 }
 
 #ifndef QTOPIA_CONTENT_INSTALLER
 QTOPIA_EXPORT_PLUGIN(QDBMigrationEngine);
 #endif
+

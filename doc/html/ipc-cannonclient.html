@@ -3,22 +3,22 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Tutorial: Qtopia IPC Client</title>
+  <title>Tutorial: Qt Extended IPC Client</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Tutorial: Qtopia IPC Client<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Tutorial: Qt Extended IPC Client<br /><span class="subtitle"></span>
 </h1>
 <p>Files:</p>
 <ul>
 <li><a href="ipc-cannonclient-main-cpp.html">ipc/cannonclient/main.cpp</a></li>
 <li><a href="ipc-cannonclient-cannonclient-pro.html">ipc/cannonclient/cannonclient.pro</a></li>
 </ul>
-<p>The Qtopia IPC Tutorial demonstrates the use of <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a>, which is the fundamental class of the Qtopia IPC system. This example demonstrates the basics of sending and receiving messages between different applications. For the other part of this tutorial, see <a href="ipc-cannonserver.html">Tutorial: Qtopia IPC Server</a>.</p>
+<p>The Qt Extended IPC Tutorial demonstrates the use of <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a>, which is the fundamental class of the Qt Extended IPC system. This example demonstrates the basics of sending and receiving messages between different applications. For the other part of this tutorial, see <a href="ipc-cannonserver.html">Tutorial: Qt Extended IPC Server</a>.</p>
 <p>The cannonclient application issues a shoot order request to any listening cannonserver applications, and once it receives a result broadcast, exits.</p>
 <a name="cannonresultlistener-class-definition"></a>
 <h2>CannonResultListener Class Definition</h2>
@@ -61,21 +61,21 @@
 <ol type="1">
 <li>Create a new directory (e.g&#x2e; $HOME/src/cannonclient) and copy all the example files to that directory.<pre>    mkdir $HOME/src/cannonclient
     cd $HOME/src/cannonclient
-    cp -r &lt;Qtopia-source-directory&gt;/examples/ipc/cannonclient/* .
+    cp -r &lt;QtExtended-source-directory&gt;/examples/ipc/cannonclient/* .
     chmod +w *</pre>
 </li>
-<li>Build the new application.<pre>    export QPEDIR=&lt;Qtopia-build-directory&gt;
+<li>Build the new application.<pre>    export QPEDIR=&lt;QtExtended-build-directory&gt;
     $QPEDIR/bin/qtopiamake
     make install</pre>
 </li>
-<li>Run Qtopia.<pre>    $QPEDIR/bin/runqtopia</pre>
+<li>Run Qt Extended.<pre>    $QPEDIR/bin/runqtopia</pre>
 </li>
 <li>Run the cannonserver application, you will then need to run the cannonclient application.</li>
 </ol>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

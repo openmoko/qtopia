@@ -1,9 +1,9 @@
-This sample project shows how to create a Qtopia SXE program
+This sample project shows how to create a QtExtended SXE program
 and package it for delivery via an SXE Server.
 
 The steps are:
-1) Create Qtopia source code files as normal, eg main.cpp, mywidget.cpp
-2) Create Qtopia .pro file as normal, eg mywidget.pro
+1) Create QtExtended source code files as normal, eg main.cpp, mywidget.cpp
+2) Create .pro file as normal, eg mywidget.pro
 3) In the .pro file, do "pkg.domain=untrusted" 
 4) Run qtopiamake to generate the Makefile
 5) Do "make && make packages"
@@ -34,4 +34,4 @@ $ export LD_LIBRARY_PATH=$QPEDIR/lib:$LD_LIBRARY_PATH
 
 #install them in this machines http server root
 sudo mkdir -p /srv/www/htdocs/feed
-$HOME/path/to/qtopia/bin/mkPackages /srv/www/htdocs/feed
+$QTOPIA_DEPOT_PATH/bin/mkPackages /srv/www/htdocs/feed

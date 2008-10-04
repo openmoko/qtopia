@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "mydevicesdisplay.h"
@@ -48,10 +46,16 @@
 class DeviceDialogFilter : public QBluetoothRemoteDeviceDialogFilter 
 {
 public:
+    DeviceDialogFilter(const QList<QBluetoothAddress> &devices);
     virtual bool filterAcceptsDevice(const QBluetoothRemoteDevice &device);
 
     QList<QBluetoothAddress> m_pairedDevices;
 };
+
+DeviceDialogFilter::DeviceDialogFilter(const QList<QBluetoothAddress> &devices)
+    : m_pairedDevices(devices)
+{
+}
 
 bool DeviceDialogFilter::filterAcceptsDevice(const QBluetoothRemoteDevice &device)
 {
@@ -71,7 +75,6 @@ MyDevicesDisplay::MyDevicesDisplay(QBluetoothLocalDevice *local, QWidget *parent
       m_pairingAgent(0),
       m_pairingWaitWidget(0),
       m_pairingDeviceDialog(0),
-      m_pairingDeviceDialogFilter(0),
       m_sdpQuery(0),
       m_deviceInfoDialog(0)
 {
@@ -91,7 +94,6 @@ MyDevicesDisplay::MyDevicesDisplay(QBluetoothLocalDevice *local, QWidget *parent
 
 MyDevicesDisplay::~MyDevicesDisplay()
 {
-    delete m_pairingDeviceDialogFilter;
 }
 
 void MyDevicesDisplay::init()
@@ -219,12 +221,9 @@ void MyDevicesDisplay::newPairing()
         m_pairingDeviceDialog = 0;
     }
 
-    if (!m_pairingDeviceDialogFilter)
-        m_pairingDeviceDialogFilter = new DeviceDialogFilter;
-    m_pairingDeviceDialogFilter->m_pairedDevices = m_local->pairedDevices();
-
     m_pairingDeviceDialog = new QBluetoothRemoteDeviceDialog(m_local, this);
-    m_pairingDeviceDialog->setFilter(m_pairingDeviceDialogFilter);
+    m_pairingDeviceDialog->addFilter(new DeviceDialogFilter(m_local->pairedDevices()));
+    m_pairingDeviceDialog->setFilterSelectionEnabled(false);
     connect(m_pairingDeviceDialog, SIGNAL(accepted()),
             SLOT(selectedPairingTarget()));
     QtopiaApplication::showDialog(m_pairingDeviceDialog);

@@ -5,6 +5,6 @@ SOURCES=main.cpp
 pkg.name=soundsystemtest
 pkg.desc=This is a command line tool useful to test and enumerate the volume properties of a OSS sound card
 pkg.version=1.0.0-1
-pkg.maintainer=Trolltech (www.trolltech.com)
+pkg.maintainer=Qt Extended <info@qtextended.org>
 pkg.license=GPL
 pkg.domain=trusted

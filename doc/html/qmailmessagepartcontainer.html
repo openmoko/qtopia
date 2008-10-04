@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QMailMessagePartContainer Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QMailMessagePartContainer Class Reference<br /><span class="small-subtitle">[<a href="qtmessagingmodule.html">QtMessagingModule</a>, <a href="qtpimmodule.html">QtPimModule</a>]</span>
+</h1>
 <p>The QMailMessagePartContainer class provides access to a collection of message parts. <a href="#details">More...</a></p>
 <pre>    #include &lt;QMailMessagePartContainer&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
 <p>Inherited by <a href="qmailmessage.html">QMailMessage</a> and <a href="qmailmessagepart.html">QMailMessagePart</a>.</p>
@@ -26,8 +27,8 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#appendHeaderField">appendHeaderField</a></b> ( const QString &amp; <i>id</i>, const QString &amp; <i>value</i> )</li>
-<li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#appendHeaderField-2">appendHeaderField</a></b> ( const QMailMessageHeaderField &amp; <i>field</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qmailmessagepartcontainer.html#appendHeaderField">appendHeaderField</a></b> ( const QString &amp; <i>id</i>, const QString &amp; <i>value</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qmailmessagepartcontainer.html#appendHeaderField-2">appendHeaderField</a></b> ( const QMailMessageHeaderField &amp; <i>field</i> )</li>
 <li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#appendPart">appendPart</a></b> ( const QMailMessagePart &amp; <i>part</i> )</li>
 <li><div class="fn"/>QMailMessageBody <b><a href="qmailmessagepartcontainer.html#body">body</a></b> () const</li>
 <li><div class="fn"/>QByteArray <b><a href="qmailmessagepartcontainer.html#boundary">boundary</a></b> () const</li>
@@ -44,11 +45,11 @@
 <li><div class="fn"/>QMailMessagePart &amp; <b><a href="qmailmessagepartcontainer.html#partAt-2">partAt</a></b> ( uint <i>pos</i> )</li>
 <li><div class="fn"/>uint <b><a href="qmailmessagepartcontainer.html#partCount">partCount</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#prependPart">prependPart</a></b> ( const QMailMessagePart &amp; <i>part</i> )</li>
-<li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#removeHeaderField">removeHeaderField</a></b> ( const QString &amp; <i>id</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qmailmessagepartcontainer.html#removeHeaderField">removeHeaderField</a></b> ( const QString &amp; <i>id</i> )</li>
 <li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#setBody">setBody</a></b> ( const QMailMessageBody &amp; <i>body</i> )</li>
 <li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#setBoundary">setBoundary</a></b> ( const QByteArray &amp; <i>text</i> )</li>
-<li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#setHeaderField">setHeaderField</a></b> ( const QString &amp; <i>id</i>, const QString &amp; <i>value</i> )</li>
-<li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#setHeaderField-2">setHeaderField</a></b> ( const QMailMessageHeaderField &amp; <i>field</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qmailmessagepartcontainer.html#setHeaderField">setHeaderField</a></b> ( const QString &amp; <i>id</i>, const QString &amp; <i>value</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qmailmessagepartcontainer.html#setHeaderField-2">setHeaderField</a></b> ( const QMailMessageHeaderField &amp; <i>field</i> )</li>
 <li><div class="fn"/>void <b><a href="qmailmessagepartcontainer.html#setMultipartType">setMultipartType</a></b> ( MultipartType <i>type</i> )</li>
 <li><div class="fn"/>QMailMessageBody::TransferEncoding <b><a href="qmailmessagepartcontainer.html#transferEncoding">transferEncoding</a></b> () const</li>
 </ul>
@@ -87,11 +88,11 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QMailMessagePartContainer"></a>QMailMessagePartContainer::QMailMessagePartContainer ( Subclass * <i>p</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Constructs an empty part container object, in the space allocated within the subclass instance at <i>p</i>.</p>
-<h3 class="fn"><a name="appendHeaderField"></a>void QMailMessagePartContainer::appendHeaderField ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="appendHeaderField"></a>void QMailMessagePartContainer::appendHeaderField ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Appends a new header field with id <i>id</i> and value <i>value</i> to the existing list of header fields. Any existing header fields with the same id are not modified. If <i>value</i> is of the form &quot;&lt;id&gt;:&lt;content&gt;&quot;, then only the part after the semi-colon is processed.</p>
 <p>RFC 2822 encoding requires header fields to be transmitted in ASCII characters. If <i>value</i> contains non-ASCII characters, it will be encoded to ASCII via the <a href="qmailmessageheaderfield.html#encodeContent">QMailMessageHeaderField::encodeContent</a>() function; depending on the specific header field this may result in illegal content. Where possible, clients should encode non-ASCII data prior to calling appendHeaderField.</p>
 <p>See also <a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a>.</p>
-<h3 class="fn"><a name="appendHeaderField-2"></a>void QMailMessagePartContainer::appendHeaderField ( const <a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a> &amp; <i>field</i> )</h3>
+<h3 class="fn"><a name="appendHeaderField-2"></a>void QMailMessagePartContainer::appendHeaderField ( const <a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a> &amp; <i>field</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Appends a new header field with the properties of <i>field</i>. Any existing header fields with the same id are not modified.</p>
 <h3 class="fn"><a name="appendPart"></a>void QMailMessagePartContainer::appendPart ( const <a href="qmailmessagepart.html">QMailMessagePart</a> &amp; <i>part</i> )</h3>
@@ -135,7 +136,7 @@
 <p>Returns the number of attachments the message has.</p>
 <h3 class="fn"><a name="prependPart"></a>void QMailMessagePartContainer::prependPart ( const <a href="qmailmessagepart.html">QMailMessagePart</a> &amp; <i>part</i> )</h3>
 <p>Prepend <i>part</i> to the list of attachments for the message.</p>
-<h3 class="fn"><a name="removeHeaderField"></a>void QMailMessagePartContainer::removeHeaderField ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )</h3>
+<h3 class="fn"><a name="removeHeaderField"></a>void QMailMessagePartContainer::removeHeaderField ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Removes all existing header fields with id equal to <i>id</i>.</p>
 <h3 class="fn"><a name="setBody"></a>void QMailMessagePartContainer::setBody ( const <a href="qmailmessagebody.html">QMailMessageBody</a> &amp; <i>body</i> )</h3>
 <p>Sets the part to contain the body element <i>body</i>.</p>
@@ -143,11 +144,11 @@
 <h3 class="fn"><a name="setBoundary"></a>void QMailMessagePartContainer::setBoundary ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>text</i> )</h3>
 <p>Sets the boundary text used to delimit the container's parts when encoded in RFC 2822 form to <i>text</i>.</p>
 <p>See also <a href="qmailmessagepartcontainer.html#boundary">boundary</a>().</p>
-<h3 class="fn"><a name="setHeaderField"></a>void QMailMessagePartContainer::setHeaderField ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setHeaderField"></a>void QMailMessagePartContainer::setHeaderField ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sets the value of the first header field with identity <i>id</i> to <i>value</i> if it already exists; otherwise adds the header with the supplied id and value. If <i>value</i> is of the form &quot;&lt;id&gt;:&lt;content&gt;&quot;, then only the part after the semi-colon is processed.</p>
 <p>RFC 2822 encoding requires header fields to be transmitted in ASCII characters. If <i>value</i> contains non-ASCII characters, it will be encoded to ASCII via the <a href="qmailmessageheaderfield.html#encodeContent">QMailMessageHeaderField::encodeContent</a>() function; depending on the specific header field this may result in illegal content. Where possible, clients should encode non-ASCII data prior to calling setHeaderField.</p>
 <p>See also <a href="qmailmessagepartcontainer.html#headerField">headerField</a>() and <a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a>.</p>
-<h3 class="fn"><a name="setHeaderField-2"></a>void QMailMessagePartContainer::setHeaderField ( const <a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a> &amp; <i>field</i> )</h3>
+<h3 class="fn"><a name="setHeaderField-2"></a>void QMailMessagePartContainer::setHeaderField ( const <a href="qmailmessageheaderfield.html">QMailMessageHeaderField</a> &amp; <i>field</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sets the first header field with identity matching <i>field</i> to have the content of <i>field</i>.</p>
 <h3 class="fn"><a name="setMultipartType"></a>void QMailMessagePartContainer::setMultipartType ( <a href="qmailmessagepartcontainer.html#MultipartType-enum">MultipartType</a> <i>type</i> )</h3>
@@ -158,8 +159,8 @@
 <p>See also <a href="qmailmessagepartcontainer.html#hasBody">hasBody</a>() and <a href="qmailmessagebody.html#transferEncoding">QMailMessageBody::transferEncoding</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

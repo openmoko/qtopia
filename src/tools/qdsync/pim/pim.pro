@@ -1,14 +1,18 @@
+!qbuild{
 qtopia_project(qtopia plugin)
 TARGET=pim
 CONFIG+=no_tr
 # Packaged by tools/qdsync/app
 CONFIG+=no_pkg
 plugin_type=qdsync
-
-DEFINES+=PIMXML_NAMESPACE=QDSync
-
 VPATH+=..
 INCLUDEPATH+=..
+depends(libraries/qtopiapim)
+requires(contains(PROJECTS,tools/qdsync/common))
+contains(PROJECTS,tools/qdsync/common):depends(tools/qdsync/common)
+}
+
+DEFINES+=PIMXML_NAMESPACE=QDSync
 
 HEADERS+=\
     qpimsyncstorage.h\
@@ -17,7 +21,4 @@ HEADERS+=\
 SOURCES+=\
     qpimsyncstorage.cpp\
     qpimxml.cpp\
-
-depends(libraries/qtopiapim)
-depends(tools/qdsync/common)
 

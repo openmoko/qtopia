@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="home" base="themes/crisp">
   <group name="background">
-    <image name="background" rect="0,0,0x0" src="background"/>
-    <plugin name="bgplugin"/>
+    <plugin name="background-plugin"/>
+    <plugin name="homescreen-image-plugin"/>
   </group>
     <image name="dialer" rect="58,86,-57,-70" src="dialerbutton" onclick="src=dialerbuttonp;color=Highlight" interactive="yes" keypad="no" scale="yes"/>
     <layout rect="0,25%,0x45pt" align="hcenter">
@@ -20,7 +20,7 @@
           </rect>
         </layout>
 	  </rect>
-	  <rect name="messages" rect="0,0,0x0" brush="None" transient="yes" active="expr:@/Communications/Messages/NewMessages > 0 || @/Telephony/Status/SMSMemoryFull > 0" interactive="yes">
+	  <rect name="messages" rect="0,0,0x0" transient="yes" active="expr:@/Communications/Messages/NewMessages > 0 || @/Telephony/Status/SMSMemoryFull > 0" interactive="yes">
         <layout align="hcenter">
           <rect rect="0,0,58x42">
             <image rect="0,0,58x42" src="mail"/>
@@ -55,10 +55,10 @@
 	<status name="calldivert" rect="1,1,14x14" imageon="calldivert" onclick="coloron=Highlight" interactive="yes" on="expr:@/Telephony/Status/CallDivert"/>
     </rect>
     <rect name="infobox" rect="5%,55%,90%x20%" color="Highlight" brush="Base" transient="yes" active="no">
-      <image name="infobox" rect="0,0,40x100%"/>
-      <text name="infobox" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter"/>
+      <image name="infobox-image" rect="0,0,40x100%"/>
+      <text name="infobox-text" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter"/>
     </rect>
-    <layout name="pinbox" rect="0,29,0,0" orientation="vertical" transient="yes" active="no">
+    <layout name="pinbox" rect="0,29,0,0" orientation="vertical" transient="yes" active="no" keypad="no">
 	<rect name="pinbox" rect="0,0,0,32" color="Highlight" brush="Base">
 	    <image name="pinbox" rect="0,0,32x32"/>
 	    <text name="pinbox" rect="32,0,-3,49" size="7" color="Text" align="hcenter,vcenter"/>

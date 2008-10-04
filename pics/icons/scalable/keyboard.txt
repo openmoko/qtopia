@@ -1,0 +1,5 @@
+=========== pics/icons/scalable/keyboard.txt ============
+An icon to represent the virtual keyboard service.
+The virtual keyboard service provides an on screen
+keyboard that the user can use to enter text.
+Suggested icon: picture of a keyboard.

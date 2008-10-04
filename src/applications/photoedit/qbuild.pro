@@ -1,0 +1,12 @@
+TEMPLATE=app
+CONFIG+=qtopia
+TARGET=photoedit
+
+CONFIG+=quicklaunch singleexec
+
+include(photoedit.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

@@ -1,0 +1,4 @@
+========= pics/icons/scalable/BackupRestore.txt ==========
+An icon to represent the database migration service.
+Service used to upgrade content databases to new schema
+versions.

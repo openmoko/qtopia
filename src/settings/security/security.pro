@@ -1,23 +1,24 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=security
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+enable_cell:depends(libraries/qtopiaphone)
+}
 
 HEADERS		= security.h
 SOURCES		= security.cpp main.cpp
 
-enable_cell {
-    FORMS	= securityphone.ui
-    HEADERS	+= phonesecurity.h
-    SOURCES	+= phonesecurity.cpp
-    depends(libraries/qtopiaphone)
-} else {
-    FORMS	= securitybase.ui
-}
+CELL.TYPE=CONDITIONAL_SOURCES
+CELL.CONDITION=enable_cell
+CELL.FORMS=securityphone.ui
+CELL.HEADERS=phonesecurity.h
+CELL.SOURCES=phonesecurity.cpp
+!qbuild:CONDITIONAL_SOURCES(CELL)
 
-TRANSLATABLES +=  phonesecurity.h \
-                    phonesecurity.cpp \
-                    securityphone.ui \
-                    securitybase.ui
+NONCELL.TYPE=CONDITIONAL_SOURCES
+NONCELL.CONDITION=!enable_cell
+NONCELL.FORMS=securitybase.ui
+!qbuild:CONDITIONAL_SOURCES(NONCELL)
 
 pics.files=$$QTOPIA_DEPOT_PATH/pics/security/*
 pics.path=/pics/security

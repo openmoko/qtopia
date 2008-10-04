@@ -1,6 +1,8 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=appearance
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+}
 
 HEADERS		= appearance.h
 SOURCES		= appearance.cpp main.cpp

@@ -1,0 +1,16 @@
+TEMPLATE=plugin
+CONFIG+=qtopia singleexec
+TARGET=genericcomposer
+
+PLUGIN_FOR=qtopia
+PLUGIN_TYPE=composers
+
+QTOPIA*=mail
+equals(QTOPIA_UI,home):MODULES*=homeui
+
+include(generic.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

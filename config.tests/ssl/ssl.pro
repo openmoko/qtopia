@@ -1,7 +1,9 @@
-TEMPLATE=app
 CONFIG-=qt x11 app_bundle
+TEMPLATE=app
 SINGLEEXEC=$$(SINGLEEXEC)
 equals(SINGLEEXEC,1) {
+    SOURCES+=main.cpp
+    LIBS+=-lssl -lcrypto
     QMAKE_BEHAVIORS=
     foo="bar"
     bar=bar
@@ -12,9 +14,7 @@ equals(SINGLEEXEC,1) {
     } else {
         LITERAL_ESCAPED_QUOTE=\\\"
     }
-    SOURCES+=main.cpp
     DEFINES+=MAIN_FILE=$$LITERAL_ESCAPED_QUOTE$$(QT_DEPOT)/config.tests/unix/openssl/openssl.cpp$$LITERAL_ESCAPED_QUOTE
-    LIBS+=-lssl -lcrypto
 } else {
     SOURCES+=$$(QT_DEPOT)/config.tests/unix/openssl/openssl.cpp
 }

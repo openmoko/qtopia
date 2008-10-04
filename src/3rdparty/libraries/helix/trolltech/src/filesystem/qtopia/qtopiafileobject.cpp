@@ -1,5 +1,5 @@
 /**********************************************************************
-** Author: Trolltech
+** Author: Qt Extended
 **
 ** Licensees holding a valid license agreement for the use of the
 ** Helix DNA code base may use this file in accordance with that license.
@@ -7,7 +7,7 @@
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
+** Contact info@qtextended.org if any conditions of this licensing are
 ** not clear to you.
 **
 **/

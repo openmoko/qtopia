@@ -1,7 +1,9 @@
+!qbuild {
 qtopia_project(qtopia app)
 depends(libraries/qtopia)
 TARGET=homescreen
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+}
 
 HEADERS		= homescreen.h
 SOURCES		= homescreen.cpp main.cpp

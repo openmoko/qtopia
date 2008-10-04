@@ -2,6 +2,6 @@
 File=QtopiaServices
 Context=CallHistory
 [Service]
-Actions="showCallHistory(QCallList::ListType);viewDetails(QCallListItem,QContact,int)"
+Actions="showCallHistory(QCallList::ListType,QString);viewDetails(QCallListItem,QContact,int)"
 Icon=callhistory/CallHistory
 Name[]="Call History Details"

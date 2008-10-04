@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -35,6 +33,8 @@
 #include <QPushButton>
 #include <QDir>
 #include <QMenu>
+#include <QKeyEvent>
+
 
 using namespace Ui;
 
@@ -113,7 +113,8 @@ private:
 #include "langname.h"
 
 LanguageSettings::LanguageSettings( QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl ), confirmChange(true), a_input(0)
+    : QDialog( parent, fl ),
+    confirmChange(true), notifySystem(true), a_input(0)
 {
     setupUi(this);
     setModal( true );
@@ -192,6 +193,11 @@ LanguageSettings::~LanguageSettings()
 void LanguageSettings::setConfirm(bool c)
 {
     confirmChange = c;
+}
+
+void LanguageSettings::setNotify(bool notify)
+{
+    notifySystem = notify;
 }
 
 void LanguageSettings::inputToggled(const QModelIndex &index)
@@ -281,7 +287,7 @@ void LanguageSettings::newLanguageSelected()
     if( lang != chosenLanguage && confirmChange
         && QMessageBox::warning( this, tr("Language Change"),
                                   tr("<qt>This will cause "
-                                  "Qtopia to restart, closing all applications."
+                                  "Qt Extended to restart, closing all applications."
                                   "<p>Change Language?</qt>"),
                                   QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes ) {
         return;
@@ -295,7 +301,7 @@ void LanguageSettings::newLanguageSelected()
 
     config.setValue( "Language", chosenLanguage );
     forceChosen();
-    config.setValue("InputLanguages", inputLanguages.join(QString(' ' )));
+    config.setValue("InputLanguages", inputLanguages);
     config.sync();
 
     qLog(I18n) << "New language:" << chosenLanguage;
@@ -320,7 +326,7 @@ void LanguageSettings::newLanguageSelected()
 
     qpeconfig.sync();
 
-    if( lang != chosenLanguage ) {
+    if (lang != chosenLanguage && notifySystem) {
         QtopiaIpcEnvelope e("QPE/System","language(QString)");
         e << chosenLanguage;
     }
@@ -332,7 +338,7 @@ void LanguageSettings::accept()
 {
     QSettings config("Trolltech","locale");
     config.beginGroup( "Language" );
-    config.setValue("InputLanguages", inputLanguages.join(QString(' ' )));
+    config.setValue("InputLanguages", inputLanguages);
     config.sync();
 
     QDialog::accept();
@@ -369,7 +375,7 @@ void LanguageSettings::reset()
     }
 
     chosenLanguage = l;
-    inputLanguages = config.value( "InputLanguages").toString().split( ' ' );
+    inputLanguages = config.value( "InputLanguages").toStringList();
     forceChosen();
 }
 

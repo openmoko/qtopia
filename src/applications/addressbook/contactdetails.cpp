@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -68,6 +66,17 @@ void ContactDetails::init( const QContact &entry )
     ent = entry;
     mLink.clear();
 
+
+    // We create tabs for each addressbook detail view plugin
+    // We ask them if they want to be shown for this contact (or they can
+    // just hide themselves in the init function)
+    // they need to provide certain actions
+    // and signals
+    // maybe a view factory plugin
+    // returns view plugins for list, details?
+    // maybe string, maybe enum
+
+
     /* Create our members, if we haven't */
     if ( !mModel ) {
         mModel = new QContactModel(this);
@@ -90,15 +99,15 @@ void ContactDetails::init( const QContact &entry )
         mTabs->addTab(mMessageHistoryTab, QIcon(":icon/email"), tr("Messages"));
 
         connect(mQuickTab, SIGNAL(externalLinkActivated()), this, SIGNAL(externalLinkActivated()));
-        connect(mQuickTab, SIGNAL(backClicked()), this, SIGNAL(backClicked()));
+        connect(mQuickTab, SIGNAL(closeView()), this, SIGNAL(closeView()));
         connect(mDetailsTab, SIGNAL(externalLinkActivated()), this, SIGNAL(externalLinkActivated()));
-        connect(mDetailsTab, SIGNAL(backClicked()), this, SIGNAL(backClicked()));
+        connect(mDetailsTab, SIGNAL(closeView()), this, SIGNAL(closeView()));
 #if defined(QTOPIA_TELEPHONY)
         connect(mCallHistoryTab, SIGNAL(externalLinkActivated()), this, SIGNAL(externalLinkActivated()));
-        connect(mCallHistoryTab, SIGNAL(backClicked()), this, SIGNAL(backClicked()));
+        connect(mCallHistoryTab, SIGNAL(closeView()), this, SIGNAL(closeView()));
 #endif
         connect(mMessageHistoryTab, SIGNAL(externalLinkActivated()), this, SIGNAL(externalLinkActivated()));
-        connect(mMessageHistoryTab, SIGNAL(backClicked()), this, SIGNAL(backClicked()));
+        connect(mMessageHistoryTab, SIGNAL(closeView()), this, SIGNAL(closeView()));
 
         connect(mQuickTab, SIGNAL(callContact()), this, SIGNAL(callContact()));
         connect(mQuickTab, SIGNAL(textContact()), this, SIGNAL(textContact()));
@@ -123,13 +132,6 @@ void ContactDetails::init( const QContact &entry )
 void ContactDetails::modelChanged()
 {
     if (mTabs && mModel) {
-        mQuickTab->setModel(mModel);
-        mDetailsTab->setModel(mModel);
-#if defined(QTOPIA_TELEPHONY)
-        mCallHistoryTab->setModel(mModel);
-#endif
-        mMessageHistoryTab->setModel(mModel);
-
         mQuickTab->init(ent);
         mDetailsTab->init(ent, ContactDocument::Details);
 #if defined(QTOPIA_TELEPHONY)
@@ -142,7 +144,7 @@ void ContactDetails::modelChanged()
 // -------------------------------------------------------------
 // ContactHistoryDelegate
 // -------------------------------------------------------------
-
+#ifndef QTOPIA_HOMEUI
 ContactHistoryDelegate::ContactHistoryDelegate(QObject *parent)
     : QPimDelegate(parent)
 {
@@ -215,4 +217,5 @@ QSize ContactHistoryDelegate::decorationsSizeHint(const QStyleOptionViewItem& op
     Q_UNUSED(index);
     return QSize(mPrimarySize.width() + mSecondarySize.width() + s.width(), qMax(qMax(mPrimarySize.height(), mSecondarySize.height()) + 2, s.height()));
 }
+#endif // QTOPIA_HOMEUI
 

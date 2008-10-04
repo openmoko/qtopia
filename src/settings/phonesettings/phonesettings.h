@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef PHONESETTINGS_H
@@ -33,6 +31,7 @@
 #include <QDialog>
 #include <QIcon>
 #include <QListWidget>
+#include <QtopiaAbstractService>
 
 class QListWidgetItem;
 class QCheckBox;
@@ -71,6 +70,10 @@ class PhoneSettings : public QDialog
 public:
     PhoneSettings( QWidget *parent = 0, Qt::WFlags fl = 0 );
     enum { Barring, Waiting, CallerId, Broadcast, Fixed, Flip, Service, Volume };
+
+    void activate( int itemId );
+
+    bool selectVoiceMail;
 
 private slots:
     void itemActivated( QListWidgetItem *item );
@@ -277,6 +280,8 @@ public:
     ServiceNumbers( QWidget *parent = 0, Qt::WFlags fl = 0 );
     ~ServiceNumbers();
 
+    void selectVoiceMail() { focusVoiceMail = true; }
+
 private:
     void init();
 
@@ -290,6 +295,7 @@ private:
     QLineEdit *voiceMail, *serviceCenter;
     QString init_voicenum, init_smsnum;
     QServiceNumbers *serviceNumbers;
+    bool focusVoiceMail;
 };
 
 class CallVolume : public QDialog
@@ -326,5 +332,23 @@ private:
     QCallVolume *callVolume;
 };
 
-#endif // PHONESETTINGS_H
+class VoiceMailService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class PhoneSettings;
+private:
+    VoiceMailService( PhoneSettings *parent )
+        : QtopiaAbstractService( "VoiceMail", parent )
+    { this->parent = parent; publishAll(); }
 
+public:
+    ~VoiceMailService();
+
+public slots:
+    void setVoiceMail();
+
+private:
+    PhoneSettings *parent;
+};
+
+#endif

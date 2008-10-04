@@ -10,9 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">SMSService Class Reference</h1>
-<p>Provides the Qtopia SMS service. <a href="#details">More...</a></p>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">SMSService Class Reference</h1>
+<p>Provides the Qt Extended SMS service. <a href="#details">More...</a></p>
 <pre>    #include &lt;SMSService&gt;</pre><p>Inherits <a href="qtopiaabstractservice.html">QtopiaAbstractService</a>.</p>
 <ul>
 <li><a href="smsservice-members.html">List of all members, including inherited members</a></li>
@@ -20,8 +20,6 @@
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
 <ul>
-<li><div class="fn"/>void <b><a href="smsservice.html#flashSms">flashSms</a></b> ( const QDSActionRequest &amp; <i>request</i> )</li>
-<li><div class="fn"/>void <b><a href="smsservice.html#pushMmsMessage">pushMmsMessage</a></b> ( const QDSActionRequest &amp; <i>request</i> )</li>
 <li><div class="fn"/>void <b><a href="smsservice.html#smsVCard">smsVCard</a></b> ( const QString &amp; <i>filename</i>, const QString &amp; <i>description</i> )</li>
 <li><div class="fn"/>void <b><a href="smsservice.html#smsVCard-2">smsVCard</a></b> ( const QString &amp; <i>channel</i>, const QString &amp; <i>id</i>, const QString &amp; <i>filename</i>, const QString &amp; <i>description</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>void <b><a href="smsservice.html#smsVCard-3">smsVCard</a></b> ( const QDSActionRequest &amp; <i>request</i> )</li>
@@ -48,18 +46,10 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>Provides the Qtopia SMS service.</p>
+<p>Provides the Qt Extended SMS service.</p>
 <p>The <i>SMS</i> service enables applications to access features of the system's SMS application.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="flashSms"></a>void SMSService::flashSms ( const <a href="qdsactionrequest.html">QDSActionRequest</a> &amp; <i>request</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Direct the <i>SMS</i> service to process the flash SMS message within <i>request</i>.</p>
-<p>This slot corresponds to a QDS service with request data containing the serialization of a <a href="qsmsmessage.html">QSMSMessage</a>, and no response data.</p>
-<p>This slot corresponds to the QCop service message <tt>SMS::flashSms(QDSActionRequest)</tt>.</p>
-<h3 class="fn"><a name="pushMmsMessage"></a>void SMSService::pushMmsMessage ( const <a href="qdsactionrequest.html">QDSActionRequest</a> &amp; <i>request</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Direct the <i>SMS</i> services to handle the MMS push notification <i>request</i>.</p>
-<p>This slot corresponds to a QDS service with request data containing the serialization of an <tt>MMSMessage</tt>, and no response data.</p>
-<p>This slot corresponds to the QCop service message <tt>SMS::pushMmsMessage(QDSActionRequest)</tt>.</p>
 <h3 class="fn"><a name="smsVCard"></a>void SMSService::smsVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Direct the <i>SMS</i> service to interact with the user to compose a new SMS message for sending the vcard data in <i>filename</i>. The <i>description</i> argument provides an optional descriptive text message.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::smsVCard(QString,QString)</tt>.</p>
@@ -75,8 +65,8 @@
 <p>This slot corresponds to the QCop service message <tt>SMS::smsVCard(QDSActionRequest)</tt>.</p>
 <h3 class="fn"><a name="viewSms"></a>void SMSService::viewSms ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This function is deprecated.</p>
-<p>Clients of this service should instead use <tt>Messages::viewNewMessages()</tt>.</p>
 <p>Show the most recently received SMS message.</p>
+<p>Clients of this service should instead use <tt>Messages::viewNewMessages()</tt>.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::viewSms()</tt>.</p>
 <h3 class="fn"><a name="viewSmsList"></a>void SMSService::viewSmsList ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This function is deprecated.</p>
@@ -95,8 +85,8 @@
 <p>This slot corresponds to the QCop service message <tt>SMS::writeSms(QString,QString,QString)</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

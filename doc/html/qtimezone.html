@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QTimeZone Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QTimeZone Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QTimeZone class provides access to time zone data. <a href="#details">More...</a></p>
 <pre>    #include &lt;QTimeZone&gt;</pre><ul>
 <li><a href="qtimezone-members.html">List of all members, including inherited members</a></li>
@@ -40,7 +41,7 @@
 <li><div class="fn"/>QString <b><a href="qtimezone.html#standardAbbreviation">standardAbbreviation</a></b> () const</li>
 <li><div class="fn"/>QDateTime <b><a href="qtimezone.html#toCurrent">toCurrent</a></b> ( const QDateTime &amp; <i>dt</i> ) const</li>
 <li><div class="fn"/>uint <b><a href="qtimezone.html#toTime_t">toTime_t</a></b> ( const QDateTime &amp; <i>dt</i> ) const</li>
-<li><div class="fn"/>QDateTime <b><a href="qtimezone.html#toUtc">toUtc</a></b> ( const QDateTime &amp; <i>dt</i> ) const</li>
+<li><div class="fn"/>QDateTime <b><a href="qtimezone.html#toUtcx">toUtc</a></b> ( const QDateTime &amp; <i>dt</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qtimezone.html#operator-not-eq">operator!=</a></b> ( const QTimeZone &amp; <i>c</i> ) const</li>
 <li><div class="fn"/>QTimeZone &amp; <b><a href="qtimezone.html#operator-eq">operator=</a></b> ( const QTimeZone &amp; <i>from</i> )</li>
 <li><div class="fn"/>bool <b><a href="qtimezone.html#operator-eq-eq">operator==</a></b> ( const QTimeZone &amp; <i>c</i> ) const</li>
@@ -51,6 +52,8 @@
 <li><div class="fn"/>QTimeZone <b><a href="qtimezone.html#current">current</a></b> ()</li>
 <li><div class="fn"/>QTimeZone <b><a href="qtimezone.html#findFromMinutesEast">findFromMinutesEast</a></b> ( const QDateTime &amp; <i>t</i>, int <i>mineast</i>, bool <i>isdst</i> )</li>
 <li><div class="fn"/>QStringList <b><a href="qtimezone.html#ids">ids</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtimezone.html#setApplicationTimeZone">setApplicationTimeZone</a></b> ( const QString &amp; <i>newtz</i> )</li>
+<li><div class="fn"/>void <b><a href="qtimezone.html#setSystemTimeZone">setSystemTimeZone</a></b> ( const QString &amp; <i>newtz</i> )</li>
 <li><div class="fn"/>QTimeZone <b><a href="qtimezone.html#utc">utc</a></b> ()</li>
 <li><div class="fn"/>QDateTime <b><a href="qtimezone.html#utcDateTime">utcDateTime</a></b> ()</li>
 </ul>
@@ -61,7 +64,7 @@
 <p>QTimeZone provides access to timezone data and conversion between dates and times in different time zones.</p>
 <p>A time zone is a region of the world that has adopted the same standard time, including conventions on Daylight Saving or Summer time adjustments.</p>
 <p>Each time zone is specified by a unique identifier. A set of such identifiers is known to the system, and can be found using <a href="qtimezone.html#ids">ids</a>().</p>
-<p>Conversions between time zones can either be done via UTC, using <a href="qtimezone.html#fromUtc">fromUtc</a>() and <a href="qtimezone.html#toUtc">toUtc</a>(), or directly with <a href="qtimezone.html#convert">convert</a>(), <a href="qtimezone.html#fromCurrent">fromCurrent</a>(), or <a href="qtimezone.html#toCurrent">toCurrent</a>().</p>
+<p>Conversions between time zones can either be done via UTC, using <a href="qtimezone.html#fromUtc">fromUtc</a>() and <a href="qtimezone.html#toUtcx">toUtc</a>(), or directly with <a href="qtimezone.html#convert">convert</a>(), <a href="qtimezone.html#fromCurrent">fromCurrent</a>(), or <a href="qtimezone.html#toCurrent">toCurrent</a>().</p>
 <p>Each time zone is in a greater <a href="qtimezone.html#area">area</a>() and has an associated <a href="qtimezone.html#city">city</a>() that observes the standard. This city is not necessarily the capital, just a well-known city in the area. More than one city in an area may observe identical standards, yet they will appear as distinct time zones. The countyCode() of the country containing the time zone is also available.</p>
 <p>A QTimeZone either <a href="qtimezone.html#isValid">isValid</a>() or is not valid. The default constructor creates an invalid QTimeZone.</p>
 <p>Note that some features of QTimeZone may not be available on non-POSIX platforms.</p>
@@ -111,9 +114,13 @@
 <p>Returns the longitude of the <a href="qtimezone.html#city">city</a>() of this timezone, in seconds of a degree.</p>
 <h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QTimeZone::name () const</h3>
 <p>Returns either the <a href="qtimezone.html#city">city</a>() for this time zone, or some other string meaningful to the user (eg. &quot;GMT+10&quot; meaning 10 hours East of GMT).</p>
+<h3 class="fn"><a name="setApplicationTimeZone"></a>void QTimeZone::setApplicationTimeZone ( const <a href="qstring.html">QString</a> &amp; <i>newtz</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Sets the application time zone to <i>newtz</i>.</p>
 <h3 class="fn"><a name="setId"></a>void QTimeZone::setId ( const char * <i>id</i> )</h3>
 <p>Sets the time zone id of this <a href="qtimezone.html">QTimeZone</a> to <i>id</i>.</p>
 <p>See also <a href="qtimezone.html#id">id</a>().</p>
+<h3 class="fn"><a name="setSystemTimeZone"></a>void QTimeZone::setSystemTimeZone ( const <a href="qstring.html">QString</a> &amp; <i>newtz</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Sets the system time zone to <i>newtz</i>.</p>
 <h3 class="fn"><a name="standardAbbreviation"></a><a href="qstring.html">QString</a> QTimeZone::standardAbbreviation () const</h3>
 <p>Returns the time zone abbreviation, e.g&#x2e; EST</p>
 <h3 class="fn"><a name="toCurrent"></a><a href="qdatetime.html">QDateTime</a> QTimeZone::toCurrent ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
@@ -121,7 +128,7 @@
 <p>See also <a href="qtimezone.html#current">current</a>().</p>
 <h3 class="fn"><a name="toTime_t"></a><a href="qtglobal.html#uint-typedef">uint</a> QTimeZone::toTime_t ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
 <p>Returns the date and time <i>dt</i> in this time zone, as the number of seconds since 1 January 1970.</p>
-<h3 class="fn"><a name="toUtc"></a><a href="qdatetime.html">QDateTime</a> QTimeZone::toUtc ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
+<h3 class="fn"><a name="toUtcx"></a><a href="qdatetime.html">QDateTime</a> QTimeZone::toUtc ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
 <p>Returns the date and time <i>dt</i> in this time zone as a date and time in UTC.</p>
 <h3 class="fn"><a name="utc"></a>QTimeZone QTimeZone::utc ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return a time zone located at the UTC reference.</p>
@@ -135,8 +142,8 @@
 <p>Returns true if <i>c</i> is equal to this, otherwise false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

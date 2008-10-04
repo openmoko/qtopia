@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -37,9 +35,7 @@
 
 #include <qtopialog.h>
 #include <qtopianamespace.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -52,19 +48,15 @@ public:
     DialupUI( DialupConfig *c, QWidget* parent, Qt::WFlags flags = 0);
     ~DialupUI();
 
-#ifdef QTOPIA_PHONE
     enum Entry {
         Account, Dialing, Proxy, Advanced
     };
-#endif
 
 public slots:
     void accept();
 private slots:
-#ifdef QTOPIA_PHONE
     void optionSelected(QListWidgetItem* item);
     void updateUserHint(QListWidgetItem* cur, QListWidgetItem* prev);
-#endif
 
 private:
     void init();
@@ -77,13 +69,9 @@ private:
     AccountPage* accPage;
     DialingPage* dialingPage;
     AdvancedPage* advancedPage;
-#ifdef QTOPIA_PHONE
     QListWidget* options;
     QStackedWidget* stack;
     QLabel* userHint;
-#else
-    QTabWidget* tabWidget;
-#endif
     QString errorText;
 };
 
@@ -175,10 +163,8 @@ DialupUI::DialupUI(DialupConfig *c, QWidget* parent, Qt::WFlags flags)
     :QDialog(parent, flags), config( c )
 {
     init();
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this , true );
-#endif
     setObjectName("dialup-menu");
 }
 
@@ -198,48 +184,6 @@ void DialupUI::init()
         setWindowTitle( title );
 
     QtopiaNetwork::Type type = QtopiaNetwork::toType( config->configFile() );
-#ifndef QTOPIA_PHONE
-    QTabWidget * tabWidget = new QTabWidget( this );
-
-    QScrollArea* scroll = new QScrollArea();
-    scroll->setWidgetResizable( true );
-    scroll->setFocusPolicy( Qt::NoFocus );
-    scroll->setFrameShape( QFrame::NoFrame );
-    accPage = new AccountPage( type,
-            knownProp );
-    scroll->setWidget( accPage );
-    tabWidget->addTab( scroll, tr("Account") );
-    tabWidget->setTabIcon( 0, QIcon(":icon/netsetup/account") );
-
-    scroll = new QScrollArea();
-    scroll->setWidgetResizable( true );
-    scroll->setFocusPolicy( Qt::NoFocus );
-    scroll->setFrameShape( QFrame::NoFrame );
-    proxiesPage = new ProxiesPage( knownProp );
-    scroll->setWidget( proxiesPage );
-    tabWidget->addTab( scroll, tr("Proxy","for http traffic") );
-    tabWidget->setTabIcon( 1, QIcon(":icon/netsetup/proxies") );
-
-    scroll = new QScrollArea();
-    scroll->setWidgetResizable( true );
-    scroll->setFocusPolicy( Qt::NoFocus );
-    scroll->setFrameShape( QFrame::NoFrame );
-    dialingPage = new DialingPage( knownProp );
-    scroll->setWidget( dialingPage );
-    tabWidget->addTab( scroll, tr("Network") );
-    tabWidget->setTabIcon( 2, QIcon(":icon/netsetup/server") );
-
-    scroll = new QScrollArea();
-    scroll->setWidgetResizable( true );
-    scroll->setFocusPolicy( Qt::NoFocus );
-    scroll->setFrameShape( QFrame::NoFrame );
-    advancedPage = new AdvancedPage( knownProp );
-    scroll->setWidget( advancedPage );
-    tabWidget->addTab( scroll, tr("Advanced") );
-    tabWidget->setTabIcon( 3, QIcon(":icon/settings") );
-
-    vBox->addWidget( tabWidget );
-#else
     stack = new QStackedWidget( this );
 
     QWidget* page = new QWidget();
@@ -319,15 +263,11 @@ void DialupUI::init()
     vBox->addWidget( stack );
     connect(options, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(optionSelected(QListWidgetItem*)));
-#endif
-
 }
 
 void DialupUI::accept()
 {
-#ifdef QTOPIA_PHONE
     if (stack->currentIndex() == 0) {
-#endif
         QtopiaNetworkProperties props = proxiesPage->properties();
         config->writeProperties(props);
         props = accPage->properties();
@@ -349,11 +289,9 @@ void DialupUI::accept()
             else
                 QDialog::accept();
         }
-#ifdef QTOPIA_PHONE
     } else {
         stack->setCurrentIndex( 0 );
     }
-#endif
 }
 
 void DialupUI::createPeerId( )
@@ -548,7 +486,6 @@ int DialupUI::writeSystemFiles()
     return 0;
 }
 
-#ifdef QTOPIA_PHONE
 void DialupUI::optionSelected(QListWidgetItem* item)
 {
     if (item) {
@@ -597,6 +534,5 @@ void DialupUI::updateUserHint(QListWidgetItem* cur, QListWidgetItem* /*prev*/)
     }
     userHint->setText( desc );
 }
-#endif
 
 #include "config.moc"

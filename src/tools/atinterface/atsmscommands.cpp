@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -33,7 +31,7 @@
 #include <QMailMessage>
 #include <QMailMessageKey>
 #include <QMailAddress>
-#include <QMailId>
+#include <QMailMessageId>
 #include <QServiceNumbers>
 
 
@@ -62,9 +60,9 @@ AtSmsCommands::AtSmsCommands( AtCommands * parent ) : QObject( parent )
              this, SLOT(extraLine(QString,bool)) );
 
     connect( smsReader,
-             SIGNAL(fetched(const QString &, const QSMSMessage &)),
+             SIGNAL(fetched(QString,QSMSMessage)),
              this,
-             SLOT(smsFetched(const QString &, const QSMSMessage &)) );
+             SLOT(smsFetched(QString,QSMSMessage)) );
     connect( smsSender,
              SIGNAL(finished(QString,QTelephony::Result)),
              this,
@@ -142,23 +140,23 @@ void AtSmsCommands::atcmgd( const QString& params )
 
             QMailStore *qms = QMailStore::instance();
             QMailMessageKey showSmsKey( QMailMessageKey::Type, QMailMessage::Sms );
-            QMailMessageKey showIncomingKey( QMailMessageKey::Status, QMailMessage::Incoming, QMailMessageKey::Contains );
-            QMailMessageKey showOutgoingKey( QMailMessageKey::Status, QMailMessage::Outgoing, QMailMessageKey::Contains );
-            QMailMessageKey showReadKey( QMailMessageKey::Status, QMailMessage::Read, QMailMessageKey::Contains );
-            QMailMessageKey showSentKey( QMailMessageKey::Status, QMailMessage::Sent, QMailMessageKey::Contains );
-            QList<QMailId> qlm;
-            QList<QMailId>::ConstIterator it;
+            QMailMessageKey showIncomingKey( QMailMessageKey::Status, QMailMessage::Incoming, QMailDataComparator::Includes );
+            QMailMessageKey showOutgoingKey( QMailMessageKey::Status, QMailMessage::Outgoing, QMailDataComparator::Includes );
+            QMailMessageKey showReadKey( QMailMessageKey::Status, QMailMessage::Read, QMailDataComparator::Includes );
+            QMailMessageKey showSentKey( QMailMessageKey::Status, QMailMessage::Sent, QMailDataComparator::Includes );
+            QList<QMailMessageId> qlm;
+            QList<QMailMessageId>::ConstIterator it;
 
             switch ( delflag ) {
                 case 0: // delete the index
                 {
-                    QMailMessage qmm = qms->message( QMailId( del_index ) );
-                    if ( !qmm.id().isValid() || ! ( qmm.messageType() | QMailMessage::Sms ) ) {
+                    QMailMessage qmm = qms->message( QMailMessageId( del_index ) );
+                    if ( !qmm.id().isValid() || ! ( qmm.messageType() & QMailMessage::Sms ) ) {
                         // this was either not valid, or not an sms.
                         atc->done( QAtResult::InvalidMemoryIndex );
                     } else {
                         // ok, delete it.
-                        if ( qms->removeMessage( QMailId( del_index ) ) ) {
+                        if ( qms->removeMessage( QMailMessageId( del_index ) ) ) {
                             atc->done();
                         } else {
                             atc->done( QAtResult::SMSMemoryFailure );
@@ -217,8 +215,8 @@ void AtSmsCommands::atcmgd( const QString& params )
 
             QMailStore *qms = QMailStore::instance();
             QMailMessageKey showSmsKey( QMailMessageKey::Type, QMailMessage::Sms );
-            QList<QMailId> qlm = qms->queryMessages( showSmsKey );
-            QList<QMailId>::ConstIterator it;
+            QList<QMailMessageId> qlm = qms->queryMessages( showSmsKey );
+            QList<QMailMessageId>::ConstIterator it;
             for ( it = qlm.begin(); it != qlm.end(); ++it ) {
                 status += "," + QString::number( (*it).toULongLong() );
             }
@@ -311,12 +309,12 @@ void AtSmsCommands::atcmgl( const QString& params )
             }
 
             QMailStore *qms = QMailStore::instance();
-            QMailMessageKey showSmsKey( QMailMessageKey::Type, QMailMessage::Sms, QMailMessageKey::Contains );
-            QMailMessageKey showIncomingKey( QMailMessageKey::Status, QMailMessage::Incoming, QMailMessageKey::Contains );
-            QMailMessageKey showOutgoingKey( QMailMessageKey::Status, QMailMessage::Outgoing, QMailMessageKey::Contains );
-            QMailMessageKey showReadKey( QMailMessageKey::Status, QMailMessage::Read, QMailMessageKey::Contains );
-            QMailMessageKey showSentKey( QMailMessageKey::Status, QMailMessage::Sent, QMailMessageKey::Contains );
-            QList<QMailId> qml;
+            QMailMessageKey showSmsKey( QMailMessageKey::Type, QMailMessage::Sms, QMailDataComparator::Includes );
+            QMailMessageKey showIncomingKey( QMailMessageKey::Status, QMailMessage::Incoming, QMailDataComparator::Includes );
+            QMailMessageKey showOutgoingKey( QMailMessageKey::Status, QMailMessage::Outgoing, QMailDataComparator::Includes );
+            QMailMessageKey showReadKey( QMailMessageKey::Status, QMailMessage::Read, QMailDataComparator::Includes );
+            QMailMessageKey showSentKey( QMailMessageKey::Status, QMailMessage::Sent, QMailDataComparator::Includes );
+            QList<QMailMessageId> qml;
 
             // identify which messages we are required to list.
             uint posn = 1;
@@ -373,14 +371,14 @@ void AtSmsCommands::atcmgl( const QString& params )
                 nstat = 4;
             }
 
-            QList<QMailId>::ConstIterator it;
+            QList<QMailMessageId>::ConstIterator it;
             for ( it = qml.begin(); it != qml.end(); ++it ) {
                 QMailMessage qmm = qms->message(*it);
                 QString address = "";
                 QString alpha_address = "";
                 QString service_centre = "";
 
-                if ( qmm.status() | QMailMessage::Incoming ) {
+                if ( qmm.status() & QMailMessage::Incoming ) {
                     // if it wasn't read before, it is now.
                     qmm.setStatus( qmm.status() | QMailMessage::Read );
                     stat = "REC READ";
@@ -396,7 +394,7 @@ void AtSmsCommands::atcmgl( const QString& params )
 
                 } else {
                     if ( stat == "ALL" ) {
-                        if ( qmm.status() | QMailMessage::Sent ) {
+                        if ( qmm.status() & QMailMessage::Sent ) {
                             stat = "STO SENT";
                             nstat = 3;
                         } else {
@@ -536,10 +534,10 @@ void AtSmsCommands::atcmgr( const QString& params )
 
                 // retrieve the message from the store
                 QMailStore *qms = QMailStore::instance();
-                QMailMessage qmm = qms->message( QMailId( index ) );
+                QMailMessage qmm = qms->message( QMailMessageId( index ) );
 
                 // check that it is a valid message, and also an SMS message.
-                if ( !qmm.id().isValid() || ! ( qmm.messageType() | QMailMessage::Sms ) ) {
+                if ( !qmm.id().isValid() || ! ( qmm.messageType() & QMailMessage::Sms ) ) {
                     // this is not an sms.
                     atc->done( QAtResult::Error );
                     break;
@@ -553,9 +551,9 @@ void AtSmsCommands::atcmgr( const QString& params )
                 if ( atc->options()->messageFormat ) {
 
                     // append the message status and address info.
-                    if ( qmm.status() | QMailMessage::Incoming ) {
+                    if ( qmm.status() & QMailMessage::Incoming ) {
                         // message_status
-                        if ( qmm.status() | QMailMessage::Read ) {
+                        if ( qmm.status() & QMailMessage::Read ) {
                             status += "\"REC READ\"";
                         } else {
                             status += "\"REC UNREAD\"";
@@ -574,7 +572,7 @@ void AtSmsCommands::atcmgr( const QString& params )
                         status += "+00\""; // we're in UTC, so no timezone.
                     } else {
                         // message_status
-                        if ( qmm.status() | QMailMessage::Sent ) {
+                        if ( qmm.status() & QMailMessage::Sent ) {
                             status += "\"STO SENT\"";
                         } else {
                             status += "\"STO UNSENT\"";

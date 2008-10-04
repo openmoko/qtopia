@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -33,9 +31,6 @@
 #ifdef QTOPIA_CELL
 #	include <QSimInfo>
 #	include "atgsmcellcommands.h"
-#endif
-
-#ifdef ATINTERFACE_SMS
 #	include "atsmscommands.h"
 #endif
 
@@ -54,8 +49,6 @@ AtCommands::AtCommands( AtFrontEnd *frontEnd, AtSessionManager *manager )
     m_atgnc = new AtGsmNonCellCommands( this );
 #ifdef QTOPIA_CELL
     m_atgcc = new AtGsmCellCommands( this );
-#endif
-#ifdef ATINTERFACE_SMS
     m_atsms = new AtSmsCommands( this );
 #endif
 #ifdef QTOPIA_BLUETOOTH
@@ -102,8 +95,6 @@ AtCommands::~AtCommands()
     delete m_atgnc;
 #ifdef QTOPIA_CELL
     delete m_atgcc;
-#endif
-#ifdef ATINTERFACE_SMS
     delete m_atsms;
 #endif
 #ifdef QTOPIA_BLUETOOTH
@@ -285,13 +276,13 @@ void AtCommands::notAllowed()
     \page modem-emulator.html
     \title Modem Emulator
 
-    The modem emulator component in Qtopia allows external devices, such
+    The modem emulator component in Qt Extended allows external devices, such
     as laptops and Bluetooth hands-free kits, to send AT commands to a
-    Qtopia Phone to cause it to perform operations on the external device's
+    Qt Extended Phone to cause it to perform operations on the external device's
     behalf.
 
     The following sections describe the AT commands that are supported
-    by Qtopia via the Modem Emulator interface.
+    by Qt Extended via the Modem Emulator interface.
 
     \list
         \o \l{Modem Emulator - Call Control}{Call Control Commands}
@@ -301,6 +292,7 @@ void AtCommands::notAllowed()
         \o \l{Modem Emulator - Network}{Network Commands}
         \o \l{Modem Emulator - Supplementary Services}{Supplementary Service Commands}
         \o \l{Modem Emulator - GPRS}{GPRS Commands}
+        \o \l{Modem Emulator - Short Message Service}{Short Message Service (SMS) Commands}
         \o \l{Modem Emulator - Ignored Commands}{Ignored Commands}
     \endlist
 
@@ -692,6 +684,14 @@ void AtCommands::deferredResult
     if ( dataCallRequested && result == QAtResult::Connect ) {
         dataCallRequested = false;
         frontEnd()->setState( AtFrontEnd::OnlineData );
+        if (cmdsPosn >= cmds.size()) {
+            this->result = result;
+            cmdsPosn = cmds.size();
+            frontEnd()->send( result );
+            return;
+        } else {
+            qLog(ModemEmulator) << "Data call: Connected but more commands pending";
+        }
     }
     done( result );
 }

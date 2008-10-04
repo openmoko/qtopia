@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QPowerSourceProvider Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QPowerSourceProvider Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QPowerSourceProvider class provides an interface for power sources to integrate into Qtopia. <a href="#details">More...</a></p>
 <pre>    #include &lt;QPowerSourceProvider&gt;</pre><p>Inherits <a href="qpowersource.html">QPowerSource</a>.</p>
 <p>Inherited by <a href="defaultbattery.html">DefaultBattery</a>.</p>
@@ -57,7 +58,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QPowerSourceProvider class provides an interface for power sources to integrate into Qtopia.</p>
-<p>Power sources are components, either external or internal, such as batteries or wall sockets that provide power to a Qtopia device. The QPowerSourceProvider API allows the addition of information about new power sources into Qtopia.</p>
+<p>Power sources are components, either external or internal, such as batteries or wall sockets that provide power to a Qt Extended device. The QPowerSourceProvider API allows the addition of information about new power sources into Qtopia.</p>
 <p>By deriving from the QPowerSourceProvider (or just creating an instance), an application or system component can provide information about a power source that can then be accessed through the <a href="qpowersource.html">QPowerSource</a> API. For example,</p>
 <pre>    QPowerSourceProvider *battery = new QPowerSourceProvider(QPowerSource::Battery, &quot;My Pretend Battery&quot;);
     battery-&gt;setAvailability(QPowerSource::NotAvailable);
@@ -81,8 +82,8 @@
 <p>Set the time <i>remaining</i>, in minutes, for the power source.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

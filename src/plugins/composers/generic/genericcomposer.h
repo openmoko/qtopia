@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,49 +22,19 @@
 
 #include <QLineEdit>
 
-#include <qtopia/mail/qmailcomposer.h>
-#include <qtopia/mail/qmailcomposerplugin.h>
+#include <qmailcomposer.h>
+#include <qmailcomposerplugin.h>
 
-class AddAttDialog;
-class QTextEdit;
-class QLabel;
-class QAction;
-
-class GenericComposer : public QWidget
-{
-    Q_OBJECT
-public:
-    GenericComposer( QWidget *parent = 0 );
-    ~GenericComposer();
-
-    void setText( const QString &t, const QString &type );
-    QString text() const;
-    bool isVCard() const { return m_vCard; }
-
-    void addActions(QMenu* menu);
-
-signals:
-    void contentChanged();
-    void finished();
-
-protected slots:
-    void updateSmsLimitIndicator();
-    void templateText();
-    void textChanged();
-
-#ifndef QTOPIA_NO_SMS
-    void smsLengthInfo(uint& estimatedBytes, bool& isUnicode);
-    int smsCountInfo();
+#ifdef QTOPIA_HOMEUI
+#include <private/homewidgets_p.h>
 #endif
 
-private:
-    QTextEdit *m_textEdit;
-    QLabel *m_smsLimitIndicator;
-    QAction *m_showLimitAction;
-    QAction *m_templateTextAction;
-    bool m_vCard;
-    QString m_vCardData;
-};
+class AddAttDialog;
+class ComposerTextEdit;
+class DetailsPage;
+class QLabel;
+class QAction;
+class QStackedWidget;
 
 class GenericComposerInterface : public QMailComposerInterface
 {
@@ -74,23 +42,69 @@ class GenericComposerInterface : public QMailComposerInterface
 
 public:
     GenericComposerInterface( QWidget *parent = 0 );
-    ~GenericComposerInterface();
+    virtual ~GenericComposerInterface();
 
     bool isEmpty() const;
     QMailMessage message() const;
 
-    QWidget *widget() const;
-
-    virtual void addActions(QMenu* menu) const;
+    void setDefaultAccount(const QMailAccountId& id);
+    void setTo(const QString& toAddress);
+    void setFrom(const QString& fromAddress);
+    void setSubject(const QString& subject);
+    void setMessageType(QMailMessage::MessageType type);
+    QString from() const;
+    QString to() const;
+    bool isReadyToSend() const;
+    bool isDetailsOnlyMode() const;
+    void setDetailsOnlyMode(bool val);
+    QString contextTitle() const;
+    QMailAccount fromAccount() const;
 
 public slots:
     void setMessage( const QMailMessage &mail );
-    void setText( const QString &txt, const QString &type );
+    void setBody( const QString &txt, const QString &type );
     void clear();
     void attach( const QContent &lnk, QMailMessage::AttachmentsAction action = QMailMessage::LinkToAttachments );
+    void reply(const QMailMessage& source, int action);
+
+protected slots:
+    void updateSmsLimitIndicator();
+    void templateText();
+    void textChanged();
+#ifndef QTOPIA_NO_SMS
+    void smsLengthInfo(uint& estimatedBytes, bool& isUnicode);
+    int smsCountInfo();
+#endif
+    void detailsPage();
+    void composePage();
+#ifdef QTOPIA_HOMEUI
+    void selectRecipients();
+    void recipientsActivated();
+#endif
 
 private:
-    GenericComposer *m_composer;
+    void init();
+    QString text() const;
+    bool isVCard() const { return m_vCard; }
+    void setContext(const QString& title);
+
+private:
+    QStackedWidget* m_widgetStack;
+    QWidget* m_composerWidget;
+    ComposerTextEdit *m_textEdit;
+    QLabel *m_smsLimitIndicator;
+    DetailsPage* m_detailsWidget;
+    QAction *m_showLimitAction;
+    QAction *m_templateTextAction;
+#ifdef QTOPIA_HOMEUI
+    HomeFieldButton *m_toEdit;
+    HomeActionButton *m_contactsButton;
+    ColumnSizer m_sizer;
+#endif
+    bool m_vCard;
+    QString m_vCardData;
+    QString m_title;
+    QMailMessage::MessageType m_type;
 };
 
 class GenericComposerPlugin : public QMailComposerPlugin
@@ -99,15 +113,6 @@ class GenericComposerPlugin : public QMailComposerPlugin
 
 public:
     GenericComposerPlugin();
-
-    virtual QString key() const;
-    virtual QMailMessage::MessageType messageType() const;
-
-    virtual QString name() const;
-    virtual QString displayName() const;
-    virtual QIcon displayIcon() const;
-
-    virtual bool isSupported( QMailMessage::MessageType type ) const;
 
     QMailComposerInterface* create( QWidget* parent );
 };

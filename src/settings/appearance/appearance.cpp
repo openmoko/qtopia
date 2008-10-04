@@ -1,73 +1,158 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "appearance.h"
 #include "themedview.h"
 
-#include <private/contextkeymanager_p.h>
-#include <QtopiaApplication>
-#include <qtopiaservices.h>
-#include <QMenu>
-#include <QTimer>
-#include <QPhoneProfileManager>
-#include <QFormLayout>
+#include <QStringList>
+#include <QStringListModel>
+#include <QSettings>
+#include <QTranslatableSettings>
 #include <QComboBox>
+#include <QLabel>
+#include <QPixmap>
+#include <QFormLayout>
+#include <QDesktopWidget>
 #include <QGroupBox>
 #include <QCheckBox>
-#include <QTranslatableSettings>
-#include <QtopiaChannel>
-#include <QtopiaIpcEnvelope>
-#include <QPixmap>
-#include <QDesktopWidget>
+#include <QGridLayout>
+#include <QDir>
+#include <QList>
+#include <QHash>
+#include <QHashIterator>
 #include <QScrollArea>
+#include <QMenu>
+#include <QTimer>
 
-ThemePreview::ThemePreview(const QString &name, int width, int height)
-    : QObject(0), m_name(name), themedView(0),
-      m_buttonIcons(true),
-      m_width(width),
-      m_height(height)
+#include <QtopiaServiceRequest>
+#include <QtopiaIpcEnvelope>
+#include <QtopiaApplication>
+#include <QSoftMenuBar>
+#include <QtopiaChannel>
+#include <QPhoneProfile>
+#include <qtopianamespace.h>
+#include <qtopialog.h>
+#include <private/contextkeymanager_p.h>
+
+QHash<QString, QString> appearance_defaultColorValues()
+{
+    QHash<QString, QString> values;
+    values["Background"] = "#EEEEEE";
+    values["Background_alpha"] = "64";
+    values["Foreground"] = "#000000";
+    values["Button"] = "#F0F0F0";
+    values["Button_alpha"] = "176";
+    values["Highlight"] = "#8BAF31";
+    values["Highlight_alpha"] = "176";
+    values["HighlightedText"] = "#FFFFFF";
+    values["Text"] = "#000000";
+    values["ButtonText"] = "#000000";
+    values["ButtonText_disabled"] = "";
+    values["ButtonText_disabled_alpha"] = "255";
+    values["Base"] = "#FFFFFF";
+    values["Base_alpha"] = "176";
+    values["AlternateBase"] = "#CBEF71";
+    values["AlternateBase_alpha"] = "176";
+    values["Text_disabled"] = "";
+    values["Text_disabled_alpha"] = "255";
+    values["Foreground_disabled"] = "";
+    values["Foreground_disabled_alpha"] = "255";
+    values["Shadow"] = "";
+    values["Link"] = "#0000FF";
+    values["LinkVisited"] = "#FF00FF";
+    return values;
+}
+static const QHash<QString, QString> gDefaultColorValues = appearance_defaultColorValues();
+
+static QSettings gConfig("Trolltech", "qpe");
+
+
+class ThemeItemPreview
+{
+public:
+    ThemeItemPreview(const QString &pageItemName, const QString &xmlSourcePath);
+    ~ThemeItemPreview();
+
+    void setPalette(const QPalette &palette);
+    void getPixmap(QPixmap *pixmap, int width, int height);
+    void getPixmap(QPixmap *pixmap, int width, int height, QSoftMenuBar::LabelType labelType);
+
+private:
+    void resetButton(bool useIcon, int buttonIndex, QSoftMenuBar::StandardLabel label);
+
+    QString m_pageItemName;
+    QString m_xmlSourcePath;
+    ThemedView *m_themedView;
+};
+
+ThemeItemPreview::ThemeItemPreview(const QString &pageItemName, const QString &xmlSourcePath)
+    : m_pageItemName(pageItemName),
+      m_xmlSourcePath(xmlSourcePath),
+      m_themedView(new ThemedView)
 {
 }
 
-ThemePreview::~ThemePreview()
+ThemeItemPreview::~ThemeItemPreview()
 {
-    delete themedView;
+    delete m_themedView;
 }
 
-void ThemePreview::setXmlFilename(const QString &filename)
+void ThemeItemPreview::setPalette(const QPalette &palette)
 {
-    if (filename == m_filename)
-        return;
-    m_filename = filename;
-    reload();
+    m_themedView->setPalette(palette);
 }
 
-void ThemePreview::setButton(bool icon, int buttonIndex, QSoftMenuBar::StandardLabel label)
+void ThemeItemPreview::getPixmap(QPixmap *pixmap, int width, int height)
 {
-    QString buttonName = "button" + QString::number(buttonIndex);
-    ThemeTextItem *textItem = (ThemeTextItem *)themedView->findItem(buttonName , ThemedView::Text);
-    ThemeImageItem *imageItem = (ThemeImageItem *)themedView->findItem(buttonName, ThemedView::Image);
+    getPixmap(pixmap, width, height, QSoftMenuBar::LabelType(-1));
+}
+
+void ThemeItemPreview::getPixmap(QPixmap *pixmap, int width, int height, QSoftMenuBar::LabelType labelType)
+{
+    m_themedView->loadSource(m_xmlSourcePath);
+    m_themedView->resize(width, height);
+
+    if (labelType != QSoftMenuBar::LabelType(-1)) {
+        bool useIcon = (labelType == QSoftMenuBar::IconLabel);
+        QList<QSoftMenuBar::StandardLabel> labels;
+        if (QApplication::isLeftToRight())
+            labels << QSoftMenuBar::Options << QSoftMenuBar::Select << QSoftMenuBar::Back;
+        else
+            labels << QSoftMenuBar::Back << QSoftMenuBar::Select << QSoftMenuBar::Options;
+        for (int i=0; i<labels.size(); i++)
+            resetButton(useIcon, i, labels[i]);
+    }
+
+    ThemeItem *page = m_themedView->findItem(m_pageItemName, ThemedView::Page);
+    if (page)
+        *pixmap = QPixmap::grabWidget(m_themedView, page->rect());
+}
+
+void ThemeItemPreview::resetButton(bool useIcon, int buttonIndex, QSoftMenuBar::StandardLabel label)
+{
+    ThemeTextItem *textItem = (ThemeTextItem *)m_themedView->findItem(
+            "tbutton" + QString::number(buttonIndex) , ThemedView::Text);
+    ThemeImageItem *imageItem = (ThemeImageItem *)m_themedView->findItem(
+            "button" + QString::number(buttonIndex), ThemedView::Image);
 
     ContextKeyManager *mgr = ContextKeyManager::instance();
-    if (!icon) {
+    if (!useIcon) {
         if (textItem) {
            textItem->setVisible(true);
            textItem->setText(mgr->standardText(label));
@@ -86,214 +171,516 @@ void ThemePreview::setButton(bool icon, int buttonIndex, QSoftMenuBar::StandardL
     }
 }
 
-void ThemePreview::reload()
-{
-    if (m_color.isEmpty() || m_filename.isEmpty())
-        return;
-    delete themedView;
-    themedView = new ThemedView;
-    themedView->setPalette(m_palette);
-    themedView->loadSource(m_filename);
-    themedView->resize(m_width, m_height);
+//==============================================================================
 
-    if (m_name == "contextbar") {
-        QList<QSoftMenuBar::StandardLabel> labels;
-        if (QApplication::isLeftToRight())
-            labels << QSoftMenuBar::Options << QSoftMenuBar::Select << QSoftMenuBar::Back;
-        else
-            labels << QSoftMenuBar::Back << QSoftMenuBar::Select << QSoftMenuBar::Options;
-        for (int i=0; i<labels.size(); i++)
-            setButton(m_buttonIcons, i, labels[i]);
-    }
+class Theme
+{
+public:
+    enum StringAttribute {
+        StyleName,
+        ServerWidgets,
+        DecorationConfig,
+        ExtendedFocusHighlight,
+        FormStyle,
+        PopupShadows,
+        HideMenuIcons,
+        FullWidthMenu,
+        IconPath,
+        MenuAlignment
+    };
+
+    ~Theme();
+
+    inline const QString &uniqueName() const { return m_uniqueName; }
+    inline const QString &name() const { return m_name; }
+
+    QString stringValue(StringAttribute attr) const;
+    const QStringList &colorSchemeNames() const;
+    const QStringList &colorSchemeFiles() const;
+    const QStringList &backgrounds() const;
+
+    void setCurrentColorIndex(int index);
+    int currentColorIndex() const;
+    void setCurrentBackgroundIndex(int index);
+    int currentBackgroundIndex() const;
+
+    void getTitlePreview(QPixmap *pixmap);
+    void getSoftMenuBarPreview(QPixmap *pixmap, QSoftMenuBar::LabelType labelType);
+    void getBackgroundPreview(QPixmap *pixmap);
+
+    void writeThemeSettings(bool writeAppearanceSettings);
+    void writeColorSchemeSettings();
+
+    static Theme *create(const QString &settingsPath, const QString &themeUniqueName);
+    static void setAvailableColorSchemes(const QHash<QString, QString> &schemes);
+
+private:
+    Theme(const QString &uniqueName, QTranslatableSettings *settings);
+    void ensureLoaded();
+
+    QString m_uniqueName;
+    QString m_name;
+    QTranslatableSettings *m_settings;
+    bool m_loaded;
+
+    QStringList m_colorSchemeFiles;
+    QStringList m_colorSchemeNames;
+    QStringList m_backgrounds;
+    QHash<StringAttribute, QString> m_attrs;
+
+    int m_colorIndex;
+    int m_backgroundIndex;
+
+    ThemeItemPreview *m_titlePreview;
+    ThemeItemPreview *m_softMenuBarPreview;
+    QPalette m_palette;
+
+    static QHash<QString, QString> availableColorSchemes;
+};
+
+QHash<QString, QString> Theme::availableColorSchemes;
+
+Theme::Theme(const QString &uniqueName, QTranslatableSettings *settings)
+    : m_uniqueName(uniqueName),
+      m_settings(settings),
+      m_loaded(false),
+      m_colorIndex(-1),
+      m_backgroundIndex(-1),
+      m_titlePreview(0),
+      m_softMenuBarPreview(0)
+{
+    settings->beginGroup(QLatin1String("Theme"));
+    m_name = m_settings->value("Name").toString();
 }
 
-void ThemePreview::setColor(const QString &color)
+Theme::~Theme()
 {
-    if (color == m_color)
+    delete m_settings;
+    delete m_titlePreview;
+    delete m_softMenuBarPreview;
+}
+
+void Theme::ensureLoaded()
+{
+    if (m_loaded)
         return;
-    QSettings scheme(color, QSettings::IniFormat);
+
+    m_attrs[StyleName] = m_settings->value("Style", "Qtopia").toString();
+    m_attrs[ServerWidgets] = m_settings->value("ServerWidget", "Phone").toString();
+    m_attrs[DecorationConfig] = m_settings->value("DecorationConfig").toString();
+    m_attrs[ExtendedFocusHighlight] = m_settings->value("ExtendedFocusHighlight", "1").toString();
+
+    m_attrs[FormStyle] = m_settings->value("FormStyle", "QtopiaDefaultStyle").toString();
+    m_attrs[PopupShadows] = m_settings->value("PopupShadows", "0").toString();
+    m_attrs[HideMenuIcons] = m_settings->value("HideMenuIcons", "0").toString();
+    m_attrs[FullWidthMenu] = m_settings->value("FullWidthMenu", "0").toString();
+    m_attrs[IconPath] = m_settings->value("IconPath").toString();
+    m_attrs[MenuAlignment] = m_settings->value("MenuAlignment", "left").toString();
+
+    // ensure we only provide schemes that actually have a corresponding .scheme file
+    QStringList colorSchemes = m_settings->value("ColorScheme").toString()
+            .split("|", QString::SkipEmptyParts);
+    for (int i=0; i<colorSchemes.size(); i++) {
+        if (Theme::availableColorSchemes.contains(colorSchemes[i])) {
+            m_colorSchemeFiles.append(colorSchemes[i]);
+            QString schemePath = Theme::availableColorSchemes[colorSchemes[i]];
+            QTranslatableSettings settings(schemePath, QSettings::IniFormat);
+            QString colorName = settings.value("Global/Name").toString();
+            if (colorName.isEmpty())
+                colorName = colorSchemes[i].left(colorSchemes[i].lastIndexOf(".scheme"));
+            m_colorSchemeNames << colorName;
+        }
+    }
+    if (m_colorSchemeFiles.size() > 0)
+        m_colorIndex = 0;
+
+    m_backgrounds = m_settings->value("Backgrounds").toString().split("|", QString::SkipEmptyParts);
+    if (m_backgrounds.size() > 0)
+        m_backgroundIndex = 0;
+
+    m_loaded = true;
+}
+
+QString Theme::stringValue(StringAttribute attr) const
+{
+    const_cast<Theme *>(this)->ensureLoaded();
+    return m_attrs.value(attr, QString());
+}
+
+const QStringList &Theme::colorSchemeNames() const
+{
+    const_cast<Theme *>(this)->ensureLoaded();
+    return m_colorSchemeNames;
+}
+
+const QStringList &Theme::colorSchemeFiles() const
+{
+    const_cast<Theme *>(this)->ensureLoaded();
+    return m_colorSchemeFiles;
+}
+
+const QStringList &Theme::backgrounds() const
+{
+    const_cast<Theme *>(this)->ensureLoaded();
+    return m_backgrounds;
+}
+
+void Theme::setCurrentColorIndex(int index)
+{
+    ensureLoaded();
+
+    QString schemePath = Theme::availableColorSchemes.value(m_colorSchemeFiles.value(index));
+    if (schemePath.isEmpty())
+        return;
+
+    QSettings scheme(schemePath, QSettings::IniFormat);
     scheme.beginGroup("Colors");
     m_palette.setColor(QPalette::Normal, QPalette::Window, scheme.value("Background").toString());
     m_palette.setColor(QPalette::Normal, QPalette::Button, scheme.value("Button").toString());
     m_palette.setColor(QPalette::Normal, QPalette::Highlight, scheme.value("Highlight").toString());
     m_palette.setColor(QPalette::Normal, QPalette::Text, scheme.value("Text").toString());
     m_palette.setColor(QPalette::Normal, QPalette::Base, scheme.value("Base").toString());
-    m_color = color;
-    reload();
+
+    if (m_titlePreview)
+        m_titlePreview->setPalette(m_palette);
+    if (m_softMenuBarPreview)
+        m_softMenuBarPreview->setPalette(m_palette);
+
+    m_colorIndex = index;
 }
 
-void ThemePreview::requestPreview()
+int Theme::currentColorIndex() const
 {
-    QTimer::singleShot(0, this, SLOT(doPreview()));
+    const_cast<Theme *>(this)->ensureLoaded();
+    return m_colorIndex;
 }
 
-void ThemePreview::doPreview()
+void Theme::setCurrentBackgroundIndex(int index)
 {
-    if (!themedView)
+    ensureLoaded();
+
+    if (index < 0 || index > m_backgrounds.size())
         return;
-    ThemeItem *page = themedView->findItem(m_name, ThemedView::Page);
-    if (page)
-        m_preview = QPixmap::grabWidget(themedView, page->rect());
-    emit previewReady(m_preview.scaledToWidth((int)(m_width * 0.55), Qt::SmoothTransformation));
+    m_backgroundIndex = index;
 }
 
-void ThemePreview::setIconLabel(bool enable)
+int Theme::currentBackgroundIndex() const
 {
-    m_buttonIcons = enable;
+     const_cast<Theme *>(this)->ensureLoaded();
+     return m_backgroundIndex;
+}
 
-    if (!themedView)
+void Theme::getTitlePreview(QPixmap *pixmap)
+{
+    ensureLoaded();
+    if (!m_titlePreview) {
+        m_titlePreview = new ThemeItemPreview("title",
+                AppearanceSettings::findFile(QLatin1String("etc/themes/") + m_uniqueName + "/title.xml"));
+        m_titlePreview->setPalette(m_palette);
+    }
+
+    QDesktopWidget *dw = QApplication::desktop();
+    QSize screenSize = dw->screenGeometry(dw->primaryScreen()).size();
+    m_titlePreview->getPixmap(pixmap, screenSize.width(), int(screenSize.height() * 0.09));
+}
+
+void Theme::getSoftMenuBarPreview(QPixmap *pixmap, QSoftMenuBar::LabelType labelType)
+{
+    ensureLoaded();
+    if (!m_softMenuBarPreview) {
+        m_softMenuBarPreview = new ThemeItemPreview("contextbar",
+                AppearanceSettings::findFile(QLatin1String("etc/themes/") + m_uniqueName + "/context.xml"));
+        m_softMenuBarPreview->setPalette(m_palette);
+    }
+
+    QDesktopWidget *dw = QApplication::desktop();
+    QSize screenSize = dw->screenGeometry(dw->primaryScreen()).size();
+    m_softMenuBarPreview->getPixmap(pixmap, screenSize.width(), int(screenSize.height() * 0.15), labelType);
+}
+
+void Theme::getBackgroundPreview(QPixmap *pixmap)
+{
+    ensureLoaded();
+    QString fileName = AppearanceSettings::findFile("pics/themes/"
+        + m_uniqueName + '/' + m_backgrounds.value(m_backgroundIndex) + ".png");
+
+    QPixmap bg(fileName);
+    *pixmap = bg;
+}
+
+void Theme::writeThemeSettings(bool writeAppearanceSettings)
+{
+    gConfig.beginGroup("Appearance");
+    QString themeFileName = m_uniqueName + ".conf";
+    if (writeAppearanceSettings){
+        qLog(UI) << "Write config theme select"
+                << m_attrs.value(Theme::StyleName).toLatin1().data()
+                << m_name.toLatin1().data();
+        gConfig.setValue("Style", m_attrs.value(Theme::StyleName));
+        gConfig.setValue("Theme", themeFileName);
+        gConfig.setValue("DecorationTheme", m_attrs.value(Theme::DecorationConfig));
+    } else {
+        qLog(UI) << "Write simple config theme select"
+                << m_attrs.value(Theme::StyleName).toLatin1().data()
+                << m_name.toLatin1().data();
+        gConfig.setValue("Style", themeFileName);
+        gConfig.setValue("Theme", "");
+        gConfig.setValue("DecorationTheme", "");
+    }
+    gConfig.endGroup();
+
+    gConfig.beginGroup("Style");
+    gConfig.setValue("ExtendedFocusHighlight", m_attrs.value(ExtendedFocusHighlight));
+    gConfig.setValue("FormStyle", m_attrs.value(FormStyle));
+    gConfig.setValue("PopupShadows", m_attrs.value(PopupShadows));
+    gConfig.setValue("HideMenuIcons", m_attrs.value(HideMenuIcons));
+    gConfig.setValue("FullWidthMenu", m_attrs.value(FullWidthMenu));
+    gConfig.setValue("MenuAlignment", m_attrs.value(MenuAlignment));
+    gConfig.endGroup();
+
+    gConfig.sync();
+}
+
+void Theme::writeColorSchemeSettings()
+{
+    if (m_colorIndex < 0 || m_colorIndex > m_colorSchemeFiles.size())
         return;
 
-   reload();
+    gConfig.beginGroup("Appearance");
+    gConfig.setValue("Scheme", m_colorSchemeFiles[m_colorIndex]);
+
+    // copy colour settings from .scheme file to gConfig
+    QString schemeFile = Theme::availableColorSchemes.value(m_colorSchemeFiles[m_colorIndex]);
+    QSettings scheme(schemeFile, QSettings::IniFormat);
+    if (scheme.status() == QSettings::NoError){
+        scheme.beginGroup("Colors");
+        QHashIterator<QString, QString> i(gDefaultColorValues);
+        while (i.hasNext()) {
+            i.next();
+            gConfig.setValue(i.key(), scheme.value(i.key(), i.value()).toString());
+        }
+    }
+    gConfig.endGroup();
+    gConfig.sync();
 }
 
-static QSettings gConfig("Trolltech", "qpe");
+Theme *Theme::create(const QString &settingsPath, const QString &themeUniqueName)
+{
+    QTranslatableSettings *settings = new QTranslatableSettings(settingsPath, QSettings::IniFormat);
+    if (settings->status() != QSettings::NoError) {
+        qLog(UI) << "Cannot load theme at" << settingsPath.toLocal8Bit().data();
+        delete settings;
+        return 0;
+    }
 
-// ThemeInfo ----------------------------------------------------
-ThemeInfo::ThemeInfo() {}
-void ThemeInfo::setThemeName(const QString &n) { name = n; }
-const QString & ThemeInfo::themeName() { return name; }
-void ThemeInfo::setStyleName( const QString sn ) { style = sn; }
-const QString & ThemeInfo::styleName() const { return style; }
-void ThemeInfo::setThemeFileName( const QString fn ) { themeFile = fn; }
-const QString & ThemeInfo::themeFileName() const { return themeFile; }
-void ThemeInfo::setDecorationFileName( const QString fn ) { decorationFile = fn; }
-const QString & ThemeInfo::decorationFileName() const { return decorationFile; }
-void ThemeInfo::setServerWidget(const QString &sw) { srvWidget = sw; }
-QString ThemeInfo::serverWidget() const { return srvWidget; }
-void ThemeInfo::setColorSchemes(const QStringList &cs) { colSchemes = cs; }
-QStringList ThemeInfo::colorSchemes() const { return colSchemes; }
-void ThemeInfo::setBackgroundImages(const QStringList &bg) { bgImages = bg; }
-QStringList ThemeInfo::backgroundImages() const { return bgImages; }
+    settings->beginGroup(QLatin1String("Theme"));
+    if (settings->value("Name").toString().isEmpty()) {
+        qLog(UI) << "Cannot load theme at" << settingsPath.toLocal8Bit().data() << "(no theme name)";
+        delete settings;
+        return 0;
+    }
+    settings->endGroup();
 
-// AppearanceSettings ----------------------------------------------------
-AppearanceSettings::AppearanceSettings( QWidget* parent, Qt::WFlags fl )
+    return new Theme(themeUniqueName, settings);
+}
+
+void Theme::setAvailableColorSchemes(const QHash<QString, QString> &schemes)
+{
+    availableColorSchemes = schemes;
+}
+
+
+//===================================================================
+
+AppearanceSettings::AppearanceSettings(QWidget* parent, Qt::WFlags fl)
     : QDialog(parent, fl),
-    mIsStatusView(false), mIsFromActiveProfile(false)
+      m_isStatusView(false)
 {
-    setupUi();
-    readThemeSettings();
-    readColorSchemeSettings();
+    initUi();
+    loadThemes();
+    loadColorSchemes();
+    loadSavedTheme();
 
-    // Populate the first combo box (theme).
-    populate();
+    connect(qApp, SIGNAL(appMessage(QString,QByteArray)),
+        this, SLOT(receiveAppMessage(QString,QByteArray)));
 
-    // Select the theme to populate the other combo boxes.
-    // Note that they are not connected yet, so no preview is requested.
-    themeSelected(mActiveThemeIndex);
+    QMenu *menu = QSoftMenuBar::menuFor(this);
+    menu->addAction(QIcon(":icon/Note"), tr("Add to current profile"),
+                    this, SLOT(pushSettingStatus()));
+    menu->addAction(QIcon(":image/homescreen/homescreen"), tr("Homescreen Settings..."),
+                    this, SLOT(openHomescreenSettings()));
 
-    // Connect the combo boxes.
-    connect( mThemeCombo, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(themeSelected(int)) );
-    connect( mColorCombo, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(colorSelected(int)) );
-    connect( mBgCombo, SIGNAL(currentIndexChanged(QString)),
-            this, SLOT(backgroundSelected(QString)) );
-    connect( mLabelCkBox, SIGNAL(toggled(bool)),
-            this, SLOT(labelToggled(bool)) );
-
-    connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
-        this, SLOT(receive(QString,QByteArray)) );
-
-    // Re-select the theme to request the previews.
-    themeSelected(mActiveThemeIndex);
-
-    QSoftMenuBar::menuFor( this )->addAction
-        ( QIcon( ":icon/Note" ), tr( "Add to current profile" ), this, SLOT(pushSettingStatus()) );
-    QSoftMenuBar::menuFor( this )->addAction
-        ( QIcon( ":image/homescreen/homescreen" ), tr( "Homescreen Settings..." ), this, SLOT(openHomescreenSettings()) );
+    setWindowTitle(tr("Appearance"));
 }
 
 AppearanceSettings::~AppearanceSettings()
 {
+    qDeleteAll(m_themes);
 }
 
-void AppearanceSettings::populate()
+Theme *AppearanceSettings::currentTheme() const
 {
-    // current theme & color
-    gConfig.beginGroup( "Appearance" );
-    mActiveTheme = gConfig.value( "Theme", "qtopia.conf" ).toString();
-    mActiveColor = gConfig.value( "Scheme", "Qtopia" ).toString();
-    mActiveBackground = gConfig.value( "BackgroundImage", "" ).toString();
-    gConfig.endGroup();
+    return m_themes.value(m_themeCombo->currentIndex(), 0);
+}
 
-    // current label type
-    gConfig.beginGroup( "ContextMenu" );
-    mActiveLabelType = (QSoftMenuBar::LabelType)gConfig.value( "LabelType", QSoftMenuBar::TextLabel ).toInt();
-    gConfig.endGroup();
-    mLabelCkBox->setCheckState( mActiveLabelType == QSoftMenuBar::IconLabel ? Qt::Checked : Qt::Unchecked );
-    labelToggled( mActiveLabelType == QSoftMenuBar::IconLabel );
+void AppearanceSettings::themeChanged(int index)
+{
+    Theme *theme = m_themes.value(index, 0);
+    if (!theme)
+        return;
 
-    // current server widgets
-    QSettings cfg( "Trolltech", "ServerWidgets" );
-    cfg.beginGroup( "Mapping" );
-    if (!cfg.childKeys().isEmpty())
-        mServerWidgets = cfg.value("Default", "Phone").toString();
+    QStringListModel *model;
 
-    // populate theme combo box
-    foreach ( ThemeInfo theme, mThemes ) {
-        mThemeCombo->addItem( theme.themeName() );
-        if ( theme.themeFileName() == mActiveTheme ) {
-            mActiveThemeIndex = mThemeCombo->count() - 1;
-            mThemeCombo->setCurrentIndex(mActiveThemeIndex);
-        }
+    model = qobject_cast<QStringListModel *>(m_colorCombo->model());
+    model->setStringList(theme->colorSchemeNames());
+    m_colorCombo->setCurrentIndex(theme->currentColorIndex());
+
+    model = qobject_cast<QStringListModel *>(m_backgroundCombo->model());
+    model->setStringList(theme->backgrounds());
+    m_backgroundCombo->setCurrentIndex(theme->currentBackgroundIndex());
+}
+
+void AppearanceSettings::colorChanged(int index)
+{
+    Theme *theme = currentTheme();
+    if (theme) {
+        theme->setCurrentColorIndex(index);
+        QTimer::singleShot(0, this, SLOT(previewColorChanges()));
     }
-    mContextPreview->setIconLabel(mActiveLabelType == QSoftMenuBar::IconLabel);
+}
+
+void AppearanceSettings::backgroundChanged(int index)
+{
+    Theme *theme = currentTheme();
+    if (theme) {
+        theme->setCurrentBackgroundIndex(index);
+        QTimer::singleShot(0, this, SLOT(previewBackgroundChanges()));
+    }
+}
+
+void AppearanceSettings::softKeyOptionChanged()
+{
+    QTimer::singleShot(0, this, SLOT(previewSoftMenuBarChanges()));
+}
+
+void AppearanceSettings::previewColorChanges()
+{
+    Theme *theme = currentTheme();
+    if (theme) {
+        QPixmap pm;
+        theme->getTitlePreview(&pm);
+        m_previewTitle->setPixmap(
+                pm.scaledToWidth(int(pm.width() * 0.55), Qt::SmoothTransformation));
+
+        previewSoftMenuBarChanges();
+        m_previewBox->show();
+    }
+}
+
+void AppearanceSettings::previewSoftMenuBarChanges()
+{
+    Theme *theme = currentTheme();
+    if (theme) {
+        QPixmap pm;
+        QSoftMenuBar::LabelType labelType = (m_softKeyIconCheck->isChecked() ?
+                QSoftMenuBar::IconLabel : QSoftMenuBar::TextLabel);
+        theme->getSoftMenuBarPreview(&pm, labelType);
+        m_previewSoftMenuBar->setPixmap(
+                pm.scaledToWidth(int(pm.width() * 0.55), Qt::SmoothTransformation));
+        m_previewBox->show();
+    }
+}
+
+void AppearanceSettings::previewBackgroundChanges()
+{
+    Theme *theme = currentTheme();
+    if (theme) {
+        QDesktopWidget *dw = QApplication::desktop();
+        QSize screenSize = dw->screenGeometry(dw->primaryScreen()).size();
+        QPixmap pm;
+        theme->getBackgroundPreview(&pm);
+        m_previewBackground->setPixmap(
+                pm.scaled(int(screenSize.width() * 0.2),
+                          int(screenSize.height() * 0.2),
+                          Qt::IgnoreAspectRatio,
+                          Qt::SmoothTransformation));
+        m_previewBox->show();
+    }
 }
 
 void AppearanceSettings::accept()
 {
-    QPhoneProfileManager profileManager;
-    QPhoneProfile activeProfile = profileManager.activeProfile();
-
-    if ( !mIsStatusView ) { // normal appearance setting operation
+    if (!m_isStatusView) { // normal appearance setting operation
+        QPhoneProfileManager profileManager;
+        QPhoneProfile activeProfile = profileManager.activeProfile();
         QPhoneProfile::Setting setting = activeProfile.applicationSetting("appearance");
-        if ( setting != QPhoneProfile::Setting() )
+        if (setting != QPhoneProfile::Setting())
             pushSettingStatus();
     } else { // status view from profiles
         // save current status to the profile
         pushSettingStatus();
     }
 
-    applyStyle();
-
+    applyCurrentSettings();
     QDialog::accept();
 }
 
-void AppearanceSettings::applyStyle()
+bool AppearanceSettings::themeNeedsRestart(Theme *theme) const
 {
-    if (mThemeCombo->currentIndex() < 0 ||
-            mThemeCombo->currentIndex() >= mThemes.count()) {
-        return;
-    }
-
-    const ThemeInfo &theme = mThemes[mThemeCombo->currentIndex()];
-
-    QString themeFile = findFile(QLatin1String("etc/themes/") + mActiveTheme);
-    QSettings themeCfg(themeFile, QSettings::IniFormat);
-    themeCfg.beginGroup(QLatin1String("Theme"));
-    QString activeIconPath = themeCfg.value(QLatin1String("IconPath")).toString();
+    if (!theme)
+        return false;
 
     // If the server widgets or IconPath changes we need to restart for
     // all changes to be visible.
-    bool needRestart = mServerWidgets != theme.serverWidget()
-                        || activeIconPath != theme.iconPath;
+    QString serverWidgets;
+    QSettings serverWidgetsConfig("Trolltech", "ServerWidgets");
+    serverWidgetsConfig.beginGroup("Mapping");
+    if (!serverWidgetsConfig.childKeys().isEmpty())
+        serverWidgets = serverWidgetsConfig.value("Default", "Phone").toString();
 
-    if (needRestart) {
-        int ret = QMessageBox::warning( this, tr( "Restart?" ),
-                tr( "Device will be restarted for theme to be fully applied.<br>Apply Now?" ),
-                QMessageBox::Yes, QMessageBox::No );
-        if ( ret != QMessageBox::Yes )
+    QString themeFile = findFile(QLatin1String("etc/themes/") + theme->uniqueName() + ".conf");
+    QSettings settings(themeFile, QSettings::IniFormat);
+    settings.beginGroup(QLatin1String("Theme"));
+    QString activeIconPath = settings.value(QLatin1String("IconPath")).toString();
+
+    return (serverWidgets != theme->stringValue(Theme::ServerWidgets)
+            || activeIconPath != theme->stringValue(Theme::IconPath));
+}
+
+void AppearanceSettings::applyCurrentSettings()
+{
+    Theme *theme = currentTheme();
+    if (!theme)
+        return;
+
+    bool needsRestart = themeNeedsRestart(theme);
+    if (needsRestart) {
+        if (QMessageBox::warning(this, tr("Restart?"),
+                    tr("Device will be restarted for theme to be fully applied.<br>Apply Now?"),
+                    QMessageBox::Yes, QMessageBox::No)
+                != QMessageBox::Yes) {
             return;
+        }
     }
 
-    bool themeChanged = ( theme.themeFileName() != mActiveTheme );
-    bool colorSchemeChanged = ( mColorCombo->itemData(mColorCombo->currentIndex()).toString() != mActiveColor );
+    bool themeChanged = (theme->uniqueName() + ".conf" != m_savedTheme);
+    bool colorSchemeChanged = (theme->colorSchemeNames()[theme->currentColorIndex()] + ".scheme"
+            != m_savedColorScheme);
+    bool backgroundChanged = (theme->backgrounds()[theme->currentBackgroundIndex()]
+            != m_savedBackground);
+    bool softKeyLabelTypeChanged = (m_softKeyIconCheck->isChecked() ?
+            QSoftMenuBar::IconLabel : QSoftMenuBar::TextLabel) != m_savedLabelType;
 
+    qLog(UI) << "Theme settings changed?" << themeChanged << colorSchemeChanged
+            << backgroundChanged <<softKeyLabelTypeChanged;
+
+    // write config settings
     if (themeChanged)
-        writeThemeSettings(theme);
+        theme->writeThemeSettings(theme->uniqueName() + ".conf" != m_themeCombo->currentText());
     if (colorSchemeChanged)
-        writeColorSchemeSettings();
+        theme->writeColorSchemeSettings();
+
+    // apply changes
     if (themeChanged || colorSchemeChanged) {
         QtopiaChannel::send("QPE/System", "applyStyle()");
         if (themeChanged)
@@ -301,101 +688,192 @@ void AppearanceSettings::applyStyle()
         else
             QtopiaChannel::send("QPE/System", "applyStyleNoSplash()");
     }
-
-    if ( mBgCombo->currentText() != mActiveBackground )
+    if (backgroundChanged)
         applyBackgroundImage();
-    if ( ( mLabelCkBox->isChecked()
-                ? QSoftMenuBar::IconLabel
-                : QSoftMenuBar::TextLabel ) != mActiveLabelType ) {
+    if (softKeyLabelTypeChanged)
         applySoftKeyLabels();
-    }
 
-    if ( !theme.serverWidget().isEmpty() ) {
-        QSettings cfg( "Trolltech", "ServerWidgets" );
-        cfg.beginGroup( "Mapping" );
-        cfg.remove(""); //delete all entries in current grp
-        cfg.setValue("Default", theme.serverWidget());
 
-        if (needRestart) {
-            QtopiaIpcEnvelope env( "QPE/System", "restart()" );
+    if (!theme->stringValue(Theme::ServerWidgets).isEmpty()) {
+        QSettings serverWidgetsConfig("Trolltech", "ServerWidgets");
+        serverWidgetsConfig.beginGroup("Mapping");
+        serverWidgetsConfig.remove(""); //delete all entries in current grp
+        serverWidgetsConfig.setValue("Default", theme->stringValue(Theme::ServerWidgets));
+
+        if (needsRestart) {
+            QtopiaIpcEnvelope env("QPE/System", "restart()");
             QtopiaApplication::quit();
         }
     }
 }
 
-void AppearanceSettings::setupUi()
+void AppearanceSettings::applyBackgroundImage()
 {
-    // title string
-    setWindowTitle( tr( "Appearance" ) );
+    QString s = m_backgroundCombo->currentText();
+    gConfig.beginGroup("Appearance");
+    gConfig.setValue("BackgroundImage", s);
+    gConfig.endGroup();
+    gConfig.sync();
+    QtopiaChannel::send("QPE/System", "updateBackground()");
+    QtopiaChannel::send("QPE/System", "exportBackground()");
+}
 
-    QVBoxLayout *l = new QVBoxLayout(this);
-    l->setContentsMargins(0, 0, 0, 0);
+void AppearanceSettings::applySoftKeyLabels()
+{
+    gConfig.beginGroup("ContextMenu");
+    gConfig.setValue("LabelType", m_softKeyIconCheck->isChecked() ?
+            int(QSoftMenuBar::IconLabel) : int(QSoftMenuBar::TextLabel));
+    gConfig.endGroup();
+    gConfig.sync();
 
-    QWidget *appearance = new QWidget;
+    QtopiaChannel::send("QPE/System", "updateContextLabels()");
+}
 
-    QScrollArea *appearanceWrapper = new QScrollArea;
-    appearanceWrapper->setFocusPolicy(Qt::NoFocus);
-    appearanceWrapper->setFrameStyle(QFrame::NoFrame);
-    appearanceWrapper->setWidget(appearance);
-    appearanceWrapper->setWidgetResizable(true);
-    appearanceWrapper->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff); 
+void AppearanceSettings::loadThemes()
+{
+    QStringList themeNames;
+    QStringList installPaths = Qtopia::installPaths();
+    for (int i=0; i<installPaths.size(); i++) {
+        QString path(installPaths[i] + "etc/themes/");
+        QDir dir;
+        if (!dir.exists(path)) {
+            qLog(UI) << "Theme style configuration path not found" << path.toLocal8Bit().data();
+            continue;
+        }
 
-    // create layout
-    QFormLayout *formLayout = new QFormLayout(appearance);
+        // read theme.conf files
+        dir.setPath(path);
+        dir.setNameFilters(QStringList("*.conf")); // No tr
 
-    // create widgets
-    mThemeCombo = new QComboBox( this );
-    mColorCombo = new QComboBox( this );
-    mBgCombo = new QComboBox( this );
+        for (uint j=0; j<dir.count(); j++) {
+            QString name = dir[j].mid(0, dir[j].length() - 5); // cut ".conf"
+            Theme *theme = Theme::create(path + dir[j], name);
+            if (theme) {
+                m_themes << theme;
+                themeNames << theme->name();
+            }
+        }
+    }
 
-    // add widgets
-    formLayout->addRow( tr( "Theme" ), mThemeCombo );
-    formLayout->addRow( tr( "Color" ), mColorCombo );
-    formLayout->addRow( tr( "Background" ), mBgCombo );
+    QStringListModel *model;
+    model = qobject_cast<QStringListModel *>(m_themeCombo->model());
+    model->setStringList(themeNames);
+}
 
-    // label option checkbox
-    mLabelCkBox = new QCheckBox( tr( "Use icons for soft keys" ), this );
-    QHBoxLayout *hLayout = new QHBoxLayout();
-    hLayout->addWidget( mLabelCkBox, 0, Qt::AlignHCenter );
-    formLayout->addRow( hLayout );
+void AppearanceSettings::loadColorSchemes()
+{
+    QHash<QString, QString> colorSchemeNames;
+    QStringList installPaths = Qtopia::installPaths();
+    for (int i=0; i<installPaths.size(); i++) {
+        QString path(installPaths[i] + "etc/colors/");
+        QDir dir;
+        if (!dir.exists(path)) {
+            qLog(UI) << "Color scheme configuration path not found" << path.toLocal8Bit().data();
+            continue;
+        }
 
-    // preview
-    mGroupBox = new QGroupBox(this);
-    QHBoxLayout *layout = new QHBoxLayout();
-    layout->setMargin(10);
-    mGroupBox->setLayout(layout);
-    mGroupBox->hide();
+        // read theme.conf files
+        dir.setPath(path);
+        dir.setNameFilters(QStringList("*.scheme")); // No tr
 
-    QVBoxLayout *previewLayout = new QVBoxLayout();
-    previewLayout->setSpacing(0);
+        // insert (scheme-file-name, scheme-path) pair
+        for (uint j=0; j<dir.count(); j++) {
+            if (!colorSchemeNames.contains(dir[j]))
+                colorSchemeNames[dir[j]] = path + dir[j];
+        }
+    }
+    Theme::setAvailableColorSchemes(colorSchemeNames);
+}
 
-    QDesktopWidget *desktop = QApplication::desktop();
-    int width = desktop->screenGeometry(desktop->primaryScreen()).width();
-    int height = desktop->screenGeometry(desktop->primaryScreen()).height();
+void AppearanceSettings::loadSavedTheme()
+{
+    gConfig.beginGroup("Appearance");
+    m_savedTheme = gConfig.value("Theme", "qtopia.conf").toString();
+    m_savedColorScheme = gConfig.value("Scheme", "Qtopia").toString();
+    m_savedBackground = gConfig.value("BackgroundImage", "").toString();
+    gConfig.endGroup();
 
-    mTitlePreview = new ThemePreview("title", width, height);
-    connect(mTitlePreview, SIGNAL(previewReady(QPixmap)), this, SLOT(setTitlePixmap(QPixmap)));
+    gConfig.beginGroup("ContextMenu");
+    m_savedLabelType = (QSoftMenuBar::LabelType)gConfig.value(
+            "LabelType", QSoftMenuBar::TextLabel).toInt();
+    gConfig.endGroup();
+    m_softKeyIconCheck->setChecked(m_savedLabelType == QSoftMenuBar::IconLabel);
 
-    mContextPreview = new ThemePreview("contextbar", width, height);
-    connect(mContextPreview, SIGNAL(previewReady(QPixmap)), this, SLOT(setContextPixmap(QPixmap)));
+    for (int i=0; i<m_themes.size(); i++) {
+        if (m_themes[i]->uniqueName() + ".conf" == m_savedTheme) {
+            Theme *theme = m_themes[i];
+            theme->setCurrentColorIndex(theme->colorSchemeFiles().indexOf(m_savedColorScheme));
+            theme->setCurrentBackgroundIndex(theme->backgrounds().indexOf(m_savedBackground));
+            m_themeCombo->setCurrentIndex(i);
+            break;
+        }
+    }
+}
 
-    previewLayout->addWidget( &mTitleLabel, 0, Qt::AlignHCenter );
-    previewLayout->addWidget( &mContextLabel, 0, Qt::AlignHCenter );
+void AppearanceSettings::initUi()
+{
+    m_themeCombo = new QComboBox;
+    m_themeCombo->setModel(new QStringListModel(this));
+    connect(m_themeCombo, SIGNAL(currentIndexChanged(int)), SLOT(themeChanged(int)));
 
-    layout->addStretch(1);
-    layout->addLayout(previewLayout);
-    layout->addWidget(&mBackgroundLabel);
-    layout->addStretch(1);
-    formLayout->addRow( mGroupBox );
+    m_colorCombo = new QComboBox;
+    m_colorCombo->setModel(new QStringListModel(this));
+    connect(m_colorCombo, SIGNAL(currentIndexChanged(int)), SLOT(colorChanged(int)));
 
-    l->addWidget(appearanceWrapper);
+    m_backgroundCombo = new QComboBox;
+    m_backgroundCombo->setModel(new QStringListModel(this));
+    connect(m_backgroundCombo, SIGNAL(currentIndexChanged(int)), SLOT(backgroundChanged(int)));
+
+    m_softKeyIconCheck = new QCheckBox(tr("Use icons for soft keys"));
+    gConfig.beginGroup("ContextMenu");
+    int labelType = (QSoftMenuBar::LabelType)gConfig.value("LabelType", QSoftMenuBar::TextLabel).toInt();
+    gConfig.endGroup();
+    m_softKeyIconCheck->setChecked(labelType == QSoftMenuBar::IconLabel);
+    connect(m_softKeyIconCheck, SIGNAL(clicked(bool)), SLOT(softKeyOptionChanged()));
+
+    QFormLayout *form = new QFormLayout;
+    form->addRow(tr("Theme"), m_themeCombo);
+    form->addRow(tr("Color"), m_colorCombo);
+    form->addRow(tr("Background"), m_backgroundCombo);
+    form->addRow(m_softKeyIconCheck);
+    form->setAlignment(m_softKeyIconCheck, Qt::AlignCenter);
+
+    m_previewTitle = new QLabel;
+    m_previewSoftMenuBar = new QLabel;
+    m_previewBackground = new QLabel;
+
+    QGridLayout *previewGrid = new QGridLayout;
+    previewGrid->setMargin(10);
+    previewGrid->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    previewGrid->addWidget(m_previewTitle, 0, 0);
+    previewGrid->addWidget(m_previewSoftMenuBar, 1, 0);
+    previewGrid->addWidget(m_previewBackground, 0, 1, 2, 1);
+
+    m_previewBox = new QGroupBox;
+    m_previewBox->setLayout(previewGrid);
+    form->addRow(m_previewBox);
+    m_previewBox->hide();   // hide until a preview is shown
+
+    QScrollArea *scroll = new QScrollArea;
+    scroll->setFocusPolicy(Qt::NoFocus);
+    scroll->setFrameStyle(QFrame::NoFrame);
+    QWidget *w = new QWidget;
+    w->setLayout(form);
+    scroll->setWidget(w);
+    scroll->setWidgetResizable(true);
+    scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->addWidget(scroll);
+    setLayout(mainLayout);
 }
 
 QString AppearanceSettings::findFile(const QString &file)
 {
     QStringList instPaths = Qtopia::installPaths();
     foreach (QString path, instPaths) {
-        QString themeDataPath( path + file );
+        QString themeDataPath(path + file);
         if (QFile::exists(themeDataPath)) {
             return themeDataPath;
         }
@@ -404,416 +882,96 @@ QString AppearanceSettings::findFile(const QString &file)
     return QString();
 }
 
-bool AppearanceSettings::readTheme(const QString &configFileName, ThemeInfo &theme)
-{
-    QTranslatableSettings themeConfig(configFileName, QSettings::IniFormat);
-    // Ensure that we only provide valid theme choices.
-    if ( themeConfig.status() != QSettings::NoError ) {
-        // failed to read theme.conf. try next one
-        qLog(UI) << "Failed to read, ignore" << configFileName.toLocal8Bit().data();
-        return false;
-    } else {
-        themeConfig.beginGroup( "Theme" ); // No tr
-        QString styleName = themeConfig.value("Style", "Qtopia").toString();
-        QString serverWidgetName = themeConfig.value("ServerWidget", "Phone").toString();
-        QStringList colSchemes = themeConfig.value("ColorScheme").toString().split( "|", QString::SkipEmptyParts );
-        QStringList bg = themeConfig.value("Backgrounds").toString().split( "|", QString::SkipEmptyParts );
 
-//          FIXME: We don't check the validity of the theme for performance issues...
-//             QStringList list;
-//             list << "TitleConfig" << "HomeConfig"
-//                 << "ContextConfig" << "DialerConfig"
-//                 << "CallScreenConfig" << "DecorationConfig"
-//                 << "SecondaryTitleConfig" << "SecondaryHomeConfig"
-//                 << "BootChargerConfig";
-//             for (QStringList::const_iterator it = list.constBegin(); it != list.constEnd(); it++){
-//                 if (themeConfig.contains(*it)){
-//                     QFileInfo info(Qtopia::qtopiaDir() + "etc/themes/" + themeConfig.value(*it).toString());
-//                     if (!info.isFile()){
-//                         qLog(UI) << "QSettings entry" << (*it).toLocal8Bit().data()
-//                                 << "in" << configFileName.toLocal8Bit().data()
-//                                 << "points to non-existant file" << info.filePath().toLocal8Bit().data();
-//                         valid = false;
-//                         break;
-//                     }
-//                 }
-//             }
-//             if ( !valid ) {
-//                 // this theme does not have all the necessary files, try next one
-//                 qLog(UI) << "Missing files, ignore" << configFileName.toLocal8Bit().data();
-//                 continue;
-//             }
+//------- methods for external settings changes via IPC follow: -------
 
-        if ( !themeConfig.contains( "Name" ) ) {
-            // this theme does not have a name, try next one
-            qLog(UI) << "No name, ignore" << configFileName.toLocal8Bit().data();
-            return false;
-        }
-
-        theme.setThemeName( themeConfig.value( "Name" ).toString() );
-        theme.setStyleName( styleName );
-        theme.setDecorationFileName( themeConfig.value("DecorationConfig").toString() );
-        theme.setServerWidget( serverWidgetName );
-        theme.setColorSchemes( colSchemes );
-        theme.setBackgroundImages( bg );
-        theme.extendedFocusHighlight = themeConfig.value("ExtendedFocusHighlight", "1").toString();
-        theme.formStyle = themeConfig.value("FormStyle", "QtopiaDefaultStyle").toString();
-        theme.popupShadows = themeConfig.value("PopupShadows", "0").toString();
-        theme.hideMenuIcons = themeConfig.value("HideMenuIcons", "0").toString();
-        theme.fullWidthMenu = themeConfig.value("FullWidthMenu", "0").toString();
-        theme.iconPath = themeConfig.value("IconPath").toString();
-
-        return true;
-    }
-}
-
-void AppearanceSettings::readThemeSettings()
-{
-    QStringList instPaths = Qtopia::installPaths();
-    foreach (QString path, instPaths) {
-        QString themeDataPath( path + "etc/themes/" );
-        QDir dir;
-        if ( !dir.exists( themeDataPath ) ) {
-            qLog(UI) << "Theme style configuration path not found" << themeDataPath.toLocal8Bit().data(); // No tr
-            continue;
-        }
-
-        // read theme.conf files
-        dir.setPath( themeDataPath );
-        dir.setNameFilters( QStringList( "*.conf" )); // No tr
-
-        for (int index = 0; index < (int)dir.count(); index++) {
-            QString configFileName = themeDataPath + dir[index];
-            ThemeInfo theme;
-            if (readTheme(configFileName, theme)) {
-                theme.setThemeFileName(dir[index]);
-                mThemes.append( theme );
-            }
-        }
-    }
-}
-
-void AppearanceSettings::readColorSchemeSettings()
-{
-    QStringList instPaths = Qtopia::installPaths();
-    foreach (QString path, instPaths) {
-        QString colorSchemePath( path + "etc/colors/" );
-        QDir dir;
-        if ( !dir.exists( colorSchemePath ) ) {
-            qLog(UI) << "Color scheme configuration path not found" << colorSchemePath.toLocal8Bit().data(); // No tr
-            continue;
-        }
-
-        dir.setPath( colorSchemePath );
-        dir.setNameFilters( QStringList( "*.scheme" )); // No tr
-
-        for (int index = 0; index < (int)dir.count(); index++) {
-            QString name = dir[index].left( dir[index].indexOf( ".scheme" ) );
-            mColorListIDs.append(name);
-        }
-    }
-}
-
-void AppearanceSettings::themeSelected( int index )
-{
-    if (index >= mThemes.count())
-        return;
-
-    QString dir = mThemes[index].themeFileName();
-    dir.chop(5);
-
-    QString themeFile = findFile(QLatin1String("etc/themes/") + dir + "/title.xml");
-    mTitlePreview->setXmlFilename(themeFile);
-    themeFile = findFile(QLatin1String("etc/themes/") + dir + "/context.xml");
-    mContextPreview->setXmlFilename(themeFile);
-
-    mBgCombo->clear();
-    if ( mThemes[index].backgroundImages().count() ) {
-        foreach ( QString bg, mThemes[index].backgroundImages() ) {
-            mBgCombo->addItem( bg );
-            if ( bg == mActiveBackground )
-                mBgCombo->setCurrentIndex( mBgCombo->count() - 1 );
-        }
-    }
-
-    if ( !mColorListIDs.count() )
-        return;
-
-    mColorCombo->clear();
-
-    if ( mThemes[index].colorSchemes().count() ) {
-        foreach ( QString colorId, mThemes[index].colorSchemes() ) {
-            QString col = colorId.left( colorId.indexOf( ".scheme" ) );
-            if ( mColorListIDs.contains( col ) ) {
-                QString schemeFile = findFile("etc/colors/" + col + ".scheme");
-                QTranslatableSettings scheme(schemeFile, QSettings::IniFormat);
-                mColorCombo->addItem( scheme.value("Global/Name", col).toString(), col );
-                if ( col == mActiveColor )
-                    mColorCombo->setCurrentIndex( mColorCombo->count() - 1 );
-            }
-        }
-        return;
-    }
-
-    // theme doesn't have preference, show all color schemes
-    int defaultIdx = 0;
-    foreach ( QString colorId, mColorListIDs ) {
-        QString schemeFile = findFile("etc/colors/" + colorId + ".scheme");
-        QTranslatableSettings scheme(schemeFile, QSettings::IniFormat);
-        mColorCombo->addItem( scheme.value("Global/Name", colorId).toString(), colorId );
-        if ( colorId == mActiveColor )
-            mColorCombo->setCurrentIndex( mColorCombo->count() - 1 );
-        if ( colorId == "Qtopia" )
-            defaultIdx = mColorCombo->count() - 1;
-    }
-    if ( !mColorCombo->currentIndex() )
-        mColorCombo->setCurrentIndex( defaultIdx );
-}
-
-void AppearanceSettings::colorSelected( int index )
-{
-    QString text = mColorCombo->itemData( index ).toString();
-    if (!text.isNull()) {
-        QString schemeFile = findFile("etc/colors/" + text + ".scheme");
-        mTitlePreview->setColor(schemeFile);
-        mContextPreview->setColor(schemeFile);
-        mTitlePreview->requestPreview();
-        mContextPreview->requestPreview();
-    }
-}
-
-void AppearanceSettings::labelToggled( bool toggled )
-{
-    mContextPreview->setIconLabel(toggled);
-    mContextPreview->requestPreview();
-}
-
-void AppearanceSettings::backgroundSelected( const QString &text )
-{
-    if (text.isNull()) {
-        mBackgroundLabel.setPixmap(QPixmap());
-        return;
-    }
-
-    QString themeFileName;
-
-    foreach(ThemeInfo info, mThemes) {
-        if (info.themeName() == mThemeCombo->currentText())
-            themeFileName = info.themeFileName();
-    }
-    themeFileName.chop(5);
-
-    QDesktopWidget *desktop = QApplication::desktop();
-    int width = desktop->screenGeometry(desktop->primaryScreen()).width();
-    QString filename = findFile("pics/themes/" + themeFileName + '/' + text + ".png");
-    QPixmap back(filename);
-    mBackgroundLabel.setPixmap(back.scaledToWidth((int)(width * 0.2), Qt::SmoothTransformation));
-}
-
-void AppearanceSettings::setTitlePixmap(const QPixmap &pixmap)
-{
-    mTitleLabel.setPixmap(pixmap);
-    mGroupBox->show();
-}
-
-void AppearanceSettings::setContextPixmap(const QPixmap &pixmap)
-{
-    mContextLabel.setPixmap(pixmap);
-    mGroupBox->show();
-}
-
-void AppearanceSettings::writeThemeSettings(const ThemeInfo &theme)
-{
-    gConfig.beginGroup( "Appearance" );
-    if (!theme.themeFileName().isEmpty() && (theme.themeFileName() != mThemeCombo->currentText()) ){
-        gConfig.setValue("Style", theme.styleName());
-        gConfig.setValue("Theme", theme.themeFileName());
-        gConfig.setValue("DecorationTheme", theme.decorationFileName());
-        qLog(UI) << "Write config theme select" << theme.styleName().toLatin1().data() <<
-            mThemeCombo->currentText().toLatin1().data();
-    } else {
-        QString s = theme.themeFileName().isEmpty() ? mThemeCombo->currentText() : theme.themeFileName();
-        qLog(UI) << "Write simple config theme select" << theme.styleName().toLatin1().data() <<
-                mThemeCombo->currentText().toLatin1().data();
-        gConfig.setValue( "Style", s );
-        gConfig.setValue( "Theme", "");
-        gConfig.setValue( "DecorationTheme", "");
-    }
-    gConfig.endGroup();
-
-    gConfig.beginGroup("Style");
-    gConfig.setValue("ExtendedFocusHighlight", theme.extendedFocusHighlight);
-    gConfig.setValue("FormStyle", theme.formStyle);
-    gConfig.setValue("PopupShadows", theme.popupShadows);
-    gConfig.setValue("HideMenuIcons", theme.hideMenuIcons);
-    gConfig.setValue("FullWidthMenu", theme.fullWidthMenu);
-    gConfig.endGroup();
-
-    gConfig.sync();
-}
-
-void AppearanceSettings::applyBackgroundImage()
-{
-    QString s = mBgCombo->currentText();
-    gConfig.beginGroup( "Appearance" );
-    gConfig.setValue( "BackgroundImage", s );
-    gConfig.endGroup();
-    gConfig.sync();
-    QtopiaChannel::send("QPE/System", "applyHomeScreenImage()");
-    if (QtopiaApplication::desktop()->numScreens() > 1)
-        QtopiaChannel::send("QPE/System", "applySecondaryBackgroundImage()");
-}
-
-void AppearanceSettings::writeColorSchemeSettings()
-{
-    QString s = mColorCombo->itemData( mColorCombo->currentIndex() ).toString();
-    gConfig.beginGroup( "Appearance" );
-    gConfig.setValue( "Scheme", s );
-
-    QString schemeFile = findFile("etc/colors/" + s + ".scheme");
-    QSettings scheme(schemeFile, QSettings::IniFormat);
-    if (scheme.status()==QSettings::NoError){
-        scheme.beginGroup("Colors");
-        QString color = scheme.value( "Background", "#EEEEEE" ).toString();
-        gConfig.setValue( "Background", color );
-        QString alpha = scheme.value( "Background_alpha", "64" ).toString();
-        gConfig.setValue( "Background_alpha", alpha );
-        color = scheme.value( "Foreground", "#000000" ).toString();
-        gConfig.setValue( "Foreground", color );
-        color = scheme.value( "Button", "#F0F0F0" ).toString();
-        gConfig.setValue( "Button", color );
-        alpha = scheme.value( "Button_alpha", "176" ).toString();
-        gConfig.setValue( "Button_alpha", alpha );
-        color = scheme.value( "Highlight", "#8BAF31" ).toString();
-        gConfig.setValue( "Highlight", color );
-        alpha = scheme.value( "Highlight_alpha", "176" ).toString();
-        gConfig.setValue( "Highlight_alpha", alpha );
-        color = scheme.value( "HighlightedText", "#FFFFFF" ).toString();
-        gConfig.setValue( "HighlightedText", color );
-        color = scheme.value( "Text", "#000000" ).toString();
-        gConfig.setValue( "Text", color );
-        color = scheme.value( "ButtonText", "#000000" ).toString();
-        gConfig.setValue( "ButtonText", color );
-        color = scheme.value( "ButtonText_disabled", "" ).toString();
-        gConfig.setValue( "ButtonText_disabled", color );
-        alpha = scheme.value( "ButtonText_disabled_alpha", 255 ).toString();
-        gConfig.setValue( "ButtonText_disabled_alpha", alpha );
-        color = scheme.value( "Base", "#FFFFFF" ).toString();
-        gConfig.setValue( "Base", color );
-        alpha = scheme.value( "Base_alpha", "176" ).toString();
-        gConfig.setValue( "Base_alpha", alpha );
-        color = scheme.value( "AlternateBase", "#CBEF71" ).toString();
-        gConfig.setValue( "AlternateBase", color );
-        alpha = scheme.value( "AlternateBase_alpha", "176" ).toString();
-        gConfig.setValue( "AlternateBase_alpha", alpha );
-        color = scheme.value( "Text_disabled", "" ).toString();
-        gConfig.setValue("Text_disabled", color);
-        alpha = scheme.value( "Text_disabled_alpha", 255 ).toString();
-        gConfig.setValue("Text_disabled_alpha", alpha);
-        color = scheme.value( "Foreground_disabled", "" ).toString();
-        gConfig.setValue("Foreground_disabled", color);
-        alpha = scheme.value( "Foreground_disabled_alpha", 255 ).toString();
-        gConfig.setValue("Foreground_disabled_alpha", alpha);
-        color = scheme.value( "Shadow", "" ).toString();
-        gConfig.setValue("Shadow", color);
-        color = scheme.value( "Link", "#0000FF" ).toString();
-        gConfig.setValue( "Link", color );
-        color = scheme.value( "LinkVisited", "#FF00FF" ).toString();
-        gConfig.setValue( "LinkVisited", color );
-    }
-    gConfig.endGroup();
-    gConfig.sync();
-}
-
-void AppearanceSettings::applySoftKeyLabels()
-{
-    gConfig.beginGroup( "ContextMenu" );
-    gConfig.setValue( "LabelType", mLabelCkBox->isChecked() ? (int)QSoftMenuBar::IconLabel : (int)QSoftMenuBar::TextLabel );
-    gConfig.endGroup();
-    gConfig.sync();
-
-    QtopiaChannel::send("QPE/System", "updateContextLabels()");
-}
 
 void AppearanceSettings::pushSettingStatus()
 {
-    QtopiaServiceRequest e( "SettingsManager", "pushSettingStatus(QString,QString,QString)" );
-    e << QString( "appearance" ) << QString( windowTitle() ) << status();
+    QtopiaServiceRequest e("SettingsManager", "pushSettingStatus(QString,QString,QString)");
+    e << QString("appearance") << QString(windowTitle()) << settingsString();
     e.send();
 }
 
 void AppearanceSettings::pullSettingStatus()
 {
-    QtopiaServiceRequest e( "SettingsManager", "pullSettingStatus(QString,QString,QString)" );
-    e << QString( "appearance" ) << QString( windowTitle() ) << status();
+    QtopiaServiceRequest e("SettingsManager", "pullSettingStatus(QString,QString,QString)");
+    e << QString("appearance") << QString(windowTitle()) << settingsString();
     e.send();
 }
 
-QString AppearanceSettings::status()
+void AppearanceSettings::changeSettings(const QString &settingsString)
+{
+    QStringList details = settingsString.split(',');
+    m_themeCombo->setCurrentIndex(details.at(0).toInt());
+    m_colorCombo->setCurrentIndex(details.at(1).toInt());
+    m_backgroundCombo->setCurrentIndex(details.at(2).toInt());
+    m_softKeyIconCheck->setCheckState(details.at(3).toInt() ? Qt::Checked : Qt::Unchecked);
+}
+
+QString AppearanceSettings::settingsString() const
 {
     QString status;
-    status += QString::number( mThemeCombo->currentIndex() ) + ",";
-    status += QString::number( mColorCombo->currentIndex() ) + ",";
-    status += QString::number( mBgCombo->currentIndex() ) + ",";
-    status += QString::number( mLabelCkBox->isChecked() ) + ",";
+    status += QString::number(m_themeCombo->currentIndex()) + ",";
+    status += QString::number(m_colorCombo->currentIndex()) + ",";
+    status += QString::number(m_backgroundCombo->currentIndex()) + ",";
+    status += QString::number(m_softKeyIconCheck->isChecked()) + ",";
     return status;
 }
 
-void AppearanceSettings::setStatus( const QString details )
+void AppearanceSettings::receiveAppMessage(const QString &msg, const QByteArray &data)
 {
-    QStringList s = details.split( ',' );
-    mThemeCombo->setCurrentIndex( s.at( 0 ).toInt() );
-    mColorCombo->setCurrentIndex( s.at( 1 ).toInt() );
-    mBgCombo->setCurrentIndex( s.at( 2 ).toInt() );
-    mLabelCkBox->setCheckState( s.at( 3 ).toInt() ? Qt::Checked : Qt::Unchecked );
-}
-
-void AppearanceSettings::receive( const QString& msg, const QByteArray& data )
-{
-    QDataStream ds( data );
-    if ( msg == "Settings::setStatus(bool,QString)" ) {
+    QDataStream ds(data);
+    if (msg == "Settings::setStatus(bool,QString)") {
         // must show widget to keep running
         QtopiaApplication::instance()->showMainWidget();
-        mIsStatusView = true;
-        QSoftMenuBar::removeMenuFrom( this, QSoftMenuBar::menuFor( this ) );
+        m_isStatusView = true;
+        QSoftMenuBar::removeMenuFrom(this, QSoftMenuBar::menuFor(this));
         QSoftMenuBar::menuFor(this);
         QString details;
-        ds >> mIsFromActiveProfile;
+        bool isFromActiveProfile;
+        ds >> isFromActiveProfile;
         ds >> details;
-        setStatus( details );
-        applyStyle();
-    } else if ( msg == "Settings::activateSettings(QString)" ) {
+        changeSettings(details);
+        applyCurrentSettings();
+    } else if (msg == "Settings::activateSettings(QString)") {
         hide();
         QString details;
         ds >> details;
-        setStatus( details );
-        applyStyle();
-    } else if ( msg == "Settings::pullSettingStatus()" ) {
+        changeSettings(details);
+        applyCurrentSettings();
+    } else if (msg == "Settings::pullSettingStatus()") {
         hide();
         pullSettingStatus();
-    } else if ( msg == "Settings::activateDefault()" ) {
+    } else if (msg == "Settings::activateDefault()") {
         hide();
-        int i = 0;
-        foreach ( ThemeInfo theme, mThemes ) {
-            if ( theme.themeFileName() == "qtopia.conf" ) {
-                mThemeCombo->setCurrentIndex( i );
-                break;
-            }
-            i++;
-        }
-        for ( i = 0; i < mColorCombo->count(); i++ ) {
-            if ( mColorCombo->itemData( i ).toString() == "Qtopia" ) {
-                mColorCombo->setCurrentIndex( i );
+        for (int i=0; i<m_themes.size(); i++) {
+            if (m_themes[i]->uniqueName() == "qtopia") {
+                m_themeCombo->setCurrentIndex(i);
                 break;
             }
         }
-        mLabelCkBox->setCheckState( Qt::Checked );
-        applyStyle();
+        Theme *theme = currentTheme();
+        if (theme) {
+            int index = theme->colorSchemeNames().indexOf("Qtopia");
+            if (index != -1)
+                colorChanged(index);
+        }
+        m_softKeyIconCheck->setChecked(true);
+        applyCurrentSettings();
     }
+}
+
+void AppearanceSettings::resizeEvent(QResizeEvent *re)
+{
+    QDialog::resizeEvent(re);
+    m_previewBox->hide();
+    QTimer::singleShot(0, this, SLOT(previewColorChanges()));
+    QTimer::singleShot(0, this, SLOT(previewBackgroundChanges()));
 }
 
 void AppearanceSettings::openHomescreenSettings()
 {
-    QtopiaIpcEnvelope env( "QPE/Application/homescreen", "HomescreenSettings::configure()" );
+    QtopiaIpcEnvelope env("QPE/Application/homescreen", "HomescreenSettings::configure()");
 }
 

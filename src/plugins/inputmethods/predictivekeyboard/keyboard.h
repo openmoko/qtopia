@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _KEYBOARD_H_
-#define _KEYBOARD_H_
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
 
 #include <QWidget>
 #include <QTimeLine>
@@ -34,7 +32,7 @@ class KeyboardWidget : public QWidget
 {
 Q_OBJECT
 public:
-    enum BoardType { NonAlphabet, Numeric, UpperCase, LowerCase }; 
+    enum BoardType { Other, Numeric, Letters, Words };
     static void instantiatePopupScreen();
 
     struct Config
@@ -43,7 +41,7 @@ public:
         int strokeMotionPeriod;
         int maximumClickStutter;
         int maximumClickTime;
-        qreal minimumStrokeLength;
+        int minimumPressTime;
         qreal minimumStrokeDirectionRatio;
 
         QSize keyAreaSize;
@@ -51,6 +49,7 @@ public:
         int selectCircleDiameter;
         int selectCircleOffset;
 
+        int magnifyShowTime;
         int boardChangeTime;
 
         int leftSquishPoint;
@@ -77,7 +76,7 @@ public:
 
     void setSelectionHeight(int);
 
-    void addBoard(const QStringList &, BoardType);
+    void addBoard(BoardType type, const QStringList &rows, const QStringList &caps, const QStringList &equivalences);
 
     void autoCapitalizeNextWord(bool);
 
@@ -144,7 +143,6 @@ private:
 
     QList<Board *> m_boards;
     int m_currentBoard;
-    QSize m_boardSize;
     QRect m_boardRect;
     QPoint toBoardPoint(const QPoint &) const;
 
@@ -162,6 +160,7 @@ private:
     PopupWindow *m_charWindow;
 
     void setBoardByType(BoardType newBoard);
+    void setBoardCaps(bool);
     QTimeLine m_boardChangeTimeline;
     int m_oldBoard;
     bool m_boardUp;
@@ -199,5 +198,4 @@ private:
     QList<KeyOccurance> m_occuranceHistory;
 };
 
-#endif // _KEYBOARD_H_
-
+#endif

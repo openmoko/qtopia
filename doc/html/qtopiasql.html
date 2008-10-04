@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QtopiaSql Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QtopiaSql Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QtopiaSql class provides a collection of methods for setting up and managing database connections. <a href="#details">More...</a></p>
 <pre>    #include &lt;QtopiaSql&gt;</pre><ul>
 <li><a href="qtopiasql-members.html">List of all members, including inherited members</a></li>
@@ -31,7 +32,7 @@
 <li><div class="fn"/>void <b><a href="qtopiasql.html#detachDB">detachDB</a></b> ( const QString &amp; <i>path</i> )</li>
 <li><div class="fn"/>bool <b><a href="qtopiasql.html#ensureTableExists">ensureTableExists</a></b> ( const QString &amp; <i>tableName</i>, QSqlDatabase &amp; <i>db</i> )</li>
 <li><div class="fn"/>bool <b><a href="qtopiasql.html#ensureTableExists-2">ensureTableExists</a></b> ( const QStringList &amp; <i>tableNames</i>, QSqlDatabase &amp; <i>db</i> )</li>
-<li><div class="fn"/>QString <b><a href="qtopiasql.html#escapeString">escapeString</a></b> ( const QString &amp; <i>input</i> )</li>
+<li><div class="fn"/>QString <b><a href="qtopiasql.html#escapeString">escapeString</a></b> ( const QString &amp; <i>input</i> )&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 <li><div class="fn"/>QSqlError <b><a href="qtopiasql.html#exec">exec</a></b> ( const QString &amp; <i>query</i>, QSqlDatabase &amp; <i>db</i>, bool <i>inTransaction</i> = true )</li>
 <li><div class="fn"/>QSqlError <b><a href="qtopiasql.html#exec-2">exec</a></b> ( QSqlQuery &amp; <i>query</i>, QSqlDatabase &amp; <i>db</i>, bool <i>inTransaction</i> = true )</li>
 <li><div class="fn"/>bool <b><a href="qtopiasql.html#isDatabase">isDatabase</a></b> ( const QString &amp; <i>path</i> )</li>
@@ -44,6 +45,7 @@
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
 <ul>
+<li><div class="fn"/>QString <b><a href="qtopiasql.html#escape">escape</a></b> ( const QString &amp; <i>input</i> )</li>
 <li><div class="fn"/>QtopiaSql * <b><a href="qtopiasql.html#instance">instance</a></b> ()</li>
 <li><div class="fn"/>int <b><a href="qtopiasql.html#stringCompare">stringCompare</a></b> ( const QString &amp; <i>l</i>, const QString &amp; <i>r</i> )</li>
 </ul>
@@ -51,9 +53,9 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QtopiaSql class provides a collection of methods for setting up and managing database connections.</p>
-<p>Qtopia has a database architecture which uses a number of different databases, including a seperate database for each removable storage media. Additionally the database schema required for a particular version of Qtopia may differ from that currently on the device due to Qtopia being upgraded.</p>
+<p>Qt Extended has a database architecture which uses a number of different databases, including a seperate database for each removable storage media. Additionally the database schema required for a particular version of Qt Extended may differ from that currently on the device due to Qt Extended being upgraded.</p>
 <p>Use these routines to manage connections to these databases. The <a href="qcontent.html#QtopiaDatabaseId-typedef">QtopiaDatabaseId</a> type identifies a particular database of the collectin.</p>
-<p>The <a href="qtopiasql.html#systemDatabase">systemDatabase</a>() method is used to fetch a <a href="qsqldatabase.html">QSqlDatabase</a> object pointing to the Qtopia main system database. Call <a href="qtopiasql.html#attachDB">attachDB</a>() to connect a database for a particular path, typically associated with a new storage media mount-point. These will be operated on with the system database as a unit.</p>
+<p>The <a href="qtopiasql.html#systemDatabase">systemDatabase</a>() method is used to fetch a <a href="qsqldatabase.html">QSqlDatabase</a> object pointing to the Qt Extended main system database. Call <a href="qtopiasql.html#attachDB">attachDB</a>() to connect a database for a particular path, typically associated with a new storage media mount-point. These will be operated on with the system database as a unit.</p>
 <p>Lists of the current databases can be obtained with <a href="qtopiasql.html#databaseIds">databaseIds</a>() and <a href="qtopiasql.html#databases">databases</a>(). Given a database id obtain the path for the associated media mount point with <a href="qtopiasql.html#databasePathForId">databasePathForId</a>() and obtain the <a href="qsqldatabase.html">QSqlDatabase</a> itself with <a href="qtopiasql.html#database">database</a>().</p>
 <p>The <a href="qtopiasql.html#ensureTableExists">ensureTableExists</a>() methods call through to the Database migration utility to ensure the table schema referred to is loaded.</p>
 <p>The <a href="qtopiasql.html#attachDB">attachDB</a>() methods use the underlying database implementation specific method for creating queries across seperate databases. In SQLITE this method is the ATTACH statement, but an equivalent method is used for other implementations.</p>
@@ -96,8 +98,11 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Ensure that all tables in the list of <i>tableNames</i> exists in the database <i>db</i>.</p>
 <p>Internally this invokes the &quot;DBMigrationEngine&quot; service to run any migrations or schema updates required.</p>
+<h3 class="fn"><a name="escape"></a><a href="qstring.html">QString</a> QtopiaSql::escape ( const <a href="qstring.html">QString</a> &amp; <i>input</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the given <i>input</i> with all single quote characters repalced with two consecutive quote characters.</p>
 <h3 class="fn"><a name="escapeString"></a><a href="qstring.html">QString</a> QtopiaSql::escapeString ( const <a href="qstring.html">QString</a> &amp; <i>input</i> )</h3>
-<p>Returns a version of the <a href="qstring.html">QString</a> <i>input</i> with all single quote characters replaced with two consecutive quote characters.</p>
+<p>This function is deprecated.</p>
+<p>Returns the given <i>input</i> with all single quote characters repalced with two consecutive quote characters.</p>
 <h3 class="fn"><a name="exec"></a><a href="qsqlerror.html">QSqlError</a> QtopiaSql::exec ( const <a href="qstring.html">QString</a> &amp; <i>query</i>, <a href="qsqldatabase.html">QSqlDatabase</a> &amp; <i>db</i>, bool <i>inTransaction</i> = true )</h3>
 <p>Execute the given <a href="qstring.html">QString</a> <i>query</i> on the database <i>db</i>. If <i>inTransaction</i> is true, then perform the query inside an SQL transaction, for atomicity, if the database backend supports this.</p>
 <h3 class="fn"><a name="exec-2"></a><a href="qsqlerror.html">QSqlError</a> QtopiaSql::exec ( <a href="qsqlquery.html">QSqlQuery</a> &amp; <i>query</i>, <a href="qsqldatabase.html">QSqlDatabase</a> &amp; <i>db</i>, bool <i>inTransaction</i> = true )</h3>
@@ -106,7 +111,7 @@
 <h3 class="fn"><a name="instance"></a>QtopiaSql * QtopiaSql::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a pointer to the singleton object of <a href="qtopiasql.html">QtopiaSql</a>. This is the preferred method of accessing the <a href="qtopiasql.html">QtopiaSql</a> class.</p>
 <h3 class="fn"><a name="isDatabase"></a>bool QtopiaSql::isDatabase ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )</h3>
-<p>Return true if the file located at the given <i>path</i> is a Qtopia database file, for example the datastore used by the SQLITE engine; return false otherwise.</p>
+<p>Return true if the file located at the given <i>path</i> is a Qt Extended database file, for example the datastore used by the SQLITE engine; return false otherwise.</p>
 <p>This may be used to test if the file should be shown to the end-user.</p>
 <pre>    if ( !QtopiaSql::isDatabase( fileFound ))
         listForDisplay.append( fileFound );</pre>
@@ -126,8 +131,8 @@
 <p>Return the <a href="qsqldatabase.html">QSqlDatabase</a> instance of the main system database.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

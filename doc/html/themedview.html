@@ -10,11 +10,11 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">ThemedView Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">ThemedView Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The ThemedView widget constructs, manages and displays themed views in Qtopia. <a href="#details">More...</a></p>
 <pre>    #include &lt;ThemedView&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
-<p>Inherited by <a href="callscreen.html">CallScreen</a>, <a href="contextlabel.html">ContextLabel</a>, and <a href="phoneheader.html">PhoneHeader</a>.</p>
 <ul>
 <li><a href="themedview-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -26,7 +26,7 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="themedview.html#ThemedView">ThemedView</a></b> ( QWidget * <i>parent</i> = 0, Qt::WFlags <i>f</i> = 0 )</li>
+<li><div class="fn"/><b><a href="themedview.html#ThemedViewx">ThemedView</a></b> ( QWidget * <i>parent</i> = 0, Qt::WFlags <i>f</i> = 0 )</li>
 <li><div class="fn"/>virtual <b><a href="themedview.html#dtor.ThemedView">~ThemedView</a></b> ()</li>
 <li><div class="fn"/>const QString <b><a href="themedview.html#base">base</a></b> () const</li>
 <li><div class="fn"/>const QString <b><a href="themedview.html#defaultPics">defaultPics</a></b> () const</li>
@@ -47,9 +47,9 @@
 <li><div class="fn"/>QString <b><a href="themedview.html#themeName">themeName</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>201 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>206 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -78,7 +78,7 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>57 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>19 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
@@ -93,7 +93,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The ThemedView widget constructs, manages and displays themed views in Qtopia.</p>
-<p>A Qtopia theme is made up of multiple themed views, each described by an XML document called the themed view XML. You construct a new ThemedView by passing a themed view XML file to the <a href="themedview.html#loadSource">ThemedView::loadSource</a>() function. The ThemedView widget parses the XML, creates the theme item tree and renders it to the widget.</p>
+<p>A Qt Extended theme is made up of multiple themed views, each described by an XML document called the themed view XML. You construct a new ThemedView by passing a themed view XML file to the <a href="themedview.html#loadSource">ThemedView::loadSource</a>() function. The ThemedView widget parses the XML, creates the theme item tree and renders it to the widget.</p>
 <p>The theme item tree is the run-time representation of a themed view. Each node in the tree derives from <a href="themeitem.html">ThemeItem</a> and implements some specific functionality eg. <a href="themetextitem.html">ThemeTextItem</a> displays text, <a href="themerectitem.html">ThemeRectItem</a> draws rectangles, <a href="themelayoutitem.html">ThemeLayoutItem</a> positions and sizes other items etc. The ThemedView widget manages the theme item tree, instructing items to layout and paint themselves at the appropriate times.</p>
 <p>As the ThemedView is basically a customizeable user interface component, a core part of a themed view is its ability to display data to the user. There are 2 different methods of getting data into a themed view for display to the user. 1. Using the <a href="themedview.html#findItem">ThemedView::findItem</a>() function, you can get access to theme items in the tree and set data on them directly. Eg.</p>
 <pre>    ThemedView *view;
@@ -102,7 +102,7 @@
     if (myTextItem != 0)
         myTextItem-&gt;setText(&quot;Hello, World!&quot;);</pre>
 <p>The above example finds the item with name &quot;myTextItem&quot; and a <a href="themeitem.html#rtti">ThemeItem::rtti</a>() value of <a href="themedview.html#Type-enum">ThemedView::Text</a> and sets its contents to be &quot;Hello, World!&quot;.</p>
-<p>2. <a href="themelevelitem.html">ThemeLevelItem</a>, <a href="themestatusitem.html">ThemeStatusItem</a>, <a href="themetextitem.html">ThemeTextItem</a> and <a href="themeimageitem.html">ThemeImageItem</a> can source their data through Qtopia's expression evaluator. This method allows items to source data from the system without any tight-coupling. See the item-specific documentation for details.</p>
+<p>2. <a href="themelevelitem.html">ThemeLevelItem</a>, <a href="themestatusitem.html">ThemeStatusItem</a>, <a href="themetextitem.html">ThemeTextItem</a> and <a href="themeimageitem.html">ThemeImageItem</a> can source their data through a <a href="qexpressionevaluator.html">QExpressionEvaluator</a>. This method allows items to source data from the system without any tight-coupling. See the item-specific documentation for details.</p>
 <p>The ThemedView is also responsible for handling user interactivity with theme items. You can monitor user interactivity programatically by connecting to the <a href="themedview.html#itemPressed">ThemedView::itemPressed</a>(), <a href="themedview.html#itemClicked">ThemedView::itemClicked</a>() and <a href="themedview.html#itemReleased">ThemedView::itemReleased</a>() signals. Alternatively, theme items can send IPC messages to services or a specific channel when clicked. This allows themed views to effect the system without tight coupling. See the documentation of <a href="themeitem.html">ThemeItem</a> for details.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -130,7 +130,7 @@
 <p>See also <a href="themeitem.html#rtti">ThemeItem::rtti</a>().</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="ThemedView"></a>ThemedView::ThemedView ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="qt.html#WFlags-typedef">Qt::WFlags</a> <i>f</i> = 0 )</h3>
+<h3 class="fn"><a name="ThemedViewx"></a>ThemedView::ThemedView ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="qt.html#WFlags-typedef">Qt::WFlags</a> <i>f</i> = 0 )</h3>
 <p>Constructs a <a href="themedview.html">ThemedView</a> object passing the <i>parent</i> widget and widget flags <i>f</i> to the <a href="qwidget.html">QWidget</a> constructor.</p>
 <h3 class="fn"><a name="dtor.ThemedView"></a>ThemedView::~ThemedView ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="themedview.html">ThemedView</a> object and all of its data.</p>
@@ -193,8 +193,8 @@
 <p>Emitted when the visibility of <i>item</i> changes. The <i>visible</i> parameter is true if <i>item</i> is visible or false otherwise.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

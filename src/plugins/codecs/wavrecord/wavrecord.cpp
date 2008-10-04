@@ -1,28 +1,28 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "wavrecord.h"
 
+#ifdef WAVGSM_SUPPORTED
 extern "C" {
 #include "gsm.h"
 };
+#endif
 
 //#define WAVGSM_SUPPORTED 1
 
@@ -45,6 +45,7 @@ WavRecorderPlugin::WavRecorderPlugin()
     headerLen = 0;
     gsmPosn = 0;
     gsmHandle = 0;
+    encodeAsGsm = false;
 
     // Determine if we need to byte-swap samples before writing
     // them to the output device (wav is little-endian).
@@ -108,6 +109,7 @@ bool WavRecorderPlugin::begin( QIODevice *_device, const QString& formatTag )
     device = _device;
     start = _device->pos();
 
+#ifdef WAVGSM_SUPPORTED
     // Set up for GSM encoding if necessary.
     encodeAsGsm = (formatTag == "gsm");
     if ( encodeAsGsm ) {
@@ -118,6 +120,7 @@ bool WavRecorderPlugin::begin( QIODevice *_device, const QString& formatTag )
             gsm_option( (gsm)gsmHandle, GSM_OPT_WAV49, &value );
         }
     }
+#endif
     return true;
 }
 
@@ -130,12 +133,14 @@ bool WavRecorderPlugin::end()
     if ( !device )
         return false;
 
+#ifdef WAVGSM_SUPPORTED
     // Flush the last GSM block if necessary.
     if ( encodeAsGsm && gsmPosn > 0 ) {
         memset( gsmBuffer + gsmPosn, 0, sizeof(short) * (320 - gsmPosn) );
         gsmFlush( true );
         gsm_destroy( (gsm)gsmHandle );
     }
+#endif
 
     // Back-patch the header with the total file length.
     if ( writtenHeader ) {
@@ -370,6 +375,7 @@ bool WavRecorderPlugin::writeHeader()
 
 void WavRecorderPlugin::gsmFlush( bool last )
 {
+#ifdef WAVGSM_SUPPORTED
     gsm_byte frame[65];
 
     // Bail out if GSM initialization failed.
@@ -402,5 +408,6 @@ void WavRecorderPlugin::gsmFlush( bool last )
         device->write( (char *)frame, (uint)1 );
         ++totalBytes;
     }
+#endif
 }
 

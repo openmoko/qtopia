@@ -1,0 +1,13 @@
+TEMPLATE=app
+CONFIG+=qtopia
+TARGET=musicplayer
+
+QTOPIA*=media
+CONFIG+=quicklaunch
+MODULES*=homeui
+
+include(musicplayer.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES

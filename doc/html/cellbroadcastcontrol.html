@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">CellBroadcastControl Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">CellBroadcastControl Class Reference<br /><span class="small-subtitle">[<a href="qtcellmodule.html">QtCellModule</a>]</span>
+</h1>
 <p>The CellBroadcastControl class monitors incoming cell broadcast messages. <a href="#details">More...</a></p>
 <pre>    #include &lt;CellBroadcastControl&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -38,19 +39,12 @@
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
-<a name="static-public-members"></a>
-<h3>Static Public Members</h3>
-<ul>
-<li><div class="fn"/>CellBroadcastControl * <b><a href="cellbroadcastcontrol.html#instance">instance</a></b> ()</li>
-</ul>
-<ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
@@ -58,7 +52,9 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The CellBroadcastControl class monitors incoming cell broadcast messages.</p>
-<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
+<p>This task opens a message box if a cellbroadcast message of type <a href="cellbroadcastcontrol.html#Type-enum">CellBroadcastControl::Popup</a> is received and notfies the message board task about any background broadcasts. If this is not a desired behavior or such a notification would be handled by a different class the message box can be disabled by setting the <tt>CellBroadcast\DisablePopup</tt> key to <tt>true</tt> in the <tt>Trolltech/Phone</tt> configuration file. If this setting is missing, the CellBroadcastControl class opens the above mentioned popup box.</p>
+<p>This class is a Qt Extended server task. It is part of the Qt Extended server and cannot be used by other Qt Extended applications.</p>
+<p>See also <a href="messageboard.html">MessageBoard</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Type-enum"></a>enum CellBroadcastControl::Type</h3>
@@ -74,12 +70,10 @@
 <p>Constructs a new <a href="cellbroadcastcontrol.html">CellBroadcastControl</a> instance with the specified <i>parent</i>.</p>
 <h3 class="fn"><a name="broadcast"></a>void CellBroadcastControl::broadcast ( <a href="cellbroadcastcontrol.html#Type-enum">CellBroadcastControl::Type</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>channel</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever a new cell broadcast message of the given <i>type</i> is received. <i>channel</i> indicates the channel on which the message was received and <i>text</i> its text.</p>
-<h3 class="fn"><a name="instance"></a>CellBroadcastControl * CellBroadcastControl::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Return the single instance of <a href="cellbroadcastcontrol.html">CellBroadcastControl</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

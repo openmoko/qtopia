@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,7 +22,7 @@
 #include <qdebug.h>
 #include <qbuffer.h>
 #include <qtimer.h>
-#include "../../../libraries/qtopiaphone/qsmsmessage.h"
+#include <QSMSMessage>
 #include "../../../libraries/qtopiaphone/qcbsmessage.h"
 #include "../../../libraries/qtopiacomm/serial/qgsmcodec.h"
 #include "../../../libraries/qtopiaphone/wap/qwsppdu.h"
@@ -128,28 +126,33 @@ QString HardwareManipulator::constructCBMessage(const QString &messageCode, int 
     return PS_toHex( m.toPdu() );
 }
 
-void HardwareManipulator::constructSMSMessage( const QString &sender, const QString &serviceCenter, const QString &text )
+void HardwareManipulator::constructSMSMessage( const int type, const QString &sender, const QString &serviceCenter, const QString &text )
 {
     QSMSMessage m;
-    if ( sender.isEmpty() ) {
-        warning(tr("Invalid Sender"),
-                tr("Sender must not be empty"));
-        return;
-    }
+    m.setMessageClass(type);
     m.setSender(sender);
-
-    if ( serviceCenter.contains(QRegExp("\\D")) ) {
-        warning(tr("Invalid Service Center"),
-                tr("Service Center must not be empty and contain "
-                   "only digits"));
-        return;
-    }
     m.setServiceCenter(serviceCenter);
-
     m.setText(text);
     m.setTimestamp(QDateTime::currentDateTime());
+    sendSMS(m);
 
-    SMSList.appendSMS( m.toPdu() );
+}
+
+void HardwareManipulator::sendSMS( const QSMSMessage &m )
+{
+    int originalCount = getSMSList().count();
+    if( m.shouldSplit() ) {
+        QList<QSMSMessage> list = m.split();
+
+        for( int i =0; i < list.count(); i++ ) {
+            SMSList.appendSMS( list[i].toPdu() );
+        }
+    } else {
+        SMSList.appendSMS( m.toPdu() );
+    }
+
+    if ( getSMSList().count() > originalCount )
+        emit unsolicitedCommand("+CMTI: \"SM\","+QString::number( getSMSList().count()));
 }
 
 void HardwareManipulator::constructSMSDatagram(int port, const QString &sender, const QByteArray &data,
@@ -179,15 +182,7 @@ void HardwareManipulator::constructSMSDatagram(int port, const QString &sender, 
     m.setSender(sender);
     m.setApplicationData(appData);
 
-    if( m.shouldSplit() ) {
-        QList<QSMSMessage> list = m.split();
-
-        for( int i =0; i < list.count(); i++ ) {
-           SMSList.appendSMS( list[i].toPdu() );
-        }
-    } else {
-        SMSList.appendSMS( m.toPdu() );
-    }
+    sendSMS(m);
 }
 
 int HardwareManipulator::convertString(const QString &number, int maxValue, int numChar, int base, bool *ok)

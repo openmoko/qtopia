@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "remotedeviceinfodialog.h"
@@ -49,9 +47,9 @@ class ServicesDisplay : public QObject
 {
     Q_OBJECT
 public:
-    ServicesDisplay(QWidget *parent = 0);
+    ServicesDisplay(QObject *parent = 0);
     ~ServicesDisplay();
-    void exec(QBluetoothLocalDevice *local, const QBluetoothAddress &address);
+    void setRemoteDevice(const QBluetoothAddress &address, const QBluetoothLocalDevice &local);
 
 private slots:
     void foundServices(const QBluetoothSdpQueryResult &result);
@@ -60,11 +58,10 @@ private:
     QBluetoothSdpQuery *m_sdpQuery;
     QWaitWidget *m_wait;
     QStringListModel *m_serviceModel;
-
-    QListView *createListView() const;
+    QBluetoothAddress m_address;
 };
 
-ServicesDisplay::ServicesDisplay(QWidget *parent)
+ServicesDisplay::ServicesDisplay(QObject *parent)
     : QObject(parent),
       m_sdpQuery(new QBluetoothSdpQuery(this)),
       m_wait(new QWaitWidget(0)),
@@ -83,51 +80,16 @@ ServicesDisplay::~ServicesDisplay()
     delete m_wait;
 }
 
-QListView *ServicesDisplay::createListView() const
+void ServicesDisplay::setRemoteDevice(const QBluetoothAddress &address, const QBluetoothLocalDevice &local)
 {
-    QListView *view = new QListView;
-    view->setAlternatingRowColors(true);
-    view->setFrameShape(QFrame::NoFrame);
-    view->setSelectionMode(QListView::NoSelection);
-
-    // items aren't selectable, so remove 'select' label
-    QSoftMenuBar::setLabel(view, Qt::Key_Select, QSoftMenuBar::NoLabel);
-
-    return view;
-}
-
-void ServicesDisplay::exec(QBluetoothLocalDevice *local, const QBluetoothAddress &address)
-{
-    if (!m_sdpQuery->searchServices(address, *local, QBluetoothSdpUuid::L2cap)) {
+    if (!m_sdpQuery->searchServices(address, local, QBluetoothSdpUuid::L2cap)) {
         QMessageBox::warning(0, tr("Services Query Error"),
                              tr("<P>Unable to request device services"));
         return;
     }
+    m_address = address;
     m_serviceModel->removeRows(0, m_serviceModel->rowCount());
-
-    // don't use QtopiaApplication::execDialog() because the widget won't
-    // animate without a call to show()
     m_wait->show();
-    m_wait->exec();
-    if (m_wait->wasCancelled() || m_wait->result() != QDialog::Accepted)
-        return;
-    QDialog dlg;
-    dlg.setWindowTitle(tr("Supported services"));
-    QVBoxLayout layout;
-    if (m_serviceModel->rowCount() > 0) {
-        QListView *view = createListView();
-        view->setModel(m_serviceModel);
-        layout.addWidget(view);
-    } else {
-        QLabel *label = new QLabel(tr("(No available services.)"));
-        layout.setMargin(9);
-        layout.setSpacing(6);
-        label->setAlignment(Qt::AlignCenter);
-        label->setWordWrap(true);
-        layout.addWidget(label);
-    }
-    dlg.setLayout(&layout);
-    QtopiaApplication::execDialog(&dlg);
 }
 
 void ServicesDisplay::foundServices(const QBluetoothSdpQueryResult &result)
@@ -135,7 +97,7 @@ void ServicesDisplay::foundServices(const QBluetoothSdpQueryResult &result)
     if (!result.isValid()) {
         QMessageBox::warning(0, tr("Services Query Error"),
                              tr("<P>Unable to request device services"));
-        m_wait->reject();
+        m_wait->hide();
         return;
     }
 
@@ -143,9 +105,47 @@ void ServicesDisplay::foundServices(const QBluetoothSdpQueryResult &result)
     const QList<QBluetoothSdpRecord> &services = result.services();
     for (int i=0; i<services.size(); i++) {
         serviceNames << (services[i].serviceName());
+
+        // save any Headset or Handsfree channel info
+        if (services[i].isInstance(QBluetooth::HeadsetProfile)) {
+            BtSettings::setAudioProfileChannel(
+                    m_address,
+                    QBluetooth::HeadsetProfile,
+                    QBluetoothSdpRecord::rfcommChannel(services[i]));
+
+        } else if (services[i].isInstance(QBluetooth::HandsFreeProfile)) {
+            BtSettings::setAudioProfileChannel(
+                    m_address,
+                    QBluetooth::HandsFreeProfile,
+                    QBluetoothSdpRecord::rfcommChannel(services[i]));
+        }
     }
     m_serviceModel->setStringList(serviceNames);
-    m_wait->accept();
+
+    QDialog *dlg = new QDialog;
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->setWindowTitle(tr("Supported services"));
+    QVBoxLayout *layout = new QVBoxLayout;
+    if (m_serviceModel->rowCount() > 0) {
+        QListView *view = new QListView;
+        view->setAlternatingRowColors(true);
+        view->setFrameShape(QFrame::NoFrame);
+        view->setSelectionMode(QListView::NoSelection);
+        view->setModel(m_serviceModel);
+        layout->addWidget(view);
+        QSoftMenuBar::setLabel(view, Qt::Key_Select, QSoftMenuBar::NoLabel);
+    } else {
+        QLabel *label = new QLabel(tr("(No available services.)"));
+        layout->setMargin(9);
+        layout->setSpacing(6);
+        label->setAlignment(Qt::AlignCenter);
+        label->setWordWrap(true);
+        layout->addWidget(label);
+    }
+    dlg->setLayout(layout);
+    QtopiaApplication::showDialog(dlg);
+
+    m_wait->hide();
 }
 
 
@@ -471,14 +471,11 @@ void AudioDeviceConnectionStatus::clickedDisconnect()
     qLog(Bluetooth) << "AudioDeviceConnectionStatus::clickedDisconnect()";
 
     QBluetoothAudioGateway *gateway = connectedGateway();
-    m_waitWidget->setText(tr("Disconnecting..."));
-    m_waitWidget->setCancelEnabled(false);
-    m_waitWidget->show();
-
-    if (gateway == m_headsetGateway) {
-        m_headsetGateway->disconnect();
-    } else if (gateway == m_handsFreeGateway) {
-        m_handsFreeGateway->disconnect();
+    if (gateway) {
+        m_waitWidget->setText(tr("Disconnecting..."));
+        m_waitWidget->setCancelEnabled(false);
+        m_waitWidget->show();
+        gateway->disconnect();
     }
 }
 
@@ -529,6 +526,7 @@ RemoteDeviceInfoDialog::RemoteDeviceInfoDialog(QBluetoothLocalDevice *local, QWi
       m_ui(0),
       m_local(local),
       m_device(QBluetoothAddress()),
+      m_servicesDisplay(0),
       m_audioDeviceConnStatus(0),
       m_genericDeviceConnStatus(0)
 {
@@ -680,20 +678,21 @@ void RemoteDeviceInfoDialog::setTitle()
 // similar to details display for local device (in settingdisplay.cpp)
 void RemoteDeviceInfoDialog::showMoreInfo()
 {
-    QDialog dlg;
-    QFormLayout form(&dlg);
+    QDialog *dlg = new QDialog;
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    QFormLayout *form = new QFormLayout(dlg);
 
-    QLabel name(m_name);
-    name.setFont(m_nameFontVariant.value<QFont>());
-    form.addRow(tr("Name:"), &name);
-    form.addRow(tr("Version:"), new QLabel(m_device.version()));
-    form.addRow(tr("Vendor:"), new QLabel(m_device.manufacturer()));
-    form.addRow(tr("Company:"), new QLabel(m_device.company()));
-    //form.addWidget(tr("Services:"),
+    QLabel *name = new QLabel(m_name);
+    name->setFont(m_nameFontVariant.value<QFont>());
+    form->addRow(tr("Name:"), name);
+    form->addRow(tr("Version:"), new QLabel(m_device.version()));
+    form->addRow(tr("Vendor:"), new QLabel(m_device.manufacturer()));
+    form->addRow(tr("Company:"), new QLabel(m_device.company()));
+    //form->addWidget(tr("Services:"),
     //               new QLabel(m_device.serviceClassesAsString().join(", ")));
 
-    for (int i=0; i<form.count(); i++) {
-        QLabel *label = qobject_cast<QLabel*>(form.itemAt(i)->widget());
+    for (int i=0; i<form->count(); i++) {
+        QLabel *label = qobject_cast<QLabel*>(form->itemAt(i)->widget());
         if (label) {
             label->setWordWrap(true);
             if (label->text() == "(null)")  // returned from hcid
@@ -701,14 +700,15 @@ void RemoteDeviceInfoDialog::showMoreInfo()
         }
     }
 
-    dlg.setWindowTitle(tr("Other details"));
-    QtopiaApplication::execDialog(&dlg);
+    dlg->setWindowTitle(tr("Other details"));
+    QtopiaApplication::showDialog(dlg);
 }
 
 void RemoteDeviceInfoDialog::showServices()
 {
-    ServicesDisplay display;
-    display.exec(m_local, m_address);
+    if (!m_servicesDisplay)
+        m_servicesDisplay = new ServicesDisplay(this);
+    m_servicesDisplay->setRemoteDevice(m_address, *m_local);
 }
 
 #include "remotedeviceinfodialog.moc"

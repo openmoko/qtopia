@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaApplications
+Context=Network
+[Desktop Entry]
+Comment[]=Start usb networking
+Exec=usbnet-start.sh
+Icon=devtools/devtools
+Type=ConsoleApplication
+Name[]=Start usb networking

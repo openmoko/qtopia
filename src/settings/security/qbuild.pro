@@ -1,0 +1,13 @@
+TEMPLATE=app
+CONFIG+=qtopia singleexec
+TARGET=security
+
+enable_cell:QTOPIA*=phone
+CONFIG+=quicklaunch
+
+include(security.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

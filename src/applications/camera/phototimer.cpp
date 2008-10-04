@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -35,16 +33,10 @@
 #include <QAnalogClock>
 #include <QtopiaApplication>
 
-PhotoTimer::PhotoTimer( int timeout,
-                        int number,
-                        int interval,
-                        QWidget* parent,
+PhotoTimer::PhotoTimer( QWidget* parent,
                         Qt::WFlags f )
 :   QWidget( parent, f ),
-    mTimeout( timeout ),
-    mNumber( number ),
-    mInterval( interval ),
-    mClock( 0 )
+    mClock(0)
 {
     QGridLayout* layout = new QGridLayout( this );
 
@@ -55,11 +47,22 @@ PhotoTimer::PhotoTimer( int timeout,
     setLayout( layout );
 
     setMinimumSize( 70, 70 );
+    setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
 
-    QTimer* timer = new QTimer( this );
+    timer = new QTimer( this );
     timer->setInterval( 1000 );
     connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
+    hide();
+}
+
+void PhotoTimer::start(int timeout, int number, int interval)
+{
+    mTimeout  = timeout;
+    mNumber   = number;
+    mInterval = interval;
+
     timer->start();
+    show();
 }
 
 void PhotoTimer::timeout()
@@ -67,7 +70,8 @@ void PhotoTimer::timeout()
     if ( mTimeout <= 0 ) {
         emit( takePhoto() );
         if ( mNumber <= 1 ) {
-            deleteLater();
+            timer->stop();
+            hide();
         } else {
             mTimeout = mInterval;
             --mNumber;
@@ -77,6 +81,12 @@ void PhotoTimer::timeout()
     }
 
     mClock->display( QTime( 0, mTimeout, mTimeout ) );
+}
+
+void PhotoTimer::cancelTimer()
+{
+    timer->stop();
+    hide();
 }
 
 PhotoTimerDialog::PhotoTimerDialog( QWidget* parent, Qt::WFlags f )
@@ -103,31 +113,40 @@ PhotoTimerDialog::PhotoTimerDialog( QWidget* parent, Qt::WFlags f )
              this,
              SLOT(timeoutChanged(int)) );
 
-    layout->addWidget( new QLabel( tr( "Photos" ) ), 1, 0 );
+    //layout->addWidget( new QLabel( tr( "Photos" ) ),  1, 0 );
     QSpinBox* number = new NoEditSpinBox(this);
     number->setMinimum( 1 );
     number->setMaximum( 50 );
     number->setValue( mNumber );
-    layout->addWidget( number, 1, 1 );
+
+    //TODO: Disable for now
+    //layout->addWidget( number, 1, 1 );
+    number->setEnabled(false);
+    number->hide();
+
     connect( number,
              SIGNAL(valueChanged(int)),
              this,
              SLOT(numberChanged(int)) );
 
-    layout->addWidget( new QLabel( tr( "Interval" ) ), 2, 0 );
+    //layout->addWidget( new QLabel( tr( "Interval" ) ), 2, 0 );
     mIntervalSpin = new CameraMinSecSpinBox( this );
     mIntervalSpin->setMinimum( 1 );
     mIntervalSpin->setMaximum( 120 );
     mIntervalSpin->setValue( mInterval );
     mIntervalSpin->setEnabled( false );
-    layout->addWidget( mIntervalSpin, 2, 1 );
+
+    //TODO: Disable for now
+    //layout->addWidget( mIntervalSpin, 2, 1 );
+    mIntervalSpin->hide();
+
     connect( mIntervalSpin,
              SIGNAL(valueChanged(int)),
              this,
              SLOT(intervalChanged(int)) );
 
     setLayout( layout );
-    
+
     QtopiaApplication::setInputMethodHint(timeout,QtopiaApplication::AlwaysOff);
     QtopiaApplication::setInputMethodHint(number,QtopiaApplication::AlwaysOff);
     QtopiaApplication::setInputMethodHint(mIntervalSpin,QtopiaApplication::AlwaysOff);

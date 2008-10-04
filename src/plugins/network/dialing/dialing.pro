@@ -1,8 +1,11 @@
+!qbuild{
 qtopia_project(qtopia plugin)
 TARGET=dialing
-
 # Packaged by settings/network
 CONFIG+=no_pkg
+depends(libraries/qtopiacomm/network)
+enable_cell:depends(libraries/qtopiaphone)
+}
 
 FORMS       =   dialingbase.ui \
                 advancedbase.ui
@@ -22,34 +25,30 @@ SOURCES	    =   dialupplugin.cpp \
                 advanced.cpp \
                 dialstring.cpp
 
-depends(libraries/qtopiacomm/network)
-
-phone {
-    depends(libraries/qtopiaphone)
-    conf.files = $$QTOPIA_DEPOT_PATH/etc/network/dialupGPRS.conf
+isEmpty(DIALING_NETWORK_CONFIGS) {
+    DIALING_NETWORK_CONFIGS=dialup dialupIR
+    enable_cell:DIALING_NETWORK_CONFIGS+=dialupGPRS
 }
-                
-conf.files	+= $$QTOPIA_DEPOT_PATH/etc/network/dialup.conf \
-                  $$QTOPIA_DEPOT_PATH/etc/network/dialupIR.conf
-conf.path	= /etc/network
+for(l,DIALING_NETWORK_CONFIGS) {
+    conf.files+=$$device_overrides(/etc/network/$${l}.conf)
+}
+conf.path=/etc/network
 INSTALLS+=conf
 
-script=$$PWD/ppp-network
-variable=$$DIALING_NETWORK_SCRIPT
-include(../network_script.pri)
-
-bin2.files=$$QTOPIA_DEPOT_PATH/bin/qtopia-pppd-internal
-bin2.path=/bin
-bin2.hint=script
-INSTALLS+=bin2
+bin.files=\
+    $$device_overrides(/src/plugins/network/dialing/ppp-network)\
+    $$QTOPIA_DEPOT_PATH/bin/qtopia-pppd-internal
+bin.path=/bin
+bin.hint=script
+INSTALLS+=bin
 
 pics.files	= $$QTOPIA_DEPOT_PATH/pics/Network/dialup/*  
 pics.path	= /pics/Network/dialup
 pics.hint=pics
 INSTALLS+=pics
 
-icons.files     = $$QTOPIA_DEPOT_PATH/pics/Network/icons/*
-icons.path      = /pics/Network/icons
+icons.files     = $$QTOPIA_DEPOT_PATH/pics/Network/icons/dialup/*
+icons.path      = /pics/Network/icons/dialup
 icons.hint=pics
 INSTALLS+=icons
 

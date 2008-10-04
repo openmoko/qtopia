@@ -1,3 +1,4 @@
+!qbuild{
 qtopia_project(stub)
 
 defineReplace(maketarget) {
@@ -12,6 +13,7 @@ for(p,PROJECTS) {
     depends($$p,fake)
 }
 QMAKE_STRIP=
+}
 
 flash.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/flash-files/*
 flash.path=/../
@@ -22,7 +24,12 @@ startup.path=/
 startup.hint=script
 INSTALLS+=startup
 
+qbuild {
+# QBuild doesn't have a $$files function (though it probably should)
 script.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/scripts/*
+} else {
+script.files=$$files($$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/scripts/*)
+}
 script.path=/bin
 script.hint=script
 INSTALLS+=script
@@ -30,15 +37,13 @@ INSTALLS+=script
 f_dir.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/.directory
 f_dir.path=/apps/Devtools
 f_dir.trtarget=Devtools
-f_dir.hint=desktop nct
+f_dir.hint=desktop nct prep_db
+MODULES*=qtopia::prep_db
 INSTALLS+=f_dir
 
-desktop.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/docapi-rescan.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/network-services-start.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/network-services-start.desktop
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/network-services-stop.desktop
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/sdcard-umount.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/usb-gadget-ether.desktop
-desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/usb-gadget-stop.desktop
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/sdio-storage.desktop
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/desktop/sdio-wifi.desktop
 desktop.path=/apps/Devtools

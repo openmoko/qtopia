@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -123,9 +121,9 @@ void LanImpl::initialize()
 
     if ( isAvailable() ) {
         qLog(Network) << "LanImpl: Using network interface: " <<deviceName;
-	if ( isActive() )
+        if ( isActive() )
             ifaceStatus = QtopiaNetworkInterface::Up;
-	else	
+        else
             ifaceStatus = QtopiaNetworkInterface::Down;
     } else {
         ifaceStatus = QtopiaNetworkInterface::Unavailable;
@@ -178,13 +176,21 @@ bool LanImpl::setDefaultGateway()
         return false;
     }
 
+    QString prefix = "Properties/";
+#ifndef NO_WIRELESS_LAN
+    if ( type() & QtopiaNetwork::WirelessLAN ) {
+        prefix = QString("WirelessNetworks/%1/").arg(netIndex);
+    }
+#endif
+
     qLog(Network) << "Settings default gateway to" <<configIface->configFile();
     QStringList args;
     args << "route";
     args << deviceName;
-    const bool dhcp  = configIface->property("Properties/DHCP").toString() != "n";
+
+    const bool dhcp  = configIface->property(prefix+"DHCP").toString() != "n";
     if ( !dhcp ) {
-        QString gateway = configIface->property("Properties/GATEWAY").toString();
+        QString gateway = configIface->property(prefix+"GATEWAY").toString();
         args << "-gw";
         args << gateway;
     }
@@ -207,8 +213,14 @@ void LanImpl::installDNS(bool dhcp)
     list << deviceName;
     list << "dns";
     if ( !dhcp ) {
-        list << configIface->property("Properties/DNS_1").toString();
-        list << configIface->property("Properties/DNS_2").toString();
+        QString prefix = "Properties/";
+#ifndef NO_WIRELESS_LAN
+        if ( type() & QtopiaNetwork::WirelessLAN ) {
+            prefix = QString("WirelessNetworks/%1/").arg(netIndex);
+        }
+#endif
+        list << configIface->property(prefix+"DNS_1").toString();
+        list << configIface->property(prefix+"DNS_2").toString();
     }
 
     //write dns info
@@ -218,11 +230,10 @@ void LanImpl::installDNS(bool dhcp)
 bool LanImpl::start( const QVariant options )
 {
     const QtopiaNetworkProperties prop = configIface->getProperties();
-    const bool dhcp = prop.value("Properties/DHCP").toString() != "n";
 
     bool writeToSystem = prop.value("Info/WriteToSystem").toBool();
 #ifndef NO_WIRELESS_LAN
-    int netIndex = 0;
+    netIndex = 0;
     QtopiaNetwork::Type t = type();
     if ( t & QtopiaNetwork::WirelessLAN ) {
         QString essid = options.toString();
@@ -274,6 +285,14 @@ bool LanImpl::start( const QVariant options )
         params << "install";
         params << deviceName;
 
+        QString prefix = "Properties/";
+#ifndef NO_WIRELESS_LAN
+        if ( t & QtopiaNetwork::WirelessLAN ) {
+            prefix = QString("WirelessNetworks/%1/").arg(netIndex);
+        }
+#endif
+
+        const bool dhcp = prop.value(prefix+"DHCP").toString() != "n";
         if ( dhcp ) {
             // ### install <iface> dhcp
             // dhcp takes care of everything
@@ -284,7 +303,8 @@ bool LanImpl::start( const QVariant options )
 
             bool missingOption = false;
 
-            QString temp = prop.value("Properties/IPADDR").toString();
+
+            QString temp = prop.value(prefix+"IPADDR").toString();
             if ( temp.isEmpty() ) {
                 updateTrigger( QtopiaNetworkInterface::NotConnected,
                         tr("IP address missing.") );
@@ -297,7 +317,7 @@ bool LanImpl::start( const QVariant options )
             if ( missingOption )
                 return false;
 
-            temp = prop.value("Properties/SUBNET").toString();
+            temp = prop.value(prefix+"SUBNET").toString();
             if ( temp.isEmpty() ) {
                 qLog(Network) << "Subnet mask missing";
                 updateTrigger( QtopiaNetworkInterface::NotConnected,
@@ -312,7 +332,7 @@ bool LanImpl::start( const QVariant options )
 
             QString ip = temp; //save ip in case we need it as gateway address
 
-            temp = prop.value("Properties/BROADCAST").toString();
+            temp = prop.value(prefix+"BROADCAST").toString();
             if ( temp.isEmpty() ) {
                 updateTrigger( QtopiaNetworkInterface::NotConnected,
                         tr("Broadcast address missing.") );
@@ -325,7 +345,7 @@ bool LanImpl::start( const QVariant options )
             if ( missingOption )
                 return false;
 
-            temp = prop.value("Properties/GATEWAY").toString();
+            temp = prop.value(prefix+"GATEWAY").toString();
             if ( temp.isEmpty() ) {
                 qLog(Network) << "Gateway address missing. Using IP address.";
                 params << ip;
@@ -538,27 +558,27 @@ bool LanImpl::isPCMCIADevice( const QString& dev ) const
 }
 
 /*!
-  Returns \c TRUE if \a device is specifically assigned to the current configuration
-  or nobody else holds a lock on it; other \c FALSE. This removes the indeterministic 
-  assignment of Linux network interface to Qtopia network configurations.
+  Returns \c true if \a device is specifically assigned to the current configuration
+  or nobody else holds a lock on it; otherwise \c false. This removes the indeterministic
+  assignment of Linux network interface to Qt Extended network configurations.
   */
 bool LanImpl::isAvailableDevice(const QString& device) const
 {
     const QString assignedDevice = configIface->property("Properties/DeviceName" ).toString();
-    if ( !assignedDevice.isEmpty() ) 
+    if ( !assignedDevice.isEmpty() )
     {
         if ( assignedDevice == device ) {
             qLog(Network) << "Testing assigned device only:" << device;
             return true;
         }
-    } 
-    else 
+    }
+    else
     {
         QtopiaNetwork::Type staticNetworkTypes[] = {
              QtopiaNetwork::LAN, QtopiaNetwork::WirelessLAN };
-        for (uint i=0; i< sizeof( staticNetworkTypes )/sizeof(QtopiaNetwork::Type); i++ ) 
+        for (uint i=0; i< sizeof( staticNetworkTypes )/sizeof(QtopiaNetwork::Type); i++ )
         {
-            QStringList ifaces = 
+            QStringList ifaces =
                 QtopiaNetwork::availableNetworkConfigs( staticNetworkTypes[i] );
             //exclude the current config
             ifaces.removeAll( configIface->configFile() );
@@ -613,7 +633,7 @@ bool LanImpl::isAvailable() const
                     flags = ifrq2.ifr_flags;
                     if ( (flags & IFF_BROADCAST) != IFF_BROADCAST ) //we want ethernet
                         continue;
-                    
+
                     //don't grab this device if another (W)LAN config holds exclusive right
                     //on this device
                     //isAvailableDevice() is expensive -> only do this when we don't have an initial
@@ -780,7 +800,7 @@ void LanImpl::updateState()
     }
 #ifndef NO_WIRELESS_LAN
     QtopiaNetwork::Type t = type();
-    if ( t & QtopiaNetwork::WirelessLAN 
+    if ( t & QtopiaNetwork::WirelessLAN
             && ifaceStatus == QtopiaNetworkInterface::Up )
     {
         wlanRegProvider->notifyClients();

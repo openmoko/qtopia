@@ -1,29 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef ABEDITOR_H
 #define ABEDITOR_H
 
-#include <qtopia/pim/qcontact.h>
-#include <qtopia/pim/qappointment.h>
-#include <qtopia/pim/qcontactmodel.h>
+#include <qcontact.h>
+#include <qappointment.h>
+#include <qcontactmodel.h>
 #include <qtopia/qcontent.h>
 
 #include <QDialog>
@@ -58,116 +56,8 @@ class ReminderPicker;
 class GroupView;
 class QCategoryManager;
 class AbFullEditor;
-class PhoneFieldManager;
-
-//-----------------------------------------------------------------------
-
-class PhoneFieldType
-{
-public:
-    PhoneFieldType();
-    PhoneFieldType( const QString &id, const QString &str );
-    PhoneFieldType( const PhoneFieldType &other );
-    PhoneFieldType &operator=( const PhoneFieldType &other );
-    bool operator==( const PhoneFieldType &other ) const;
-    bool operator!=( const PhoneFieldType &other ) const;
-    bool isNull() const { return id.isEmpty(); }
-
-    QString id;
-    QIcon icon;
-    QString name;
-};
-
-//-----------------------------------------------------------------------
-
-class PhoneField : public QObject
-{
-    Q_OBJECT
-public:
-    PhoneField( QGridLayout *l, int &rowCount, QWidget *parent = 0 );
-    ~PhoneField();
-
-    void setTypes( const QList<PhoneFieldType> &newTypes );
-
-    void setType( const PhoneFieldType &newType );
-    PhoneFieldType type();
-
-    QString number() const;
-    bool isEmpty() const;
-    void setNumber( const QString &newNumber );
-
-    void remove();
-protected slots:
-    void emitFieldChanged();
-    void userChangedType( int idx );
-signals:
-    void typeChanged(const PhoneFieldType& newType);
-    void userChangedType(const PhoneFieldType& newType);
-    void internalChangedType(const PhoneFieldType& newType);
-    void numberChanged(const QString&);
-    void fieldChanged(const QString&,const PhoneFieldType&);
-protected:
-    friend class PhoneFieldManager;
-    QLineEdit *numberLE;
-
-    QIconSelector *typeIS;
-
-private:
-    QList<PhoneFieldType> mTypes;
-};
-
-//-----------------------------------------------------------------------
-
-// manages the creation of PhoneField children and provides an interface to access them
-class PhoneFieldManager : public QObject
-{
-    Q_OBJECT
-
-public:
-    PhoneFieldManager( QWidget *parent, QGridLayout *layout, int rc, AbFullEditor *editor);
-    ~PhoneFieldManager();
-
-    //add field. use existing empty field if available, otherwise, addBlank
-    void add( const QString &number, const PhoneFieldType &type );
-    void addEmpty();
-    bool isFull() const;
-    bool isEmpty() const;
-
-    bool removeNumber(QWidget *victim);
-    bool removeNumber(PhoneFieldType type);
-
-    void setTypes( const QList<PhoneFieldType> &newTypes );
-    QList<PhoneFieldType> types() const;
-
-    void setNumberFromType( const PhoneFieldType &type, const QString &newNumber );
-    QString numberFromType( const PhoneFieldType &type );
-
-    void clear();
-
-protected slots:
-    void emitFieldChanged( const QString &number, const PhoneFieldType &type );
-
-    //  controls the available types phonefields have when the user changes
-    //  the type of one of them
-    void updateTypes( const PhoneFieldType &newType );
-    void checkForAdd(); //  a field has changed, check to see if we need to add()
-
-signals:
-    void fieldChanged(const QString&, const PhoneFieldType&);
-
-protected:
-    QGridLayout *parLayout;
-    int rowCount;
-    int firstRow;
-    QList<PhoneField*> phoneFields;
-    QList<PhoneFieldType> mTypes;
-    AbFullEditor *mEditor;
-
-private:
-    bool mEmitFieldChanged;
-};
-
-//-----------------------------------------------------------------------
+class FieldLineEdit;
+class QContactFieldList;
 
 // detail editor ; constructs a dialog to edit fields specified by a key => value map
 class AbDetailEditor : public QDialog
@@ -305,8 +195,6 @@ public:
     virtual QAppointment::AlarmFlags birthdayReminder() {return birthdayAppt.alarm();}
     virtual int birthdayReminderDelay() {return birthdayAppt.alarmDelay();}
 
-    void addRemoveNumberMenu(QWidget *field);
-
 protected slots:
     void editPhoto();
 
@@ -320,10 +208,6 @@ protected slots:
     //Communication between Contact tab and details on other tabs
 
     void specFieldsFilter( const QString &newValue );
-    void phoneFieldsToDetailsFilter( const QString &newNumber, const PhoneFieldType &newType );
-    void detailsToPhoneFieldsFilter( const QString &newNumber );
-
-    PhoneFieldType findPhoneField(QLineEdit *detail);
 
     void accept();
     void reject();
@@ -331,10 +215,9 @@ protected slots:
     void editEmails();
     void prepareTab(int);
 
-    void removeNumber();
-
     void toneSelected( const QContent &tone );
 
+    void activateFieldAction(const QString &, const QString &value);
 protected:
     void closeEvent(QCloseEvent *e);
     void showEvent( QShowEvent *e );
@@ -349,8 +232,6 @@ private:
     void setupTabWork();
     void setupTabHome();
     void setupTabOther();
-
-    void setupPhoneFields( QWidget *parent = 0 );
 
     void setEntryWork();
     void setEntryHome();
@@ -376,12 +257,7 @@ private:
     QWidget *summaryTab;
     QTextEdit *summary;
 
-    PhoneFieldType  mHPType, mHMType, mHFType, mBPType, mBMType,
-                    mBFType, mBPAType, mHVType, mBVType;
-
     bool lastUpdateInternal;
-
-    QList<PhoneFieldType> phoneTypes;
 
     QMap<QContactModel::Field, QLineEdit *> lineEdits;
 
@@ -415,13 +291,17 @@ private:
     //  Business tab widgets
     //
 
-    QLineEdit *companyLE, *companyProLE, *jobTitleLE, *busPhoneLE, *busFaxLE,
-              *busMobileLE, *busPagerLE, *busWebPageLE, *deptLE, *officeLE,
+    QLineEdit *companyLE, *companyProLE, *jobTitleLE,
+              *busWebPageLE, *deptLE, *officeLE,
               *professionLE, *managerLE, *assistantLE;
 
     //Home tab widgets
-    QLineEdit *homePhoneLE, *homeFaxLE, *homeMobileLE, *homeWebPageLE,
+    QLineEdit *homeWebPageLE,
               *spouseLE, *anniversaryLE, *childrenLE;
+
+    // Phone number fields.
+    FieldLineEdit *busPhoneLE, *busFaxLE, *busMobileLE, *busPagerLE,
+                  *homePhoneLE, *homeFaxLE, *homeMobileLE;
 
 #if defined(QTOPIA_VOIP)
     QLineEdit *busVoipLE, *homeVoipLE;
@@ -435,7 +315,7 @@ private:
     QAppointment anniversaryAppt, birthdayAppt;
 
     QToolButton *photoPB;
-    PhoneFieldManager *phoneMan;
+    QContactFieldList *phoneNumbers;
 
     QAction *actionEmailDetails;
 #if defined(QTOPIA_TELEPHONY)
@@ -455,7 +335,6 @@ private:
 #if defined(QTOPIA_TELEPHONY)
     QAction* actionSetRingTone;
 #endif
-    QAction *actionRemoveNumber;
 };
 
 #ifdef QTOPIA_CELL
@@ -486,7 +365,7 @@ private:
 
     QWidget *simEditor;
     QLineEdit *simName;
-    QLineEdit *simNumber;
+    QContactFieldList *phoneNumbers;
 
     QContact ent;
 
@@ -494,21 +373,5 @@ private:
 };
 #endif
 
-//-----------------------------------------------------------------------
-
-class PhoneFieldLineEdit : public QLineEdit
-{
-    Q_OBJECT
-
-public:
-    PhoneFieldLineEdit( QWidget *typeSibling, QWidget *parent );
-    bool eventFilter( QObject *o, QEvent *e );
-
-public slots:
-    void appendText( const QString &txt );
-
-private:
-    QWidget *mTypeSibling;
-};
 
 #endif

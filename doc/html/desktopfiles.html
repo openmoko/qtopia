@@ -10,10 +10,10 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Desktop File Standard<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Desktop File Standard<br /><span class="subtitle"></span>
 </h1>
-<a name="desktop"></a><p>A .desktop file provides the information required by the the <a href="docsys-overview.html">Qtopia Document System</a> to include an application in a launcher folder.</p>
+<a name="desktop"></a><p>A .desktop file provides the information required by the the <a href="docsys-overview.html">Qt Extended Document System</a> to include an application in a launcher folder.</p>
 <ul><li><a href="#installation">Installation</a></li>
 <li><a href="#file-format">File Format</a></li>
 <ul><li><a href="#desktop-entry">Desktop Entry</a></li>
@@ -56,7 +56,7 @@
 </td><td>No</td></tr>
 <tr valign="top" class="odd"><td><tt>Comment[]</tt></td><td>Specifies a comment describing the launcher entry.</td><td>No</td></tr>
 <tr valign="top" class="even"><td><tt>MimeType</tt></td><td>Specifies a comma separated list of MIME types an application can open.<p>This is equivalent to the <a href="qcontent.html#mimeTypes">QContent::mimeTypes</a>() property.</p>
-<p>See <a href="docwidget.html">Qtopia - Main Document Widget</a> for more information on associating MIME types with an application.</p>
+<p>See <a href="docwidget.html">Main Document Widget</a> for more information on associating MIME types with an application.</p>
 </td><td>No</td></tr>
 <tr valign="top" class="odd"><td><tt>MimeTypeIcons</tt></td><td>Specifies a comma separated list of icons for documents of the types in the <tt>MimeType</tt> list. There should be an icon in this list for each type in the <tt>MimeType</tt> list.<p>This is equivalent to the <a href="qcontent.html#mimeTypeIcons">QContent::mimeTypeIcons</a>() property.</p>
 </td><td>No</td></tr>
@@ -87,6 +87,7 @@
 <p>If other groups are included in the .desktop their contents will be pulled into the documents database and stored as properties of the <a href="qcontent.html">QContent</a> created from the .desktop. These properties can be accessed using <a href="qcontent.html#property"><tt>QContent::property( const QString &amp;key, const QString &amp;group )</tt></a> where key is the parameter name and group is the settings group.</p>
 <a name="example-application-desktop-file"></a>
 <h2>Example Application .desktop file</h2>
+<p>For applications that are simply executables, the format is as follows (lines beginning with a ';' are ignored as comments):</p>
 <pre>    [Desktop Entry]
     ; the line above is mandatory at the beginning of the file
     ;
@@ -108,10 +109,18 @@
     ; the next lines specify the name of the application as it should appear in the launcher
     ; and start menu
     ; Name[]=&quot;My fancy application&quot;</pre>
+<p>For applications that are realized by a service request, the format is similar, except the Type is a service (must take one <a href="qstring.html">QString</a> parameter), File is an arbitrary parameter, and Role must be &quot;Application&quot;:</p>
+<pre>    [Desktop Entry]
+    Type=Service/MyService::myMessage(QString)
+    File=MyParameter
+    Role=Application
+    Icon=Iconfile
+    Name[]=&quot;My fancy application&quot;</pre>
+<p>By using Services to realize applications, a single application can present an interface depending on information loaded from the parameter. For example, a Java engine could load a .jar file or a weblet could load a webpage.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

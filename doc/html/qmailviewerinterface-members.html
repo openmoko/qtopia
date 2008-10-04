@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">List of All Members for QMailViewerInterface</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">List of All Members for QMailViewerInterface</h1>
 <p>This is the complete list of members for <a href="qmailviewerinterface.html">QMailViewerInterface</a>, including inherited members.</p>
 <p><table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td width="45%" valign="top"><ul>
@@ -23,12 +23,15 @@
 <li><div class="fn"/><a href="qobject.html#childEvent">childEvent</a> ( QChildEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#children">children</a> () const</li>
 <li><div class="fn"/><a href="qmailviewerinterface.html#clear">clear</a> ()</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#completeMessage">completeMessage</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#connect">connect</a> ( const QObject *, const char *, const QObject *, const char *, Qt::ConnectionType )</li>
 <li><div class="fn"/><a href="qobject.html#connect-2">connect</a> ( const QObject *, const char *, const char *, Qt::ConnectionType ) const</li>
 <li><div class="fn"/><a href="qobject.html#connectNotify">connectNotify</a> ( const char * )</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#contactDetails">contactDetails</a> ( const QContact &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#customEvent">customEvent</a> ( QEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#d_ptr-var">d_ptr</a> : </li>
 <li><div class="fn"/><a href="qobject.html#deleteLater">deleteLater</a> ()</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#deleteMessage">deleteMessage</a> ()</li>
 <li><div class="fn"/><a href="qobject.html#destroyed">destroyed</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#disconnect">disconnect</a> ( const QObject *, const char *, const QObject *, const char * )</li>
 <li><div class="fn"/><a href="qobject.html#disconnect-2">disconnect</a> ( const char *, const QObject *, const char * )</li>
@@ -43,11 +46,15 @@
 <li><div class="fn"/><a href="qobject.html#findChildren">findChildren</a> ( const QString &amp; ) const</li>
 <li><div class="fn"/><a href="qobject.html#findChildren-2">findChildren</a> ( const QRegExp &amp; ) const</li>
 <li><div class="fn"/><a href="qmailviewerinterface.html#finished">finished</a> ()</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#forwardMessage">forwardMessage</a> ()</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#handleIncomingMessages">handleIncomingMessages</a> ( const QMailMessageIdList &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#handleOutgoingMessages">handleOutgoingMessages</a> ( const QMailMessageIdList &amp; ) const : bool</li>
 </ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qobject.html#installEventFilter">installEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#killTimer">killTimer</a> ( int )</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#messageChanged">messageChanged</a> ( const QMailMessageId &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#metaObject">metaObject</a> () const</li>
 <li><div class="fn"/><a href="qobject.html#moveToThread">moveToThread</a> ( QThread * )</li>
 <li><div class="fn"/><a href="qobject.html#objectName-prop">objectName</a> () const</li>
@@ -55,7 +62,11 @@
 <li><div class="fn"/><a href="qobject.html#property">property</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#replyToAll">replyToAll</a> ()</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#replyToSender">replyToSender</a> ()</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#saveSender">saveSender</a> ()</li>
 <li><div class="fn"/><a href="qmailviewerinterface.html#scrollToAnchor">scrollToAnchor</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#sendMessage">sendMessage</a> ( const QMailMessage &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#sender">sender</a> () const</li>
 <li><div class="fn"/><a href="qmailviewerinterface.html#setMessage">setMessage</a> ( const QMailMessage &amp; ) : bool</li>
 <li><div class="fn"/><a href="qobject.html#objectName-prop">setObjectName</a> ( const QString &amp; )</li>
@@ -70,14 +81,15 @@
 <li><div class="fn"/><a href="qobject.html#timerEvent">timerEvent</a> ( QTimerEvent * )</li>
 <li><div class="fn"/><a href="qobject.html#tr">tr</a> ( const char *, const char *, int )</li>
 <li><div class="fn"/><a href="qobject.html#trUtf8">trUtf8</a> ( const char *, const char *, int )</li>
+<li><div class="fn"/><a href="qmailviewerinterface.html#viewMessage">viewMessage</a> ( const QMailMessageId &amp;, QMailViewerFactory::PresentationType )</li>
 <li><div class="fn"/><a href="qmailviewerinterface.html#widget">widget</a> () const : QWidget *</li>
 </ul>
 </td></tr>
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

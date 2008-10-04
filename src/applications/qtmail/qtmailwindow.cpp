@@ -1,42 +1,48 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-
-
 #include "qtmailwindow.h"
 #include "statusdisplay.h"
-#include "writemail.h"
 
+#include "emailservice.h"
+#ifndef QTOPIA_NO_SMS
+#include "smsservice.h"
+#endif
+#ifndef QTOPIA_NO_COLLECTIVE
+#include "instantmessageservice.h"
+#endif
+#include "messagesservice.h"
+
+#include <qtopiaipcadaptor.h>
 #include <qtopiaipcenvelope.h>
 #include <qtopiaapplication.h>
 #include <qdatetime.h>
 #include <qtimer.h>
 #include <QDebug>
 #include <QStackedWidget>
+#include <QMailAccount>
 
 
 QTMailWindow *QTMailWindow::self = 0;
 
 QTMailWindow::QTMailWindow(QWidget *parent, Qt::WFlags fl)
-    : QMainWindow(parent, fl), noShow(false)
+    : QWidget(parent, fl), noShow(false)
 {
     qLog(Messaging) << "QTMailWindow ctor begin";
 
@@ -48,67 +54,120 @@ void QTMailWindow::init()
 {
     self = this;
 
-    // Pass in an incorrect parent, a warning
-    // "QLayout::addChildWidget: EmailClient "client" in wrong parent; "
-    // "moved to correct parent" will be shown, but this is necessary
-    // to make the emailClient QMainWindow display.
-    // This seems to be a QMainWindow in a QStackedWidget bug
-    emailClient = new EmailClient(this, "client"); // No tr
+    views = new QStackedWidget;
+    views->setFrameStyle(QFrame::NoFrame);
 
     status = new StatusDisplay;
 
+    QVBoxLayout* vboxLayout = new QVBoxLayout(this);
+    vboxLayout->setContentsMargins( 0, 0, 0, 0 );
+    vboxLayout->setSpacing( 0 );
+    vboxLayout->addWidget( views );
+    vboxLayout->addWidget( status );
+
+    // Add the email client to our central widget stack
+    emailClient = new EmailClient(views);
+
+    // Connect the email client as the primary interface widget
     connect(emailClient, SIGNAL(raiseWidget(QWidget*,QString)),
             this, SLOT(raiseWidget(QWidget*,QString)) );
     connect(emailClient, SIGNAL(statusVisible(bool)),
             status, SLOT(showStatus(bool)) );
     connect(emailClient, SIGNAL(updateStatus(QString)),
             status, SLOT(displayStatus(QString)) );
-    connect(emailClient, SIGNAL(updateProgress(uint, uint)),
-            status, SLOT(displayProgress(uint, uint)) );
+    connect(emailClient, SIGNAL(updateProgress(uint,uint)),
+            status, SLOT(displayProgress(uint,uint)) );
     connect(emailClient, SIGNAL(clearStatus()),
             status, SLOT(clearStatus()) );
 
-    views = new QStackedWidget;
+    // Hook up the QCop service handlers
+    QtopiaAbstractService* svc;
+
+    svc = new EmailService( this );
+    connect(svc, SIGNAL(viewInbox()), 
+            emailClient, SLOT(viewEmails()));
+    connect(svc, SIGNAL(message(QMailMessageId)), 
+            emailClient, SLOT(displayMessage(QMailMessageId)));
+    connect(svc, SIGNAL(write(QString,QString)), 
+            emailClient, SLOT(writeMailAction(QString,QString)));
+    connect(svc, SIGNAL(write(QString,QString,QStringList,QStringList)), 
+            emailClient, SLOT(writeMailAction(QString,QString,QStringList,QStringList)));
+    connect(svc, SIGNAL(vcard(QString,QString)), 
+            emailClient, SLOT(emailVCard(QString,QString)));
+    connect(svc, SIGNAL(vcard(QDSActionRequest)), 
+            emailClient, SLOT(emailVCard(QDSActionRequest)));
+    connect(svc, SIGNAL(cleanup(QDate,int)), 
+            emailClient, SLOT(cleanupMessages(QDate,int)));
+
+#ifndef QTOPIA_NO_SMS
+    svc = new SMSService( this );
+    connect(svc, SIGNAL(newMessages(bool)), 
+            emailClient, SLOT(newMessages(bool)));
+    connect(svc, SIGNAL(viewInbox()), 
+            emailClient, SLOT(viewMessages()));
+    connect(svc, SIGNAL(write(QString,QString,QString)), 
+            emailClient, SLOT(writeSms(QString,QString,QString)));
+    connect(svc, SIGNAL(vcard(QString,QString)), 
+            emailClient, SLOT(smsVCard(QString,QString)));
+    connect(svc, SIGNAL(vcard(QDSActionRequest)), 
+            emailClient, SLOT(smsVCard(QDSActionRequest)));
+#endif
+
+#ifndef QTOPIA_NO_COLLECTIVE
+    svc = new InstantMessageService(this);
+    connect(svc, SIGNAL(write(QString)), 
+            emailClient, SLOT(writeInstantMessage(QString)));
+#endif
+
+    svc = new MessagesService( this );
+    connect(svc, SIGNAL(view()), 
+            emailClient, SLOT(viewMessages()));
+    connect(svc, SIGNAL(viewNew(bool)), 
+            emailClient, SLOT(newMessages(bool)));
+    connect(svc, SIGNAL(view(QMailMessageId)), 
+            emailClient, SLOT(displayMessage(QMailMessageId)));
+    connect(svc, SIGNAL(replyTo(QMailMessageId)), 
+            emailClient, SLOT(replyToMessage(QMailMessageId)));
+    connect(svc, SIGNAL(compose(QMailMessage::MessageType, 
+                                const QMailAddressList&, 
+                                const QString&, 
+                                const QString&, 
+                                const QContentList&, 
+                                QMailMessage::AttachmentsAction)), 
+            emailClient, SLOT(composeMessage(QMailMessage::MessageType, 
+                                             const QMailAddressList&, 
+                                             const QString&, 
+                                             const QString&, 
+                                             const QContentList&, 
+                                             QMailMessage::AttachmentsAction)));
+    connect(svc, SIGNAL(compose(QMailMessage)), 
+            emailClient, SLOT(composeMessage(QMailMessage)));
+
     views->addWidget(emailClient);
     views->setCurrentWidget(emailClient);
 
-    QFrame* vbox = new QFrame(this);
-    vbox->setFrameStyle(QFrame::NoFrame);
-
-    QVBoxLayout* vboxLayout = new QVBoxLayout(vbox);
-    vboxLayout->setContentsMargins( 0, 0, 0, 0 );
-    vboxLayout->setSpacing( 0 );
-    vboxLayout->addWidget( views );
-    vboxLayout->addWidget( status );
-
-    setCentralWidget( vbox );
     setWindowTitle( emailClient->windowTitle() );
 }
 
 QTMailWindow::~QTMailWindow()
 {
-    if (emailClient)
-        emailClient->cleanExit( true );
-
     qLog(Messaging) << "QTMailWindow dtor end";
 }
 
 void QTMailWindow::closeEvent(QCloseEvent *e)
 {
-    if (WriteMail* writeMail = emailClient->mWriteMail) {
-        if ((views->currentWidget() == writeMail) && (writeMail->hasContent())) {
-            // We need to save whatever is currently being worked on
-            writeMail->forcedClosure();
-        }
-    }
-
-    if (emailClient->isTransmitting()) {
-        emailClient->closeAfterTransmissionsFinished();
-        hide();
-        e->ignore();
-    } else {
+    if (emailClient->closeImmediately()) {
         e->accept();
+    } else {
+        e->ignore();
     }
+}
+
+void QTMailWindow::showEvent(QShowEvent *e)
+{
+    emailClient->raiseApplication();
+
+    QWidget::showEvent(e);
 }
 
 void QTMailWindow::forceHidden(bool hidden)
@@ -120,12 +179,13 @@ void QTMailWindow::setVisible(bool visible)
 {
     if (noShow && visible)
         return;
-    QMainWindow::setVisible(visible);
+
+    QWidget::setVisible(visible);
 }
 
-void QTMailWindow::setDocument(const QString &_address)
+void QTMailWindow::setDocument(const QString &address)
 {
-    emailClient->setDocument(_address);
+    emailClient->sendMessageTo(QMailAddress(address), QMailMessage::AnyType);
 }
 
 void QTMailWindow::raiseWidget(QWidget *w, const QString &caption)
@@ -153,4 +213,6 @@ QTMailWindow* QTMailWindow::singleton()
 {
     return self;
 }
+
+#include "qtmailwindow.moc"
 

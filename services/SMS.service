@@ -2,7 +2,7 @@
 File=QtopiaServices
 Context=Email
 [Service]
-Actions = "writeSms();smsVCard(QDSActionRequest);viewSms();viewSmsId(QString);viewSmsList();pushMmsMessage(QDSActionRequest);flashSms(QDSActionRequest);startup()"
+Actions = "writeSms();smsVCard(QDSActionRequest);viewSms();viewSmsId(QString);viewSmsList()"
 Icon = email
 Name[]=SMS
 [writeSms()]
@@ -16,5 +16,3 @@ Name[]="View SMS"
 [viewSmsList()]
 Icon = email
 Name[]= "View SMS List"
-[startup()]
-Icon = phone/sms

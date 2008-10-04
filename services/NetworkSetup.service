@@ -2,7 +2,7 @@
 File=QtopiaServices
 Context=Network
 [Service]
-Actions="configureData();configureWap();pushWapNetworkSettings(QDSActionRequest);pushNokiaNetworkSettings(QDSActionRequest)"
+Actions="configureData();configureWap();pushWapNetworkSettings(QDSActionRequest);pushNokiaNetworkSettings(QDSActionRequest);pushLanNetworkSettings(QDSActionRequest)"
 Icon=netsetup/internet
 Name[]="Setup Network"
 [configureData()]

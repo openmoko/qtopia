@@ -43,15 +43,37 @@ setup_path()
                 compiler="${TB_CC_PREFIX}$CC"
                 [ -z "$_comp" ] && _comp="$compiler"
                 if [ ! -f "$DEVICE_BIN/$compiler" -o "$DEFAULT_DEVICE_PATH/environment" -nt "$DEVICE_BIN/$compiler" -o "$DEVICE_CONFIG_PATH/environment" -nt "$DEVICE_BIN/$compiler" ]; then
+                    # This gets called before we know how to invoke the host
+                    # toolchain so we write a script that does the job the
+                    # first time it's run. This is guaranteed to be after we
+                    # know how to invoke the host toolchain.
+                    #
+                    # There would be more error checking here except that we
+                    # know this script is going to be called immediately after
+                    # compile.host has been written (as part of configure's
+                    # compiler test).
+
                     #echo rebuilding "$DEVICE_BIN/$compiler"
                     cat >"$DEVICE_BIN/$compiler" <<END
 #!/bin/sh
-if [ "\$TEAMBUILDER_SYSTEM" = '$TB_SYS' ]; then
-    exec $TOOLCHAIN/bin/$compiler "\$@"
-else
-    export TEAMBUILDER_SYSTEM='$TB_SYS'
-    exec $TB_DIR/bin/$compiler "\$@"
-fi
+TOOLCHAIN="$TOOLCHAIN"
+TB_SYS="$TB_SYS"
+compiler="$compiler"
+TB_DIR="$TB_DIR"
+TB_STRIP_ARGS="$TB_STRIP_ARGS"
+DEVICE_BIN="$DEVICE_BIN"
+DEFAULT_DEVICE_PATH="$DEFAULT_DEVICE_PATH"
+END
+                    cat >>"$DEVICE_BIN/$compiler" <<'END'
+rm "$0"
+$DEVICE_BIN/compile.host\
+    -DTOOLCHAIN="\"$TOOLCHAIN\""\
+    -DTB_SYS="\"$TB_SYS\""\
+    -DCOMPILER="\"$compiler\""\
+    -DTB_DIR="\"$TB_DIR\""\
+    -DTB_STRIP_ARGS="\"$TB_STRIP_ARGS\""\
+    -o "$0" "$DEFAULT_DEVICE_PATH/wrapper.c" || exit 1
+exec "$0" "$@"
 END
                     chmod 755 "$DEVICE_BIN/$compiler"
                 fi

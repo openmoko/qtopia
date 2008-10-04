@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Image Viewer Tutorial: Part 2<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Image Viewer Tutorial: Part 2<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><a name="ui-specification"></a>
 <h2>UI Specification</h2>
@@ -27,6 +27,7 @@
     {
         _listScreen  = 0;
         _imageScreen = 0;
+        setWindowTitle(&quot;Image Viewer&quot;);
     }</pre>
 <p>Don't forget that the _listScreen member must be initialized with 0 in the constructor and added as private to the header file. Now calling the following function in the constructor will set the list screen as the current widget</p>
 <p>File: iviewer.cpp</p>
@@ -39,14 +40,14 @@
     }</pre>
 <a name="setup-the-model"></a>
 <h4>Setup the model</h4>
-<p>For the content, the <a href="http://doc.trolltech.com/qtopia4.3/docsys-overview.html">qtopia document system</a>, which provides a very handy way to retrieve our content, should be used.</p>
+<p>For the content, the <a href="docsys-overview.html">Qt Extended document system</a>, which provides a very handy way to retrieve our content, should be used.</p>
 <p>File: listscreen.cpp</p>
 <pre>    void ListScreen::setupContent()
     {
         _cs  = new QContentSet(QContentFilter::MimeType, &quot;image/png&quot;, this);
         _csm = new QContentSetModel(_cs, this);
     }</pre>
-<p>The <a href="qcontentset.html">QContentSet</a> represents a set of <a href="qcontent.html">QContent</a> defined over the mime type &quot;image/png&quot;. The content model is a <a href="qabstractlistmodel.html">QAbstractListModel</a> which could be set directly to the <a href="qlistwidget.html">QListWidget</a>, if the setModel(..&#x2e;) method were not private in <a href="qlistwidget.html">QListWidget</a>. This is done, because the <a href="qlistwidget.html">QListWidget</a> shall only be used with the <a href="qlistwidgetitem.html">QListWidgetItem</a> class. The corresponding view class has to be used in order to use a model. See <a href="http://doc.trolltech.com/qtopia4.3/model-view-programming.html">model-view programming</a>.</p>
+<p>The <a href="qcontentset.html">QContentSet</a> represents a set of <a href="qcontent.html">QContent</a> defined over the mime type &quot;image/png&quot;. The content model is a <a href="qabstractlistmodel.html">QAbstractListModel</a> which could be set directly to the <a href="qlistwidget.html">QListWidget</a>, if the setModel(..&#x2e;) method were not private in <a href="qlistwidget.html">QListWidget</a>. This is done, because the <a href="qlistwidget.html">QListWidget</a> shall only be used with the <a href="qlistwidgetitem.html">QListWidgetItem</a> class. The corresponding view class has to be used in order to use a model. See <a href="model-view-programming.html">model-view programming</a>.</p>
 <p><b>Testing the View class</b> To test, the <a href="qlistwidget.html">QListWidget</a> must be replaced with a <a href="qlistview.html">QListView</a> class everywhere and setModel(_csm) must be added to the ListScreen::setupContent() method. As long as some png files are present in the $HOME/Documents folder, it should show the list of files and their mime type icons. In an imageviewer, thumbnails should be shown rather than mimetype icons. The model will be tweaked later. For now, it is fine to just use the model as a list of Content objects, from which necessary information can be retrieved.</p>
 <a name="populating-the-list"></a>
 <h4>Populating the list</h4>
@@ -70,8 +71,8 @@
     {
         setSelectionMode(QAbstractItemView::SingleSelection);
         setIconSize(QSize(32,32));
-        connect(this, SIGNAL(activated(const QModelIndex&amp;)),
-                this, SLOT(onImageActivated(const QModelIndex&amp;)));
+        connect(this, SIGNAL(activated(QModelIndex)),
+                this, SLOT(onImageActivated(QModelIndex)));
         createActions();
         createMenu();
     }</pre>
@@ -92,7 +93,7 @@
         _showInfoAction = new QAction(&quot;Show Info&quot;, this);
         connect(_showInfoAction, SIGNAL(triggered()), this, SLOT(onShowInfo()));
     }</pre>
-<p>In the create menu method, the menu for this screen is retrieved and the created actions are added to this menu. The menu will be the options menu on the screen whenever this screen or any child of this screen has focus. (See <a href="qsoftmenubar.html">QSoftMenuBar</a> and <a href="tut-phoneapps.html">Tutorial: Writing Qtopia Phone Applications</a>).</p>
+<p>In the create menu method, the menu for this screen is retrieved and the created actions are added to this menu. The menu will be the options menu on the screen whenever this screen or any child of this screen has focus. (See <a href="qsoftmenubar.html">QSoftMenuBar</a> and <a href="tut-phoneapps.html">Tutorial: Writing Qt Extended Phone Applications</a>).</p>
 <p>File: listscreen.cpp</p>
 <pre>    void ListScreen::createMenu()
     {
@@ -123,8 +124,8 @@
 <a name="opening-image-using-signals-and-slots"></a>
 <h3>Opening image using signals and slots</h3>
 <p>In the setupUI method the following line is added:</p>
-<pre>        connect(this, SIGNAL(activated(const QModelIndex&amp;)),
-                this, SLOT(onImageActivated(const QModelIndex&amp;)));</pre>
+<pre>        connect(this, SIGNAL(activated(QModelIndex)),
+                this, SLOT(onImageActivated(QModelIndex)));</pre>
 <p>The signal is emitted, when the select button is pressed. It provides a model index. From the index, the row can be looked up again. So the <tt>onItemActivated(...)</tt> slot method is similar as the <tt>onOpenImage(...)</tt> method.</p>
 <pre>    void ListScreen::onImageActivated(const QModelIndex&amp; index)
     {
@@ -152,8 +153,8 @@
 <p><a href="tut-iviewer-part1.html">Prev</a>|<a href="#top">Top</a>|<a href="tut-iviewer-part1.html">Start Page</a>|<a href="tut-iviewer-part3.html">Next</a></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

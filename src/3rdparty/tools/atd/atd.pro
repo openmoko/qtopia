@@ -1,6 +1,8 @@
+!qbuild{
 qtopia_project(external app)
 license(LGPL)
 TARGET=atd
+}
 
 SOURCES = atd.cpp greenphone.cpp
 HEADERS = greenphone.h

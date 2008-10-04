@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -43,7 +41,7 @@ void ModemInfo::init()
     infoDisplay = new QTextBrowser();
     infoDisplay->installEventFilter( this );
     infoDisplay->setFrameShape( QFrame::NoFrame );
-    //infoDisplay->setFocusPolicy( Qt::NoFocus );
+    infoDisplay->setTextInteractionFlags(Qt::NoTextInteraction);
     QVBoxLayout *vb = new QVBoxLayout( this );
     vb->setSpacing( 0 );
     vb->setMargin( 0 );
@@ -98,21 +96,30 @@ QString ModemInfo::format()
 {
     QString infoString;
 
-    infoString += tr("Manufacturer:") +
-                  " " + Qt::escape( manufacturer ) +
-                  "<br/>";
+    if (QApplication::layoutDirection() == Qt::RightToLeft) {
+        //simplify RTL case -> otherwise lots of RTL,LTR and neutral char mixes 
+        //(depends on modem strings)
+        infoString += Qt::escape(manufacturer) + "<br>"
+                  + Qt::escape(model) + "<br>"
+                  + Qt::escape(revision) + "<br>"
+                  + Qt::escape(serial) + "<br>";
+    } else {
+        infoString += tr("Manufacturer:") +
+                      ' ' + Qt::escape( manufacturer ) +
+                      "<br/>";
 
-    infoString += tr("Model:") +
-                  " " + Qt::escape( model ) +
-                  "<br/>";
+        infoString += tr("Model:") +
+                      ' ' + Qt::escape( model ) +
+                      "<br/>";
 
-    infoString += tr("Revision:") +
-                  " " + Qt::escape( revision ) +
-                  "<br/>";
+        infoString += tr("Revision:") +
+                      ' ' + Qt::escape( revision ) +
+                      "<br/>";
 
-    infoString += tr("Serial Number:") +
-                  " " + Qt::escape( serial ) +
-                  "<br/>";
+        infoString += tr("Serial Number:") +
+                      ' ' + Qt::escape( serial ) +
+                      "<br/>";
+    }
 
     if ( !extraVersion.isEmpty() ) {
         infoString += Qt::escape( extraVersion ).replace( "\n", "<br/>" );

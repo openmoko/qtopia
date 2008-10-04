@@ -1,27 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-
-
 #include "maillist.h"
+
+#include <QStringList>
 
 void MailList::clear()
 {
@@ -32,12 +30,12 @@ void MailList::clear()
     currentPos = 0;
 }
 
-int MailList::count()
+int MailList::count() const
 {
     return sortedList.count();
 }
 
-int MailList::size()
+int MailList::size() const
 {
     int total = 0;
     QListIterator<dList*> it(sortedList);
@@ -47,7 +45,7 @@ int MailList::size()
     return total;
 }
 
-int MailList::currentSize()
+int MailList::currentSize() const
 {
     dList *mPtr;
 
@@ -58,18 +56,18 @@ int MailList::currentSize()
     return mPtr->size;
 }
 
-QMailId MailList::currentId()
+QMailMessageId MailList::currentId() const
 {
     dList *mPtr;
 
     if (currentPos == 0)
-        return QMailId();
+        return QMailMessageId();
 
     mPtr = sortedList.at(currentPos - 1);
     return mPtr->internalId;
 }
 
-QString MailList::currentMailbox()
+QString MailList::currentMailbox() const
 {
     dList *mPtr;
 
@@ -104,7 +102,7 @@ QString* MailList::next()
     return &(mPtr->serverId);
 }
 
-void MailList::sizeInsert(QString serverId, uint size, QMailId id, QString box)
+void MailList::sizeInsert(const QString& serverId, uint size, const QMailMessageId& id, const QString& box)
 {
     int x = 0;
 
@@ -125,7 +123,7 @@ void MailList::sizeInsert(QString serverId, uint size, QMailId id, QString box)
     sortedList.append(newEntry);
 }
 
-void MailList::append(QString serverId, uint size, QMailId id, QString box)
+void MailList::append(const QString& serverId, uint size, const QMailMessageId& id, const QString& box)
 {
     dList *newEntry = new dList;
     newEntry->serverId = serverId;
@@ -136,7 +134,16 @@ void MailList::append(QString serverId, uint size, QMailId id, QString box)
     sortedList.append(newEntry);
 }
 
-void MailList::moveFront(QString serverId)
+bool MailList::contains(const QMailMessageId& id) const
+{
+    foreach (const dList* item, sortedList)
+        if (item->internalId == id)
+            return true;
+
+    return false;
+}
+
+void MailList::moveFront(const QMailMessageId& id)
 {
     dList *currentPtr;
     uint tempPos;
@@ -145,21 +152,19 @@ void MailList::moveFront(QString serverId)
     if ( tempPos >= static_cast<uint>(sortedList.count()) )
         return;
     currentPtr = sortedList.at(tempPos);
-    while ( ((tempPos+1) < static_cast<uint>(sortedList.count())) && ( currentPtr->serverId != serverId) ) {
+    while ( ((tempPos+1) < static_cast<uint>(sortedList.count())) && ( currentPtr->internalId != id) ) {
         tempPos++;
         currentPtr = sortedList.at(tempPos);
     }
 
-    if ( (currentPtr != NULL) && (currentPtr->serverId == serverId) ) {
-        qWarning(QString("moved to front, message: " + serverId).toLatin1());
-
+    if ( (currentPtr != NULL) && (currentPtr->internalId == id) ) {
         dList *itemPtr = sortedList.takeAt(tempPos);
         sortedList.insert(currentPos, itemPtr);
     }
 }
 
 //only works if mail is not already in download
-bool MailList::remove(QString serverId)
+bool MailList::remove(const QMailMessageId& id)
 {
     dList *currentPtr;
     uint tempPos;
@@ -168,17 +173,42 @@ bool MailList::remove(QString serverId)
     if ( tempPos >= static_cast<uint>(sortedList.count()) )
         return false;
     currentPtr = sortedList.at(tempPos);
-    while ( ((tempPos + 1) < static_cast<uint>(sortedList.count())) && ( currentPtr->serverId != serverId) ) {
+    while ( ((tempPos + 1) < static_cast<uint>(sortedList.count())) && ( currentPtr->internalId != id) ) {
         tempPos++;
         currentPtr = sortedList.at(tempPos);
     }
 
-    if ( (currentPtr != NULL) && (currentPtr->serverId == serverId) ) {
-        qWarning(QString("deleted message: " + serverId).toLatin1());
+    if ( (currentPtr != NULL) && (currentPtr->internalId == id) ) {
         sortedList.removeAt(tempPos);
-
         return true;
     }
     return false;
+}
+
+QStringList MailList::serverUids() const
+{
+    QStringList ids;
+    foreach (const dList* item, sortedList)
+        ids.append(item->serverId);
+
+    return ids;
+}
+
+QMailMessageIdList MailList::mailIds() const
+{
+    QMailMessageIdList ids;
+    foreach (const dList* item, sortedList)
+        ids.append(item->internalId);
+
+    return ids;
+}
+
+QMailMessageId MailList::mailId(const QString& serverUid) const
+{
+    foreach (const dList* item, sortedList)
+        if (item->serverId == serverUid)
+            return item->internalId;
+
+    return QMailMessageId();
 }
 

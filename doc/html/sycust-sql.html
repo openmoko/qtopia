@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">SQL Integration<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">SQL Integration<br /><span class="subtitle"></span>
 </h1>
 <ul><li><a href="#sql-database-requirements">SQL Database Requirements</a></li>
 <ul><li><a href="#concurrent-access">Concurrent Access</a></li>
@@ -29,10 +29,10 @@
 <h2>SQL Database Requirements</h2>
 <a name="concurrent-access"></a>
 <h3>Concurrent Access</h3>
-<p>The database handles simultaneous query attempts from multiple applications by blocking new queries while existing queries are running. However, Qtopia's applications and libraries are designed to only create short-lived/temporary SQL queries.</p>
+<p>The database handles simultaneous query attempts from multiple applications by blocking new queries while existing queries are running. However, the Qt Extended applications and libraries are designed to only create short-lived/temporary SQL queries.</p>
 <a name="internationalization"></a>
 <h3>Internationalization</h3>
-<p>Qtopia supports a number of languages and so strings should be stored in a Unicode-compatible encoding such as UTF8 or UTF16. A localized string comparison operation must be provided by the database as <tt>localeAwareCompare</tt> needs to be equivalent to the <tt>QString::localeAwareCompare()</tt> function. The <a href="legal-sqlite.html">SQLite</a> version of this function is as follows:</p>
+<p>Qt Extended supports a number of languages and so strings should be stored in a Unicode-compatible encoding such as UTF8 or UTF16. A localized string comparison operation must be provided by the database as <tt>localeAwareCompare</tt> needs to be equivalent to the <tt>QString::localeAwareCompare()</tt> function. The <a href="legal-sqlite.html">SQLite</a> version of this function is as follows:</p>
 <pre>    int sqliteLocaleAwareCompare(void *, int ll, const void *l, int rl, const void *r)
     {
         QString left = QString::fromUtf16((const ushort *)l, ll);
@@ -41,10 +41,10 @@
     }</pre>
 <a name="sql-language-support"></a>
 <h3>SQL Language Support</h3>
-<p>Much of Qtopia 4 was developed with the <a href="legal-sqlite.html">SQLite</a> database in mind. So while it is intended that embedded SQL statements are not dependent on any specific implementation it is possible there will be incompatibilities with SQL databases that do not support the <a href="legal-sqlite.html">SQLite</a> SQL language subset. Any incompatiblities will be addressed in the affected libraries and applications as they are identified. An exception to this is the creation of tables and constraints which is explained in the section Ensuring Table Schemas.</p>
+<p>Much of Qtopia / Qt Extended 4 was developed with the <a href="legal-sqlite.html">SQLite</a> database in mind. So while it is intended that embedded SQL statements are not dependent on any specific implementation it is possible there will be incompatibilities with SQL databases that do not support the <a href="legal-sqlite.html">SQLite</a> SQL language subset. Any incompatiblities will be addressed in the affected libraries and applications as they are identified. An exception to this is the creation of tables and constraints which is explained in the section Ensuring Table Schemas.</p>
 <a name="performance-and-size"></a>
 <h3>Performance and Size</h3>
-<p>Qtopia is intended for use on embedded devices and it is important that the database has small implementation and dataset sizes in addition to good performance. Currently <a href="legal-sqlite.html">SQLite</a> Version 3 is being used with Qtopia and provides a benchmark for size and performance requirement as follows:</p>
+<p>Qt Extended is intended for use on embedded devices and it is important that the database has small implementation and dataset sizes in addition to good performance. Currently <a href="legal-sqlite.html">SQLite</a> Version 3 is being used with Qt Extended and provides a benchmark for size and performance requirement as follows:</p>
 <ul>
 <li>table sizes are expected to be at most 10000 items</li>
 <li>performance must be acceptable on a 200Mhz device</li>
@@ -54,15 +54,15 @@
 <h2>Integration</h2>
 <a name="qsql"></a>
 <h3>QSql</h3>
-<p>Qtopia uses the <a href="qsql.html">QSql</a> classes provided by Qt and so a Qt SQL database driver is required for access to the database. If the access to the database is not provided by one of the existing Qt SQL database drivers a new SQL database driver will need to be implemented. Additional documentation on SQL database drivers for Qt can be found at <a href="sql-driver.html">Qt SQL Module - Drivers</a>.</p>
+<p>Qt Extended uses the <a href="qsql.html">QSql</a> classes provided by Qt and so a Qt SQL database driver is required for access to the database. If the access to the database is not provided by one of the existing Qt SQL database drivers a new SQL database driver will need to be implemented. Additional documentation on SQL database drivers for Qt can be found at <a href="sql-driver.html">Qt SQL Module - Drivers</a>.</p>
 <a name="specifying-the-sql-database-driver"></a>
 <h3>Specifying the SQL Database Driver</h3>
-<p>Code related to specifying a Qtopia driver as well as many other driver-specific code can be found in:</p>
+<p>Code related to specifying a Qt Extended driver as well as many other driver-specific code can be found in:</p>
 <pre>         $QPEDIR/src/libraries/qtopia/qtopiasql.cpp</pre>
 <p>however relevant sections may be moved to <tt>custom.cpp</tt> in future.</p>
 <a name="ensuring-table-schemas"></a>
 <h3>Ensuring Table Schemas</h3>
-<p>Incompatibilities between SQL implementations exist when creating tables and specifying constraints on fields. Qtopia overcomes this limitation by providing a mechanism to abstract the creation of tables in the database as follows:</p>
+<p>Incompatibilities between SQL implementations exist when creating tables and specifying constraints on fields. Qt Extended overcomes this limitation by providing a mechanism to abstract the creation of tables in the database as follows:</p>
 <ol type="1">
 <li>Libraries and applications specify a set of resource files containing the SQL statements required to create required tables and constraints. For example the resource file to create the categories table, related constraints and initial data can be found at<p><tt>$QPEDIR/src/libraries/qtopia/resources/categories.sqlite.sql</tt></p>
 </li>
@@ -75,7 +75,7 @@
 </ul>
 </li>
 <li>The function first checks for an existing table of the name specified. If it does not exist it will load the schema as via the resource files described earlier. The resource file is responsible for creating the table of its own name and setting any constraints or initial data required by that table.</li>
-<li>Code that uses the SQL database is required to call <tt>ensureSchema</tt> for all tables it depends on. For example, the <tt>Contacts</tt> part of Qtopia PIM library has the following <tt>ensureSchema</tt> statements:<pre>         QStringList tables;
+<li>Code that uses the SQL database is required to call <tt>ensureSchema</tt> for all tables it depends on. For example, the <tt>Contacts</tt> part of Qt Extended PIM library has the following <tt>ensureSchema</tt> statements:<pre>         QStringList tables;
          tables &lt;&lt; &quot;categories&quot;;
          tables &lt;&lt; &quot;contacts&quot;;
          tables &lt;&lt; &quot;emailaddresses&quot;;
@@ -84,11 +84,11 @@
          QtopiaSql::ensureSchema(tables);</pre>
 </li>
 </ol>
-<p>Some schemas may depend on others and it is the responsibility of the application or library to ensure schemas are loaded in the correct order. Constraints specified in Qtopia are almost entirely foreign key constraints, although currently there are also system data constraints for the categories table.</p>
+<p>Some schemas may depend on others and it is the responsibility of the application or library to ensure schemas are loaded in the correct order. Constraints specified in Qt Extended are almost entirely foreign key constraints, although currently there are also system data constraints for the categories table.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

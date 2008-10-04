@@ -1,6 +1,9 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=drmbrowser
 CONFIG+=qtopia_main
+depends(libraries/qtopia)
+}
 
 HEADERS		= drmbrowser.h
 
@@ -25,12 +28,6 @@ qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/OmaDrmAgent
 qdsservice.path=/etc/qds
 INSTALLS+=qdsservice
 
-
-depends(libraries/qtopia)
-
-phone {
-    depends(libraries/qtopiaphone)
-}
 
 pkg.desc=DRM information for Qtopia.
 pkg.domain=trusted

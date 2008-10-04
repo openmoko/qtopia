@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -240,6 +238,27 @@ QString RadioBand::standardBandForFrequency( RadioBand::Frequency freq )
 */
 
 /*#
+    Returns true if the audio is being routed to the hands-free speaker.
+
+    \sa setSpeakerActive(), speakerPresent()
+*/
+bool RadioBand::speakerActive() const
+{
+    return false;
+}
+
+/*#
+    Returns true if the radio band supports a hands-free speaker.
+    The default return value is false.
+
+    \sa speakerActive(), setSpeakerActive()
+*/
+bool RadioBand::speakerPresent() const
+{
+    return false;
+}
+
+/*#
     Get the name of this radio band.  Usually this will be something
     like \c{AM} or \c{FM}, and can be displayed to the user.
 */
@@ -400,3 +419,13 @@ void RadioBand::setFrequencyIsChannelNumber( bool value )
     Adjust the volume on this band by \a diff.  This may affect the volume
     on other bands if they are provided by the same underlying radio device.
 */
+
+/*#
+    Sets the active speaker mode to \a value.
+
+    \sa speakerActive(), speakerPresent()
+*/
+void RadioBand::setSpeakerActive( bool )
+{
+    // Nothing to do here.
+}

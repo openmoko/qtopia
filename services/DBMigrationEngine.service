@@ -4,4 +4,4 @@ Context=DBMigrationEngine
 [Service]
 Actions = "doMigrate(QDSActionRequest);ensureTableExists(QDSActionRequest)"
 Icon = backuprestore/BackupRestore
-Name[]=DBMigrationEngine
+Name[]=Database Migration

@@ -1,5 +1,10 @@
-qtopia_project(qtopia plugin)
-TARGET=genericviewer
+!qbuild {
+    qtopia_project(qtopia plugin)
+    TARGET=genericviewer
+
+    depends(libraries/qtopiamail)
+    equals(QTOPIA_UI,home):depends(libraries/homeui)
+}
 
 !enable_cell {
     DEFINES+=QTOPIA_NO_SMS
@@ -16,7 +21,3 @@ SOURCES+=\
     browser.cpp\
     genericviewer.cpp
 
-TRANSLATABLES +=    $$HEADERS\
-                    $$SOURCES
-
-depends(libraries/qtopiamail)

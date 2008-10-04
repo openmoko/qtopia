@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -30,12 +28,17 @@
 #include <QDSActionRequest>
 #include <QtopiaAbstractService>
 #include <QContentSet>
-#include <QTimer>
+#include <QSettings>
+#include <QFileSystem>
+#include <QFocusEvent>
+#include <QCameraDevice>
 
+class CameraSettings;
 class QAction;
+class QTimer;
 class QValueSpaceItem;
 class QWaitWidget;
-class QSlider;
+class  MainWindowPrivate;
 
 class CameraMainWindow : public QMainWindow
 {
@@ -47,82 +50,83 @@ public:
 public slots:
     void takePhoto();
     void toggleVideo();
-    void selectThumb(int i);
-    void thumbClicked(int i);
     void getImage( const QDSActionRequest& request );
-
 private slots:
     void viewPictures();
     void viewVideos();
     void doSettings();
-    void editThumb();
-    void delThumb();
-    void moveToContact();
-    void takePhotoNow();
     void takePhotoTimer();
-    void sendFile();
     void clamshellChanged();
     void contextMenuAboutToShow();
     void contextMenuAboutToHide();
-    void loadThumbs( bool resized = false );
-    void delayedInit();
+    void init();
+    void pictureviewBrowser();
     void zoomChanged(int);
+    void exitZoomState();
     void showZoom();
-    void hideZoom();
+    void updateTimerActions();
+    void lensCoverStateChanged();
+
+    void noCamera();
+
+    void imageReady(QContent&);
+    void imageReadyRaw(QImage&);
+    void videoReadyForSaving(QContent&);
+
 private:
+
+    void doInitialCameraSetup();
+    void setupCameraCategory();
+    void launchService();
+    void setupSnapshotViewer();
+    void setupSettingsDialog();
+
     bool event(QEvent* e);
-    void updateActions();
     void resizeEvent(QResizeEvent*);
+    void focusOutEvent(QFocusEvent*);
 
     bool eventFilter(QObject*, QEvent*);
     QString nextFileName();
 
-    void pushThumb(const QContent& f, const QImage& img);
-    static const int nthumb = 5;
-    QToolButton* thumb[nthumb];
-    QContent picturefile[nthumb];
-    int cur_thumb;
-    bool delThumb(int th);
 
     // Settings
-    void confirmSettings();
+    void saveSettings();
     Ui::CameraSettings *settings;
     QDialog *settingsDialog;
     QString storagepath;
     QString media;
-    int thumbw;
-    int thumbh;
-    int psize;
-    int vsize;
-    int pquality;
-    int vquality;
-    int vframerate;
-    int m_currzoom;
-    bool zoomActive;
-    QSlider* m_zoom;
-    QTimer zoomTimer;
+
+    QSize photoSize;
+    QSize videoSize;
+    //int videoFramerate;
+    QMap<int, QSize> photoSizeMap;
+    QMap<int, QSize> videoSizeMap;
+
     // Snap
     QSize snap_max;
     void setSnapMode( bool snapMode );
 
-    Ui::CameraBase *camera;
+    Ui::CameraBase *basicControls;
 
     int namehint;
     QAction *a_pview, *a_vview, *a_timer, *a_settings;
     QAction *a_th_edit, *a_th_del, *a_th_add;
     QAction *a_send;
-    QAction *a_zoom;
-    QList<QSize> photo_size;
-    QList<QSize> video_size;
+    QAction *a_mode;
+    QCameraDevice::CaptureMode mode;
 
-    QTimer *refocusTimer;
+    QList<QSize> photo_sizes;
+    QList<QSize> video_sizes;
+    QList<QSize> preview_sizes;
+
+    // QAction a_stillCapture;
+    // QAction a_videoCapture;
+
     QString picfile;
 
     QDSActionRequest* snapRequest;
 
     bool recording;
-    void stopVideo();
-    void startVideo();
 
     void preview();
 
@@ -138,6 +142,13 @@ private:
     bool m_iswaiting;
     void showWaitScreen(const QString& s = "");
     void hideWaitScreen();
+
+    bool hasCamera;
+    bool hasVideo;
+    bool hasStill;
+
+    bool shutdown_camera;
+    MainWindowPrivate *d;
 };
 
 class CameraService : public QtopiaAbstractService
@@ -160,6 +171,133 @@ private:
     CameraMainWindow *parent;
 };
 
+
+class CameraSettings
+{
+public:
+    CameraSettings() {
+       m_settings = new QSettings("Trolltech", "Camera");
+    }
+
+    ~CameraSettings() {
+        delete m_settings;
+    }
+
+    QSize video() const {
+        return m_video;
+    }
+
+    int videoframerate() const {
+        return m_videoFPS;
+    }
+
+    QSize photo() const {
+        return m_photo;
+    }
+
+    int photoquality() const {
+        return m_photoQuality;
+    }
+
+    int videoquality() const {
+        return m_videoQuality;
+    }
+
+    QString location() const {
+        return m_storageLocation;
+    }
+
+    void setVideoSize(QSize v) {
+        m_video = v;
+    }
+
+    void setPhotoSize(QSize p) {
+        m_photo = p;
+    }
+
+    void setPhotoQuality(int q) {
+        m_photoQuality = q;
+    }
+
+    void setVideoQuality(int q) {
+        m_videoQuality = q;
+    }
+
+    void setVideoFrameRate(int r) {
+        m_videoFPS = r;
+    }
+
+    void setStorageLocation(QString l) {
+        m_storageLocation = l;
+    }
+
+
+
+    void load(QString dpresolution, QString dvresolution, int  dpquality,
+              int dvquality, int dvframerate)
+    {
+        QString res;
+        QStringList r;
+        m_settings->sync();
+        m_settings->beginGroup("General");
+        m_storageLocation = m_settings->value("location", QFileSystem::documentsFileSystem().documentsPath()).toString();
+        m_settings->endGroup();
+        //photo
+        m_settings->beginGroup("Photo");
+        res = m_settings->value("resolution", dpresolution).toString();
+        r = res.split("x", QString::SkipEmptyParts, Qt::CaseInsensitive);
+        m_photo = QSize( (!r[0].isEmpty()) ? r[0].toInt() : -1, (!r[1].isEmpty()) ? r[1].toInt() : -1);
+        m_photoQuality = m_settings->value("quality", dpquality).toInt();
+        m_settings->endGroup();
+
+        r.clear();
+        //Video
+        m_settings->beginGroup("Video");
+        res = m_settings->value("resolution", dvresolution).toString();
+        r = res.split("x",QString::SkipEmptyParts, Qt::CaseInsensitive);
+        m_video = QSize( (!r[0].isEmpty()) ? r[0].toInt() : -1, (!r[1].isEmpty()) ? r[1].toInt() : -1);
+        m_videoQuality = m_settings->value("quality", dvquality).toInt();
+        m_videoFPS = m_settings->value("framerate", dvframerate).toInt();
+        m_settings->endGroup();
+
+    }
+
+    void save()
+    {
+        QString resX,resY;
+        m_settings->beginGroup("General");
+        m_settings->setValue("location", m_storageLocation);
+        m_settings->endGroup();
+
+        //Photo
+        m_settings->beginGroup("Photo");
+        resX.setNum(m_photo.width());
+        resY.setNum(m_photo.height());
+        m_settings->setValue("resolution", resX+"x"+resY);
+        m_settings->setValue("quality", m_photoQuality);
+        m_settings->endGroup() ;
+
+        //Video
+        m_settings->beginGroup("Video");
+        resX.setNum(m_video.width());
+        resY.setNum(m_video.height());
+        m_settings->setValue("resolution", resX+"x"+resY);
+        m_settings->setValue("quality", m_videoQuality);
+        m_settings->setValue("framerate", m_videoFPS);
+        m_settings->endGroup();
+    }
+
+
+private:
+    QSettings* m_settings;
+    QSize m_photo;
+    QSize m_video;
+    QString m_storageLocation;
+    int m_photoQuality;    //0..100
+    int m_videoQuality;
+    int m_videoFPS;
+
+};
 
 #endif
 

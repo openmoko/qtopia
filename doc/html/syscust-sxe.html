@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">SXE - System Integration<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">SXE - System Integration<br /><span class="subtitle"></span>
 </h1>
 <ul><li><a href="#introduction">Introduction</a></li>
 <ul><li><a href="#the-role-of-mac-in-sxe">The role of MAC in SXE</a></li>
@@ -20,8 +20,8 @@
 <li><a href="#file-system-creation">File System Creation</a></li>
 <li><a href="#boot-process">Boot Process</a></li>
 <li><a href="#policy-file-creation">Policy File Creation</a></li>
-<li><a href="#qtopia-sxe-and-lids-mac-integration-points">Qtopia SXE and LIDS MAC Integration Points</a></li>
-<ul><li><a href="#qtopia-sxe-domain-scripts">Qtopia SXE Domain Scripts</a></li>
+<li><a href="#qt-extended-sxe-and-lids-mac-integration-points">Qt Extended SXE and LIDS MAC Integration Points</a></li>
+<ul><li><a href="#qt-extended-sxe-domain-scripts">Qt Extended SXE Domain Scripts</a></li>
 </ul>
 <li><a href="#setting-up-the-security-log">Setting up the security log</a></li>
 <li><a href="#memory-limits">Memory Limits</a></li>
@@ -29,8 +29,8 @@
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>The <a href="sxe.html">Safe Execution Environment - (SXE)</a> is built into Qtopia to provide a level of confidence to allow the download and execution of native 3rd-party binaries, such as games and utilities.</p>
-<p>At the application level, SXE acts like a firewall to prevent programs making unauthorized access to sensitive system services. Requests received by the Qtopia server are first checked to see if the originating program has the correct security domain awarded to allow the sending of such messages.</p>
+<p>The <a href="sxe.html">Safe Execution Environment - (SXE)</a> is built into Qt Extended to provide a level of confidence to allow the download and execution of native 3rd-party binaries, such as games and utilities.</p>
+<p>At the application level, SXE acts like a firewall to prevent programs making unauthorized access to sensitive system services. Requests received by the Qt Extended server are first checked to see if the originating program has the correct security domain awarded to allow the sending of such messages.</p>
 <p>Downloaded programs must however, also be controlled at the file system level, to prevent them accessing sensitive system files, such as the <tt>sxe.policy</tt> file. Altering the policy file could result in the program awarding the security domain to itself.</p>
 <p>These file system level controls are achieved for SXE by a Mandatory Access Control (MAC) system.</p>
 <p>This document is to assist engineers with system integration to enable the MAC system for a device.</p>
@@ -42,7 +42,7 @@
 <li>enabling LIDS during system boot and shutdown</li>
 <li>configuring the policy scripts.</li>
 </ol>
-<p>These stages for enabling LIDS MAC for a Qtopia SXE device are described below.</p>
+<p>These stages for enabling LIDS MAC for a Qt Extended SXE device are described below.</p>
 <a name="the-role-of-mac-in-sxe"></a>
 <h3>The role of MAC in SXE</h3>
 <p>MAC policy can prevent a program from accessing the network or the modem device directly. This means that programs must route their requests via the application policy framework mentioned in the previous section.</p>
@@ -58,14 +58,14 @@
 <li>LIDS for Linux 2.6 uses the Linux Security Module (LSM) framework.</li>
 <li>LIDS for Linux 2.4 includes additional features such as the Trusted Domain Enforcement (TDE) system. The TDE system makes available the LIDS_SANDBOX Access Control List rule, which simplifies the task of creating a sandbox for untrusted programs. The 2.6 series LIDS system must instead detail all rules required to effectively sandbox the untrusted program, making the list of rules required longer. Efforts are underway to port the LIDS_SANDBOX feature to the 2.6 series.</li>
 </ol>
-<p>The Linux kernel patches required to enable LIDS are available from <a href="http://www.lids.org/">http://www.lids.org/</a> and <a href="http://qtopia.net/downloads/lids">http://qtopia.net/downloads/lids</a>.</p>
+<p>The Linux kernel patches required to enable LIDS are available from <a href="http://www.lids.org/">http://www.lids.org/</a> and <a href="http://qtextended.org/downloads/lids">http://qtextended.org/downloads/lids</a>.</p>
 <p>A full discussion of how to patch and install the LIDS enabled kernel is beyond the scope of this document. Refer to <a href="http://www.lids.org">http://www.lids.org</a> and the documentation included in the LIDS source packages for more details.</p>
 <p>Some <a href="http://www.secureos.jp/LIDS-JP/LIDS_en/index.html">resources for embedded LIDS</a> have been prepared by a Japanese user-group.</p>
 <p>The steps for compiling LIDS into the kernel are:</p>
 <ol type="1">
 <li>Determine the Linux kernel version - here the example of 2.6&#x2e;13 is used<pre>    export SXE_ROOT=$PWD
     export LIDS=lids-2.2.1-2.6.13
-    export LIDS_DL=http:<span class="comment">//qtopia.net/downloads/lids/v2.6/2.6.13</span>
+    export LIDS_DL=http:<span class="comment">//qtextended.org/downloads/lids/v2.6/2.6.13</span>
     export LIDS_DIR=$SXE_ROOT/$LIDS</pre>
 </li>
 <li>Download and install the LIDS patches for that version. The following assumes that the kernel sources are located in <tt>$SXE_ROOT/linux</tt>:<pre>    wget $LIDS_DL/$LIDS.tar.gz
@@ -136,11 +136,11 @@
 </ul>
 </td></tr>
 <tr valign="top" class="even"><td>MAC system configuration</td><td><tt>/etc/lids</tt></td><td>Programs cannot access</td></tr>
-<tr valign="top" class="odd"><td>Qtopia binaries</td><td><tt>/opt/Qtopia/bin</tt></td><td>No program ever launches these binaries except <tt>qpe</tt></td></tr>
-<tr valign="top" class="even"><td>Qtopia libraries</td><td><tt>/opt/Qtopia/lib:/opt/Qtopia/plugins:/opt/Qtopia/qt_plugins</tt></td><td>Programs can read but not write</td></tr>
+<tr valign="top" class="odd"><td>Qt Extended binaries</td><td><tt>/opt/Qtopia/bin</tt></td><td>No program ever launches these binaries except <tt>qpe</tt></td></tr>
+<tr valign="top" class="even"><td>Qt Extended libraries</td><td><tt>/opt/Qtopia/lib:/opt/Qtopia/plugins:/opt/Qtopia/qt_plugins</tt></td><td>Programs can read but not write</td></tr>
 <tr valign="top" class="odd"><td>system libraries</td><td><tt>/lib:/usr/lib</tt></td><td>Programs can read but not write</td><td></td></tr>
 <tr valign="top" class="even"><td>system binaries</td><td><tt>/bin:/sbin:/usr/bin:/usr/sbin</tt></td><td>Programs shouldn't be launching these binaries</td></tr>
-<tr valign="top" class="odd"><td>Qtopia etc</td><td><tt>/opt/Qtopia/etc</tt></td><td>Programs can read but not write. Some configuration files are not readable, see next item.</td></tr>
+<tr valign="top" class="odd"><td>Qt Extended etc</td><td><tt>/opt/Qtopia/etc</tt></td><td>Programs can read but not write. Some configuration files are not readable, see next item.</td></tr>
 <tr valign="top" class="even"><td>SXE registry files</td><td><tt>/opt/Qtopia/etc/keyfile</tt>, <tt>/opt/Qtopia/etc/sxe.profiles</tt>, <tt>/opt/Qtopia/etc/sxe.policy</tt>, <tt>/opt/Qtopia/etc/manifest</tt>, <tt>/opt/Qtopia/etc/keyfile.sequence</tt>, <tt>/opt/Qtopia/etc/installs</tt></td><td>No program can read</td></tr>
 <tr valign="top" class="odd"><td>DRM system directory</td><td><tt>/opt/Qtopia/Applications/Qtopia/DRM</tt></td><td>Programs cannot access</td></tr>
 </table></p>
@@ -151,12 +151,12 @@
     lidsconf -A -s ${BIN} -o ${QTOPIA_DIR}/qt_plugins -j READONLY
     lidsconf -A -s ${BIN} -o ${QTOPIA_DIR}/services -j READONLY
     lidsconf -A -s ${BIN} -o ${QTOPIA_DIR}/etc -j READONLY</pre>
-<a name="qtopia-sxe-and-lids-mac-integration-points"></a>
-<h2>Qtopia SXE and LIDS MAC Integration Points</h2>
+<a name="qt-extended-sxe-and-lids-mac-integration-points"></a>
+<h2>Qt Extended SXE and LIDS MAC Integration Points</h2>
 <p>The LIDS MAC installation for the device is heavily dependent on the configuration of the filesystem.</p>
-<p>In addition there are differences between the 2.6 and 2.4 series kernel implementations. Efforts are underway to reduce these differences, but at present integration by way of scripts is required in order to provide an interface for Qtopia.</p>
-<p>This means that much of the interface between Qtopia SXE and the LIDS MAC system must be done by SXE calling into scripts which are provided by the system integration engineers for the device.</p>
-<p>Qtopia uses this system for other integration points where device specifics prevent Qtopia code from making direct access, such as the <tt>pppd</tt> and network scripts which are called by the <tt>netsetup</tt> program.</p>
+<p>In addition there are differences between the 2.6 and 2.4 series kernel implementations. Efforts are underway to reduce these differences, but at present integration by way of scripts is required in order to provide an interface for Qt Extended.</p>
+<p>This means that much of the interface between Qt Extended SXE and the LIDS MAC system must be done by SXE calling into scripts which are provided by the system integration engineers for the device.</p>
+<p>Qt Extended uses this system for other integration points where device specifics prevent Qt Extended code from making direct access, such as the <tt>pppd</tt> and network scripts which are called by the <tt>netsetup</tt> program.</p>
 <p>The SXE system provides a number of scripts that can serve as a starting point for the integration effort. The scripts and descriptions of their function are listed here:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Script Name</th><th>Call Signature</th><th>Description</th></tr></thead>
@@ -189,28 +189,28 @@
 <tr valign="top" class="even"><td><ul>
 <li><tt>sxe_bounding</tt></li>
 </ul>
-</td><td><tt>sxe_bounding</tt></td><td>Sets up MAC rules for the root file system<p>This script is called by <tt>sxe_boot</tt> prior to generating Qtopia specific rules.</p>
+</td><td><tt>sxe_bounding</tt></td><td>Sets up MAC rules for the root file system<p>This script is called by <tt>sxe_boot</tt> prior to generating Qt Extended specific rules.</p>
 </td></tr>
 <tr valign="top" class="odd"><td><ul>
 <li><tt>sxe_qtopia</tt></li>
 </ul>
-</td><td><tt>sxe_qtopia</tt></td><td>Sets up MAC rules and registry files for Qtopia<p>This script is called by <tt>sxe_boot</tt>.</p>
+</td><td><tt>sxe_qtopia</tt></td><td>Sets up MAC rules and registry files for Qt Extended<p>This script is called by <tt>sxe_boot</tt>.</p>
 </td></tr>
 <tr valign="top" class="even"><td><ul>
 <li><tt>sxe_qtopia_&lt;domain-name&gt;</tt></li>
 </ul>
 </td><td><tt>sxe_qtopia_&lt;domain-name&gt;</tt> (Various parameters are passed as environment variables including but not limited to BIN, QTOPIA_DIR and PACKAGES_DIR)</td><td>Applies a set of MAC rules relevant for the domain to a specific binary.</td></tr>
 </table></p>
-<a name="qtopia-sxe-domain-scripts"></a>
-<h3>Qtopia SXE Domain Scripts</h3>
+<a name="qt-extended-sxe-domain-scripts"></a>
+<h3>Qt Extended SXE Domain Scripts</h3>
 <p>SXE domain scripts are used to award binaries with MAC privileges based on the SXE security domain assigned to the binary. The security domain required by an application is declared in the <tt>.pro</tt> file, via either the <tt>pkg.domain</tt> or <tt>target.domain</tt> variables. For example to award an application the <tt>trusted</tt> domain, the following line can be added to the applications <tt>.pro</tt> file:</p>
 <pre>        pkg.domain += trusted</pre>
 <p>The domain scripts are executed at package install time by <tt>packagemanager</tt>. (The domain scripts do not apply to pre-installed applications). For the domain awarded to a program the associated domain script, <tt>/opt/Qtopia/etc/sxe_domains/sxe_qtopia_&lt;domain-name&gt;</tt>, is executed. The full path of the binary awarded the security domain is passed to the script through the <tt>BIN</tt> environment variable.</p>
 <p>The default configuration of SXE includes two domains scripts <tt>trusted</tt> and <tt>untrusted</tt>. Applications in the <tt>trusted</tt> domain have unrestricted access to the devices hardware. Applications in the <tt>untrusted</tt> domain are only granted limited capabilities.</p>
 <a name="setting-up-the-security-log"></a>
 <h2>Setting up the security log</h2>
-<p>To setup security logging, both LIDS messages produced by the kernel and Qtopia security messages produced by <tt>qpe</tt> need to be directed to the security log.</p>
-<p>Kernel messages (on the greenphone) have been directed to the <tt>user</tt> facility while Qtopia security messages have been directed to the <tt>local6</tt> facility. SXE (on the greenphone) uses a customized syslogd daemon where alternate logs can be specified as extra options to syslogd like so:</p>
+<p>To setup security logging, both LIDS messages produced by the kernel and Qt Extended security messages produced by <tt>qpe</tt> need to be directed to the security log.</p>
+<p>Kernel messages (on the greenphone) have been directed to the <tt>user</tt> facility while Qt Extended security messages have been directed to the <tt>local6</tt> facility. SXE (on the greenphone) uses a customized syslogd daemon where alternate logs can be specified as extra options to syslogd like so:</p>
 <pre>    -A /mnt/documents/.log/sxe%s.log:user -A /mnt/documents/.log/sxe%s.log:local6</pre>
 <p>Log messages from both facilities will be directed to the security log so that breaches can be acted upon by the <a href="sxe-sxemonitor.html">SxeMonitor</a>.</p>
 <p>In addition ensure that the maximum log size used by the logging facility is the same as that specified in <a href="sxe-sxemonitor.html#sxe-conf">Sxe.conf</a>. Note that in <tt>Sxe.conf</tt>, the maximum size before rotation is specified in units of bytes, while the logging facility may use another base unit such as kilobytes.</p>
@@ -242,8 +242,8 @@
 <p><b>Note</b> Refer to the LIDS documentation for a more comprehensive set of commands.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

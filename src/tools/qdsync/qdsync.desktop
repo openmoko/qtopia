@@ -1,5 +1,9 @@
+[Translation]
+File=qdsync-nct
+Context=QDSync
+
 [Desktop Entry]
-Comment[]=Sync with Qtopia Sync Agent.
+Comment[]=Sync with Qt Extended Sync Agent.
 Exec=qdsync
 Icon=qdsync/qdsync
 Type=Application

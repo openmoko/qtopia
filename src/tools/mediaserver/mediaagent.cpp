@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -54,6 +52,11 @@ public:
 };
 // }}}
 
+/*!
+    \class mediaserver::MediaAgent
+    \internal
+*/
+
 // {{{ MediaAgent
 MediaAgent::MediaAgent():
     d(new MediaAgentPrivate)
@@ -61,6 +64,12 @@ MediaAgent::MediaAgent():
     d->wrapSessions = false;
     d->info = new QValueSpaceObject("/Media/Engines");
     d->foreman = new BuilderManager;
+
+    // Special case for mediaserver should always resume! 255 priority
+    audioMgr = new QAudioInterface("MediaServer", this);
+    connect(audioMgr,SIGNAL(audioStarted()),this,SLOT(resume()));
+    connect(audioMgr,SIGNAL(audioStopped()),this,SLOT(suspend()));
+    audioMgr->startAudio();
 }
 
 MediaAgent::~MediaAgent()
@@ -70,6 +79,7 @@ MediaAgent::~MediaAgent()
     delete d->foreman;
     delete d->info;
     delete d;
+    delete audioMgr;
 }
 
 QMediaServerSession* MediaAgent::createSession(QMediaSessionRequest const& sessionRequest)
@@ -170,7 +180,6 @@ void MediaAgent::initialize()
 void MediaAgent::sessionStarting(MediaAgentSession* session)
 {
     // Stop others not in this engine
-
     session->wrappedSession()->start();
 }
 
@@ -178,6 +187,24 @@ void MediaAgent::sessionStopped(MediaAgentSession* session)
 {
     // Resume any stopped by this engine
     session->wrappedSession()->stop();
+}
+
+void MediaAgent::suspend()
+{
+    foreach (QMediaEngine* mediaEngine, d->engines) {
+        if(mediaEngine) {
+            mediaEngine->suspend();
+        }
+    }
+}
+
+void MediaAgent::resume()
+{
+    foreach (QMediaEngine* mediaEngine, d->engines) {
+        if(mediaEngine) {
+            mediaEngine->resume();
+        }
+    }
 }
 
 // }}}

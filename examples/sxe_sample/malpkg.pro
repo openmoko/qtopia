@@ -1,6 +1,7 @@
-qtopia_project(qtopia app)
-TARGET=malpkg
+!qbuild {
 
+qtopia_project(qtopia app)
+}
 # Input
 HEADERS += malpkg.h \
 
@@ -26,9 +27,10 @@ pkg.desc=Sample Malware Application
 pkg.domain=untrusted
 pkg.version=1.0.0
 pkg.multi=pkgA pkgB pkgC pkgD pkgE pkgF pkgG pkgH pkgJ pkgK
-pkg.maintainer=Sarah Smith <sarah.smith@trolltech.com>
+pkg.maintainer=Qt Extended <info@qtextended.org>
 pkg.license=Commercial
 
+help.source=help
 help.files=malpkg.html
 help.hint=help
 INSTALLS+=help

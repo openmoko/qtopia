@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -378,57 +376,17 @@ void NetworkPackageController::install( int packageI )
 {
     SimpleErrorReporter reporter( SimpleErrorReporter::Install, pkgList[packageI].name);
 
-    bool ok;
-    qlonglong fileSize = pkgList[packageI].size.toLongLong( &ok );
-    if ( !ok )
+    if (InstalledPackageScanner::isPackageInstalled(pkgList[packageI]))
     {
-        QString simpleError =  PackageView::tr( "Invalid package download size supplied, contact package supplier" );
-        QString detailedError( "NetworkPackageController::install:- Invalid package size supplied: %1" );
-        detailedError = detailedError.arg( pkgList[packageI].size );
-        reporter.reportError( simpleError, detailedError );
-        return;
-    }
-
-    QString installedSizeStr = pkgList[packageI].installedSize;
-    qlonglong installedSize = SizeUtils::parseInstalledSize(installedSizeStr);
-
-    if ( installedSize  < 1 )
-    {
-        QString simpleError =  QObject::tr( "Package did not supply valid installed size, contact package supplier" );
-        QString detailedError( "NetworkPackageController::install:- Package supplied invalid size %1" );
-        detailedError = detailedError.arg( installedSizeStr );
-        reporter.reportError( simpleError, detailedError );
-        return;
-    }
-
-    if ( fileSize >= installedSize )
-    {
-        QString simpleError =  QObject::tr( "Invalid package, contact package supplier" );
-        QString detailedError( "NetworkPackageController::install:- download file size >= installed size, "
-                               "download size = %1, installed size = %2 ");
-        detailedError = detailedError.arg( fileSize ).arg( installedSize );
-        reporter.reportError( simpleError, detailedError );
-        return;
-    }
-
-    QString neededSpace;
-    if ( !SizeUtils::isSufficientSpace( installedSize, neededSpace) )
-    {
-        QString simpleError =  QObject::tr( "Not enough space for package, free up %1", "%1= 1MB" );
-        simpleError = simpleError.arg( neededSpace );
-        QString detailedError( "NetworkPackageController::install:- Insufficient space, need %1" );
-        detailedError = detailedError.arg( neededSpace );
-        reporter.reportError( simpleError, detailedError );
-        return;
-    }
-
-    if ( InstalledPackageScanner::isPackageInstalled(pkgList[packageI]) )
-    {
-        QString simpleError = QObject::tr( "Package already installed" );
+        QString simpleError = QObject::tr("Package already installed");
         QString detailedError = QString("NetworkPackageController::install:- "
-                    "Package already installed name: %1, md5Sum %2")
-                    .arg(pkgList[packageI].name).arg( pkgList[packageI].md5Sum );
-        reporter.reportError( simpleError, detailedError );
+                "Package already installed name: %1, md5Sum %2")
+            .arg(pkgList[packageI].name).arg( pkgList[packageI].md5Sum);
+        reporter.reportError(simpleError, detailedError);
+        return;
+    }
+
+    if (!SizeUtils::isSufficientSpace(pkgList[packageI], &reporter)) {
         return;
     }
 
@@ -438,7 +396,7 @@ void NetworkPackageController::install( int packageI )
     if ( hf == NULL )
         hf = new HttpFetcher( currentNetworkServer, this );
 
-    hf->setFile( pkgList[packageI].packageFile, fileSize );
+    hf->setFile( pkgList[packageI].packageFile, pkgList[packageI].size.toInt() );
     currentPackageName = pkgList[packageI].name;
     if ( progressDisplay )
     {
@@ -508,7 +466,7 @@ void NetworkPackageController::packageFetchComplete()
         qWarning( "HttpFetcher was deleted early!" );
 
     }
-    QFile::remove( InstallControl::downloadedFileLoc() );
+    QFile::remove( InstallControl::downloadedPkgPath() );
 }
 
 ////////////////////////////////////////////////////////////////////////

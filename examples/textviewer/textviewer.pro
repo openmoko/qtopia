@@ -14,6 +14,6 @@ INSTALLS+=desktop
 pkg.name=textviewer
 pkg.desc=An Example Program to View Text Files
 pkg.version=1.0.0-1
-pkg.maintainer=Trolltech (www.trolltech.com)
+pkg.maintainer=Qt Extended <info@qtextended.org>
 pkg.license=GPL
 pkg.domain=trusted

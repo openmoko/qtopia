@@ -1,11 +1,12 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=callforwarding
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+depends(libraries/qtopiapim)
+}
 
 HEADERS		= callforwarding.h
 SOURCES		= callforwarding.cpp main.cpp
-
-depends(libraries/qtopiapim)
 
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=callforwarding*

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,6 +21,7 @@
 
 #include <qtopianamespace.h>
 #include <QGridLayout>
+#include <QDebug>
 #include <QToolButton>
 #include <QApplication>
 
@@ -41,6 +40,8 @@ NavigationBar::NavigationBar( QWidget* parent) : QWidget(parent) {
 
 void NavigationBar::init()
 {
+    leftBn = 0;
+
     QGridLayout *layout = new QGridLayout;
     setLayout(layout);
     layout->setMargin(0);
@@ -50,6 +51,9 @@ void NavigationBar::init()
     leftBn = createButton(Qt::LeftArrow);
     // Set up the right button.
     rightBn = createButton(Qt::RightArrow);
+
+    // Normal font size. Actual buttons can be shrunk to fit.
+    updateNormalSize();
 
     //Note: We have double negation. Qt swaps the button layout around in RTL.
     //However this is a case where we don't want this behavior. Hence we have to
@@ -125,10 +129,12 @@ void NavigationBar::setForwardsEnabled(bool flag)
         rightBn->setEnabled(flag);
 }
 
-// XXX
-// XXX Labels not supported until QTextBrowser improves.
-// XXX See task 313
-// XXX
+void NavigationBar::updateNormalSize()
+{
+    if (leftBn)
+        normalSize = leftBn->font().pointSize();
+    // XXX don't have strings, so can't update labels properly
+}
 
 // Handler for the event that the forwards and backwards labels need updating.
 void NavigationBar::labelsChanged(const QString &previous,const QString &next)
@@ -138,57 +144,77 @@ void NavigationBar::labelsChanged(const QString &previous,const QString &next)
     // one of the pieces of text, we need to make the best use of the screen real estate.
     // That is, if one string is very short, it should not take up a whole half of the
     // available area at the expense of the other string being elided.
-
-    // Find out how much space we've got to draw both sets of text. (!!!!Unfortunately,
-    // have had to put a magic number in here, since wasn't able to find out how much
-    // space you get to draw in on a button, despite heroic efforts...)
-    int labelSpace = leftBn->contentsRect().width() + rightBn->contentsRect().width()
-                     - leftBn->iconSize().width() - rightBn->iconSize().width() - 25;
+    // We can also reduce the font size a little if necessary to avoid elision.
 
     QString nextText;
     QString previousText;
+    int leftWidth;
+    int rightWidth;
 
-    //swap text when RTL
-    if ( QApplication::layoutDirection() == Qt::LeftToRight ) {
-        nextText = next;
-        previousText = previous;
-    } else {
-        nextText = previous;
-        previousText = next;
-    }
+    const double scale[] = {1,0.75,0,-1};
+    for (int resize=0; scale[resize]>=0; ++resize) {
+        QFont f = leftBn->font();
+        // Okay to be smaller than user's standard, since not essential text to be readable.
+        f.setPointSizeF(normalSize*scale[resize]);
+        leftBn->setFont(f);
+        rightBn->setFont(f);
 
-    // Find out how much room the given strings will take to draw.
-    int leftWidth = leftBn->fontMetrics().boundingRect(previousText).width();
-    int rightWidth = rightBn->fontMetrics().boundingRect(nextText).width();
+        // Find out how much space we've got to draw both sets of text. (!!!!Unfortunately,
+        // have had to put a magic number in here, since wasn't able to find out how much
+        // space you get to draw in on a button, despite heroic efforts...)
+        int labelSpace = leftBn->contentsRect().width() + rightBn->contentsRect().width()
+                         - leftBn->iconSize().width() - rightBn->iconSize().width() - 25;
 
-    // Find out if we've got too much text and not enough room to draw it in.
-    int excess = leftWidth + rightWidth - labelSpace;
-    if ( excess > 0 ) {
-        // Must reduce width on one or both labels.
-        int diff = qAbs(leftWidth-rightWidth); // difference between width required for each string
-        if ( diff != 0 ) {
-            // Labels are not equal size.
-            if ( diff > excess ) {
-                // Only need to reduce the largest label.
-                if ( leftWidth > rightWidth ) {
-                    leftWidth -= excess;
+        //swap text when RTL
+        if ( QApplication::layoutDirection() == Qt::LeftToRight ) {
+            nextText = next;
+            previousText = previous;
+        } else {
+            nextText = previous;
+            previousText = next;
+        }
+
+        // Find out how much room the given strings will take to draw.
+        leftWidth = leftBn->fontMetrics().boundingRect(previousText).width()+2;
+        rightWidth = rightBn->fontMetrics().boundingRect(nextText).width()+2;
+
+        // Find out if we've got too much text and not enough room to draw it in.
+        int excess = leftWidth + rightWidth - labelSpace;
+
+        if ( excess > 0 ) {
+            if ( scale[resize]==0 ) {
+                // No further font shrinking - must reduce width on one or both labels.
+                int diff = qAbs(leftWidth-rightWidth); // difference between width required for each string
+                if ( diff != 0 ) {
+                    // Labels are not equal size.
+                    if ( diff > excess ) {
+                        // Only need to reduce the largest label.
+                        if ( leftWidth > rightWidth ) {
+                            leftWidth -= excess;
+                        } else {
+                            rightWidth -= excess;
+                        }
+                    } else {
+                        // Make the two labels the same width by taking diff from the widest.
+                        leftWidth = qMin(leftWidth,rightWidth);
+                        rightWidth = leftWidth;
+                        // Figure out how much we've got left to get rid of.
+                        excess -= diff;
+                        // Treat them evenly, now.
+                        leftWidth -= (excess/2);
+                        rightWidth -= (excess/2);
+                    }
                 } else {
-                    rightWidth -= excess;
+                    // No difference - labels are equal size.
+                    leftWidth -= (excess/2);
+                    rightWidth -= (excess/2);
                 }
-            } else {
-                // Make the two labels the same width by taking diff from the widest.
-                leftWidth = qMin(leftWidth,rightWidth);
-                rightWidth = leftWidth;
-                // Figure out how much we've got left to get rid of.
-                excess -= diff;
-                // Treat them evenly, now.
-                leftWidth -= (excess/2);
-                rightWidth -= (excess/2);
             }
         } else {
-            // No difference - labels are equal size.
+            // Share it anyway
             leftWidth -= (excess/2);
             rightWidth -= (excess/2);
+            break;
         }
     }
 

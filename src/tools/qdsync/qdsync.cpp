@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <trace.h>
@@ -38,6 +36,9 @@ QD_LOG_OPTION(QDSync)
 #include <QPluginManager>
 #include <private/contextkeymanager_p.h>
 
+#include <QUsbEthernetGadget>
+#include <QUsbSerialGadget>
+
 // See documentation for this macro in doc/src/syscust/custom.qdoc
 #ifndef QDSYNC_DEFAULT_TCP_PORT
 #define QDSYNC_DEFAULT_TCP_PORT 4245
@@ -58,8 +59,9 @@ QTOPIA_EXPORT_PLUGIN(QDSync)
 
 QDSync::QDSync( QWidget *parent, Qt::WFlags /*f*/ )
     : QTextBrowser( parent ),
-    bridge( 0 ), serialAction( 0 ), ethernetAction( 0 )
+    bridge( 0 )
     , selectDown( false ), connected( false ), syncing( false )
+    , m_ethernetGadget( 0 ), m_serialGadget( 0 )
     , selectLabelState( Blank )
 {
     TRACE(QDSync) << "QDSync::QDSync";
@@ -70,21 +72,23 @@ QDSync::QDSync( QWidget *parent, Qt::WFlags /*f*/ )
     connect( qApp, SIGNAL(appMessage(QString,QByteArray)), this, SLOT(appMessage(QString,QByteArray)) );
 
     QMenu *menu = new QMenu( this );
-    // This is setup for the Greenphone which writes the current gadget to /etc/gadget
-    QFile f( "/etc/gadget" );
-    if ( f.exists() && f.open(QIODevice::ReadOnly) ) {
-        serialAction = menu->addAction( "Serial Gadget", this, SLOT(serialGadget()) );
-        ethernetAction = menu->addAction( "Ethernet Gadget", this, SLOT(ethernetGadget()) );
-        QByteArray gadget = f.readAll();
-        if ( gadget.trimmed() == "ether" )
-            ethernetAction->setVisible( false );
-        else
-            serialAction->setVisible( false );
-        f.close();
-    }
 
     menu->addAction( "Restart Synchronization", qApp, SLOT(quit()) );
     QSoftMenuBar::addMenuTo( this, menu );
+
+    QSettings settings("Trolltech", "qdsync");
+    int version = settings.value("/version", 0).toInt();
+    if ( version == 0 ) {
+        // version 0: pre-beta
+        // remove everything so the new defaults can take effect
+        version++;
+        settings.remove("/port/tcp");
+        settings.remove("/port/serial");
+        settings.remove("/port/greenphone_serial");
+        settings.remove("/ports");
+    }
+    settings.setValue("/version", version);
+    ports = settings.value("/ports", QDSYNC_DEFAULT_PORTS ).toStringList();
 
     // Initialize tasks
     Qtopia4Sync *sync = Qtopia4Sync::instance();
@@ -111,16 +115,59 @@ QDSync::~QDSync()
     TRACE(QDSync) << "QDSync::~QDSync";
 }
 
-void QDSync::appMessage( const QString &message, const QByteArray & /*data*/ )
+void QDSync::appMessage( const QString &message, const QByteArray &data )
 {
     TRACE(QDSync) << "QDSync::appMessage" << message;
-    if ( message == "startDaemons()" ) {
+    if ( message == "startup()" ) {
+        QtopiaApplication::instance()->registerRunningTask("qdsync", this);
         startDaemons();
-    } else if ( message == "stopDaemons()" ) {
-        stopDaemons();
     } else if ( message == "shutdown()" ) {
         stopDaemons();
         QtopiaApplication::instance()->unregisterRunningTask("qdsync");
+    } else if ( message == "startUsbService(QString)" ) {
+        if (!ports.contains("gadget"))
+            return;
+
+        QDataStream stream(data);
+        QString service;
+        stream >> service;
+
+        if (service == "UsbGadget/Ethernet") {
+            m_ethernetGadget = new QUsbEthernetGadget;
+            if (m_ethernetGadget && m_ethernetGadget->available()) {
+                connect(m_ethernetGadget, SIGNAL(activated()), this, SLOT(ethernetActivated()));
+                connect(m_ethernetGadget, SIGNAL(deactivated()), this, SLOT(ethernetDeactivated()));
+                stopDaemons();
+                m_ethernetGadget->activate();
+            }
+        } else if (service == "UsbGadget/Serial") {
+            m_serialGadget = new QUsbSerialGadget;
+            if (m_serialGadget && m_serialGadget->available()) {
+                connect(m_serialGadget, SIGNAL(activated()), this, SLOT(serialActivated()));
+                connect(m_serialGadget, SIGNAL(deactivated()), this, SLOT(serialDeactivated()));
+                stopDaemons();
+                m_serialGadget->activate();
+            }
+        }
+    } else if ( message == "stopUsbService(QString)" ) {
+        if (!ports.contains("gadget"))
+            return;
+
+        QDataStream stream(data);
+        QString service;
+        stream >> service;
+
+        if (service == "UsbGadget/Ethernet") {
+            if (m_ethernetGadget) {
+                //stopDaemons();
+                m_ethernetGadget->deactivate();
+            }
+        } else if (service == "UsbGadget/Serial") {
+            if (m_serialGadget) {
+                //stopDaemons();
+                m_serialGadget->deactivate();
+            }
+        }
     }
 }
 
@@ -193,36 +240,28 @@ void QDSync::startDaemons()
 {
     TRACE(QDSync) << "QDSync::startDaemons" << (bridge?"RUNNING":"NOT RUNNING");
     if ( !bridge ) {
-        QtopiaApplication::instance()->registerRunningTask("qdsync", this);
-
         QSettings settings("Trolltech", "qdsync");
-
-        int version = settings.value("/version", 0).toInt();
-        if ( version == 0 ) {
-            // version 0: pre-beta
-            // remove everything so the new defaults can take effect
-            version++;
-            settings.remove("/port/tcp");
-            settings.remove("/port/serial");
-            settings.remove("/port/greenphone_serial");
-            settings.remove("/ports");
-        }
-        settings.setValue("/version", version);
 
         int port = settings.value("/port/tcp", QDSYNC_DEFAULT_TCP_PORT).toInt();
         QRegExp disp("-(\\d+)\\/$");
         if ( disp.indexIn(Qtopia::tempDir()) )
             port += QVariant(disp.cap(1)).toInt();
-        QString serialPort = settings.value("/port/serial", QDSYNC_DEFAULT_SERIAL_PORT).toString();
-        QStringList ports = settings.value("/ports", QDSYNC_DEFAULT_PORTS ).toStringList();
+
+        // use the tty device from the serial gadget, otherwise default
+        QString serialPort;
+        if (ports.contains("gadget") && m_serialGadget && m_serialGadget->active())
+            serialPort = m_serialGadget->tty();
+        else
+            serialPort = settings.value("/port/serial", QDSYNC_DEFAULT_SERIAL_PORT).toString();
 
         bridge = new QCopBridge( this );
         connect( bridge, SIGNAL(gotConnection()), this, SLOT(gotConnection()) );
         connect( bridge, SIGNAL(lostConnection()), this, SLOT(lostConnection()) );
-        int interfaces = 0;
 
-        // Don't start the TCP server if the ethernet gadget is not loaded
-        if ( (!ethernetAction || !ethernetAction->isVisible()) && ports.contains("tcp") ) {
+        int interfaces = 0;
+        if (ports.contains("tcp") ||
+            (ports.contains("gadget") && m_ethernetGadget && m_ethernetGadget->active()))
+        {
             LOG() << "Starting QCopBridge on TCP port" << port;
             if ( bridge->startTcp( port ) ) {
                 interfaces++;
@@ -232,8 +271,9 @@ void QDSync::startDaemons()
             }
         }
 
-        // Don't start the serial server if the serial gadget is not loaded
-        if ( (!serialAction || !serialAction->isVisible()) && ports.contains("serial") ) {
+        if (ports.contains("serial") ||
+            (ports.contains("gadget") && m_serialGadget && m_serialGadget->active()))
+        {
             LOG() << "Starting QCopBridge on serial port" << serialPort;
             if ( bridge->startSerial( serialPort ) ) {
                 interfaces++;
@@ -253,34 +293,34 @@ void QDSync::stopDaemons()
     }
 }
 
-void QDSync::ethernetGadget()
+void QDSync::ethernetActivated()
 {
-    TRACE(QDSync) << "QDSync::ethernetGadget";
-    ethernetAction->setVisible( false );
-    serialAction->setVisible( true );
-    bool running = ( bridge );
-    if ( running )
-        stopDaemons();
-    // This is setup for the Greenphone which uses this script to switch gadgets
-    QProcess::execute("/opt/Qtopia/bin/usb-gadget.sh", QStringList() << "unload");
-    QProcess::execute("/opt/Qtopia/bin/usb-gadget.sh", QStringList() << "ether");
-    if ( running )
-        startDaemons();
+    TRACE(QDSync) << "QDSync::ethernetActivated";
+    startDaemons();
 }
 
-void QDSync::serialGadget()
+void QDSync::ethernetDeactivated()
 {
-    TRACE(QDSync) << "QDSync::serialGadget";
-    serialAction->setVisible( false );
-    ethernetAction->setVisible( true );
-    bool running = ( bridge );
-    if ( running )
-        stopDaemons();
-    // This is setup for the Greenphone which uses this script to switch gadgets
-    QProcess::execute("/opt/Qtopia/bin/usb-gadget.sh", QStringList() << "unload");
-    QProcess::execute("/opt/Qtopia/bin/usb-gadget.sh", QStringList() << "winserial");
-    if ( running )
-        startDaemons();
+    TRACE(QDSync) << "QDSync::ethernetDeactivated";
+
+    m_ethernetGadget->deleteLater();
+    m_ethernetGadget = 0;
+    stopDaemons();
+}
+
+void QDSync::serialActivated()
+{
+    TRACE(QDSync) << "QDSync::serialActivated";
+    startDaemons();
+}
+
+void QDSync::serialDeactivated()
+{
+    TRACE(QDSync) << "QDSync::serialDeactivated";
+
+    m_serialGadget->deleteLater();
+    m_serialGadget = 0;
+    stopDaemons();
 }
 
 void QDSync::gotConnection()

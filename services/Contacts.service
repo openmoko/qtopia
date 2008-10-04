@@ -2,6 +2,6 @@
 File=QtopiaServices
 Context=Contacts
 [Service]
-Actions = "activateLink(QDSActionRequest);editPersonal();addContact(QContact);addAndEditContact(QContact);removeContact(QContact);requestLinks(QDSActionRequest);updateContact(QContact);showContact(QtopiaID);setContactImage(QString);setContactImage(QDSActionRequest);addPhoneNumberToContact(QString);createNewContact(QString)"
+Actions = "activateLink(QDSActionRequest);editPersonal();addContact(QContact);addAndEditContact(QContact);removeContact(QContact);requestLinks(QDSActionRequest);updateContact(QContact);showContact(QUniqueId);setContactImage(QString);setContactImage(QDSActionRequest);setPersonalImage(QString);addPhoneNumberToContact(QString);createNewContact(QString);peerPublishRequest(QString);"
 Icon = service/Contacts/AddressBook
 Name[]=Contacts

@@ -1,0 +1,2 @@
+=========== pics/icons/scalable/WebAccess.txt ============
+An icon to represent the web access service.

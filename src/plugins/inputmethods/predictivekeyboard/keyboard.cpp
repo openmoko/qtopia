@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -42,15 +40,21 @@
 #include <QTimer>
 #include <QCoreApplication>
 #include <QInputContext>
-#include "proxyscreen.h"
+#include <QScreen>
+
+#include "qscreenproxy_qws.h"
 #include <QExportedBackground>
 #include <ThemedView>
+#include <QThemeTextItem>
+#include <QThemedView>
+#include <QSettings>
+#include <Qtopia>
 #include <qtopialog.h>
 #include "keyboard.h"
-#include "pred.h"
+#include <private/pred_p.h>
+#include <QtopiaChannel>
 
 #define PREFIX_PREEDIT
-
 #define QTOPIA_INTERNAL_QDAWG_TRIE
 #include "qdawg.h"
 
@@ -59,7 +63,7 @@ class Board
 public:
     Board(const QStringList &,
           const QSize &,
-          KeyboardWidget::BoardType alphabet);
+          KeyboardWidget::BoardType alphabet, int lowerboard);
 
     int lines() const;
     QString characters(int line) const;
@@ -67,25 +71,33 @@ public:
 
     QRect rect(const QChar &) const;
 
-    QSize size() const;
-
+    bool isCorrective() const;
     bool isAlphabet() const;
     bool isNumeric() const;
+    int lowerCaseBoard() const { return m_lowerboard; }
     KeyboardWidget::BoardType type() const;
+    void setSize(int width,  int height);
 
 private:
     QSize m_size;
     QStringList m_lines;
     QString m_characters;
     QHash<QChar, QRect> m_rects;
-    KeyboardWidget::BoardType m_isAlphabet;
+    KeyboardWidget::BoardType m_type;
+    int m_lowerboard;
+    void initBoard();
 };
 
 
 Board::Board(const QStringList &lines,
              const QSize &boardSize,
-             KeyboardWidget::BoardType isAlphabet)
-: m_size(boardSize), m_lines(lines), m_isAlphabet(isAlphabet)
+             KeyboardWidget::BoardType type, int lowerboard)
+: m_size(boardSize), m_lines(lines), m_type(type), m_lowerboard(lowerboard)
+{
+  initBoard();
+}
+
+void Board::initBoard()
 {
     int maxline = -1;
     int maxline_len = 0;
@@ -98,11 +110,11 @@ Board::Board(const QStringList &lines,
         }
     }
 
-    if(maxline == -1 || !maxline_len || lines.isEmpty())
+    if(maxline == -1 || !maxline_len || m_lines.isEmpty())
         return;
 
     int width = m_size.width() / maxline_len;
-    int height = m_size.height() / lines.count();
+    int height = m_size.height() / m_lines.count();
 
     for(int ii = 0; ii < m_lines.count(); ++ii) {
         const QString &line = m_lines.at(ii);
@@ -114,6 +126,14 @@ Board::Board(const QStringList &lines,
             m_rects.insert(line.at(jj), r);
         }
     }
+
+}
+
+void Board::setSize(int width,  int height)
+{
+    m_size.setWidth(width);
+    m_size.setHeight(height);
+    initBoard();
 }
 
 int Board::lines() const
@@ -131,25 +151,25 @@ QRect Board::rect(const QChar &c) const
     return m_rects[c];
 }
 
-QSize Board::size() const
-{
-    return m_size;
-}
-
 bool Board::isAlphabet() const
 {
-    return m_isAlphabet == KeyboardWidget::UpperCase ||
-           m_isAlphabet == KeyboardWidget::LowerCase;
+    return m_type == KeyboardWidget::Words
+        || m_type == KeyboardWidget::Letters;
+}
+
+bool Board::isCorrective() const
+{
+    return m_type == KeyboardWidget::Words;
 }
 
 bool Board::isNumeric() const
 {
-    return m_isAlphabet == KeyboardWidget::Numeric;
+    return m_type == KeyboardWidget::Numeric;
 }
 
 KeyboardWidget::BoardType Board::type() const
 {
-    return m_isAlphabet;
+    return m_type;
 }
 
 QString Board::characters() const
@@ -161,11 +181,11 @@ class AcceptWindow : public QWidget
 {
 Q_OBJECT
 public:
-    AcceptWindow(int time);
+    AcceptWindow(int time, bool bright);
 
-    void accept(const QString &word, const QRect &from, const QPoint &to);
+    void accept(const QString &word, const QRect &from);
     void setToPoint(const QPoint &);
-
+    bool animating() const;
 protected:
     virtual void paintEvent(QPaintEvent *);
 
@@ -175,13 +195,16 @@ private slots:
 private:
     QTimeLine m_anim;
 
+    bool m_bright;
+    QRect m_fromRect;
     QPoint m_from;
     QPoint m_to;
     QString m_word;
+    QSize m_textSize; 
 };
 
-AcceptWindow::AcceptWindow(int time)
-: QWidget(0, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), m_anim(time)
+AcceptWindow::AcceptWindow(int time, bool bright)
+: QWidget(0, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), m_anim(time), m_bright(bright)
 {
 #ifdef Q_WS_QWS
     QPalette p = palette();
@@ -206,51 +229,56 @@ void AcceptWindow::valueChanged(qreal v)
         deleteLater();
     } else {
         QPoint p = m_from + (m_to - m_from) * v;
-        move(p);
+        move(p - QPoint(width() / 2, height() / 2));
         update();
     }
 }
 
-void AcceptWindow::accept(const QString &word, const QRect &from, const QPoint &to)
+#include <QFontMetrics>
+#include <QFont>
+void AcceptWindow::accept(const QString &word, const QRect &from)
 {
     setFixedSize(from.size());
-    m_from = from.topLeft();
-    m_to = to - QPoint(from.width() / 2, from.height() / 2);
-    move(m_from);
+    m_from = from.topLeft() + QPoint(width() / 2, height() / 2);
+    QFont f;
+    QFontMetrics fm(f);
+    m_textSize = fm.boundingRect(word).size();
+    m_fromRect = from;
+    move(m_from - QPoint(width() / 2, height() / 2));
     m_word = word;
 
     show();
-    m_anim.start();
+}
+
+bool AcceptWindow::animating() const
+{
+    return true;
 }
 
 void AcceptWindow::setToPoint(const QPoint &p)
 {
-    if(m_anim.state() != QTimeLine::NotRunning) {
-
-        QPoint currentPoint = m_from + (m_to - m_from) * m_anim.currentValue();
-
-        m_to = p - QPoint(width() / 2, height() / 2);
-
-        QPoint newStart;
-        if(m_anim.currentValue() == 1.0f) {
-            newStart = m_to;
-        } else {
-            newStart = (currentPoint - m_anim.currentValue() * m_to) / (1.0f - m_anim.currentValue());
-        }
-
-        m_from = newStart;
-    }
-
+    m_to = p + QPoint(-m_textSize.width() / 2, m_textSize.height() / 2);
+    m_anim.start();
 }
 
 void AcceptWindow::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
-    QColor color = palette().text().color();
+    QColor color = m_bright ? palette().brightText().color() : palette().text().color();
     color.setAlpha((int)(255 * (1.0f - m_anim.currentValue())));
     p.setPen(color);
     p.drawText(rect(), m_word, Qt::AlignHCenter | Qt::AlignVCenter);
 }
+
+class OptionsWindow;
+class OptionsContentWindow : public QWidget
+{
+public:
+    OptionsContentWindow(OptionsWindow *parent);
+    virtual void paintEvent(QPaintEvent *);
+
+    OptionsWindow *o;
+};
 
 class OptionsWindow : public QWidget
 {
@@ -263,7 +291,7 @@ public:
     enum ClearType { ClearImmediate, ClearSoon, ClearEventually };
     void clear(ClearType = ClearImmediate);
 
-    QString acceptWord(const QPoint &, bool animate = true);
+    QString acceptWord(bool animate = true);
     void setAcceptDest(const QPoint &);
     QString selectedWord() const;
 
@@ -273,7 +301,6 @@ signals:
     void wordAccepted();
 
 protected:
-    virtual void paintEvent(QPaintEvent *);
     virtual void showEvent(QShowEvent *);
     virtual void moveEvent(QMoveEvent *);
     virtual void mouseReleaseEvent(QMouseEvent *);
@@ -283,8 +310,12 @@ private slots:
     void backgroundValueChanged(qreal);
     void valueChanged(qreal);
     void finished();
+    void sysMessage(const QString &message, const QByteArray &data);
 
 private:
+    friend class OptionsContentWindow;
+    void updateTheme();
+
     void layoutWords(const QStringList &);
 
     bool m_specialDelete;
@@ -301,8 +332,6 @@ private:
 
     QTimeLine m_clearTimeline;
     QTimeLine m_backgroundTimeline;
-    QImage m_background;
-    QPixmap m_backgroundPix;
     int m_wordSpacing;
 
     void startClearTimer(ClearType);
@@ -311,94 +340,17 @@ private:
     ClearType m_clearType;
 
     QPointer<AcceptWindow> m_lastAccept;
+
+    QThemedView *tv;
+    OptionsContentWindow *ocw;
 };
 
-// Absurd functions copied from themedview
-static void yuv_to_rgb(int Y, int U, int V, int& R, int& G, int&B)
-{
-    R = int(Y +  ((92242 * (V - 128)) >> 16));
-    G = int(Y - (((22643 * (U - 128)) >> 16)) - ((46983 * (V - 128)) >> 16));
-    B = int(Y + ((116589 * (U - 128)) >> 16));
-}
-
-static void rgb_to_yuv(int R, int G, int B, int& Y, int& U, int& V)
-{
-    Y = int(R *  19595 + G *  38470 + B *  7471) >> 16;
-    U = int(R * -11076 + G * -21758 + (B << 15) + 8388608) >> 16;
-    V = int(R *  32768 + G * -27460 + B * -5328 + 8388608) >> 16;
-}
-
-static inline QRgb blendYuv(QRgb rgb, int /*sr*/, int /*sg*/, int /*sb*/, int sy, int su, int sv, int alpha, bool colorroles)
-{
-    int a = (rgb >> 24) & 0xff;
-    int r = (rgb >> 16) & 0xff;
-    int g = (rgb >> 8) & 0xff;
-    int b = rgb & 0xff;
-    if (colorroles) {
-        int y,u,v;
-        rgb_to_yuv(r,g,b,y,u,v);
-        y = (y*2+sy)/3;
-        u = (u+su*2)/3;
-        v = (v+sv*2)/3;
-        yuv_to_rgb(y,u,v,r,g,b);
-        if (r>255) r = 255; if (r<0) r=0;
-        if (g>255) g = 255; if (g<0) g=0;
-        if (b>255) b = 255; if (b<0) b=0;
-    }
-    if (alpha != 255)
-        a = (a*alpha)/255;
-    return qRgba(r, g, b, a);
-}
-
-/*!
-  Blend the color \a col and the alpha value \a alpha with the image \a img if \a blendColor is true (the default).
-  If \a blendColor is false, only the alpha value \a alpha is blended.
-  This function modifies \a img directly.
-*/
-static void colorizeImage( QImage& img, const QColor& col, int alpha, bool blendColor )
-{
-    QColor colour = col;
-    Q_ASSERT( !img.isNull() );
-    Q_ASSERT( col.isValid() );
-    int count;
-    int sr, sg, sb;
-    colour.getRgb(&sr, &sg, &sb);
-    int sy, su, sv;
-    rgb_to_yuv(sr,sg,sb,sy,su,sv);
-
-    if ( alpha != 255 &&
-         img.format() != QImage::Format_ARGB32 &&
-         img.format() != QImage::Format_ARGB32_Premultiplied ) {
-        img = img.convertToFormat(QImage::Format_ARGB32);
-    }
-    if (img.depth() == 32) {
-        const QImage &cimg = img; // avoid QImage::detach().
-        QRgb *rgb = (QRgb*)cimg.bits();
-        count = img.bytesPerLine()/sizeof(QRgb)*img.height();
-        for (int i = 0; i < count; i++, rgb++)
-            *rgb = blendYuv(*rgb, sr, sg, sb, sy, su, sv, alpha,
-                blendColor);
-    } else {
-        QVector<QRgb> ctable = img.colorTable();
-        for (int i = 0; i < ctable.count(); i++)
-            ctable[i] = blendYuv(ctable[i], sr, sg, sb, sy, su, sv, alpha,
-                    blendColor);
-        img.setColorTable(ctable);
-    }
-}
 OptionsWindow::OptionsWindow(int wordSpacing)
 : QWidget(0, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), m_specialDelete(false), m_ignore(false),
   m_selectedWord(0), m_slideTimeline(300), m_backgroundTimeline(300),
-  m_background(":image/predictivekeyboard/softbar"),
-  m_wordSpacing(wordSpacing), m_clearTimer(0)
+  m_wordSpacing(wordSpacing), m_clearTimer(0), tv(0), ocw(0)
 {
     setAttribute(Qt::WA_InputMethodTransparent, true);
-
-#ifdef Q_WS_QWS
-    QPalette p = palette();
-    p.setBrush(backgroundRole(), QColor(0,0,0,0));
-    setPalette(p);
-#endif
 
     m_clearTimeline.setCurveShape(QTimeLine::LinearCurve);
     QObject::connect(&m_clearTimeline, SIGNAL(valueChanged(qreal)),
@@ -416,11 +368,51 @@ OptionsWindow::OptionsWindow(int wordSpacing)
     setWindowModality (Qt::NonModal);
     setFocusPolicy(Qt::NoFocus);
 
-    colorizeImage(m_background, Qt::black, 125, true);
+    QtopiaChannel* sysChannel = new QtopiaChannel( "QPE/System", this );
+    connect( sysChannel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(sysMessage(QString,QByteArray)) );
+
+    ocw = new OptionsContentWindow(this);
+    updateTheme();
+    ocw->raise();
+    setWindowOpacity(0.);
+}
+
+void OptionsWindow::updateTheme()
+{
+    QSettings qpeCfg("Trolltech", "qpe");
+    qpeCfg.beginGroup("Appearance");
+    QString themeDir = Qtopia::qtopiaDir() + "etc/themes/";
+    QString theme = qpeCfg.value("Theme").toString();
+    QSettings themeCfg(themeDir + theme, QSettings::IniFormat);
+    themeCfg.beginGroup("Theme");
+    QString themeName = themeCfg.value("Name[]").toString();
+    double percentage = themeCfg.value("ContextSize", 0.10).toDouble();
+    QRect contextRect = qApp->desktop()->screenGeometry();
+    contextRect.setHeight(int(percentage * contextRect.height()));
+    QString context = themeCfg.value("ContextConfig").toString();
+
+    if(!tv)
+        tv = new QThemedView(this);
+    tv->setThemePrefix(themeName);
+    tv->load(themeDir + context);
+    tv->setFixedSize(contextRect.size());
+    ocw->setFixedSize(contextRect.size());
+    setFixedSize(contextRect.size());
+
+    for(int ii = 0; ii < 3; ++ii) {
+        QThemeTextItem *ti = 
+            (QThemeTextItem *)tv->findItem("tbutton"+QString::number(ii));
+        if(ti) ti->setText("");
+    }
+
 }
 
 void OptionsWindow::setWords(const QStringList &words)
 {
+    if(m_lastAccept && !m_lastAccept->animating()) 
+        delete m_lastAccept;
+
     stopClearTimer();
 
     if(isHidden()) {
@@ -491,6 +483,12 @@ void OptionsWindow::layoutWords(const QStringList &words)
     }
 }
 
+void OptionsWindow::sysMessage(const QString &message, const QByteArray &)
+{
+    if(message == "applyStyleSplash()" || message == "applyStyleNoSplash()")
+        updateTheme();
+}
+
 void OptionsWindow::finished()
 {
     if(m_backgroundTimeline.direction() == QTimeLine::Backward &&
@@ -507,14 +505,6 @@ void OptionsWindow::showEvent(QShowEvent *)
     m_ignore = false;
     m_backgroundTimeline.setDirection(QTimeLine::Forward);
     m_backgroundTimeline.start();
-
-    m_backgroundPix = QPixmap(size());
-    m_backgroundPix.fill(Qt::black);
-    QExportedBackground eb;
-    QPainter p(&m_backgroundPix);
-    p.drawPixmap(0, -pos().y(), eb.background());
-    QPixmap bp = QPixmap::fromImage(m_background).scaled(width(), height());
-    p.drawPixmap(0, 0, bp);
 }
 
 void OptionsWindow::moveEvent(QMoveEvent *)
@@ -596,15 +586,22 @@ QString OptionsWindow::selectedWord() const
         return m_words.at(m_selectedWord).first;
 }
 
-QString OptionsWindow::acceptWord(const QPoint &p, bool animate)
+QString OptionsWindow::acceptWord(bool animate)
 {
     QString word = m_words.at(m_selectedWord).first;
+
+    bool newword = !Qtopia::isWord(word.toLower()) && !Qtopia::isWord(word);
+    for (int i=0; i<word.length() && newword; ++i)
+        newword = newword && word[i].isLetter();
+    if (newword)
+        Qtopia::addWords(QStringList() << word);
+
     QRect startRect = wordRect(m_selectedWord);
 
     if(animate) {
-        AcceptWindow *win = new AcceptWindow(500 /* XXX */);
+        AcceptWindow *win = new AcceptWindow(500 /* XXX */, newword);
         win->accept(word,
-                QRect(mapToGlobal(startRect.topLeft()), startRect.size()), p);
+                QRect(mapToGlobal(startRect.topLeft()), startRect.size()));
         m_lastAccept = win;
     }
     m_words.clear();
@@ -614,8 +611,7 @@ QString OptionsWindow::acceptWord(const QPoint &p, bool animate)
 
 void OptionsWindow::backgroundValueChanged(qreal v)
 {
-    Q_UNUSED(v);
-    update();
+    setWindowOpacity(v);
 }
 
 void OptionsWindow::valueChanged(qreal v)
@@ -682,15 +678,14 @@ int OptionsWindow::optionsOffset() const
     }
 }
 
-void OptionsWindow::paintEvent(QPaintEvent *)
+OptionsContentWindow::OptionsContentWindow(OptionsWindow *parent)
+: QWidget(parent), o(parent)
+{
+}
+
+void OptionsContentWindow::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
-
-#ifdef Q_WS_QWS
-    p.setOpacity(m_backgroundTimeline.currentValue());
-    p.drawPixmap(0, 0, m_backgroundPix);
-    p.setOpacity(1.0f);
-#endif
 
     QPixmap pix(size());
     pix.fill(Qt::transparent);
@@ -700,35 +695,35 @@ void OptionsWindow::paintEvent(QPaintEvent *)
         QFont font;
         QFont bigfont = font;
         bigfont.setPointSize((bigfont.pointSize() * 15) / 10);
-        if(!m_words.isEmpty()) {
+        if(!o->m_words.isEmpty()) {
 
-            for(int ii = 0; ii < m_words.count(); ++ii) {
-                const QString &word = m_words.at(ii).first;
-                QRect rect = wordRect(ii);
+            for(int ii = 0; ii < o->m_words.count(); ++ii) {
+                const QString &word = o->m_words.at(ii).first;
+                QRect rect = o->wordRect(ii);
                 totalWordRect = totalWordRect.united(rect);
 
-                if(ii == m_selectedWord) {
+                if(ii == o->m_selectedWord) {
                     pixp.setFont(bigfont);
                 }
                 pixp.setPen(palette().text().color());
                 pixp.drawText(rect, word, Qt::AlignVCenter | Qt::AlignHCenter);
-                if(ii == m_selectedWord) {
+                if(ii == o->m_selectedWord) {
                     pixp.setFont(font);
                 }
             }
         }
     }
 
-    if(m_clearTimeline.state() != QTimeLine::NotRunning) {
+    if(o->m_clearTimeline.state() != QTimeLine::NotRunning) {
 
         QPainter pixp(&pix);
 
         int fadeWidth = 60;
         int fadeStart;
-        if(m_specialDelete) {
-            fadeStart = (int)((1.0f - m_clearTimeline.currentValue()) * (width() + fadeWidth) - fadeWidth);
+        if(o->m_specialDelete) {
+            fadeStart = (int)((1.0f - o->m_clearTimeline.currentValue()) * (width() + fadeWidth) - fadeWidth);
         } else {
-            fadeStart = (int)((1.0f - m_clearTimeline.currentValue()) * (totalWordRect.width() + fadeWidth) - fadeWidth) + totalWordRect.x();
+            fadeStart = (int)((1.0f - o->m_clearTimeline.currentValue()) * (totalWordRect.width() + fadeWidth) - fadeWidth) + totalWordRect.x();
         }
         int fadeEnd = fadeStart + fadeWidth;
 
@@ -741,12 +736,12 @@ void OptionsWindow::paintEvent(QPaintEvent *)
  //       pixp.fillRect(pix.rect(), QColor(255, 0, 0, 0));
 
 
-        if(m_specialDelete) {
+        if(o->m_specialDelete) {
             QPainterPath pacman;
             int pac_width = (height() * 12) / 10;
             int pac_height = height();
 
-            qreal pacmouth = m_clearTimeline.currentValue() / 0.2f;
+            qreal pacmouth = o->m_clearTimeline.currentValue() / 0.2f;
             pacmouth = pacmouth - (int)(pacmouth);
             pacmouth *= 2.0f;
             pacmouth -= 1.0f;
@@ -759,7 +754,7 @@ void OptionsWindow::paintEvent(QPaintEvent *)
             pacman.closeSubpath();
             p.setPen(Qt::black);
             p.setBrush(Qt::yellow);
-            int pacStart = (int)((1.0f - m_clearTimeline.currentValue()) * (width() + pac_width) - pac_width);
+            int pacStart = (int)((1.0f - o->m_clearTimeline.currentValue()) * (width() + pac_width) - pac_width);
 
             p.save();
             p.setClipRect(0, 0, (pac_width / 2) + pacStart, height());
@@ -785,7 +780,7 @@ class PopupWindow : public QWidget
 {
 Q_OBJECT
 public:
-    PopupWindow(int raise, QWidget * = 0);
+    PopupWindow(const KeyboardWidget::Config& config, QWidget *parent=0);
 
     void setChar(const QChar &, const QPoint &, Board *board);
     bool charOk() const;
@@ -817,11 +812,12 @@ private:
     QPoint m_point;
 };
 
-PopupWindow::PopupWindow(int raise, QWidget *parent)
+PopupWindow::PopupWindow(const KeyboardWidget::Config& config, QWidget *parent)
 : QWidget(parent, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)),
-  m_ignore(false), m_timeline(300), m_showtimeline(300), m_board(0),
-  m_offset(raise), m_dismissing(false)
+  m_ignore(false), m_timeline(config.magnifyShowTime), m_showtimeline(config.magnifyShowTime), m_board(0),
+  m_offset(config.selectCircleOffset), m_dismissing(false)
 {
+    setFixedSize(config.selectCircleDiameter, config.selectCircleDiameter);
     setAttribute(Qt::WA_DeleteOnClose);
 #ifdef Q_WS_QWS
     QPalette p = palette();
@@ -985,16 +981,18 @@ void PopupWindow::paintEvent(QPaintEvent *)
 
     for(int ii = 0; ii < characters.count(); ++ii) {
         const QChar &c = characters.at(ii);
-        QRect crect = m_board->rect(c).translated(transform.x(), transform.y());
-        if(rect().intersects(crect)) {
-            if(c == m_char) {
-                QRect r = rect();
-                r.moveCenter(crect.center());
-                p.setFont(bigFont);
-                p.drawText(r, c, Qt::AlignHCenter | Qt::AlignVCenter);
-                p.setFont(mainFont);
-            } else {
-                p.drawText(crect, c, Qt::AlignHCenter | Qt::AlignVCenter);
+        if (!c.isSpace()) {
+            QRect crect = m_board->rect(c).translated(transform.x(), transform.y());
+            if(rect().intersects(crect)) {
+                if(c == m_char) {
+                    QRect r = rect();
+                    r.moveCenter(crect.center());
+                    p.setFont(bigFont);
+                    p.drawText(r, c, Qt::AlignHCenter | Qt::AlignVCenter);
+                    p.setFont(mainFont);
+                } else {
+                    p.drawText(crect, c, Qt::AlignHCenter | Qt::AlignVCenter);
+                }
             }
         }
     }
@@ -1023,17 +1021,16 @@ void KeyboardWidget::dumpPossibleMotion()
     if(m_possibleMotion & Left) res += "Left ";
     if(m_possibleMotion & Up) res += "Up ";
     if(m_possibleMotion & Down) res += "Down ";
-    qWarning() << res;
 }
 
 KeyboardWidget::KeyboardWidget(const Config &config,
                                QWidget *parent)
 : QWidget(parent, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), m_config(config), m_mouseTimer(0),
-  m_currentBoard(0),
+  m_currentBoard(-1),
   m_pressAndHold(false),m_animate_accept(true), m_charWindow(0),
   m_boardChangeTimeline(config.boardChangeTime),
   m_ignoreMouse(false), m_ignore(false), optionsWindowTimer(0),
-  m_notWord(false), m_alphabetSet(false),
+  m_notWord(false),
   m_predict(0), m_autoCap(false), m_autoCapitaliseEveryWord(false),
   m_preeditSpace(false), m_dontAddPreeditSpace(false)
 {
@@ -1046,13 +1043,10 @@ KeyboardWidget::KeyboardWidget(const Config &config,
 
     m_predict = new WordPredict(wconfig, m_config.maxGuesses);
 
-    setFixedSize(m_config.keySize.width(), m_config.keySize.height());
-
     m_boardRect = QRect(m_config.keyMargin,
                         m_config.bottomMargin,
                         m_config.keySize.width() - 2 * m_config.keyMargin,
                         m_config.keySize.height() - 2 * m_config.bottomMargin);
-    m_boardSize = m_boardRect.size();
 
     QObject::connect(&m_boardChangeTimeline, SIGNAL(valueChanged(qreal)), this, SLOT(update()));
 
@@ -1068,6 +1062,7 @@ KeyboardWidget::KeyboardWidget(const Config &config,
 KeyboardWidget::~KeyboardWidget()
 {
     delete m_predict;
+    while (m_boards.count()) delete m_boards.takeLast();
 }
 
 void KeyboardWidget::autoCapitalizeNextWord(bool autocap)
@@ -1111,23 +1106,27 @@ QSize KeyboardWidget::sizeHint() const
     return QSize(m_config.keySize.width(), m_config.keySize.height());
 }
 
-void KeyboardWidget::addBoard(const QStringList &chars, BoardType type)
+void KeyboardWidget::addBoard(BoardType type, const QStringList &rows, const QStringList &caps, const QStringList &equivalences)
 {
-    Board *board = new Board(chars, m_boardSize, type);
-    m_boards << board;
+    Board *board = new Board(rows, m_boardRect.size(), type, -1);
 
-    if(NonAlphabet != type && !m_alphabetSet) {
-        m_alphabetSet = true;
-
+    if (type==Words || type==Letters) {
         QString chars = board->characters();
         for(int ii = 0; ii < chars.length(); ++ii) {
-            m_predict->setLetter(chars.at(ii).toLower().toLatin1(), board->rect(chars.at(ii)).center());
+            if (!chars.at(ii).isSpace())
+                m_predict->setLetter(chars.at(ii), board->rect(chars.at(ii)).center());
         }
-
+        m_predict->setEquivalences(equivalences);
+        if (m_currentBoard < 0 || m_boards.at(m_currentBoard)->type() != Words)
+            m_currentBoard = m_boards.count()+1;
+        if (caps.count())
+            m_boards << new Board(caps, m_boardRect.size(), type, m_boards.count()+1);
+    } else {
+        if (m_currentBoard < 0)
+            m_currentBoard = m_boards.count();
     }
 
-    if(LowerCase == type)
-        m_currentBoard = m_boards.count() - 1;
+    m_boards << board;
 }
 
 void KeyboardWidget::paintEvent(QPaintEvent *)
@@ -1174,7 +1173,7 @@ void KeyboardWidget::paintEvent(QPaintEvent *)
 
 void KeyboardWidget::mousePressEvent(QMouseEvent *e)
 {
-    if(m_ignoreMouse)
+    if(m_boards.isEmpty() || m_ignoreMouse)
         return;
 
     m_mousePressPoint = e->pos();
@@ -1185,16 +1184,6 @@ void KeyboardWidget::mousePressEvent(QMouseEvent *e)
     m_pressAndHold = false;
     m_mouseClick = true;
     startMouseTimer();
-
-#if 0
-    if(m_notWord || !m_boards.at(m_currentBoard)->isAlphabet()) {
-        m_pressAndHoldChar = closestCharacter(m_mouseMovePoint);
-        m_charWindow = new PopupWindow(m_config.selectCircleOffset, 0);
-        m_charWindow->setFixedSize(m_config.selectCircleDiameter,
-                                   m_config.selectCircleDiameter);
-        m_charWindow->setChar(m_pressAndHoldChar, windowPosForChar(), m_boards.at(m_currentBoard));
-    }
-#endif
 }
 
 /*
@@ -1216,6 +1205,9 @@ void KeyboardWidget::mousePressEvent(QMouseEvent *e)
 */
 void KeyboardWidget::mouseReleaseEvent(QMouseEvent *e)
 {
+    if(m_boards.isEmpty())
+        return;
+
     bool m_charWindowOk = false;
     if(m_charWindow) {
         m_charWindowOk = m_charWindow->charOk();
@@ -1259,14 +1251,14 @@ void KeyboardWidget::mouseReleaseEvent(QMouseEvent *e)
 
     Stroke leftright = NoStroke;
 
-    if(m_possibleMotion & Down && y_delta > (m_boardSize.height() / 3))
+    if(m_possibleMotion & Down && y_delta > (m_boardRect.height() / 3))
         updown = StrokeDown;
-    else if(m_possibleMotion & Up && -y_delta > (m_boardSize.height() / 3))
+    else if(m_possibleMotion & Up && -y_delta > (m_boardRect.height() / 3))
         updown = StrokeUp;
 
-    if(m_possibleMotion & Right && x_delta > (m_boardSize.width() / 3))
+    if(m_possibleMotion & Right && x_delta > (m_boardRect.width() / 3))
         leftright = StrokeRight;
-    else if(m_possibleMotion & Left && -x_delta > (m_boardSize.width() / 3))
+    else if(m_possibleMotion & Left && -x_delta > (m_boardRect.width() / 3))
         leftright = StrokeLeft;
 
     if(updown != NoStroke && leftright != NoStroke) {
@@ -1290,13 +1282,14 @@ void KeyboardWidget::mouseReleaseEvent(QMouseEvent *e)
 
 void KeyboardWidget::mouseMoveEvent(QMouseEvent *e)
 {
-    if(m_ignoreMouse)
+    if(m_boards.isEmpty() || m_ignoreMouse)
         return;
 
     m_mouseMovePoint = e->pos();
 
-    if(qMax(qAbs(e->pos().x() - m_mousePressPoint.x()), qAbs(e->pos().y() - m_mousePressPoint.y())) > m_config.maximumClickStutter)
+    if(qMax(qAbs(e->pos().x() - m_mousePressPoint.x()), qAbs(e->pos().y() - m_mousePressPoint.y())) > m_config.maximumClickStutter) {
         m_mouseClick = false;
+    }
 
     if(m_pressAndHold || m_charWindow) {
 
@@ -1325,6 +1318,8 @@ void KeyboardWidget::mouseMoveEvent(QMouseEvent *e)
 
 QPoint KeyboardWidget::windowPosForChar() const
 {
+    if (m_currentBoard<0) return QPoint();
+
     QPoint c = m_boards.at(m_currentBoard)->rect(m_pressAndHoldChar).translated(m_boardRect.x(), m_boardRect.y()).center();
 
     return mapToGlobal(c);
@@ -1332,8 +1327,6 @@ QPoint KeyboardWidget::windowPosForChar() const
 
 void KeyboardWidget::timerEvent(QTimerEvent *)
 {
-    m_mouseClick = false;
-
     if(m_possibleMotion & Right) {
         if((m_mouseMovePoint.x() - m_lastSamplePoint.x()) < m_config.minimumStrokeMotionPerPeriod)
             m_possibleMotion = (Motion)(m_possibleMotion & ~Right);
@@ -1356,25 +1349,28 @@ void KeyboardWidget::timerEvent(QTimerEvent *)
 
     m_lastSamplePoint = m_mouseMovePoint;
 
-    if(m_possibleMotion == 0) {
+    if(m_possibleMotion == 0 && m_mouseClick) {
         stopMouseTimer();
         pressAndHold();
     } else {
         speedMouseTimer();
     }
 
+    m_mouseClick = false;
+
     //dumpPossibleMotion();
 }
 
 void KeyboardWidget::startMouseTimer()
 {
-    if(m_mouseTimer)
+    if(m_mouseTimer || m_currentBoard<0)
         return;
 
-    if(m_notWord || m_boards.at(m_currentBoard)->isAlphabet())
+    if(m_notWord || !m_boards.at(m_currentBoard)->isCorrective()) {
         m_mouseTimer = startTimer(m_config.maximumClickTime);
-    else
-        m_mouseTimer = startTimer(m_config.maximumClickTime / 2);
+    } else {
+        m_mouseTimer = startTimer(m_config.minimumPressTime);
+    }
 
     m_speedMouseTimer = false;
 }
@@ -1412,15 +1408,18 @@ QChar KeyboardWidget::closestCharacter(const QPoint &p, Board *board) const
 
     QPoint bp = toBoardPoint(p);
     for(int ii = 0; ii < str.length(); ++ii) {
-        QRect r = board->rect(str.at(ii));
+        QChar cc = str.at(ii);
+        if (!cc.isSpace()) {
+            QRect r = board->rect(cc);
 
-        int x_delta = r.center().x() - bp.x();
-        int y_delta = r.center().y() - bp.y();
+            int x_delta = r.center().x() - bp.x();
+            int y_delta = r.center().y() - bp.y();
 
-        int t_distance = x_delta * x_delta + y_delta * y_delta;
-        if(distance == -1 || t_distance < distance) {
-            distance = t_distance;
-            c = str.at(ii);
+            int t_distance = x_delta * x_delta + y_delta * y_delta;
+            if(distance == -1 || t_distance < distance) {
+                distance = t_distance;
+                c = cc;
+            }
         }
     }
 
@@ -1495,7 +1494,7 @@ void KeyboardWidget::mouseClick(const QPoint &p)
         return;
     }
 
-    if(!m_boards.at(m_currentBoard)->isAlphabet())
+    if(!m_boards.at(m_currentBoard)->isCorrective())
         m_notWord = true;
 
     if(m_notWord)
@@ -1535,7 +1534,8 @@ void KeyboardWidget::pressAndHoldChar(const QChar &c)
     if(c == QChar(0x21b5)) {// Magic number - return key
         //m_preeditSpace = false;
         m_dontAddPreeditSpace = true;
-        acceptWord();
+        if(!m_words.isEmpty())
+            acceptWord();
         m_dontAddPreeditSpace = false;
         emit commit("\n");
         clear();
@@ -1551,7 +1551,7 @@ void KeyboardWidget::pressAndHoldChar(const QChar &c)
 
         m_occuranceHistory << occurance;
 
-        m_predict->addLetter(c.toLower().toLatin1());
+        m_predict->addLetter(c.toLower());
 
         updateWords();
     }
@@ -1583,8 +1583,8 @@ void KeyboardWidget::updateWords()
     // i.e. if this is the first letter of the word, autocapitalisation is on,
     // and the current board is still uppercase.
     // Changing back to uppercase is handled in KeyboardWidget::acceptWord()
-    if(m_autoCap && m_occuranceHistory.count() == 1 && m_boards.at(m_currentBoard)->type() == UpperCase) {
-        setBoardByType(LowerCase);
+    if(m_autoCap && m_occuranceHistory.count() == 1 && m_boards.at(m_currentBoard)->isAlphabet()) {
+        setBoardCaps(false);
     }
 
     update();
@@ -1614,7 +1614,7 @@ QStringList KeyboardWidget::fixupCase(const QStringList &list) const
     for(int ii = 0; !needFixupCase && ii < m_occuranceHistory.count(); ++ii) {
         const KeyOccurance &o = m_occuranceHistory.at(ii);
         if(o.type == KeyOccurance::CharSelect ||
-           m_boards.at(o.board)->type() != LowerCase)
+           m_boards.at(o.board)->isAlphabet() && m_boards.at(o.board)->lowerCaseBoard()>=0)
             needFixupCase = true;
     }
 
@@ -1629,18 +1629,38 @@ QStringList KeyboardWidget::fixupCase(const QStringList &list) const
             Q_ASSERT(str.length() == m_occuranceHistory.count());
 
             for(int jj = 0; jj < str.length(); ++jj) {
-                if(m_boards.at(m_occuranceHistory.at(jj).board)->type()
-                        == UpperCase)
-                    str[jj] = str[jj].toUpper();
-                else if(m_boards.at(m_occuranceHistory.at(jj).board)->type()
-                        == LowerCase)
-                    str[jj] = str[jj].toLower();
+                if(m_boards.at(m_occuranceHistory.at(jj).board)->isAlphabet())
+                    str[jj] = m_boards.at(m_occuranceHistory.at(jj).board)->lowerCaseBoard()>=0
+                        ? str[jj].toUpper() : str[jj].toLower();
             }
 
             rv << str;
         }
         return rv;
     }
+}
+
+void KeyboardWidget::setBoardCaps(bool cap)
+{
+    int newBoard = -1;
+    if (cap) {
+        for(int i = 0; i < m_boards.count(); i++) {
+            if (m_boards.at(i)->lowerCaseBoard() == m_currentBoard)
+            {
+                newBoard = i;
+                break;
+            }
+        }
+    } else {
+        newBoard = m_boards.at(m_currentBoard)->lowerCaseBoard();
+    }
+
+    if(newBoard == -1)
+        return;
+
+    m_oldBoard = m_currentBoard;
+    m_currentBoard = newBoard;
+    update();
 }
 
 void KeyboardWidget::setBoardByType(BoardType newBoardType)
@@ -1671,15 +1691,15 @@ void KeyboardWidget::setBoardByType(BoardType newBoardType)
         m_currentBoard = newBoard;
         if(m_currentBoard < 0)
             m_currentBoard = m_boards.count() - 1;
-        if(!m_boards.at(m_oldBoard)->isAlphabet() ||
-                !m_boards.at(m_currentBoard)->isAlphabet()) {
+        if(m_boards.at(m_oldBoard)->lowerCaseBoard() == m_currentBoard
+         ||m_boards.at(m_currentBoard)->lowerCaseBoard() == m_oldBoard) {
+            update();
+        } else {
             m_boardChangeTimeline.start();
 
             m_boardUp = ( m_currentBoard > m_oldBoard );
             if( abs(m_currentBoard - m_oldBoard) > m_boards.count() / 2)
                 m_boardUp = !m_boardUp;
-        } else {
-            update();
         }
     } else {
         //not visible, so just change the board
@@ -1698,25 +1718,24 @@ void KeyboardWidget::stroke(Stroke s)
             m_currentBoard--;
             if(m_currentBoard < 0)
                 m_currentBoard = m_boards.count() - 1;
-            if(!m_boards.at(m_oldBoard)->isAlphabet() ||
-               !m_boards.at(m_currentBoard)->isAlphabet()) {
+            if(m_boards.at(m_oldBoard)->lowerCaseBoard()==m_currentBoard
+            || m_boards.at(m_currentBoard)->lowerCaseBoard()==m_oldBoard) {
+               update();
+            } else {
                 m_boardChangeTimeline.start();
                 m_boardUp = true;
-            } else {
-               update();
             }
             break;
 
         case StrokeDown:
             m_oldBoard = m_currentBoard;
             m_currentBoard = (m_currentBoard + 1) % m_boards.count();
-            if(!m_boards.at(m_oldBoard)->isAlphabet() ||
-               !m_boards.at(m_currentBoard)->isAlphabet()) {
-                m_boardChangeTimeline.start();
+            if(m_boards.at(m_oldBoard)->lowerCaseBoard()==m_currentBoard
+            || m_boards.at(m_currentBoard)->lowerCaseBoard()==m_oldBoard) {
+                update();
+            } else {
                 m_boardChangeTimeline.start();
                 m_boardUp = false;
-            } else {
-               update();
             }
             break;
 
@@ -1740,9 +1759,7 @@ void KeyboardWidget::pressAndHold()
     if(!m_charWindow) {
         m_pressAndHoldChar = closestCharacter(m_mouseMovePoint);
 
-        m_charWindow = new PopupWindow(m_config.selectCircleOffset, 0);
-        m_charWindow->setFixedSize(m_config.selectCircleDiameter,
-                                   m_config.selectCircleDiameter);
+        m_charWindow = new PopupWindow(m_config, 0);
         m_charWindow->setChar(m_pressAndHoldChar, windowPosForChar(), m_boards.at(m_currentBoard));
     }
 
@@ -1816,13 +1833,13 @@ void KeyboardWidget::acceptWord()
         return;
     }
 
-    QString word = m_options->acceptWord(QPoint(0, 0), m_animate_accept /* XXX microfocushint */);
+    QString word = m_options->acceptWord(m_animate_accept /* XXX microfocushint */);
     m_options->clear(OptionsWindow::ClearEventually);
     clear();
     m_autoCap = m_autoCapitaliseEveryWord;
 
-    if(m_autoCap && m_boards.at(m_currentBoard)->type() == LowerCase)
-        setBoardByType(UpperCase);
+    if(m_autoCap && m_boards.at(m_currentBoard)->isAlphabet())
+        setBoardCaps(true);
 
     emit commit(word);
     if(!m_dontAddPreeditSpace) {
@@ -1831,9 +1848,34 @@ void KeyboardWidget::acceptWord()
     }
 }
 
-void KeyboardWidget::resizeEvent(QResizeEvent *)
+void KeyboardWidget::resizeEvent(QResizeEvent *event)
 {
+
+    QScreen *screen;
+    screen = QScreen::instance();
+    int sWidth = screen->width();
+    int sHeight = screen->height();
+
+    if (sHeight > sWidth) //portrait
+        m_config.keySize.setHeight(sHeight / 4);
+    else //landscape
+        m_config.keySize.setHeight(sHeight / 3 );
+
+    m_config.keyMargin = sWidth / 10;
+
+    m_boardRect = QRect(m_config.keyMargin,
+                        m_config.bottomMargin,
+                        sWidth - 2 * m_config.keyMargin,
+                        m_config.keySize.height() - 2 * m_config.bottomMargin);
+
+    for (int i = 0; i < m_boards.count(); ++i) {
+        Board *board = m_boards.at(i);
+        board->setSize(m_boardRect.width(), m_boardRect.height());
+    }
+
     positionOptionsWindow();
+
+    QWidget::resizeEvent(event);
 }
 
 void KeyboardWidget::hideEvent(QHideEvent *)
@@ -1868,17 +1910,7 @@ void KeyboardWidget::positionOptionsWindow()
 // Position the options window immediately.
 void KeyboardWidget::positionTimeOut()
 {
-    int oheight = m_config.optionsWindowHeight;
-
-    if(oheight == -1) {
-        int bottom = QApplication::desktop()->availableGeometry().bottom();
-        oheight = pos().y() - bottom - 1;
-        if(oheight <= 0)
-            oheight = 50;
-    }
-
-    m_options->setFixedSize(width(), oheight);
-    m_options->move(pos() - QPoint(0, oheight));
+    m_options->move(pos() - QPoint(0, m_options->height()));
 }
 
 void KeyboardWidget::clear()
@@ -1902,7 +1934,7 @@ void KeyboardWidget::resetToHistory()
 
         if(!localNotWord) {
             if(o.type == KeyOccurance::CharSelect) {
-                m_predict->addLetter(o.explicitChar.toLower().toLatin1());
+                m_predict->addLetter(o.explicitChar.toLower());
             } else if(o.type == KeyOccurance::MousePress) {
                 if(!localNotWord) {
                     m_predict->addTouch(toBoardPoint(o.widPoint));
@@ -1915,6 +1947,7 @@ void KeyboardWidget::resetToHistory()
     updateWords();
 }
 
+#ifndef Q_PREDICTIVE_KEYBOARD_SUPPRESS_CUSTOM_SURFACE
 #ifdef Q_WS_QWS
 
 #include <private/qwindowsurface_qws_p.h>
@@ -1928,7 +1961,8 @@ class PopupWindowSurface : public QWSSharedMemSurface
 {
 public:
     PopupWindowSurface() : QWSSharedMemSurface() {}
-    PopupWindowSurface(QWidget *w) : QWSSharedMemSurface(w) {}
+
+    PopupWindowSurface(QWidget *w) : QWSSharedMemSurface(w) { }
 
     QString key() const { return QLatin1String("PopupWindowSurface"); }
 
@@ -1968,12 +2002,12 @@ void PopupWindowSurface::flush(QWidget *widget, const QRegion &region,
   Trival screen class who sole purpose is to instantiate PopupWindowSurfaces
   on the server side.
 */
-class PopupScreen : public ProxyScreen
+class PopupScreen : public QProxyScreen
 {
 public:
-    PopupScreen() : ProxyScreen(0)
+    PopupScreen() : QProxyScreen(0, QScreen::ProxyClass)
     {
-        ProxyScreen::setScreen(qt_screen);
+        QProxyScreen::setScreen(qt_screen);
         qt_screen = this; // XXX
     }
 
@@ -1981,23 +2015,26 @@ public:
     {
         if (qobject_cast<PopupWindow*>(w))
             return new PopupWindowSurface(w);
-        return ProxyScreen::createSurface(w);
+        return QProxyScreen::createSurface(w);
     }
 
     QWSWindowSurface* createSurface(const QString &key) const
     {
         if (key == QLatin1String("PopupWindowSurface"))
             return new PopupWindowSurface;
-        return ProxyScreen::createSurface(key);
+        return QProxyScreen::createSurface(key);
     }
 };
+#endif
 #endif
 
 void KeyboardWidget::instantiatePopupScreen()
 {
+#ifndef Q_PREDICTIVE_KEYBOARD_SUPPRESS_CUSTOM_SURFACE
 #ifdef Q_WS_QWS
     // XXX
     new PopupScreen;
+#endif
 #endif
 
 }
@@ -2014,11 +2051,11 @@ void KeyboardWidget::setHint(const QString& hint)
 
     // update microfocus
     //qwsServer->sendIMQuery ( Qt::ImMicroFocus );
- 
+
     if (h.contains("propernouns")) { // no tr
         qLog(Input) << "PredictiveKeyboard::setHint(" << h << ") - setting autocapitalisation";
         // TODO: Set autocapitalisation
-        setBoardByType(UpperCase);
+        setBoardCaps(true);
         m_autoCap = true;
         m_autoCapitaliseEveryWord = true;
         boardHasBeenSet = true;
@@ -2039,9 +2076,9 @@ void KeyboardWidget::setHint(const QString& hint)
 
     if(!boardHasBeenSet && h == "text" || h == "email" || h == "words") {
         if (!m_autoCap || h == "email")
-            setBoardByType(LowerCase);
+            setBoardCaps(false);
         else
-            setBoardByType(UpperCase);
+            setBoardCaps(true);
         boardHasBeenSet = true;
     }
 }

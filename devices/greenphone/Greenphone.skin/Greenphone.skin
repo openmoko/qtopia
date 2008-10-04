@@ -2,6 +2,8 @@
 Up=Greenphone-skin.png
 Down=Greenphone-skin-down.png
 Screen=134 152 240 320
+ScreenDepth=16
+HasMouseHover=false
 Areas=32
 
 "1"	0x31 122 638 122 675 207 675 207 638

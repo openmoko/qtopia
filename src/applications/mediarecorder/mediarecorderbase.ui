@@ -19,7 +19,7 @@
    <property name="spacing" >
     <number>6</number>
    </property>
-   <item row="4" column="0" >
+   <item row="3" column="0" >
     <layout class="QHBoxLayout" >
      <property name="margin" >
       <number>0</number>
@@ -50,7 +50,7 @@
      </item>
     </layout>
    </item>
-   <item row="3" column="0" >
+   <item row="2" column="0" >
     <widget class="TimeProgressBar" native="1" name="progress" >
      <property name="sizePolicy" >
       <sizepolicy>
@@ -68,7 +68,7 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0" >
+   <item row="1" column="0" >
     <widget class="Waveform" native="1" name="waveform" >
      <property name="sizePolicy" >
       <sizepolicy>
@@ -86,65 +86,8 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" >
-    <widget class="QGroupBox" name="GroupBox1" >
-     <property name="title" >
-      <string>Quality</string>
-     </property>
-     <layout class="QGridLayout" >
-      <property name="margin" >
-       <number>11</number>
-      </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-      <item row="0" column="0" >
-       <widget class="QComboBox" name="qualityCombo" >
-        <item>
-         <property name="text" >
-          <string>Voice</string>
-         </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>Music</string>
-         </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>CD</string>
-         </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>Custom</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0" >
-       <widget class="QLabel" name="details" >
-        <property name="sizePolicy" >
-         <sizepolicy>
-          <hsizetype>5</hsizetype>
-          <vsizetype>7</vsizetype>
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="textFormat" >
-         <enum>Qt::RichText</enum>
-        </property>
-        <property name="alignment" >
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
    <item row="0" column="0" >
-    <widget class="QGroupBox" name="GroupBox2" >
+    <widget class="QGroupBox" name="GroupBox1" >
      <property name="title" >
       <string>Storage Location</string>
      </property>
@@ -156,13 +99,6 @@
        <number>6</number>
       </property>
       <item row="0" column="0" >
-       <widget class="QStorageDeviceSelector" native="1" name="storageLocation" >
-        <property name="focusPolicy" >
-         <enum>Qt::TabFocus</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" >
        <layout class="QHBoxLayout" >
         <property name="margin" >
          <number>0</number>
@@ -213,15 +149,7 @@
    <extends>QWidget</extends>
    <header>waveform.h</header>
   </customwidget>
-  <customwidget>
-   <class>QStorageDeviceSelector</class>
-   <extends>QWidget</extends>
-   <header>qtopia/qstoragedeviceselector.h</header>
-  </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>storageLocation</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

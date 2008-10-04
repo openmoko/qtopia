@@ -9,6 +9,7 @@ use Qtopia::Opt;
 use Hash::Ordered;
 use File::Path;
 use File::Fuser;
+use POSIX;
 
 # help variables
 my $optiondesc;
@@ -50,6 +51,10 @@ use constant DEBUG => 0;
 my $x11 = 0;
 # By default assume RPATH is set.
 my $rpath = 1;
+my $device;
+my $device_skin;
+my $qbuild = 0;
+my $dynamic_rotation = 0;
 # We can only find this out if we have a build (ie. this can't influence the docs)
 if ( $QPEDIR ) {
     open IN, "$QPEDIR/config.cache" or die "Can't read $QPEDIR/config.cache";
@@ -61,6 +66,22 @@ if ( $QPEDIR ) {
     @tmp = grep(/^opt\.rpath\.value=/, @data);
     if ( @tmp && $tmp[0] =~ /^opt\.rpath\.value=(.*)/ ) {
         $rpath = $1;
+    }
+    @tmp = grep(/^opt\.device\.value=/, @data);
+    if ( @tmp && $tmp[0] =~ /^opt\.device\.value=(.*)/ ) {
+        $device = $1;
+    }
+    @tmp = grep(/^opt\.device\.skin=/, @data);
+    if ( @tmp && $tmp[0] =~ /^opt\.device\.skin=(.*)/ ) {
+        $device_skin = $1;
+    }
+    @tmp = grep(/^opt\.qbuild\.value=/, @data);
+    if ( @tmp && $tmp[0] =~ /^opt\.qbuild\.value=(.*)/ ) {
+        $qbuild = $1;
+    }
+    @tmp = grep(/^opt\.dynamic_rotation\.value=/, @data);
+    if ( @tmp && $tmp[0] =~ /^opt\.dynamic_rotation\.value=(.*)/ && $1 ne "undef" ) {
+        $dynamic_rotation = $1;
     }
     close IN;
 }
@@ -100,8 +121,8 @@ set_optvar( "skin", +{
     "arg" => "skin",
     "available" => sub {
         my @avail;
-        if ( $QPEDIR ) {
-            for ( glob("$QPEDIR/src/tools/qt/qvfb/*.skin") ) {
+        if ( $SDKROOT ) {
+            for ( glob("$SDKROOT/src/tools/qt/qvfb/*.skin") ) {
                 s/\.skin$//;
                 push(@avail, basename($_));
             }
@@ -115,7 +136,11 @@ set_optvar( "skin", +{
         my $def;
         if ( @avail ) {
             $def = $avail[0];
-            OUTER: for my $pref ( "Greenphone", "Trolltech-Keypad", "Trolltech-Touchscreen" ) {
+            my @list = ( "Greenphone", "Trolltech-Keypad", "Trolltech-Touchscreen" );
+            if ( $device_skin ) {
+                unshift(@list, $device_skin);
+            }
+            OUTER: for my $pref ( @list ) {
                 for my $it ( @avail ) {
                     if ( $pref eq $it ) {
                         $def = $it;
@@ -288,13 +313,13 @@ strace -o strace.out $qpe "$@"
 END
         [ "systemtesthelper", "A helper for running system tests",
           'while [ -f $QTOPIA_RESTART_FILE ]; do qpe "$@"; done', <<'END' ],
-rm -f /tmp/qtopia-${display}/qtopiatest_cmds
+rm -f /tmp/qtopia-${display}/qtuitest_cmds
 export QTOPIA_SYSTEMTESTHELPER=1
 export QTOPIA_RESTART_FILE=/tmp/qtopia-${display}/restart-qtopia
 touch $QTOPIA_RESTART_FILE
 while [ -f $QTOPIA_RESTART_FILE ]; do
-    ( export LD_PRELOAD=$QTOPIA_PREFIX/lib/libqtopiatestoverrides.so;
-      eval `cat /tmp/qtopia-${display}/qtopiatest_cmds 2>/dev/null`;
+    ( export LD_PRELOAD=$QTOPIA_PREFIX/lib/libqtuitestoverrides.so.1;
+      eval `cat /tmp/qtopia-${display}/qtuitest_cmds 2>/dev/null`;
       $qpe "$@"; ) || exit $?
 done
 END
@@ -346,7 +371,8 @@ opt_apply_defaults();
 opt_print_autodetect();
 
 my $script = "/tmp/runqtopia.$$";
-my $skin = "$QPEDIR/src/tools/qt/qvfb/".opt("skin").".skin";
+die "No skins!" if ( !opt("skin") );
+my $skin = "$SDKROOT/src/tools/qt/qvfb/".opt("skin").".skin";
 
 if ( opt("runmode") eq "systemtesthelper" ) {
     # Cleanly handle the INT (Ctrl+C) and TERM (kill) signals
@@ -367,7 +393,9 @@ if ( opt("runmode") eq "systemtesthelper" ) {
 
 # QWS_DISPLAY is used by the Qtopia Core windowing system
 my $QWS_DISPLAY;
-if ( opt("rotation") != 0 ) {
+if ( $dynamic_rotation ) {
+    $QWS_DISPLAY = "Transformed:Rot".opt("rotation").":";
+} elsif ( opt("rotation") != 0 ) {
     $QWS_DISPLAY = "Transformed:Rot".opt("rotation").":";
 }
 if ( opt("performance") ) {
@@ -399,6 +427,7 @@ if ( open IN, "$skin/defaultbuttons.conf" ) {
     close IN;
 }
 $QWS_DISPLAY .= opt("display");
+print "Using QWS_DISPLAY $QWS_DISPLAY\n";
 
 # DISPLAY is used by the X windowing system
 my $DISPLAY = ":".opt("display");
@@ -438,8 +467,11 @@ sub run_qvfb
         print "WARNING: QVFb display ".opt("display")." is already running (see /tmp/.qtvfb_*-".opt("display").")\n";
         return 0;
     }
-    my $qvfb_path = "$QPEDIR/bin/qvfb";
-    my $skin_path = "$QPEDIR/src/tools/qt/qvfb";
+    my $qvfb_path = "$SDKROOT/bin/qvfb";
+    if ( $qbuild ) {
+        $qvfb_path = "$SDKROOT/qtopiacore/host/bin/qvfb";
+    }
+    my $skin_path = "$SDKROOT/src/tools/qt/qvfb";
 
     print "Waiting for QVFb to start...\n";
     print "Saving QVFb output to /tmp/.qtvfb_log-".opt("display")."\n";
@@ -452,14 +484,22 @@ sub run_qvfb
         $display_opt = "-x11display";
         $mapfile = "/tmp/.X11-unix/X".opt("display");
     }
-    my $qvfb_command = "$qvfb_path $display_opt :".opt("display")." -skin $skin ".opt("qvfb")." >/tmp/.qtvfb_log-".opt("display")." 2>&1 &";
+    my $qvfb_command = "$qvfb_path $display_opt :".opt("display")." -skin $skin ".opt("qvfb")." >/tmp/.qtvfb_log-".opt("display")." 2>&1";
     # we'll wait for this file so remove it now (if it exists)
     if ( -e $mapfile ) {
         unlink $mapfile;
     }
     DEBUG and print "$qvfb_command\n";
     chdir $skin_path;
-    system($qvfb_command);
+
+    # Ensure qvfb does not have any opened file descriptors.
+    # Holding file descriptors open can cause qbuild to hang.
+    if (0 == fork()) {
+        for my $i (1..1024) {
+            POSIX::close($i);
+        }
+        exit( system($qvfb_command) );
+    }
     # wait for qvfb to come up
     while ( ! -e $mapfile ) {
         sleep 1;
@@ -576,6 +616,7 @@ END
     chmod 0755, $script;
 
     my $ret = system($script." ".join(" ", @ARGV));
+    $ret = $ret >> 8;
     unlink $script;
     return $ret;
 }
@@ -749,7 +790,7 @@ sub run_phonesim
 
     if ( $start ) {
         print "Saving phonesim output to /tmp/.phonesim_log-".opt("phonesim_port")."\n";
-        system("$QPEDIR/bin/phonesim ".opt("phonesim")." -p ".opt("phonesim_port").
+        system("$SDKROOT/bin/phonesim ".opt("phonesim")." -p ".opt("phonesim_port").
                " $depotpath/src/tools/phonesim/troll.xml >/tmp/.phonesim_log-".opt("phonesim_port").
                " 2>&1 &");
     }

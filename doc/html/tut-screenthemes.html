@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Tutorial: Screen Themes<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Tutorial: Screen Themes<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#home-screen">Home Screen</a></li>
 <ul><li><a href="#example-without-pin-entry-pad">Example without PIN Entry Pad</a></li>
@@ -21,14 +21,14 @@
 </ul>
 <a name="tuthomescreen"></a><a name="home-screen"></a>
 <h2>Home Screen</h2>
-<p>The following code defines the <tt>Home Screen</tt> for the Qtopia theme both with and without PIN entry pad functionality.</p>
-<p>The Qtopia theme displays the status indicators in the title bar when the home screen is visible, so it is not necessary to define them in the home screen.</p>
+<p>The following code defines the <tt>Home Screen</tt> for the Qt Extended theme both with and without PIN entry pad functionality.</p>
+<p>The Qt Extended theme displays the status indicators in the title bar when the home screen is visible, so it is not necessary to define them in the home screen.</p>
 <a name="example-without-pin-entry-pad"></a>
 <h3>Example without PIN Entry Pad</h3>
 <pre>    &lt;page name=&quot;home&quot; base=&quot;themes/qtopia&quot;&gt;
         &lt;group name=&quot;background&quot;&gt;
             &lt;image name=&quot;background&quot; rect=&quot;0,-235,0,0&quot; src=&quot;background&quot; color=&quot;Highlight&quot; tile=&quot;yes&quot;/&gt;
-            &lt;plugin name=&quot;bgplugin&quot;/&gt;
+            &lt;plug-in name=&quot;bgplug-in&quot;/&gt;
         &lt;/group&gt;
         &lt;rect rect=&quot;0,21,0x21&quot; brush=&quot;#eeeeee&quot; alpha=&quot;192&quot;&gt;
             &lt;text name=&quot;operator&quot; size=&quot;14&quot; align=&quot;vcenter&quot; bold=&quot;yes&quot; outline=&quot;#eeeeee&quot;/&gt;
@@ -51,7 +51,7 @@
             &lt;text name=&quot;infobox&quot; rect=&quot;40,0,-3,50&quot; size=&quot;12&quot; color=&quot;Text&quot; align=&quot;hcenter,vcenter&quot;/&gt;
         &lt;/rect&gt;
     &lt;/page&gt;</pre>
-<p>The background <i>group</i> specifies both a default background image and also allows a plug-in to be used to display the background. The background plug-in built into Qtopia displays the user-selected background image.</p>
+<p>The background <i>group</i> specifies both a default background image and also allows a plug-in to be used to display the background. The background plug-in built into Qt Extended displays the user-selected background image.</p>
 <p>The calls and messages notifications are declared transient so that they will not appear unless there is actually missed calls or new messages. This leaves as little clutter as possible on the home screen, which in turn leaves more of the user's chosen background image visible.</p>
 <a name="example-with-pin-entry-pad"></a>
 <h3>Example with PIN Entry Pad</h3>
@@ -121,7 +121,7 @@
         &lt;/layout&gt;</pre>
 <a name="tutcallscreen"></a><a name="call-screen"></a>
 <h2>Call Screen</h2>
-<p>The following code defines the Call screen for the Qtopia theme:</p>
+<p>The following code defines the Call screen for the Qt Extended theme:</p>
 <pre>    &lt;page name=&quot;callscreen&quot; base=&quot;themes/default&quot;&gt;
         &lt;rect color=&quot;None&quot; brush=&quot;Background&quot;/&gt;
         &lt;image name=&quot;background&quot; src=&quot;callscreen_bg&quot; tile=&quot;yes&quot; color=&quot;Background&quot;/&gt;
@@ -170,8 +170,8 @@
     &lt;/page&gt;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

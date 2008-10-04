@@ -1,12 +1,17 @@
+!qbuild{
 qtopia_project(qtopia app)
-
 TARGET=mediaserver
 CONFIG+=singleexec_main
 
-# Give us a direct connection to the document system
-DEFINES+=QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION
+depends(libraries/qtopiamedia)
+depends(libraries/qtopiaaudio)
+enable_telephony:depends(libraries/qtopiaphone)
 
 DEFINES+="CONFIGURED_ENGINES=$$LITERAL_QUOTE$$LITERAL_ESCAPED_QUOTE$$QTOPIAMEDIA_ENGINES$$LITERAL_ESCAPED_QUOTE$$LITERAL_QUOTE"
+}
+
+# Give us a direct connection to the document system
+DEFINES+=QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION
 
 HEADERS =   \
             sessionmanager.h \
@@ -24,7 +29,8 @@ HEADERS =   \
             mediaagentsession.h \
             drmsession.h \
             mediapowercontrol.h\
-            mediavolumecontrol.h
+            mediavolumecontrol.h \
+            qaudiointerfaceserver.h
 
 SOURCES =   \
             main.cpp \
@@ -43,14 +49,21 @@ SOURCES =   \
             mediaagentsession.cpp \
             drmsession.cpp \
             mediapowercontrol.cpp\
-            mediavolumecontrol.cpp
+            mediavolumecontrol.cpp \
+            qaudiointerfaceserver.cpp
  
-contains(DEFINES,QTOPIA_TELEPHONY) {
+enable_telephony {
     HEADERS += callmonitor.h
     SOURCES += callmonitor.cpp
-
-    depends(libraries/qtopiaphone)
 }
+
+equals(QTOPIA_SOUND_SYSTEM,alsa) {
+DEFINES+=QTOPIA_HAVE_ALSA
+}
+equals(QTOPIA_SOUND_SYSTEM,pulse) {
+DEFINES+=QTOPIA_HAVE_ALSA
+}
+
 
 pkg.desc = Media Server
 pkg.domain = trusted 
@@ -59,9 +72,6 @@ mediaserverservice.files = $$QTOPIA_DEPOT_PATH/services/MediaServer/mediaserver
 mediaserverservice.path = /services/MediaServer
 INSTALLS += mediaserverservice
 
-domainmanager.files = $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/AudioDomains.conf
+domainmanager.files = $$device_overrides(/etc/default/Trolltech/AudioDomains.conf)
 domainmanager.path = /etc/default/Trolltech
 INSTALLS += domainmanager
-
-depends(libraries/qtopiamedia)
-depends(libraries/qtopiaaudio)

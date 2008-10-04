@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QMailMessageBody Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QMailMessageBody Class Reference<br /><span class="small-subtitle">[<a href="qtmessagingmodule.html">QtMessagingModule</a>, <a href="qtpimmodule.html">QtPimModule</a>]</span>
+</h1>
 <p>The QMailMessageBody class contains the body element of a message or message part. <a href="#details">More...</a></p>
 <pre>    #include &lt;QMailMessageBody&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
 <ul>
@@ -48,7 +49,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QMailMessageBody class contains the body element of a message or message part.</p>
-<p>The body of a message or message part is treated as an atomic unit by the Qtopia messaging library. It can only be inserted into a message part container or extracted from one. It can be inserted or extracted using either a <a href="qbytearray.html">QByteArray</a>, a <a href="qdatastream.html">QDataStream</a> or to/from a file. In the case of unicode text data, the insertion and extraction can operate on either a <a href="qstring.html">QString</a>, a <a href="qtextstream.html">QTextStream</a> or to/from a file.</p>
+<p>The body of a message or message part is treated as an atomic unit by the Qt Extended messaging library. It can only be inserted into a message part container or extracted from one. It can be inserted or extracted using either a <a href="qbytearray.html">QByteArray</a>, a <a href="qdatastream.html">QDataStream</a> or to/from a file. In the case of unicode text data, the insertion and extraction can operate on either a <a href="qstring.html">QString</a>, a <a href="qtextstream.html">QTextStream</a> or to/from a file.</p>
 <p>The body data must be associated with a <a href="qmailmessagecontenttype.html">QMailMessageContentType</a> describing that data. When extracting body data from a message or part to unicode text, the content type description must include a parameter named 'charset'; this parameter is used to locate a <a href="qtextcodec.html">QTextCodec</a> to be used to extract unicode data from the body data octet stream.</p>
 <p>If the Content-Type of the data is a subtype of &quot;text&quot;, then line-ending translation will be used to ensure that the text is transmitted with CR/LF line endings. The text data supplied to QMailMessageBody must conform to the RFC 2822 restrictions on maximum line lengths: &quot;Each line of characters MUST be no more than 998 characters, and SHOULD be no more than 78 characters, excluding the CRLF.&quot; Textual message body data decoded from a QMailMessageBody object will have transmitted CR/LF line endings converted to <tt>\n</tt> on extraction.</p>
 <p>The body data can also be encoded from 8-bit octets to 7-bit ASCII characters for safe transmission through obsolete email systems. When creating an instance of the QMailMessageBody class, the encoding to be used must be specified using the <a href="qmailmessagebody.html#TransferEncoding-enum">QMailMessageBody::TransferEncoding</a> enum.</p>
@@ -137,8 +138,8 @@
 <p>Returns the transfer encoding type that the body was created with.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

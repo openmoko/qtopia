@@ -2,7 +2,7 @@
 HELIX_CONFIG="$1"
 OUTPUT="$2"
 QTEDIR="$3"
-QPEDIR="$4"
+SDKROOT="$4"
 RPATHVALUE="$5"
 BUILD_RC="$6"
 LOGGING="$7"
@@ -27,6 +27,6 @@ fi
 
 # generate buildrc
 echo "SetSDKPath('qt','$QTEDIR')" >$BUILD_RC
-echo "SetSDKPath('qtopia','$QPEDIR')" >> $BUILD_RC
+echo "SetSDKPath('qtopia','$SDKROOT')" >> $BUILD_RC
 
 exit 0

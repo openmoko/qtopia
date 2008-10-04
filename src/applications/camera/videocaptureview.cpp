@@ -1,253 +1,512 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
+#include "cameravideosurface.h"
 #include "videocaptureview.h"
-#include "videocapturedevice.h"
-#include "videocapturedevicefactory.h"
 #include <math.h>
 
+#include <QtopiaFeatures>
+
+#include <QCameraDeviceLoader>
+#include <QValueSpaceItem>
+#include <QCameraDevice>
+#include <qtopiaapplication.h>
+#include <QContentSet>
+#include <QSoftMenuBar>
+#include <QTimer>
 #include <qimage.h>
 #include <qpainter.h>
 #include <qevent.h>
-
+#include <QRectF>
 #include <QDebug>
+#include <QLayout>
+#include <QImageReader>
+#include <QVideoFrame>
 
-VideoCaptureView::VideoCaptureView(QWidget *parent, Qt::WFlags fl):
-    QWidget(parent, fl),
-    m_cleared(false),
-    m_tidUpdate(0)
+#include <QWSEmbedWidget>
+
+
+using namespace QtopiaVideo;
+
+class InformationWidget : public QWidget
 {
-    m_capture = camera::VideoCaptureDeviceFactory::createVideoCaptureDevice();
+    Q_OBJECT;
+public:
+    InformationWidget(QWidget *parent = 0);
+    ~InformationWidget();
 
+    void setMessage(QString txt);
+protected:
+    void paintEvent(QPaintEvent* paintEvent);
+    void moveEvent(QMoveEvent* e);
+    void resizeEvent(QResizeEvent* e);
+
+private:
+    QString m_message;
+};
+
+InformationWidget::InformationWidget(QWidget *parent):
+    QWidget(parent),
+    m_message(QString())
+{
     setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     // Optimize paint event
     setAttribute(Qt::WA_NoSystemBackground);
 
-    QPalette    pal(palette());
+    QPalette  pal(palette());
     pal.setBrush(QPalette::Window, Qt::black);
     setPalette(pal);
-
-    setLive();
-
-
-    m_doZoom = false;
-    m_zoomlevel = 0;
-    m_zoomfactor = 1.0;
-    m_minZoom = 0;
-    m_maxZoom = 2;
-
-    m_force = false;
-
 }
 
-VideoCaptureView::~VideoCaptureView()
+InformationWidget::~InformationWidget()
+{}
+
+void InformationWidget::setMessage(QString txt)
 {
-    delete m_capture;
+    m_message = txt;
+    update();
 }
 
-int VideoCaptureView::minZoom() const
+void InformationWidget::moveEvent(QMoveEvent* e)
 {
-    return m_minZoom;
+    Q_UNUSED(e)
+    update();
 }
-int VideoCaptureView::maxZoom() const
+
+void InformationWidget::resizeEvent(QResizeEvent* e)
 {
-    return m_maxZoom;
+    Q_UNUSED(e)
+    update();
 }
 
-void VideoCaptureView::setLive(int period)
+void InformationWidget::paintEvent(QPaintEvent* paintEvent)
 {
-    if (m_tidUpdate)
-        killTimer(m_tidUpdate);
-    if (period == 0) {
-        m_tidUpdate = startTimer(m_capture->minimumFramePeriod());
-    }
-    else if ( period > 0 ) {
-        m_tidUpdate = startTimer(period);
-    }
-    else {
-        m_tidUpdate = 0;
-     }
+
+    QPainter  painter(this);
+    QPoint   brushOrigin = painter.brushOrigin();
+    // Paint window background
+    painter.setBrushOrigin(-mapToGlobal(QPoint(0, 0)));
+    painter.fillRect(paintEvent->rect(), window()->palette().brush(QPalette::Window));
+    painter.setBrushOrigin(brushOrigin);
+
+    painter.drawText(paintEvent->rect(), Qt::AlignCenter | Qt::TextWordWrap, m_message);
+
 }
 
-void VideoCaptureView::setStill(const QImage& i)
+class ViewPrivate : public QObject
 {
-    setLive(-1);
-    m_image = i;
-    repaint();
-}
+    Q_OBJECT;
+public:
+    ViewPrivate(QObject *parent = 0) :
+        QObject(parent),
+        m_surface(0),
+        canEmbedWidget(false),
+        m_lastFrame(0),
+        hidden(false),
+        embedded(0),
+        captureStarted(false),
+        embeddedActive(false),
+        cameraRunning(false)
+    {}
 
-QList<QSize> VideoCaptureView::photoSizes() const
+    ~ViewPrivate()  { }
+
+    CameraVideoSurface *m_surface;
+
+    bool canEmbedWidget;
+    QVideoFrame* m_lastFrame;
+
+
+    QValueSpaceItem *m_rotation;
+    int m_currentRotation;
+    int m_defaultRotation;
+    QValueSpaceItem *m_lensCover;
+    bool m_lensIsOpen ;
+    bool hidden;
+    QWSEmbedWidget* embedded;
+    InformationWidget *messageWidget;
+    QRect savedGeometry;
+    bool captureStarted;
+    bool embeddedActive;
+    bool cameraRunning;
+    QTimer m_lastFrameTimer;
+};
+
+int VideoCaptureView::minZoom() const {  return (m_state) ? m_state->minZoom() : 0; }
+int VideoCaptureView::maxZoom() const {  return (m_state) ? m_state->maxZoom() : 0; }
+
+bool VideoCaptureView::hasZoom() const
 {
-    return m_capture->photoSizes();
+    return (m_state) ? ((m_state->maxZoom() - m_state->minZoom()) > 0) : false;
 }
-
-QList<QSize> VideoCaptureView::videoSizes() const
-{
-    return m_capture->videoSizes();
-}
-
-QSize VideoCaptureView::recommendedPhotoSize() const
-{
-    return m_capture->recommendedPhotoSize();
-}
-
-QSize VideoCaptureView::recommendedVideoSize() const
-{
-    return m_capture->recommendedVideoSize();
-}
-
-QSize VideoCaptureView::recommendedPreviewSize() const
-{
-    return m_capture->recommendedPreviewSize();
-}
-
-QSize VideoCaptureView::captureSize() const
-{
-    return m_capture->captureSize();
-}
-
-void VideoCaptureView::setCaptureSize( QSize size )
-{
-    m_capture->setCaptureSize(size);
-}
-
-uint VideoCaptureView::refocusDelay() const
-{
-    return m_capture->refocusDelay();
-}
-
-bool VideoCaptureView::available() const
-{
-    return m_capture->hasCamera();
-}
-
-void VideoCaptureView::moveEvent(QMoveEvent*)
-{
-    m_cleared = false;
-}
-
-void VideoCaptureView::resizeEvent(QResizeEvent*)
-{
-    m_cleared = false;
-}
-
-void VideoCaptureView::paintEvent(QPaintEvent* paintEvent)
-{
-    QPainter    painter(this);
-
-    if (!m_cleared)
-    {
-        QPoint      brushOrigin = painter.brushOrigin();
-
-        // Paint window background
-        painter.setBrushOrigin(-mapToGlobal(QPoint(0, 0)));
-        painter.fillRect(paintEvent->rect(), window()->palette().brush(QPalette::Window));
-
-        // Reset origin
-        painter.setBrushOrigin(brushOrigin);
-
-        m_cleared = true;
-    }
-
-    if (m_tidUpdate && !available()) {
-
-        painter.drawText(rect(), Qt::AlignCenter | Qt::TextWordWrap, tr("No Camera"));
-
-        killTimer(m_tidUpdate);
-    }
-    else
-    {
-
-        if (m_tidUpdate > 0 || m_force)
-        {
-            m_capture->getCameraImage(m_image);
-            doZoom();
-        }
-        int w = m_image.width();
-        int h = m_image.height();
-
-        if (!(w == 0 || h == 0))
-        {
-            if (width() * w > height() * h) {
-                w = w * height() / h;
-                h = height();
-            }
-            else {
-                h = h * width() / w;
-                w = width();
-            }
-
-            painter.drawImage(QRect((width() - w) / 2, (height() - h) / 2, w, h),
-                                     m_image,
-                                     QRect(0, 0, m_image.width(), m_image.height()));
-        }
-
-     }
-}
-
-void VideoCaptureView::timerEvent(QTimerEvent*)
-{
-    m_cleared = true;
-    repaint();
-    m_cleared = false;
-}
-
 
 void VideoCaptureView::zoomIn()
 {
-    m_zoomlevel = (m_zoomlevel+1<=m_maxZoom)?++m_zoomlevel:m_zoomlevel;
-    if(m_zoomlevel != 0)
-        m_doZoom = true;
-    else
-        m_doZoom = false;
-    m_zoomfactor = 1.0/pow(2,m_zoomlevel);
+    if(m_state)
+        m_state->zoomIn();
 }
 
 void VideoCaptureView::zoomOut()
 {
-    m_zoomlevel = (m_zoomlevel-1>=m_minZoom)?--m_zoomlevel:m_zoomlevel;
-    if(m_zoomlevel != 0)
-        m_doZoom = true;
-    else
-        m_doZoom = false;
-    m_zoomfactor = 1.0 / pow(2,m_zoomlevel);
+    if(m_state)
+        m_state->zoomOut();
 }
 
-void VideoCaptureView::doZoom()
+
+VideoCaptureView::VideoCaptureView(QWidget *parent):
+    QFrame(parent),
+    m_hasCamera(true),
+    d(new ViewPrivate)
 {
-    if(!m_doZoom)
-        return;
-    float dw = 0.0,dh = 0.0;
-    QRect r = m_image.rect();
-    int w = (int)(r.width() * m_zoomfactor);
-    int h = (int)(r.height() * m_zoomfactor);
-    for(int i = m_zoomlevel; i > 0; i--) {
-        dw += w/2*i;
-        dh += h/2*i;
+    m_still = false;
+
+    d->messageWidget = new InformationWidget(this);
+    QVBoxLayout * layout = new QVBoxLayout (this);
+    layout->setSpacing(0);
+    layout->setMargin(0);
+
+    layout->addWidget(d->messageWidget);
+
+    setLayout(layout);
+
+    d->m_lensCover = new QValueSpaceItem("/Hardware/Devices/LensCover",this);
+    d->m_lensIsOpen  = d->m_lensCover->value("Open",true).toBool();
+    connect(d->m_lensCover, SIGNAL(contentsChanged()), this, SLOT(lensCoverStateChanged()));
+
+    d->messageWidget->setMessage( d->m_lensIsOpen ? tr("Initializing") : tr("Lens Cover Closed"));
+
+    d->m_rotation = new QValueSpaceItem("/UI/Rotation", this);
+
+    d->m_currentRotation = d->m_rotation->value("Current",0).toInt();
+    d->m_defaultRotation = d->m_rotation->value("Default",0).toInt();
+
+    connect(d->m_rotation, SIGNAL(contentsChanged()), this, SLOT(rotationChanged()));
+
+    QtopiaApplication::setInputMethodHint(this, QtopiaApplication::AlwaysOff);
+
+    QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    sizePolicy.setHorizontalStretch(0);
+    sizePolicy.setVerticalStretch(0);
+    setSizePolicy(sizePolicy);
+    setLineWidth(5);
+
+    connect(&d->m_lastFrameTimer, SIGNAL(timeout()), this, SLOT(renderBlankFrame()));
+}
+
+VideoCaptureView::~VideoCaptureView()
+{
+    delete d;
+}
+
+void VideoCaptureView::rotationChanged()
+{
+    d->m_currentRotation = d->m_rotation->value("Current",0).toInt();
+    d->m_surface->setRotation( d->m_currentRotation );
+}
+
+void VideoCaptureView::lensCoverStateChanged()
+{
+    d->m_lensIsOpen = d->m_lensCover->value("Open",true).toBool();
+
+    if (!d->m_lensIsOpen)
+        d->messageWidget->setMessage(tr("Lens Cover Closed"));
+    switchToEmbeddedWidget( d->m_lensIsOpen );
+
+    emit lensCoverChanged();
+}
+
+bool VideoCaptureView::lensCoverState()
+{
+    return d->m_lensIsOpen;
+}
+
+void VideoCaptureView::autoFocus()
+{
+    if(m_hasCamera && m_state) {
+        m_state->autoFocus();
     }
-    QRect d ((int)dw,(int)dh , w, h);
-    QImage img2 = m_image.copy(d);
-    m_image = img2;
+}
+
+void VideoCaptureView::toggleVideo(bool recording, QSize resolution)
+{
+    if (m_state && recording)
+        m_state->startVideoCapture(resolution);
+    else
+        m_state->endVideoCapture();
+}
+
+QSize VideoCaptureView::stillDefaultSize()
+{
+    if(m_state)
+        return m_state->defaultStillSize();
+    else
+        return QSize(-1,-1);
+}
+
+QSize VideoCaptureView::videoDefaultSize()
+{
+    if(m_state)
+        return m_state->defaultVideoSize();
+    else
+        return QSize(-1,-1);
+}
+
+QSize VideoCaptureView::previewDefaultSize()
+{
+    return m_state->defaultPreviewSize();
+}
+
+void VideoCaptureView::hideEvent(QHideEvent* event)
+{
+    Q_UNUSED(event);
+}
+
+void VideoCaptureView::showEvent(QShowEvent* event)
+{
+    Q_UNUSED(event);
+}
+
+void VideoCaptureView::mousePressEvent(QMouseEvent* mouseEvent)
+{
+    Q_UNUSED(mouseEvent);
+}
+
+void VideoCaptureView::setLive(int state)
+{
+    if(!m_hasCamera)
+        return;
+
+    if(state)  {
+        connect(m_state, SIGNAL(previewFrameReady(QVideoFrame const& )), this, SLOT(displayPreviewFrame(QVideoFrame const&)));
+    }
+    else {
+        disconnect(m_state, SIGNAL(previewFrameReady(QVideoFrame const& )), this, SLOT(displayPreviewFrame(QVideoFrame const&)));
+    }
+}
+
+bool VideoCaptureView::available() const
+{
+    return m_hasCamera;
+}
+
+void VideoCaptureView::moveEvent(QMoveEvent* e)
+{
+    Q_UNUSED(e)
+}
+
+void VideoCaptureView::resizeEvent(QResizeEvent* e)
+{
+    Q_UNUSED(e)
+}
+
+void VideoCaptureView::showBlankFrame(bool b)
+{
+    if (b)
+        d->m_lastFrameTimer.start(0);
+    else
+        d->m_lastFrameTimer.stop();
+}
+
+void VideoCaptureView::renderBlankFrame()
+{
+    d->m_surface->surface()->renderFrame(QVideoFrame());
+}
+
+void VideoCaptureView::displayPreviewFrame(QVideoFrame const &frame)
+{
+    if (d->embeddedActive && d->cameraRunning) {
+        d->m_surface->surface()->renderFrame(frame);
+    }
+}
+
+void VideoCaptureView::cameraError(QtopiaCamera::CameraError error, QString errorString)
+{
+    switch(error)
+    {
+        case QtopiaCamera::FatalError:
+        {
+            qWarning()<<"Camera fatal error: " << errorString;
+            m_hasCamera = false;
+            d->messageWidget->setMessage(tr("No Camera"));
+            switchToEmbeddedWidget(false);
+            emit noCamera();
+        }
+        case QtopiaCamera::Warning:
+        {
+            qWarning()<<"Camera warning: " << errorString;
+            m_hasCamera = false;
+            d->messageWidget->setMessage(tr("No Camera"));
+            switchToEmbeddedWidget(false);
+            emit noCamera();
+        }
+        default:
+            break;
+    }
+}
+
+/*
+    Switch between Video Surface Widget for preview data and basic widget for
+    informational messages
+*/
+void VideoCaptureView::switchToEmbeddedWidget(bool s)
+{
+    if (s) {
+        if (d->embedded && !d->embeddedActive )  {
+            d->messageWidget->hide();
+            layout()->removeWidget(d->messageWidget);
+            layout()->addWidget(d->embedded);
+            d->embedded->show();
+            d->embedded->raise();
+            d->embeddedActive = true;
+            setLive(1);
+        }
+    } else {
+        if (d->embedded && d->embeddedActive) {
+            d->embedded->hide();
+            layout()->removeWidget(d->embedded);
+            layout()->addWidget(d->messageWidget);
+            d->messageWidget->show();
+            d->messageWidget->raise();
+            d->embeddedActive = false;
+            setLive(0);
+        }
+    }
+}
+
+bool VideoCaptureView::hasStill()
+{
+    if(m_state)
+        return m_state->hasStill();
+    return false;
+}
+
+bool VideoCaptureView::hasVideo()
+{
+    if(m_state)
+        return  m_state->hasVideo();
+    return false;
+}
+
+bool VideoCaptureView::initializeCamera()
+{
+    static int once = 1;
+
+    if (!once)  return m_hasCamera;
+    once = 0;
+
+    m_loader = QCameraDeviceLoader::instance();
+
+    if (m_hasCamera = m_loader->cameraDevicesAvailable())
+    {
+        m_device = 0;
+
+        if ( (m_device = m_loader->deviceWithOrientation(QCameraDevice::BackFacing)) != 0)
+        {}
+        else if ((m_device = m_loader->deviceWithOrientation(QCameraDevice::FrontFacing)) != 0)
+        {}
+        else if ((m_device = m_loader->deviceWithOrientation(QCameraDevice::Changing)) != 0)
+        {}
+
+        if (m_device == 0) {
+            d->messageWidget->setMessage( tr("No Camera"));
+            return (m_hasCamera = false);
+        }
+
+        connect(m_device, SIGNAL(cameraError(QtopiaCamera::CameraError, QString)), this, SLOT(cameraError(QtopiaCamera::CameraError, QString)));
+
+        m_state = new CameraStateProcessor(m_device, this);
+
+        // check for valid video surface and camera device
+        if (!m_state->initialize (d->m_currentRotation)) {
+            d->messageWidget->setMessage( tr("No Camera"));
+            return (m_hasCamera=false);
+        }
+
+        d->m_surface = m_state->surface();
+
+        if (m_state->hasVideo())
+            connect(m_state, SIGNAL(videoDone(QContent&)), this, SIGNAL(videoReadyForSaving(QContent&)));
+
+        if (m_state->hasStill()) {
+            connect(m_state, SIGNAL(stillDone(QContent&)), this, SIGNAL(imageReadyForSaving(QContent&)));
+            connect(m_state, SIGNAL(stillDoneRaw(QImage&)), this, SIGNAL(imageReadyRaw(QImage&)));
+        }
+     }
+
+    if (!m_hasCamera)
+        d->messageWidget->setMessage(tr("No Camera"));
+    return m_hasCamera;
+}
+
+void VideoCaptureView::startCapture()
+{
+    if(m_state) {
+        if (m_hasCamera) {
+            d->embedded = static_cast<QWSEmbedWidget*>(d->m_surface->surface()->videoWidget());
+            if (d->embedded) {
+                d->embedded->setFocusPolicy(Qt::NoFocus);
+                if (d->m_lensIsOpen)
+                switchToEmbeddedWidget(true);
+            }
+            m_state->start();
+            d->cameraRunning = true;
+        }
+    }
+}
+
+void VideoCaptureView::endCapture()
+{
+    if(m_state) {
+        m_state->stop();
+        d->cameraRunning = false;
+    }
+}
+
+QList<QSize> VideoCaptureView::stillSizes()
+{
+    if(m_state)
+        return m_state->stillSizes();
+    return  QList<QSize>();
+
+}
+
+QList<QSize> VideoCaptureView::previewSizes()
+{
+    if(m_state)
+        return m_state->previewSizes();
+    return QList<QSize>();
+}
+
+QList<QSize> VideoCaptureView::videoSizes()
+{
+    if(m_state)
+        return m_state->videoSizes();
+    return QList<QSize>();
 }
 
 
+void VideoCaptureView::takePhoto(QSize resolution,int count)
+{
+    if(m_state && d->m_lensIsOpen)
+        m_state->takeStillImage(resolution, count);
+}
 
+
+#include "videocaptureview.moc"

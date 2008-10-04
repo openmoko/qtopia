@@ -1,35 +1,33 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef VOIPNETWORKREGISTER_H
-#define VOIPNETWORKREGISTER_H
-
-#include <qnetworkregistration.h>
-#include <qpresence.h>
-#include <qtelephonyconfiguration.h>
+#ifndef VOIPNETWORK_H
+#define VOIPNETWORK_H
 
 #include <QListWidget>
 
 class QModemNetworkRegistration;
 class QWaitWidget;
+class QListWidgetItem;
+class QCollectivePresence;
+class QTelephonyConfiguration;
+class QNetworkRegistration;
 
 class VoipNetworkRegister : public QListWidget
 {
@@ -44,20 +42,19 @@ protected:
 private slots:
     void operationSelected( QListWidgetItem * );
     void registrationStateChanged();
-    void localPresenceChanged();
 
 private:
     QNetworkRegistration *m_client;
-    QPresence *m_presence;
+    QCollectivePresence *m_presenceProvider;
     QTelephonyConfiguration *m_config;
     QListWidgetItem *m_regItem, *m_presenceItem, *m_configItem;
 
     void init();
-    inline bool registered() { return m_client->registrationState() == QTelephony::RegistrationHome; }
-    inline bool visible() { return m_presence->localPresence() == QPresence::Available; }
+    bool registered() const;
+    bool visible() const;
     void updateRegistrationState();
     void updatePresenceState();
     void configureVoIP();
 };
 
-#endif /* VOIPNETWORKREGISTER_H */
+#endif

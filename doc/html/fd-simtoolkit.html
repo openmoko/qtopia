@@ -10,20 +10,19 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Communications: Telephony: SIM Toolkit<br><small>Functional Description</small></h1><p><p />
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Communications: Telephony: SIM Toolkit<br><small>Functional Description</small></h1><p><p />
 <p />
 <p />
 The <nop>SIM Toolkit allows service providers to develop phone applications without modifying or installing software on the phone with the <nop>SIM toolkit application providing the user-interface for this functionality.
 <p />
-Qtopia provides only basic <nop>SIM toolkit functionality as the major part of the work to support <nop>SIM Toolkit is in the modem or vendor plug-in. There are no standard AT commands within the GSM specifications for <nop>SIM Toolkit and each modem has its own proprietary commands.
+Qt Extended provides only basic <nop>SIM toolkit functionality as the major part of the work to support <nop>SIM Toolkit is in the modem or vendor plug-in. There are no standard AT commands within the GSM specifications for <nop>SIM Toolkit and each modem has its own proprietary commands.
 <p />
 The SIM Toolkit provides features such as a display menu, display text and single character and string user input. Input may be numeric and the entered text may be echoed or hidden (as for password text). Play Tones are available for applications to use to indicate events such as call waiting, busy signal or errors etc.
 <p />
 <p />
 See <a href="http://www.3gpp.org/ftp/tsg_t/ WG3_USIM/TSGT3_30/docs/T3-040071.doc">3GPP TS 11.14</a>
 <p />
-
 <h2>Features</h2>
 <ul><li><a href="#QTOPIA-1551">Call Control By SIM</a>
 <li><a href="#QTOPIA-1532">Call Set-up</a>
@@ -35,34 +34,34 @@ See <a href="http://www.3gpp.org/ftp/tsg_t/ WG3_USIM/TSGT3_30/docs/T3-040071.doc
 <li><a href="#QTOPIA-1536">Internationalization</a>
 <li><a href="#QTOPIA-1535">Launch Browser</a>
 <li><a href="#QTOPIA-1537">Other Commands</a>
-<li><a href="#QTOPIA-1539">Play Tone</a>
 <li><a href="#QTOPIA-1529">Play Tone</a>
 <li><a href="#QTOPIA-1530">Refresh</a>
 <li><a href="#QTOPIA-1538">Refresh Applications</a>
-<li><a href="#QTOPIA-1525">SIM Commands</a>
 <li><a href="#QTOPIA-1531">Send Messages</a>
 <li><a href="#QTOPIA-1533">Set-up Event List</a>
 <li><a href="#QTOPIA-1534">Set-up Idle Mode Text</a>
-</ul><h3><a name=QTOPIA-1551>Call Control By SIM (QTOPIA-1551)</a></h3>
+<li><a href="#QTOPIA-1525">SIM Commands</a>
+<li><a href="#QTOPIA-7678">SIM Toolkit extensions for USAT</a>
+</ul><h3><a name=QTOPIA-1551>Call Control By SIM</a></h3>
 <p>Some SIMs can control the dialing process to change the way things work.<br/>
 We need to support this on modems that have it (e.g. Greenphone).
-<h3><a name=QTOPIA-1532>Call Set-up (QTOPIA-1532)</a></h3>
+<h3><a name=QTOPIA-1532>Call Set-up</a></h3>
 <p>The SIM toolkit application can set-up a call on behalf of the user. In this case<br/>
 the user must be asked for authorization before the call is initiated.  If the<br/>
-user agrees, then the Qtopia Dialer service is directed to initiate the dial request.
+user agrees, then the Qt Extended Dialer service is directed to initiate the dial request.
 
 <p>This feature handles <tt>SET UP CALL</tt> (3GPP TS 11.14, section 6.4.13).</p>
-<h3><a name=QTOPIA-1526>Display Menu (QTOPIA-1526)</a></h3>
+<h3><a name=QTOPIA-1526>Display Menu</a></h3>
 <p>Displays a menu from which the user can choose an option. It is possible<br/>
 to select an item from the menu or press <em>Back</em> to move to the previous<br/>
 menu. Pressing <em>Back</em> at the main menu exits the application.  This feature<br/>
 handles <tt>SET UP MENU</tt> (GSM TS 11.14, section 6.4.8) and <tt>SELECT ITEM</tt> (3GPP<br/>
 TS 11.14, section 6.4.9).
-<h3><a name=QTOPIA-1527>Display Text (QTOPIA-1527)</a></h3>
+<h3><a name=QTOPIA-1527>Display Text</a></h3>
 <p>Displays text to the user. The text can be displayed until dismissed by the<br/>
 user or for a short delay.  This feature handles <tt>DISPLAY TEXT</tt> (3GPP TS 11.14,<br/>
 section 6.4.1).
-<h3><a name=QTOPIA-1528>Get User Input (QTOPIA-1528)</a></h3>
+<h3><a name=QTOPIA-1528>Get User Input</a></h3>
 <p>The user can be prompted for input of the following types:
 
 <ul>
@@ -72,49 +71,45 @@ section 6.4.1).
 
 
 <p>The entered text can be echoed or hidden as for password input.</p>
-<h3><a name=QTOPIA-1547>Icon Support (QTOPIA-1547)</a></h3>
+<h3><a name=QTOPIA-1547>Icon Support</a></h3>
 <p>Newer versions of the SIM toolkit specification have support for icons.<br/>
 Almost every command that can show a text string (menus, display text,<br/>
 send sms, setup idle mode text, etc) can now have an icon associated<br/>
 with it.  The icon can either be displayed next to the text string, or as<br/>
 a replacement for the text string if it is marked as "self-explainatory".
-
-<p>Qtopia 4.2 has API support for reading icons from the SIM, with some support<br/>
-for displaying menu icons in <tt>simapp</tt>, but it isn't perfect.  Qtopia 4.3 needs to add<br/>
-proper icon display support to <tt>simapp</tt> and the server wherever appropriate.</p>
-<h3><a name=QTOPIA-1543>Idle Mode String (Operator) (QTOPIA-1543)</a></h3>
+<h3><a name=QTOPIA-1543>Idle Mode String (Operator)</a></h3>
 <p>The idle mode text string is displayed on the home screen<br/>
 whenever <tt>QSimToolkit::command</tt> is emitted with the command type <tt>SetupIdleModeText</tt>.
 
 <p>Actual display also depends on <span class="nobr"><a href="fd-Themes.html">Themes<sup></sup></a></span>.</p>
-<h3><a name=QTOPIA-1536>Internationalization (QTOPIA-1536)</a></h3>
+<h3><a name=QTOPIA-1536>Internationalization</a></h3>
 <p>The SIM toolkit application can request the language that the surrounding system<br/>
 is running in so that it can adapt its text message's to the user's language.  This<br/>
 feature handles  <tt>PROVIDE LOCAL INFORMATION</tt> (3GPP TS 11.14, section 6.4.15).
 
 <p>It is expected that the modem vendor plug-in will intercept the =PROVIDE LOCAL<br/>
-INFORMATION= message, call <tt>Qtopia::languageList()</tt>, and pass the user's<br/>
+INFORMATION= message, call <tt>Qt Extended::languageList()</tt>, and pass the user's<br/>
 language back to the SIM automatically.  No other interaction is required.</p>
 
 <p>The SIM toolkit application can inform the user as to the current language that<br/>
 it is using with the feature <tt>LANGUAGE NOTIFICATION</tt> (3GPP TS 11.14, section 6.4.25).<br/>
-This information is passed to the Qtopia application layer for applications that<br/>
+This information is passed to the Qt Extended application layer for applications that<br/>
 wish to display it.</p>
-<h3><a name=QTOPIA-1535>Launch Browser (QTOPIA-1535)</a></h3>
+<h3><a name=QTOPIA-1535>Launch Browser</a></h3>
 <p>The SIM toolkit application can request that the Web browser be launched with a<br/>
 specific URL.  This feature handles <tt>LAUNCH BROWSER</tt> (3GPP TS 11.14, section<br/>
-6.4.26) and the information is passed to the Qtopia WebAccess service.
+6.4.26) and the information is passed to the Qt Extended WebAccess service.
 
 <p>The 3GPP specification lists some requirements on the modem.  For example, if the<br/>
 modem is busy, not available, or processing a supplementary service request, it must<br/>
 notify the SIM application that the operation cannot be performed.  It is expected that the<br/>
-modem or vendor plug-in to handle this detail, as there is no way for Qtopia<br/>
+modem or vendor plug-in to handle this detail, as there is no way for Qt Extended<br/>
 to determine this information.</p>
-<h3><a name=QTOPIA-1537>Other Commands (QTOPIA-1537)</a></h3>
+<h3><a name=QTOPIA-1537>Other Commands</a></h3>
 <p>There are a number of other pro-active SIM commands that are sent from the SIM<br/>
 to the modem, according to 3GPP TS 11.14.  We expect these to be handled by the<br/>
 modem itself, or the vendor plug-in - any responses that need to be sent to the<br/>
-modem are sent by the vendor plug-in.  They are of no interest to Qtopia's<br/>
+modem are sent by the vendor plug-in.  They are of no interest to Qt Extended's<br/>
 application layer and so do not appear in the SIM toolkit API.
 
 <table border=1><tbody>
@@ -183,17 +178,7 @@ application layer and so do not appear in the SIM toolkit API.
 <td> 3GPP TS 11.14, section 6.4.30</td>
 </tr>
 </tbody></table>
-<h3><a name=QTOPIA-1539>Play Tone (QTOPIA-1539)</a></h3>
-<p>Tones are not currently played in response to <tt>PLAY TONE</tt>. To implement this,<br/>
-requires a database of standard tones that can be consulted and configured.<br/>
-Other programs require these tones also;  the standard tones that SIM Toolkit<br/>
-requires are listed above in the  <b>Features</b> section.
-
-<p>Update: it doesn't make much sense to allow these tones to be configured by the user.<br/>
-Systems integrators may want to change the standard tones to local equivalents,<br/>
-but there isn't that many alternatives to "dial tone", "busy", etc, and the GSM specs<br/>
-are fairly insistent as to the specific tones to use.</p>
-<h3><a name=QTOPIA-1529>Play Tone (QTOPIA-1529)</a></h3>
+<h3><a name=QTOPIA-1529>Play Tone</a></h3>
 <p>The SIM toolkit application can request that the application play a short tone<br/>
 from the following list:
 
@@ -213,22 +198,22 @@ from the following list:
 
 
 <p>This feature handles <tt>PLAY TONE</tt> (3GPP TS 11.14, section 6.4.5).</p>
-<h3><a name=QTOPIA-1530>Refresh (QTOPIA-1530)</a></h3>
-<p>This feature handles <tt>REFRESH</tt> (3GPP TS 11.14, section 6.4.7). It is assumed that the modem performs the refresh.   Applications are notified of the refresh however at present, Qtopia applications are not required to action the notification, and simply ignore it.
-<h3><a name=QTOPIA-1538>Refresh Applications (QTOPIA-1538)</a></h3>
-<p>As per Features descriptions above, applications are notified of the refresh however at present, Qtopia applications are not required to action the notification, and simply ignore it. The must however do some things - eg. re-read phone book?
-<h3><a name=QTOPIA-1531>Send Messages (QTOPIA-1531)</a></h3>
+<h3><a name=QTOPIA-1530>Refresh</a></h3>
+<p>This feature handles <tt>REFRESH</tt> (3GPP TS 11.14, section 6.4.7). It is assumed that the modem performs the refresh.   Applications are notified of the refresh however at present, Qt Extended applications are not required to action the notification, and simply ignore it.
+<h3><a name=QTOPIA-1538>Refresh Applications</a></h3>
+<p>As per Features descriptions above, applications are notified of the refresh however at present, Qt Extended applications are not required to action the notification, and simply ignore it. The must however do some things - eg. re-read phone book?
+<h3><a name=QTOPIA-1531>Send Messages</a></h3>
 <p>SIM toolkit applications can send various message types to the network via<br/>
 SMS, Supplementary Services (SS) or Unstructured Supplementary Services Data (USSD).
 
 <p>It is assumed that the modem or the vendor plug-in performs the send<br/>
-operation, and all that is required by Qtopia is to display a user-visible text string<br/>
+operation, and all that is required by Qt Extended is to display a user-visible text string<br/>
 while the send is in progress.</p>
 
 <p>This feature handles <tt>SEND SHORT MESSAGE</tt> (3GPP TS 11.14, section 6.4.10),<br/>
 <tt>SEND SS</tt> (3GPP TS 11.14, section 6.4.11), and <tt>SEND USSD</tt> (3GPP TS 11.14,<br/>
 section 6.4.12).</p>
-<h3><a name=QTOPIA-1533>Set-up Event List (QTOPIA-1533)</a></h3>
+<h3><a name=QTOPIA-1533>Set-up Event List</a></h3>
 <p>The SIM toolkit application can request that it be notified when the system<br/>
 is idle or there is user activity.  This features handles <tt>SET UP EVENT LIST</tt><br/>
 (3GPP TS 11.14, section 6.4.16).  The application layer is notified<br/>
@@ -240,15 +225,15 @@ IdleScreen and UserActivity, which indicate when the screen is idle, and when th
 user starts performing some activity again.</p>
 
 <p>Many events, particularly call-related events, are handled internally by the modem<br/>
-and so Qtopia does not have any special handling for them.  If the modem does not<br/>
+and so Qt Extended does not have any special handling for them.  If the modem does not<br/>
 handle these events, the modem vendor plug-in is expected to handle them.</p>
-<h3><a name=QTOPIA-1534>Set-up Idle Mode Text (QTOPIA-1534)</a></h3>
+<h3><a name=QTOPIA-1534>Set-up Idle Mode Text</a></h3>
 <p>The SIM toolkit application can request that a particular text string be<br/>
 displayed on the phone's home screen whenever the system is idle.  This<br/>
 feature handles <tt>SET UP IDLE MODE TEXT</tt> (3GPP TS 11.14, section 6.4.22).<br/>
 There is an API to send this text string to the application layer but<br/>
-no Qtopia applications currently display the string.
-<h3><a name=QTOPIA-1525>SIM Commands (QTOPIA-1525)</a></h3>
+no Qt Extended applications currently display the string.
+<h3><a name=QTOPIA-1525>SIM Commands</a></h3>
 <p>The following SIM commands are supported:
 
 <table border=1><tbody>
@@ -328,9 +313,80 @@ no Qtopia applications currently display the string.
 <td> GSM TS 11.14, section 6.4.8</td>
 </tr>
 </tbody></table>
+<h3><a name=QTOPIA-7678>SIM Toolkit extensions for USAT</a></h3>
+<p><h4><a name="Introduction"></a>Introduction</h4>
+
+<p>USAT contains some extensions to basic SAT:</p>
+
+<ul>
+	<li>Support for colors and text formatting rules in all user-visible text fields (can be handled by translation to HTML).</li>
+	<li>Additional commands for services and multimedia messaging.</li>
+	<li>New bearers for channel commands.</li>
+</ul>
+
+
+<h4><a name="NewCommandsforUSAT"></a>New Commands for USAT</h4>
+
+<p>The following new commands from <span class="nobr"><a href="http://webapp.etsi.org/exchangefolder/ts_102223v070801p.pdf">ETSI TS 102 223<sup></sup></a></span> are supported in the SIM toolkit API's.  Whether these commands are supported on a specific Qt Extended device or not depends upon the GSM or 3G modem that the device is using.  Older modems may not support these commands.</p>
+
+<h5><a name="SERVICESEARCH"></a>SERVICE SEARCH</h5>
+
+<p>This command is used to search for the availability of a service in the environment of the terminal.  This is typically used to access the services on devices that are connected using Bluetooth or IrDA.</p>
+
+<h5><a name="GETSERVICEINFORMATION"></a>GET SERVICE INFORMATION</h5>
+
+<p>This command is used to look for the complete service record related to a service.  By service record, it is meant all information that allows the SIM to precisely define the service.  This is typically used to get information about services on devices that are connected using Bluetooth or IrDA.</p>
+
+<h5><a name="DECLARESERVICE"></a>DECLARE SERVICE</h5>
+
+<p>This command allows the SIM to download the services that the card provides as a server into the terminal's service database. The declaration is to be made on a service by service basis, at set up time (e.g. after the profile download). The SIM  indicates whether the terminal is required to add a new service in the terminal service database or to remove a service from the terminal service database.  This is typically used by SIM's that wish to provide services to other devices that are connected using Bluetooth or IrDA.</p>
+
+<h5><a name="SETFRAMES"></a>SET FRAMES</h5>
+
+<p>This command instructs the terminal to divide the terminal's screen into multiple, scrollable rectangular regions called frames in order to present multiple information at once.  Other USAT commands have a frame identifier associated with them that indicates which frame to display the information within.</p>
+
+<h5><a name="GETFRAMESTATUS"></a>GET FRAME STATUS</h5>
+
+<p>This command instructs the terminal to provide status information on its support for frames.</p>
+
+<h5><a name="RETRIEVEMULTIMEDIAMESSAGE"></a>RETRIEVE MULTIMEDIA MESSAGE</h5>
+
+<p>This command retrieves a multimedia MMS message and returns it to the SIM.</p>
+
+<h5><a name="SUBMITMULTIMEDIAMESSAGE"></a>SUBMIT MULTIMEDIA MESSAGE</h5>
+
+<p>This command allows a SIM to submit a multimedia MMS message to the network.</p>
+
+<h5><a name="DISPLAYMULTIMEDIAMESSAGE"></a>DISPLAY MULTIMEDIA MESSAGE</h5>
+
+<p>This command instructs the terminal to display a specific multimedia MMS message on the terminal's display.</p>
+
+<h4><a name="NewAttributesforUSAT"></a>New Attributes for USAT</h4>
+
+<p>Commands that involve the display of text can have a Text Attribute block associated with them according to <span class="nobr"><a href="http://webapp.etsi.org/exchangefolder/ts_102223v070801p.pdf">ETSI TS 102 223<sup></sup></a></span>.  This is now supported by the SIM toolkit API for all relevant commands.  Because text attributes can be difficult to decode, helper functions are provided to convert the text strings into HTML for easier display in the user interface.</p>
+
+<p>Commands that interact with the user can now have a frame identifier associated with them, to allow multiple commands to be presented to the user in different parts of the screen.  This information can be accessed via the SIM toolkit API using the extension data mechanism and a tag value of 0x68 or 0xE8 (hexadecimal).</p>
+
+<h4><a name="UserInterfaceSupportforUSAT"></a>User Interface Support for USAT</h4>
+
+<p>Text attributes are supported for all relevant commands.</p>
+
+<p>Frame identifiers are not currently supported in the user interface.  It is assumed that there is a single frame for the display of all SIM toolkit commands.  It is possible for an alternative user interface to be written that supports frames using the provided API's, but it has not been done at this time.</p>
+
+<p>Service and multimedia message commands are supported in the API, but there is no user interface support for these features in this version.</p>
+
+<h4><a name="Standards"></a>Standards</h4>
+
+<ul>
+	<li><span class="nobr"><a href="http://www.3gpp.org/ftp/Specs/html-info/31111.htm">3GPP TS 31.111<sup></sup></a></span>, Universal Subscriber Identity Module (USIM) Application Toolkit (USAT)</li>
+	<li><span class="nobr"><a href="http://www.3gpp.org/ftp/Specs/html-info/31124.htm">3GPP TS 31.124<sup></sup></a></span>, Mobile Equipment (ME) conformance test specification; Universal Subscriber Identity Module; Application Toolkit (USAT) conformance test specification</li>
+	<li><span class="nobr"><a href="http://www.3gpp.org/ftp/Specs/html-info/23040.htm">3GPP TS 23.040<sup></sup></a></span>, Technical realization of the Short Message Service (SMS) <span class="error">&#91;For text attribute information&#93;</span></li>
+	<li><span class="nobr"><a href="http://webapp.etsi.org/exchangefolder/ts_102223v070801p.pdf">ETSI TS 102 223<sup></sup></a></span>, Smart Cards; Card Application Toolkit (CAT)</li>
+	<li><span class="nobr"><a href="http://webapp.etsi.org/exchangefolder/ts_101220v080000p.pdf">ETSI TS 101 220<sup></sup></a></span> Smart Cards; ETSI numbering system for telecommunication application providers (Release 8)</li>
+</ul>
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div>

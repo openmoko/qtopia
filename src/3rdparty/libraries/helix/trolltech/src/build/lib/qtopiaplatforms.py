@@ -1,4 +1,4 @@
-# Author: Trolltech
+# Author: Qt Extended
 #
 # Licensees holding a valid license agreement for the use of the
 # Helix DNA code base may use this file in accordance with that license.
@@ -6,7 +6,7 @@
 # This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 # WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Contact info@trolltech.com if any conditions of this licensing are
+# Contact info@qtextended.org if any conditions of this licensing are
 # not clear to you.
 #
 
@@ -59,3 +59,12 @@ def initialize():
         distribution_id = 'linux-2.6-libc6-arm11-cross-gcc4',
         family_list = ['unix', 'linux', 'linux2', 'linux-glibc-2.0',
                        'linux-arm', 'linux-2.6-libc6-arm11-cross-gcc4'] ))
+
+    AddPlatform(Platform(
+        id = 'linux-2.2-libc6-armv6j-cross-gcc32',
+        platform = 'linux2',
+        arch = 'arm',
+        distribution_id = 'linux-2.2-libc6-armv6j-cross-gcc32',
+        family_list = ['unix', 'linux', 'linux2', 'linux-glibc-2.0',
+                       'linux-arm', 'linux-2.2-libc6-armv6j-cross-gcc32'] ))
+

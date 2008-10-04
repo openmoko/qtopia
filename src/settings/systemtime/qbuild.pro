@@ -1,0 +1,12 @@
+TEMPLATE=app
+CONFIG+=qtopia singleexec
+TARGET=systemtime
+
+CONFIG+=quicklaunch
+
+include(systemtime.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

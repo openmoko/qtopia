@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,10 +22,11 @@
 
 #include <qdialog.h>
 
-#include "ui_confrecorderbase.h"
-
 struct QualitySetting;
 class MediaRecorderPluginList;
+class QStorageDeviceSelector;
+class QComboBox;
+class QFileSystem;
 
 
 class ConfigureRecorder : public QDialog
@@ -40,27 +39,29 @@ public:
 
 public:
     int currentQuality() const { return quality; }
-
+    const QFileSystem* fileSystem();
+    QString documentPath();
     void processPopup();
-
-public slots:
-    void setQuality( int index );
     void saveConfig();
 
 protected slots:
+    void setQuality( int index );
     void setChannels( int index );
     void setSampleRate( int index );
     void setFormat( int index );
 
 private:
-    void updateConfig( int channels, int frequency, const QString& mimeType, const QString& formatTag );
     void loadConfig();
 
-private:
-    Ui::ConfigureRecorderBase *conf;
     QualitySetting *qualities;
     MediaRecorderPluginList *plugins;
     int quality;
+
+    QComboBox *presetQualities;
+    QComboBox *channels;
+    QComboBox *sampleRate;
+    QComboBox *format;
+    QStorageDeviceSelector *storageLocation;
 };
 
 #endif

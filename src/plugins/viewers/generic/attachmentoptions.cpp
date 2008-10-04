@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -289,6 +287,7 @@ AttachmentOptions::AttachmentOptions(QWidget* parent)
       _sizeLabel(new QLabel(tr("Size"))),
       _size(new QLabel()),
       _view(new QPushButton()),
+      _viewer(new QLabel()),
       _save(new QPushButton()),
       _document(new QLabel()),
       _part(0),
@@ -314,6 +313,8 @@ AttachmentOptions::AttachmentOptions(QWidget* parent)
 
     connect(_view, SIGNAL(clicked()), this, SLOT(viewAttachment()));
     vb->addWidget(_view);
+
+    vb->addWidget(_viewer);
 
     _save->setText(tr("Add to documents"));
     connect(_save, SIGNAL(clicked()), this, SLOT(saveAttachment()));
@@ -431,12 +432,29 @@ void AttachmentOptions::setAttachment(QMailMessagePart& msgPart)
         sizeText = humanReadable(size);
     _size->setText(sizeText);
 
-    if (_class == Media)
-        _view->setText(tr("Play"));
-    else
-        _view->setText(tr("View"));
+    _viewer->setVisible(false);
+    _view->setVisible(false);
 
-    _view->setVisible(!isDeleted && (_class != Multipart));
+    if (!isDeleted) {
+        if (_class == Media) {
+            _view->setText(tr("Play"));
+            _view->setVisible(true);
+        } else if (_class == Text || _class == Image) {
+            _view->setText(tr("View"));
+            _view->setVisible(true);
+        } else {
+            // See if there is a viewer available for this type
+            QMimeType mt(_part->contentType().content());
+            if (!mt.id().isEmpty() && !QMimeType::applicationsFor(mt).isEmpty()) {
+                _view->setText(tr("View"));
+                _view->setVisible(true);
+            } else {
+                _viewer->setText("<i><small><center>" + tr("No viewer available") + "</center></small></i>");
+                _viewer->setVisible(true);
+            }
+        }
+    }
+
     _sizeLabel->setVisible(!isDeleted && (size > 0));
     _size->setVisible(!isDeleted && (size > 0));
     _save->setVisible(!isDocument && (size > 0));
@@ -473,9 +491,27 @@ void AttachmentOptions::viewAttachment()
                 if (_decodedData.isNull())
                     _decodedData = _part->body().data(QMailMessageBody::Decoded);
 
-                QString templateText(QDir::tempPath() + "/qtmail-XXXXXX");
-                if (!mt.extensions().isEmpty())
+                QString templateText(QDir::tempPath() + "/genericviewer-XXXXXX");
+                if (!mt.extensions().isEmpty()) {
                     templateText.append(".").append(mt.extensions().last());
+                } else {
+                    // Try to get an extension from the part name
+                    QString extension;
+                    QString filename = _part->contentDisposition().filename();
+                    int index = -1;
+                    if ((index = filename.lastIndexOf('.')) != -1) {
+                        extension = filename.mid(index + 1);
+                    } else {
+                        filename = _part->contentType().name();
+                        if ((index = filename.lastIndexOf('.')) != -1) {
+                            extension = filename.mid(index + 1);
+                        }
+                    }
+
+                    if (!extension.isEmpty()) {
+                        templateText.append(".").append(extension);
+                    }
+                }
 
                 tempFile = new QTemporaryFile();
                 tempFile->setFileTemplate(templateText);

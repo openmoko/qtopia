@@ -1,5 +1,5 @@
-#include <linux/types.h>
-#include <linux/time.h>
+#include <sys/types.h>
+#include <sys/time.h>
 #include <linux/videodev.h>
 #include <linux/videodev2.h>
 

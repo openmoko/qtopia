@@ -1,68 +1,80 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
+#ifndef ACCOUNTSETTINGS_H
+#define ACCOUNTSETTINGS_H
+
 #include <qdialog.h>
 #include <qmap.h>
+#include <QMailAccountId>
+#include <QMailRetrievalAction>
+#include <QModelIndex>
 
-class AccountList;
-class QMailAccount;
 class EmailClient;
 class StatusDisplay;
+class QMailAccount;
 class QMenu;
-class QListWidget;
-class QListWidgetItem;
 class QAction;
+class QSmoothList;
+class QMailAccountListModel;
 
 class AccountSettings : public QDialog
 {
     Q_OBJECT
 public:
-    AccountSettings(AccountList *al, EmailClient *parent, const char *name=0, bool modal=true);
+    AccountSettings(EmailClient *parent, const char *name=0, bool modal=true, const QMailAccountId& defaultId = QMailAccountId());
+
+    QMailAccountId defaultAccountId() const;
 
 signals:
-    void changedAccount(QMailAccount *account);
-    void deleteAccount(QMailAccount *account);
+    void deleteAccount(const QMailAccountId &id);
 
 public slots:
     void addAccount();
 
+protected:
+    void showEvent(QShowEvent* e);
+    void hideEvent(QHideEvent* e);
+
 private slots:
-    void editAccount();
     void removeAccount();
-    void accountSelected(QListWidgetItem*);
-    void accountSelected(int idx);
-    void accountHighlighted(int idx);
+    void accountSelected(QModelIndex index);
+    void updateActions();
     void displayProgress(uint, uint);
+    void activityChanged(QMailServiceAction::Activity activity);
+    void retrieveFolders();
 
 private:
-    void populateAccountList();
-    void editAccount(QMailAccount *account, bool newAccount=false);
+    void editAccount(QMailAccount *account);
 
 private:
-    AccountList *accountList;
     QMap<int,int> listToAccountIdx;
-    QListWidget *accountListBox;
+    QMailAccountListModel *accountModel;
+    QSmoothList *accountView;
     QMenu *context;
     QAction *addAccountAction;
     QAction *removeAccountAction;
     StatusDisplay *statusDisplay;
+    QMailAccountId defaultId;
+    QPoint cPos;
+    bool preExisting;
+    QMailRetrievalAction *retrievalAction;
 };
 
+#endif

@@ -1,25 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-
 #include "alarm.h"
+#include "ringcontrol.h"
 
 #include <qtopiaapplication.h>
 #include <qtopiaipcenvelope.h>
@@ -31,7 +29,8 @@
 #include <qlayout.h>
 #include <qtimer.h>
 #include <QDateTimeEdit>
-#include <QSoundControl>
+#include <QSoftMenuBar>
+#include <QKeyEvent>
 
 #ifdef Q_WS_X11
 #include <qcopchannel_x11.h>
@@ -41,13 +40,64 @@
 
 static const int magic_daily = 2292922;     //type for daily alarm
 
-void Alarm::setRingPriority(bool v)
+// =====================================================================
+
+class AlarmDialog : public QDialog
 {
-    QtopiaIpcEnvelope   e("QPE/MediaServer", "setPriority(int)");
-    e << ((v)?QSoundControl::RingTone : QSoundControl::Default);
-} 
+    Q_OBJECT
+public:
+    AlarmDialog(int snooze, QWidget *parent)
+        : QDialog(parent)
+    {
+        setWindowTitle(tr("Clock"));
+        QSoftMenuBar::setLabel( this, Qt::Key_Back, "back",  tr("Dismiss"));
+        setSnooze(snooze);
+    }
 
+    ~AlarmDialog() {}
 
+    void setSnooze(int snooze)
+    {
+        canSnooze = (snooze > 0);
+        if (canSnooze)
+            QSoftMenuBar::setLabel(this, Qt::Key_Select, "select",  tr("Snooze"));
+        else
+            QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
+    }
+
+    QWidget *snoozer;
+
+signals:
+    void snooze();
+
+private:
+    void keyPressEvent(QKeyEvent *e)
+    {
+        if (canSnooze && e->key() == Qt::Key_Select) {
+            e->accept();
+            emit snooze();
+            accept();
+            return;
+        }
+        e->ignore();
+    }
+
+    void mousePressEvent(QMouseEvent *e)
+    {
+        if (canSnooze) {
+            // Clicking on the bell also snoozes
+            if (snoozer->rect().contains(snoozer->mapFromGlobal(e->globalPos()))) {
+                e->accept();
+                emit snooze();
+                accept();
+            }
+        }
+    }
+
+    bool canSnooze;
+};
+
+// =====================================================================
 
 Alarm::Alarm( QWidget * parent, Qt::WFlags f )
     : QWidget( parent, f ), init(false) // No tr
@@ -59,14 +109,14 @@ Alarm::Alarm( QWidget * parent, Qt::WFlags f )
     ampm = QTimeString::currentAMPM();
     weekStartsMonday = Qtopia::weekStartsOnMonday();
 
-    alarmt = new QTimer( this );
-    connect( alarmt, SIGNAL(timeout()), SLOT(alarmTimeout()) );
+    alarmt = new RingControl( this );
 
     connect( qApp, SIGNAL(timeChanged()), SLOT(applyDailyAlarm()) );
     connect( qApp, SIGNAL(clockChanged(bool)), this, SLOT(changeClock(bool)) );
 
     connect( alarmEnabled, SIGNAL(toggled(bool)), this, SLOT(setDailyEnabled(bool)) );
-    connect( changeAlarmDaysButton, SIGNAL(clicked()), this, SLOT(changeAlarmDays()) );
+    connect( alarmDaysEdit, SIGNAL(clicked()), this, SLOT(changeAlarmDays()) );
+    QSoftMenuBar::setLabel(alarmDaysEdit, Qt::Key_Select, "select", tr("Change"));
 
     QSettings cConfig("Trolltech","Clock"); // No tr
     cConfig.beginGroup( "Daily Alarm" );
@@ -81,6 +131,7 @@ Alarm::Alarm( QWidget * parent, Qt::WFlags f )
     alarmEnabled->setChecked( initEnabled );
     int m = cConfig.value( "Minute", 0 ).toInt();
     int h = cConfig.value( "Hour", 7 ).toInt();
+    snooze = cConfig.value( "Snooze", 0 ).toInt();
 
     if (ampm)
         alarmTimeEdit->setDisplayFormat("h:mm ap");
@@ -88,12 +139,14 @@ Alarm::Alarm( QWidget * parent, Qt::WFlags f )
         alarmTimeEdit->setDisplayFormat("hh:mm");
     alarmTimeEdit->setTime( QTime( h, m ) );
 
+    snoozeTimeSpinner->setValue(snooze);
+
     connect( alarmTimeEdit, SIGNAL(editingFinished()), this, SLOT(applyDailyAlarm())) ;
+    connect(snoozeTimeSpinner, SIGNAL(valueChanged(int)), this, SLOT(applySnooze(int)));
 
     alarmDaysEdit->installEventFilter(this);
 
     init = true;
-    QtopiaApplication::instance()->registerRunningTask(QLatin1String("waitForTimer"), this);
 }
 
 Alarm::~Alarm()
@@ -116,38 +169,58 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
 {
     QTime theTime( when.time() );
     if ( type == magic_daily ) {
+        // Make sure the screen comes on
+        QtopiaApplication::setPowerConstraint(QtopiaApplication::DisableLightOff);
+        // but goes off again in the right number of seconds
+        QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
         QString ts = QTimeString::localHM(theTime);
         QString msg = ts + "\n" + tr( "(Daily Alarm)" );
-        setRingPriority(true);
-        Qtopia::soundAlarm();
-        alarmCount = 0;
-        alarmt->start( 2000 );
+        alarmt->setRepeat(20);
+        alarmt->start();
         if ( !alarmDlg ) {
-            alarmDlg = new QDialog( this );
-            alarmDlg->setWindowTitle( tr("Clock") );
+            alarmDlg = new AlarmDialog(snooze, this);
+            connect(alarmDlg, SIGNAL(snooze()), this, SLOT(setSnooze()));
             QVBoxLayout *vb = new QVBoxLayout(alarmDlg);
             vb->setMargin(6);
             vb->addStretch(1);
-            QLabel *l = new QLabel( alarmDlg );
-            QIcon icon(":icon/alarmbell");
-            QPixmap pm = icon.pixmap(icon.actualSize(QSize(100,100)));
-            l->setPixmap(pm);
-            l->setAlignment( Qt::AlignCenter );
-            vb->addWidget(l);
+            QWidget *w = new QWidget;
+            {
+                QHBoxLayout *hb = new QHBoxLayout(w);
+                QFrame *frame = new QFrame;
+                hb->addStretch(1);
+                hb->addWidget(frame);
+                hb->addStretch(1);
+                alarmDlg->snoozer = frame;
+                frame->setFrameStyle(QFrame::Box);
+                QVBoxLayout *vb = new QVBoxLayout( frame );
+                QLabel *l = new QLabel( alarmDlg );
+                QIcon icon(":icon/alarmbell");
+                int height = QFontMetrics(QFont()).height();
+                QPixmap pm = icon.pixmap(icon.actualSize(QSize(height * 5, height * 5)));
+                l->setPixmap(pm);
+                l->setAlignment( Qt::AlignCenter );
+                vb->addWidget(l);
+                l = new QLabel;
+                l->setText( tr("Snooze") );
+                l->setAlignment( Qt::AlignCenter );
+                vb->addWidget(l);
+            }
+            vb->addWidget(w);
             alarmDlgLabel = new QLabel( msg, alarmDlg );
             alarmDlgLabel->setAlignment( Qt::AlignCenter );
             vb->addWidget(alarmDlgLabel);
             vb->addStretch(1);
         } else {
+            alarmDlg->setSnooze(snooze);
             alarmDlgLabel->setText(msg);
         }
         // Set for tomorrow, so user wakes up every day, even if they
         // don't confirm the dialog.
         applyDailyAlarm();
         if ( !alarmDlg->isVisible() ) {
-            QtopiaApplication::execDialog(alarmDlg);
+            alarmDlg->showMaximized();
+            alarmDlg->exec();
             alarmt->stop();
-            setRingPriority(false);
         }
     }
 }
@@ -156,18 +229,6 @@ void Alarm::setDailyEnabled(bool enableDaily)
 {
     alarmEnabled->setChecked( enableDaily );
     applyDailyAlarm();
-}
-
-void Alarm::alarmTimeout()
-{
-    if ( alarmCount < 20 ) {
-        Qtopia::soundAlarm();
-        alarmCount++;
-    } else {
-        setRingPriority(false);
-        alarmCount = 0;
-        alarmt->stop();
-    }
 }
 
 QDateTime Alarm::nextAlarm( int h, int m )
@@ -219,13 +280,11 @@ void Alarm::applyDailyAlarm()
         initEnabled = enableDaily;
     }
 
-    Qtopia::deleteAlarm(QDateTime(), "QPE/Application/clock",
-            "alarm(QDateTime,int)", magic_daily);
+    bool addAlarm = false;
     if ( alarmEnabled->isChecked() && exclDays.size() < 7 ) {
-        QDateTime when = nextAlarm( hour, minute );
-        Qtopia::addAlarm(when, "QPE/Application/clock",
-                            "alarm(QDateTime,int)", magic_daily);
+        addAlarm = true;
     }
+    setAlarm(nextAlarm(hour, minute), addAlarm);
 }
 
 bool Alarm::eventFilter(QObject *o, QEvent *e)
@@ -314,7 +373,6 @@ void Alarm::changeAlarmDays()
             layout.addWidget(c);
     }
 
-    layout.setSpacing(9);
     layout.setMargin(6);
     dlg.setLayout(&layout);
     dlg.setWindowTitle(tr("Set alarm days"));
@@ -341,5 +399,29 @@ void Alarm::changeAlarmDays()
     }
 }
 
+void Alarm::setSnooze()
+{
+    if (snooze > 0) {
+        setAlarm(QDateTime::currentDateTime().addSecs(snooze*60), true);
+    }
+}
+
+void Alarm::applySnooze(int time)
+{
+    snooze = time;
+    QSettings config("Trolltech","Clock");
+    config.beginGroup( "Daily Alarm" );
+    config.setValue( "Snooze", snooze );
+}
+
+void Alarm::setAlarm(QDateTime when, bool addAlarm)
+{
+    Qtopia::deleteAlarm(QDateTime(), "QPE/Application/clock",
+                        "alarm(QDateTime,int)", magic_daily);
+    if (addAlarm) {
+        Qtopia::addAlarm(when, "QPE/Application/clock",
+                         "alarm(QDateTime,int)", magic_daily);
+    }
+}
 
 #include "alarm.moc"

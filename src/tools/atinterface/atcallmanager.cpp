@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -82,7 +80,6 @@ public:
     bool didStateChange( int id, AtCallManager::CallState state );
     void setWaiting( int id );
 
-    
     bool incoming_call;  // whether the call is incoming (or outgoing)
     bool gprs;           // whether the call is a GPRS call
 };
@@ -230,6 +227,8 @@ AtCallManager::AtCallManager( QObject *parent )
     d->callManager = new QPhoneCallManager( this );
     connect( d->callManager, SIGNAL(newCall(QPhoneCall)),
              this, SLOT(newCall(QPhoneCall)) );
+    connect( d->callManager, SIGNAL(statesChanged(QList<QPhoneCall>)),
+             this, SLOT(callManagerStatesChanged()) );
 }
 
 AtCallManager::~AtCallManager()
@@ -392,6 +391,15 @@ QAtResult::ResultCode AtCallManager::hangup( int callID )
     return QAtResult::OK;
 }
 
+QAtResult::ResultCode AtCallManager::hangupIncomingCall()
+{
+    QPhoneCall call = d->callForState( QPhoneCall::Incoming );
+    if ( ! call.isNull() ) {
+        call.hangup();
+    }
+    return QAtResult::OK;
+}
+
 QAtResult::ResultCode AtCallManager::hangupHeldCalls()
 {
     QPhoneCall call = d->callForState( QPhoneCall::Hold );
@@ -455,7 +463,7 @@ QAtResult::ResultCode AtCallManager::tone( const QString& value )
     return QAtResult::OK;
 }
 
-void AtCallManager::newCall( QPhoneCall call )
+void AtCallManager::newCall( const QPhoneCall &call )
 {
     call.connectStateChanged( this, SLOT(callStateChanged(QPhoneCall)) );
     callStateChanged( call );
@@ -590,6 +598,11 @@ void AtCallManager::callStateChanged( const QPhoneCall& call )
         emit stateChanged( id, reportState, call.number(), call.callType() );
     }
 
+    notifyCallStates();
+}
+
+void AtCallManager::notifyCallStates()
+{
     // Report the current "on call" state.
     if ( d->haveCalls( QPhoneCall::Connected ) ||
          d->haveCalls( QPhoneCall::Hold ) ) {
@@ -625,6 +638,13 @@ void AtCallManager::callStateChanged( const QPhoneCall& call )
 void AtCallManager::repeatRing()
 {
     emit ring( d->ringingCall.number(), d->ringingCall.callType() );
+}
+
+void AtCallManager::callManagerStatesChanged()
+{
+    disconnect( d->callManager, SIGNAL(statesChanged(QList<QPhoneCall>)),
+             this, SLOT(callManagerStatesChanged()) );
+    emit callStateInitialized();
 }
 
 int AtCallManager::clccCallType( const QString& callType )

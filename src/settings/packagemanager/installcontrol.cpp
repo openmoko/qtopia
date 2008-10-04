@@ -1,30 +1,26 @@
 /****************************************************************************
-// create links for the icon, binary
- **
- ** Copyright (C) 2000-2008 TROLLTECH ASA All rights reserved.
- **
- ** This file is part of the Opensource Edition of the Qtopia Toolkit.
- **
- ** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file is part of the Qt Extended Opensource Package.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Copyright (C) 2008 Trolltech ASA.
+**
+** Contact: Qt Extended Information (info@qtextended.org)
+**
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
+**
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
 **
- **
- ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
- ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- **
- ****************************************************************************/
+****************************************************************************/
 
 #include "installcontrol.h"
 #include "packagecontroller.h"
-#include "packageview.h"
 #include "sandboxinstall.h"
-#include "version.h"
+#include "packageversion.h"
 #ifndef QT_NO_SXE
 #include <qtransportauth_qws.h>
 #include "qpackageregistry.h"
@@ -62,7 +58,7 @@ SimpleErrorReporter::SimpleErrorReporter( ReporterType type, const QString &pkgN
         case ( Uninstall ):
             subject = QObject::tr( "Uninstall Error" );
             prefix = QObject::tr("%1:", "%1 = package name")
-                .arg( packageName ) + QLatin1String(" ");
+                    .arg( packageName ) + QLatin1String(" ");
             break;
         case ( Other ):
             subject = QObject::tr( "Warning" );
@@ -76,8 +72,8 @@ SimpleErrorReporter::SimpleErrorReporter( ReporterType type, const QString &pkgN
 void SimpleErrorReporter::doReportError( const QString &simpleError, const QString &detailedError )
 {
     QString userVisibleError = prefix + simpleError;
-    QString logError = userVisibleError + "\n" + detailedError;  
-    
+    QString logError = userVisibleError + "\n" + detailedError;
+
     QMessageBox::warning( 0, subject, userVisibleError );
     qWarning() << qPrintable(logError);
 }
@@ -89,7 +85,7 @@ InstallControl::InstallControl()
     QString confPath = QPackageRegistry::getInstance()->sxeConfPath();
     QTransportAuth *a = QTransportAuth::getInstance();
     a->setKeyFilePath( confPath );
-#endif 
+#endif
 }
 
 InstallControl::~InstallControl()
@@ -99,10 +95,15 @@ InstallControl::~InstallControl()
 /* Returns the path of where the package was downloaded to.
    (The entire file path is returned not just the directory)
 */
-QString InstallControl::downloadedFileLoc()
+QString InstallControl::downloadedPkgPath()
 {
-    static const QString location=Qtopia::tempDir() + "/package";
-    return location;
+    static QString path;
+    if (path.isEmpty()) {
+        path = Qtopia::packagePath() + "/tmp";
+        QDir::root().mkdir(Qtopia::packagePath() + "/tmp");
+        path += "/package";
+    }
+    return path;
 }
 
 /*!
@@ -114,22 +115,22 @@ QString InstallControl::downloadedFileLoc()
   If the Qtopia::packagePath() directory is not on the file-system of
   the media chosen by setInstallMedia() then after the install to the
   media file-system, links are created in the Qtopia::packagePath()
-  so that Qtopia's launching and resource systems will work.
+  so that the Qt Extended launching and resource systems will work.
 
   If the package is a system package then is then re-installed under the
-  standard Qtopia directory tree, under the install destination, after the
+  standard Qt Extended directory tree, under the install destination, after the
   system package verification has been done.  This includes certificate
   validation and other checks.
 */
 bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, const QString &md5Sum, ErrorReporter *reporter ) const
 {
-    QString packageFile = downloadedFileLoc();
+    QString packageFile = downloadedPkgPath();
 
     if (  QFile( packageFile).size() != pkg.size.toLongLong() )
     {
         if ( reporter )
         {
-            reporter->reportError( PackageView::tr("Downloaded package size does not match advertised package size" ),
+            reporter->reportError( QObject::tr("Downloaded package size does not match advertised package size" ),
                             QString( "InstallControl:installPackage:- Downloaded package size does not match "
                                      "advertised package size, downloaded size=%1, advertised size=%2" )
                                 .arg(QFile(packageFile).size() ).arg( pkg.size ) );
@@ -141,9 +142,9 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     {
         qLog(Package) << "MD5 Sum mismatch! Header MD5:" << pkg.md5Sum << "Package MD5:" << md5Sum;
 
-        QString simpleError = PackageView::tr( "Invalid package or package was corrupted. "
+        QString simpleError = QObject::tr( "Invalid package or package was corrupted. "
                                             "Re-download or contact package supplier");
-        QString detailedError = PackageView::tr( "InstallControl::installPackage:- MD5 Sum mismatch, "
+        QString detailedError = QObject::tr( "InstallControl::installPackage:- MD5 Sum mismatch, "
                                                     "Descriptor MD5: %1, Package MD5: %2")
                                 .arg( pkg.md5Sum ).arg( md5Sum ); 
         if( reporter )
@@ -164,15 +165,15 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     QString dataTarGz = job.destinationPath() + "/data.tar.gz";
 
     // install to directory
-    qlonglong expectedSize = SizeUtils::parseInstalledSize( pkg.installedSize );
-    qlonglong extractedSize =targz_archive_size( packageFile );
+    qulonglong expectedSize = SizeUtils::parseInstalledSize( pkg.installedSize );
+    qulonglong extractedSize =targz_archive_size( packageFile );
 
 
     if ( extractedSize > expectedSize )
     {
         if ( reporter )
         {
-            reporter->reportError( PackageView::tr("Uncompressed package larger than advertised size" ),
+            reporter->reportError( QObject::tr("Uncompressed package larger than advertised size" ),
                             QString( "InstallControl:installPackage:- (maximum)expected uncompressed size: %1 "
                                      "uncompressed size: %2 (prior to extracting data.tar.gz)")
                                 .arg( expectedSize ).arg( extractedSize ) );
@@ -185,7 +186,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     {
         if ( reporter )
         {
-            reporter->reportError( PackageView::tr("Unable to unpack package, package may be invalid" ),
+            reporter->reportError( QObject::tr("Unable to unpack package, package is invalid" ),
                     QString( "Installcontrol:installpackage:- package qpk file is invalid, "
                         "Package must not contain device nodes, hard links, absolute paths or path references to parent "
                         "directories or symlinks which refer to absolute paths or parent directories" ) );
@@ -197,13 +198,16 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     {
         if( reporter )
         {
-            reporter->reportError( PackageView::tr( "Unable to unpack package, package may be invalid" ),
+            reporter->reportError( QObject::tr( "Unable to unpack package, package may be invalid" ),
                         QString( "InstallControl::installPackage:- Could not untar %1 to %2" )
                             .arg( packageFile )
                             .arg( job.destinationPath() ));
         }
         return false;
     }
+
+    QFile tmpPackage( packageFile );
+    tmpPackage.remove();
 
     // extract data part
     extractedSize += targz_archive_size( dataTarGz ) - QFile( dataTarGz).size();
@@ -212,7 +216,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     {
         if ( reporter )
         {
-            reporter->reportError( PackageView::tr("Uncompressed package larger than advertised size" ),
+            reporter->reportError( QObject::tr("Uncompressed package larger than advertised size" ),
                     QString( "Installcontrol:installpackage:- (maximum)expected uncompressed size: %1 "
                         "uncompressed size of qpk: %2 (after extracting data.tar.gz)")
                     .arg( expectedSize ).arg( extractedSize ) );
@@ -224,7 +228,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     {
         if ( reporter )
         {
-            reporter->reportError( PackageView::tr("Unable to unpack package, package may be invalid" ),
+            reporter->reportError( QObject::tr("Unable to unpack package, package is invalid" ),
                     QString( "Installcontrol:installpackage:- package's data.tar.gz is invalid "
                         "Package must not contain devices nodes, hard links, absolute paths or path references to parent "
                         "directories or symlinks which refer to absolute paths or parent directories" ) );
@@ -236,7 +240,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     {
         if( reporter )
         {
-            reporter->reportError( PackageView::tr( "Unable to unpack package, package may be invalid" ), 
+            reporter->reportError( QObject::tr( "Unable to unpack package, package may be invalid" ),
                         QString( "InstallControl::installPackage:- Could not untar %1 to %2" )
                             .arg( dataTarGz )
                             .arg( job.destinationPath() ));
@@ -248,8 +252,6 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
     QFile dataPackage( dataTarGz );
     dataPackage.remove();
 
-    QFile tmpPackage( packageFile );
-    tmpPackage.remove();
 
     if ( !verifyPackage( job.destinationPath(), pkg, reporter ))
         return false;
@@ -335,7 +337,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
     {
         if( reporter )
         {
-            QString simpleError = PackageView::tr("Invalid package, contact package supplier");
+            QString simpleError = QObject::tr("Invalid package, contact package supplier");
             QString detailedError = QLatin1String("InstallControl::verifyPackage:-" 
                                     "Error during reading of package information file: ") 
                                     + infoReader.getError();
@@ -349,7 +351,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
     {
         if( reporter )
         {
-            QString simpleError = PackageView::tr( "Incompatible package, contact package supplier");
+            QString simpleError = QObject::tr( "Incompatible package, contact package supplier");
             QString detailedError("InstallControl::verifyPackage:- Trying to install sxe package "
                                   "with a non-sxe configured qtopia" );
             reporter->reportError( simpleError, detailedError );
@@ -362,7 +364,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
     {
         if( reporter )
         {
-            QString simpleError = PackageView::tr( "Invalid package, security requirements differ from declared " 
+            QString simpleError = QObject::tr( "Invalid package, security requirements differ from declared "
                                                    "security requirements. Contact package supplier");
             QString detailedError("InstallControl::verifyPackage:- descriptor domain(s): %1, control file domain(s): %2");
             detailedError = detailedError.arg( pkg.domain ).arg( infoReader.domain() );
@@ -375,7 +377,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
     {
         if( reporter )
         {
-            QString simpleError = PackageView::tr( "Invalid package, contact package supplier" );
+            QString simpleError = QObject::tr( "Invalid package, contact package supplier" );
             QString detailedError("InstallControl::verifyPackage:- installed sizes inconsistent "
                                   " descriptor installed size: %1, control file installed size: %2 " );
             detailedError = detailedError.arg( pkg.installedSize ).arg( infoReader.installedSize() );
@@ -388,8 +390,8 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
     {
         if ( reporter )
         {
-           reporter->reportError( PackageView::tr( "Invalid package, contact package supplier" ),
-                PackageView::tr( "InstallControl::verifyPackage:- Control file should not contain md5" ));
+            reporter->reportError( QObject::tr( "Invalid package, contact package supplier" ),
+                QObject::tr( "InstallControl::verifyPackage:- Control file should not contain md5" ));
         }
         return false;
     }
@@ -401,7 +403,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
             QString detailedError( "InstallControl::verifyPackage:- Control file's qtopia version incompatible. "
                                    "Package's compatible Qtopia Versions %1, Qtopia Version %2");
             detailedError = detailedError.arg( infoReader.qtopiaVersion(), Qtopia::version() );
-            reporter->reportError( PackageView::tr( "Incompatible package, contact package supplier"), detailedError );
+            reporter->reportError( QObject::tr( "Incompatible package, contact package supplier"), detailedError );
         }
         return false;
     }
@@ -414,7 +416,7 @@ bool InstallControl::verifyPackage( const QString &packagePath, const InstallCon
             QString detailedError( "InstallControl::verifyPackage:- Package is not device compatible "
                                    "Package's compatible devices: %1, Qtopia's compatible devices %2");
             detailedError = detailedError.arg( infoReader.devices(), QTOPIA_COMPATIBLE_DEVICES );
-            reporter->reportError( PackageView::tr( "Package is not device compatible" ),
+            reporter->reportError( QObject::tr( "Package is not device compatible" ),
                             detailedError );
         }
         return false;

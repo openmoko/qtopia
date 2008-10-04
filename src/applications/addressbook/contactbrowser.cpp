@@ -1,25 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "contactbrowser.h"
+#include "qfielddefinition.h"
 
 #include "contactdocument.h"
 #include "ui_actiondialog.h"
@@ -38,7 +37,7 @@
 
 /* ContactBrowser */
 ContactBrowser::ContactBrowser( QWidget *parent, const char * objectName)
-    : QDLBrowserClient( parent, "contactnotes" ), mModel(0)
+    : QDLBrowserClient( parent, "contactnotes" )
 {
     setObjectName(objectName);
 
@@ -58,11 +57,6 @@ ContactBrowser::ContactBrowser( QWidget *parent, const char * objectName)
 
 ContactBrowser::~ContactBrowser()
 {
-}
-
-void ContactBrowser::setModel(QContactModel *model)
-{
-    mModel = model;
 }
 
 void ContactBrowser::setSource(const QUrl & name)
@@ -96,7 +90,10 @@ void ContactBrowser::linkHighlighted(const QString& link)
                 setEditFocus(true);
                 QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Select);
                 break;
-
+            case ContactDocument::CustomLink:
+                setEditFocus(true);
+                QSoftMenuBar::setLabel(this, Qt::Key_Select, "activate", tr("Activate"));
+                break;
         }
     }
     mLink = link;
@@ -108,7 +105,7 @@ void ContactBrowser::init( const QContact& contact, ContactDocument::ContactDocu
     if (!mDocument)
         mDocument = new ContactDocument(this);
     mDocument->textDocument()->setTextWidth(width() - 10);
-    mDocument->init(this, mModel, contact, docType);
+    mDocument->init(this, contact, docType);
     setDocument(mDocument->textDocument());
     loadLinks(contact.customField(QDL::CLIENT_DATA_KEY));
     verifyLinks();
@@ -166,6 +163,32 @@ void ContactBrowser::linkClicked(const QString& link)
         emit externalLinkActivated();
     } else if (type == ContactDocument::QdlLink) {
         activateLink(link);
+    } else if (type == ContactDocument::CustomLink) {
+        QDialog diag;
+        Ui::ActionDialog ui;
+        ui.setupUi(&diag);
+        QtopiaApplication::setMenuLike(&diag, true);
+        ui.actionList->setItemDelegate(new QtopiaItemDelegate());
+
+        QContactFieldDefinition def(mDocument->getAnchorField(link));
+
+        QStringList actionIds = def.browseActions();
+        foreach(QString a, actionIds) {
+            QString label = QContactFieldDefinition::actionLabel(a);
+            QIcon icon = QContactFieldDefinition::actionIcon(a);
+            if (label.contains("%1"))
+                label = label.arg(number);
+            ui.actionList->addItem( new QListWidgetItem(icon, label ));
+        }
+
+        ui.actionList->setCurrentRow(0);
+
+        if (QtopiaApplication::execDialog(&diag)) {
+            QString chosen = actionIds[ui.actionList->currentRow()];
+            QtopiaServiceRequest request = QContactFieldDefinition::actionRequest(chosen, contact, number);
+            request.send();
+            emit externalLinkActivated();
+        }
     }
 }
 
@@ -174,7 +197,7 @@ void ContactBrowser::keyPressEvent(QKeyEvent *e)
     switch(e->key())
     {
         case Qt::Key_Back:
-            emit backClicked();
+            emit closeView();
             return;
         case Qt::Key_Call:
             if ( mDocument->getAnchorType(mLink) == ContactDocument::DialLink ) {

@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Themed Views<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Themed Views<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#themed-views">Themed Views</a></li>
 <ul><li><a href="#naming-elements">Naming Elements</a></li>
@@ -42,7 +42,7 @@
 <li><tt>Secondary Title bar</tt> (Optional)</li>
 </ul>
 <p>to display items such as: status information, text and animations.</p>
-<p>Qtopia interacts with a themed view using elements such as <i>page</i>, <i>line</i>, <i>alarm</i>, <i>date</i>, <i>button0</i>. Each of these elements has attributes which affect the visual appearance and placement of elements. For a full list of view elements refer to: <a href="themed-view-elements.html">Themed View Elements</a>. Attributes that are common to many elements are known as Common attributes and include:</p>
+<p>Qt Extended interacts with a themed view using elements such as <i>page</i>, <i>line</i>, <i>alarm</i>, <i>date</i>, <i>button0</i>. Each of these elements has attributes which affect the visual appearance and placement of elements. For a full list of view elements refer to: <a href="themed-view-elements.html">Themed View Elements</a>. Attributes that are common to many elements are known as Common attributes and include:</p>
 <ul>
 <li>Naming Elements</li>
 <li>Positioning Elements</li>
@@ -55,7 +55,7 @@
 <p>The following sections provide detailed descriptions of these elements.</p>
 <a name="naming-elements"></a>
 <h3>Naming Elements</h3>
-<p>The <tt>name</tt> attribute is available for all elements, however, each element within a type must have a unique name as Qtopia Phone interacts with elements using their <tt>name</tt>. For a list of Qtopia elements see <a href="theme-knownelem.html">Known Elements</a>.</p>
+<p>The <tt>name</tt> attribute is available for all elements, however, each element within a type must have a unique name as Qt Extended interacts with elements using their <tt>name</tt>. For a list of Qt Extended elements see <a href="theme-knownelem.html">Known Elements</a>.</p>
 <a name="positioning-elements"></a>
 <h3>Positioning Elements</h3>
 <p>The <tt>rect</tt> attribute is available for all elements and positions an element relative to the parent element geometry. It has one of two forms:</p>
@@ -135,7 +135,7 @@
     &lt;/group&gt;</pre>
 <a name="expressions-and-valuespace"></a>
 <h3>Expressions and Valuespace</h3>
-<a name="themeexpressions"></a><p>Some items can make use of expressions using <a href="qexpressionevaluator.html">QExpressionEvaluator</a>, which ultimately means they can use the Qtopia valuespace as input.</p>
+<a name="themeexpressions"></a><p>Some items can make use of expressions using <a href="qexpressionevaluator.html">QExpressionEvaluator</a>, which ultimately means they can use the Qt Extended valuespace as input.</p>
 <p>Expressions may be specified for the values of items themselves (eg. &lt;element&gt;expr:2+2&lt;/element&gt;) or for values of the item's attributes (eg. &lt;element attr=&quot;expr:2+2&quot;/&gt;). The 'expr:' indicates that the string is an expression and not a literal value. Everything after 'expr:' is assumed to be the expression data and is passed as-is to <a href="qexpressionevaluator.html#setExpression">QExpressionEvaluator::setExpression</a>(). You should consult the <a href="qexpressionevaluator.html">QExpressionEvaluator</a> documentation to determine what you may legally pass.</p>
 <p>Only certain items and attributes support expressions. Expressions are currently supported for:</p>
 <ul>
@@ -200,8 +200,8 @@
 <p>See also <a href="themed-view-elements.html#themetemplateelement">themetemplateelement</a> and <a href="themetemplateitem.html">ThemeTemplateItem</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

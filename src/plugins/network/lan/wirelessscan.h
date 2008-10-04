@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef WIRELESS_SCAN
-#define WIRELESS_SCAN
+#ifndef WIRELESSSCAN_H
+#define WIRELESSSCAN_H
 
 #include <custom.h>
 #include "wnet.h"
@@ -37,7 +35,7 @@
 
 /* A lot of wireless.h have kernel includes which should be protected by
    #ifdef __KERNEL__. They course include errors due to redefinitions of types.
-   This prevents those kernel headers being included by Qtopia.  
+   This prevents those kernel headers being included by Qtopia.
    */
 #ifndef _LINUX_IF_H
 #define _LINUX_IF_H
@@ -62,7 +60,7 @@ public:
         Connected
     };
 
-    WirelessScan( const QString& ifaceName, QObject* parent = 0 );
+    WirelessScan( const QString& ifaceName, bool whileDown, QObject* parent = 0 );
     virtual ~WirelessScan();
 
     QString attachedInterface() const { return iface; };
@@ -84,11 +82,15 @@ private slots:
     void checkResults();
 private:
     void readData( unsigned char* data, int length, int weVersion, struct iw_range* range );
-    void ensureScanESSID();
+    void ensureScanESSID() const;
+    bool prepareInterface() const;
+    void restoreInterfaceState() const;
 
     QString iface;
     QList<WirelessNetwork> entries;
     int sockfd;
+    bool scanWhileDown;
+    bool ifaceDown;
 };
 
 class QEvent;

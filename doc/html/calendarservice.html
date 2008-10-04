@@ -10,9 +10,10 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">CalendarService Class Reference</h1>
-<p>Provides the Qtopia Calendar service. <a href="#details">More...</a></p>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">CalendarService Class Reference<br /><span class="small-subtitle">[<a href="qtpimmodule.html">QtPimModule</a>]</span>
+</h1>
+<p>The CalendarService class provides the Calendar service. <a href="#details">More...</a></p>
 <pre>    #include &lt;CalendarService&gt;</pre><p>Inherits <a href="qtopiaabstractservice.html">QtopiaAbstractService</a>.</p>
 <ul>
 <li><a href="calendarservice-members.html">List of all members, including inherited members</a></li>
@@ -50,7 +51,7 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>Provides the Qtopia Calendar service.</p>
+<p>The CalendarService class provides the Calendar service.</p>
 <p>The <i>Calendar</i> service enables applications to access features of the Calendar application.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -84,7 +85,7 @@
 <p>The slot corresponds to a QDS service with a request data type of &quot;text/x-qstring&quot; and response data type of <a href="qdllink.html#listMimeType">QDLLink::listMimeType</a>().</p>
 <p>The slot corresponds to the QCop service message <tt>Calendar::requestLinks(QDSActionRequest)</tt>.</p>
 <h3 class="fn"><a name="showAppointment"></a>void CalendarService::showAppointment ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>uid</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Show the appointment indicated by <i>uid</i> in the calendar application.</p>
+<p>Show the appointment indicated by <i>uid</i> in the calendar application, wither the next upcoming occurrence from the current date, or the first occurrence if there is no upcoming occurrence.</p>
 <p>This slot corresponds to the QCop service message <tt>Calendar::showAppointment(QUniqueId)</tt>.</p>
 <h3 class="fn"><a name="showAppointment-2"></a>void CalendarService::showAppointment ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>uid</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -95,8 +96,8 @@
 <p>This slot corresponds to the QCop service message <tt>Calendar::updateAppointment(QAppointment)</tt>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

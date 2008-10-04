@@ -3,56 +3,50 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.3: context2d.cpp Example File (script/context2d/context2d.cpp)</title>
+  <title>Qt 4.4: context2d.cpp Example File (script/context2d/context2d.cpp)</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 class="title">context2d.cpp Example File<br /><span class="small-subtitle">script/context2d/context2d.cpp</span>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="namespaces.html"><font color="#004faf">All&nbsp;Namespaces</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"></td></tr></table><h1 class="title">context2d.cpp Example File<br /><span class="small-subtitle">script/context2d/context2d.cpp</span>
 </h1>
 <pre><span class="comment"> /****************************************************************************
  **
- ** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
+ ** Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies).
+ ** Contact: Qt Software Information (qt-info@nokia.com)
  **
  ** This file is part of the example classes of the Qt Toolkit.
  **
- ** This file may be used under the terms of the GNU General Public
- ** License versions 2.0 or 3.0 as published by the Free Software
- ** Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
- ** included in the packaging of this file.  Alternatively you may (at
- ** your option) use any later version of the GNU General Public
- ** License if such license has been publicly approved by Trolltech ASA
- ** (or its successors, if any) and the KDE Free Qt Foundation. In
- ** addition, as a special exception, Trolltech gives you certain
- ** additional rights. These rights are described in the Trolltech GPL
- ** Exception version 1.2, which can be found at
- ** http://www.trolltech.com/products/qt/gplexception/ and in the file
- ** GPL_EXCEPTION.txt in this package.
+ ** Commercial Usage
+ ** Licensees holding valid Qt Commercial licenses may use this file in
+ ** accordance with the Qt Commercial License Agreement provided with the
+ ** Software or, alternatively, in accordance with the terms contained in
+ ** a written agreement between you and Nokia.
  **
- ** Please review the following information to ensure GNU General
- ** Public Licensing requirements will be met:
- ** http://trolltech.com/products/qt/licenses/licensing/opensource/. If
- ** you are unsure which license is appropriate for your use, please
- ** review the following information:
- ** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
- ** or contact the sales department at sales@trolltech.com.
  **
- ** In addition, as a special exception, Trolltech, as the sole
- ** copyright holder for Qt Designer, grants users of the Qt/Eclipse
- ** Integration plug-in the right for the Qt/Eclipse Integration to
- ** link to functionality provided by Qt Designer and its related
- ** libraries.
+ ** GNU General Public License Usage
+ ** Alternatively, this file may be used under the terms of the GNU
+ ** General Public License versions 2.0 or 3.0 as published by the Free
+ ** Software Foundation and appearing in the file LICENSE.GPL included in
+ ** the packaging of this file.  Please review the following information
+ ** to ensure GNU General Public Licensing requirements will be met:
+ ** http://www.fsf.org/licensing/licenses/info/GPLv2.html and
+ ** http://www.gnu.org/copyleft/gpl.html.  In addition, as a special
+ ** exception, Nokia gives you certain additional rights. These rights
+ ** are described in the Nokia Qt GPL Exception version 1.2, included in
+ ** the file GPL_EXCEPTION.txt in this package.
  **
- ** This file is provided &quot;AS IS&quot; with NO WARRANTY OF ANY KIND,
- ** INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR
- ** A PARTICULAR PURPOSE. Trolltech reserves all rights not expressly
- ** granted herein.
+ ** Qt for Windows(R) Licensees
+ ** As a special exception, Nokia, as the sole copyright holder for Qt
+ ** Designer, grants users of the Qt/Eclipse Integration plug-in the
+ ** right for the Qt/Eclipse Integration to link to functionality
+ ** provided by Qt Designer and its related libraries.
  **
- ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
- ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ ** If you are unsure which license is appropriate for your use, please
+ ** contact the sales department at qt-sales@nokia.com.
  **
  ****************************************************************************/</span>
  #include &quot;context2d.h&quot;
@@ -62,7 +56,7 @@
  #include &lt;QVariant&gt;
 
  #include &lt;math.h&gt;
- static const double Q_PI   = 3.14159265358979323846;   <span class="comment">//</span> pi
+ static const double Q_PI   = 3.14159265358979323846;   <span class="comment">// pi</span>
 
  #define DEGREES(t) ((t) * 180.0 / Q_PI)
 
@@ -92,7 +86,7 @@
          if ((*itr) == ',')
              ++itr;
          points.append(temp.toDouble());
-         <span class="comment">//</span>eat spaces
+         <span class="comment">//eat spaces</span>
          while ((*itr).isSpace())
              ++itr;
      }
@@ -110,7 +104,7 @@
          if (compo.size() != 4) {
              return QColor();
          }
-         <span class="comment">//</span>alpha seems to be always between 0-1
+         <span class="comment">//alpha seems to be always between 0-1</span>
          compo[3] *= 255;
          return QColor((int)compo[0], (int)compo[1],
                        (int)compo[2], (int)compo[3]);
@@ -124,8 +118,8 @@
                        (int)qClamp(compo[1], qreal(0), qreal(255)),
                        (int)qClamp(compo[2], qreal(0), qreal(255)));
      } else {
-         <span class="comment">//</span>QRgb color;
-         <span class="comment">//</span>CSSParser::parseColor(name, color);
+         <span class="comment">//QRgb color;</span>
+         <span class="comment">//CSSParser::parseColor(name, color);</span>
          return QColor(name);
      }
  }
@@ -470,7 +464,7 @@
 
  void Context2D::arcTo(qreal x1, qreal y1, qreal x2, qreal y2, qreal radius)
  {
-     <span class="comment">//</span>FIXME: this is surely busted
+     <span class="comment">//FIXME: this is surely busted</span>
      QPointF st  = m_state.matrix.map(QPointF(x1, y1));
      QPointF end = m_state.matrix.map(QPointF(x2, y2));
      m_path.arcTo(st.x(), st.y(),
@@ -489,14 +483,14 @@
                      qreal sar, qreal ear,
                      bool anticlockwise)
  {
-     <span class="comment">//</span>### HACK
-     <span class="comment">//</span> In Qt we don't switch the coordinate system for degrees
-     <span class="comment">//</span> and still use the 0,0 as bottom left for degrees so we need
-     <span class="comment">//</span> to switch
+     <span class="comment">//### HACK</span>
+     <span class="comment">// In Qt we don't switch the coordinate system for degrees</span>
+     <span class="comment">// and still use the 0,0 as bottom left for degrees so we need</span>
+     <span class="comment">// to switch</span>
      sar = -sar;
      ear = -ear;
      anticlockwise = !anticlockwise;
-     <span class="comment">//</span>end hack
+     <span class="comment">//end hack</span>
 
      float sa = DEGREES(sar);
      float ea = DEGREES(ear);
@@ -514,10 +508,10 @@
          span -= 360;
      }
 
-     <span class="comment">//</span>### this is also due to switched coordinate system
-     <span class="comment">//</span> we would end up with a 0 span instead of 360
-     if (!(qFuzzyCompare(span + (ea - sa), 0.0) &amp;&amp;
-           qFuzzyCompare(qAbs(span), 360.0))) {
+     <span class="comment">//### this is also due to switched coordinate system</span>
+     <span class="comment">// we would end up with a 0 span instead of 360</span>
+     if (!(qFuzzyCompare(span + (ea - sa) + 1, 1) &amp;&amp;
+           qFuzzyCompare(qAbs(span), 360))) {
          span   += ea - sa;
      }
 
@@ -648,8 +642,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%" align="left">Copyright &copy; 2008 Nokia</td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.5</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.4.3</div></td>
 </tr></table></div></address></body>
 </html>

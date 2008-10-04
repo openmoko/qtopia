@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -56,6 +54,9 @@
 #ifndef V4L_RADIO_MIXER
 #define V4L_RADIO_MIXER             "radio"
 #endif
+
+// Define this in custom.h to apply stricter checks on tuner types.
+//#define V4L_STRICT_TUNER_CHECKS 1
 
 RadioBandV4L::RadioBandV4L
         ( int fd, const QByteArray& deviceName, int tuner, bool v4l2,
@@ -189,7 +190,7 @@ bool RadioBandV4L::createBands( QList<RadioBand *>& bands, QObject *parent )
     memset( &cap, 0, sizeof( cap ) );
     if ( ioctl( fd, VIDIOC_QUERYCAP, &cap ) >= 0 ) {
 
-#if 0   // Some devices set these flags badly.
+#ifdef V4L_STRICT_TUNER_CHECKS  // Some devices set these flags badly.
 
         // V4L2 device driver.
         if ( ( cap.capabilities & V4L2_CAP_RADIO ) == 0 ) {
@@ -216,6 +217,13 @@ bool RadioBandV4L::createBands( QList<RadioBand *>& bands, QObject *parent )
             ++num_tuners;
         }
 
+        // Some devices report 0 tuners via VIDIOC_ENUMINPUT.
+        // To work around this, we let the next loop scan a
+        // number of likely tuner indexes until some are found.
+        // Hopefully VIDIOC_G_TUNER will fail for bad indexes.
+        if ( !num_tuners )
+            num_tuners = 8;
+
         // Get the available bands.
         for ( int index = 0; index < num_tuners; ++index ) {
             struct v4l2_tuner tuner;
@@ -224,7 +232,7 @@ bool RadioBandV4L::createBands( QList<RadioBand *>& bands, QObject *parent )
             if ( ioctl( fd, VIDIOC_G_TUNER, &tuner ) < 0 )
                 continue;
 
-#if 0       // Some devices set these flags badly.
+#ifdef V4L_STRICT_TUNER_CHECKS  // Some devices set these flags badly.
 
             // Skip non-radio tuner types.
             if ( tuner.type != V4L2_TUNER_RADIO )
@@ -270,7 +278,7 @@ bool RadioBandV4L::createBands( QList<RadioBand *>& bands, QObject *parent )
             return false;
         }
 
-#if 0   // Some devices set these flags badly.
+#ifdef V4L_STRICT_TUNER_CHECKS  // Some devices set these flags badly.
 
         if ( ( cap.type & VID_TYPE_TUNER ) == 0 ) {
             close( fd );

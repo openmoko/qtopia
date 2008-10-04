@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QSimToolkit Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QSimToolkit Class Reference<br /><span class="small-subtitle">[<a href="qttelephonymodule.html">QtTelephonyModule</a>]</span>
+</h1>
 <p>The QSimToolkit class provides an interface to SIM toolkit applications. <a href="#details">More...</a></p>
 <pre>    #include &lt;QSimToolkit&gt;</pre><p>Inherits <a href="qcomminterface.html">QCommInterface</a>.</p>
 <p>Inherited by <a href="qmodemsimtoolkit.html">QModemSimToolkit</a>.</p>
@@ -144,7 +145,7 @@
 <tr valign="top" class="odd"><td><tt>SetupMenu</tt></td><td>Acknowledges receipt of the command. The actual menu selection is performed using <a href="qsimtoolkit.html#sendEnvelope">sendEnvelope</a>(), not <a href="qsimtoolkit.html#sendResponse">sendResponse</a>().</td></tr>
 <tr valign="top" class="even"><td><tt>SetupIdleModeText</tt></td><td>Acknowledges receipt of the command.</td></tr>
 </table></p>
-<p>The following commands are expected to be handled internally by the modem, or the modem vendor plugin. Qtopia will simply acknowledge receipt of the command with <a href="qsimtoolkit.html#sendResponse">sendResponse</a>() and then passes the command up to the client applications. Most of these can be safely ignored by client applications, or the application only needs to display a text string and/or an icon until such time as a new command becomes available.</p>
+<p>The following commands are expected to be handled internally by the modem, or the modem vendor plugin. Qt Extended will simply acknowledge receipt of the command with <a href="qsimtoolkit.html#sendResponse">sendResponse</a>() and then passes the command up to the client applications. Most of these can be safely ignored by client applications, or the application only needs to display a text string and/or an icon until such time as a new command becomes available.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <tr valign="top" class="odd"><td><tt>MoreTime</tt></td></tr>
 <tr valign="top" class="even"><td><tt>PollingOff</tt></td></tr>
@@ -166,7 +167,7 @@
 </table></p>
 <p>If the modem does not handle one or more of the above commands internally, the modem vendor plugin is responsible implementing the command and for composing the correct terminal response. If the modem vendor plugin does this, it should bypass emitCommandAndRespond() and emit the <a href="qsimtoolkit.html#command">command</a>() signal directly.</p>
 <p>For example, if the modem does not handle the <tt>SendSMS</tt> command internally, the modem vendor plugin is responsible for formatting the correct SMS message and transmitting it over the network. The client application only needs to handle text display while the message is being sent.</p>
-<p>In the case of <tt>ProvideLocalInformation</tt>, if the language setting is being requested, the current Qtopia language code is returned.</p>
+<p>In the case of <tt>ProvideLocalInformation</tt>, if the language setting is being requested, the current Qt Extended language code is returned.</p>
 <p>See also <a href="qsimtoolkit.html#command">command</a>() and <a href="qsimtoolkit.html#sendResponse">sendResponse</a>().</p>
 <h3 class="fn"><a name="end"></a>void QSimToolkit::end ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>End using the SIM toolkit facilities.</p>
@@ -231,8 +232,8 @@
 <p>See also <a href="qsimtoolkit.html#idleScreen">idleScreen</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,133 +1,114 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #ifndef WRITEMAIL_H
 #define WRITEMAIL_H
 
+#include <QDialog>
 #include <QMainWindow>
 #include <QString>
 #include <QMailMessage>
+#include <private/detailspage_p.h>
 
 class QAction;
 class QContent;
 class QMailComposerInterface;
 class QStackedWidget;
+class SelectComposerWidget;
 
-class AccountList;
-class DetailsPage;
-class SelectListWidget;
-
+#ifdef QTOPIA_HOMEUI
+class WriteMail : public QDialog
+#else
 class WriteMail : public QMainWindow
+#endif //QTOPIA_HOMEUI
 {
     Q_OBJECT
 
 public:
-    enum ComposeAction { Create = 0, Reply = 1, ReplyToAll = 2, Forward = 3 };
+    WriteMail(QWidget* parent = 0);
+    virtual ~WriteMail();
 
-    WriteMail( QWidget* parent, const char* name, Qt::WFlags fl = 0 );
-    ~WriteMail();
-    void reply(const QMailMessage& replyMail, int type);
+    void reply(const QMailMessage& replyMail, int action);
     void modify(const QMailMessage& previousMessage);
     void setRecipients(const QString &emails, const QString &numbers);
     void setRecipient(const QString &recipient);
-    bool readyToSend() const;
     void setSubject(const QString &subject);
     void setBody(const QString &text, const QString &type);
     bool hasContent();
 #ifndef QTOPIA_NO_SMS
     void setSmsRecipient(const QString &recipient);
 #endif
-    void setAccountList(AccountList *list);
-
+    void setDefaultAccount(const QMailAccountId& defaultId);
     QString composer() const;
-    void setComposer( const QString &id );
-
-    bool isComplete() const;
-    bool changed() const;
-    bool canClose();
-
-    void setAction(ComposeAction action);
-
     bool forcedClosure();
 
 public slots:
     bool saveChangesOnRequest();
-    void reset();
-    void discard();
-    bool draft();
-    bool composerSelected(const QString &key);
-    void selectionCanceled();
+    bool newMail( QMailMessage::MessageType = QMailMessage::AnyType, bool detailsOnly = false );
+    void attach( const QContent &dl, QMailMessage::AttachmentsAction );
 
 signals:
-    void autosaveMail(const QMailMessage&);
+    void editAccounts();
+    void noSendAccount(const QMailMessage::MessageType);
     void saveAsDraft(const QMailMessage&);
     void enqueueMail(const QMailMessage&);
     void discardMail();
-    void noSendAccount(QMailMessage::MessageType);
-
-public slots:
-    bool newMail( const QString &cmpsr = QString(), bool detailsOnly = false );
-    void attach( const QContent &dl, QMailMessage::AttachmentsAction );
+    void finished();
 
 protected slots:
-    void previousStage();
-    void nextStage();
-    void composeStage();
-    void detailsStage();
-    void sendStage();
+    bool sendStage();
+    void messageModified();
+    void reset();
+    void discard();
+    bool draft();
+    bool composerSelected(const QPair<QString, QMailMessage::MessageType> &selection);
+    void contextChanged();
 
-    void enqueue();
-
-    void messageChanged();
-    void detailsChanged();
+#ifdef QTOPIA_HOMEUI
+    void accept();
+    void reject();
+    void changeEvent(QEvent* e);
+#endif
 
 private:
     bool largeAttachments();
     uint largeAttachmentsLimit() const;
-
     bool buildMail();
     void init();
     QString signature() const;
+    bool isComplete() const;
+    bool changed() const;
+    void setComposer( const QString &id );
+    void setTitle(const QString& title);
+    void emitFinished();
 
-    void showDetailsPage();
-
+private:
     QMailMessage mail;
-
     QMailComposerInterface *m_composerInterface;
-
-    QWidget *m_composerWidget;
-    DetailsPage *m_detailsPage;
-    QAction *m_previousAction;
     QAction *m_cancelAction, *m_draftAction;
-
-    QStackedWidget* widgetStack;
-
-    QMainWindow *m_mainWindow;
-    AccountList *accountList;
+    QStackedWidget* m_widgetStack;
+    QWidget *m_mainWindow;
+    QMailAccountId defaultAccountId;
     bool hasMessageChanged;
     bool _detailsOnly;
-    ComposeAction _action;
-    QWidget *_selectComposer;
-    SelectListWidget *_composerList;
-    QList<QMailMessage::MessageType> _sendTypes;
+    SelectComposerWidget* m_selectComposerWidget;
+
 };
 
-#endif // WRITEMAIL_H
+#endif

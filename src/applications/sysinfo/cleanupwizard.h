@@ -1,64 +1,195 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #ifndef CLEANUPWIZARD_H
 #define CLEANUPWIZARD_H
 
-#include <qwidget.h>
+#include <QWizard>
+#include <QDialog>
 
-class QWidgetStack;
-class PreselectionWidget;
-class DocCleanWidget;
-class DocResultWidget;
-class DocSummaryWidget;
-class MailCleanWidget;
-class DatebookCleanWidget;
-class FinalCleanupWidget;
+#include "ui_documenttypeselector.h"
 
-class CleanupWizard : public QWidget
+class QCheckBox;
+class QSpinBox;
+class QLabel;
+class DocumentsSelectionDialog;
+class DocumentsCleanupDialog;
+class QProgressBar;
+class QDateEdit;
+class DocumentListModel;
+class QWaitWidget;
+class QKeyEvent;
+class QTableView;
+class QContentSet;
+class QContentSetModel;
+
+class CleanupWizard: public QWizard
 {
     Q_OBJECT
 public:
-    CleanupWizard(QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
-    virtual ~CleanupWizard();
-protected:
-    void keyPressEvent(QKeyEvent *keyEvent);
-    void showEvent(QShowEvent *);
-    bool eventFilter(QObject *o, QEvent *e);
+    CleanupWizard(QWidget* parent = 0);
+    ~CleanupWizard(){};
+    enum pageID {
+        preselectionID,
+        documentTypeSelectionID,
+        documentListSelectionID,
+        mailSelectionID,
+        eventSelectionID,
+        finalSummaryID
+    };
+
 private slots:
-    void addToFinalSummary(int noDeletedDocs);
-    void init();
+    void updateWizard(int id);
+};
+
+
+class PreselectionPage : public QWizardPage
+{
+    Q_OBJECT
+public:
+    PreselectionPage(QWidget* parent = 0);
+    int nextId() const;
+public slots:
+    bool isComplete() const;
+private:
+    QCheckBox* documentCheckBox;
+    QCheckBox* mailCheckBox;
+    QCheckBox* eventCheckBox;
+};
+
+
+class MailSelectionPage : public QWizardPage
+{
+    Q_OBJECT
+public:
+    MailSelectionPage(QWidget* parent = 0);
+    int nextId() const;
+    bool validatePage();
+private:
+    QSpinBox* sizeBox;
+    QDateEdit* dp;
+};
+
+
+class EventSelectionPage : public QWizardPage
+{
+    Q_OBJECT
+public:
+    EventSelectionPage(QWidget* parent = 0);
+    int nextId() const;
+    bool validatePage();
 
 private:
-    enum WizardStyle { Default, NoBack, NoForward};
-    void setContextBar(WizardStyle style);
+    QDateEdit* dp;
+};
 
-    QWidgetStack * wStack;
-    PreselectionWidget *m_PreselectionWidget;
-    DocCleanWidget *m_DocCleanWidget;
-    DocResultWidget *m_DocResultWidget;
-    DocSummaryWidget * m_DocSummaryWidget;
-    MailCleanWidget * m_MailCleanWidget;
-    DatebookCleanWidget *m_DatebookCleanWidget;
-    FinalCleanupWidget *m_FinalCleanupWidget;
+class DocumentTypeSelectionPage : public QWizardPage
+{
+    Q_OBJECT
+
+public:
+    DocumentTypeSelectionPage(QWidget* parent = 0);
+
+    int nextId() const;
+    bool isComplete() const;
+
+public slots:
+    void alltypes(bool allSChecked);
+
+private:
+    Ui::DocumentTypeSelector *m_ui;
+
+friend class DocumentListSelectionPage;
+};
+
+class DocumentListSelectionPage : public QWizardPage
+{
+    Q_OBJECT
+public:
+    DocumentListSelectionPage(QWidget* parent = 0);
+    int nextId() const;
+    void initializePage();
+    bool validatePage();
+public slots:
+    void updateCleanupStopped(bool c){ cleanupStopped = c;  };
+    void stopCleanup(){ cleanupStopped = true; };
+    void cleanup();
+
+    void updateFinished();
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
+signals:
+    void documentsDeleted(int d,bool a);
+protected:
+    void updateHeader();
+    void changeSelectedSize(int size){ selectedSize += size;
+                                       updateHeader(); };
+private:
+    int docDeleted;
+    int selectedSize;
+    int selectedDocuments;
+
+    QLabel *header;
+    QTableView *list;
+
+    DocumentsCleanupDialog *documentsCleanupDialog;
+
+    bool cleanupStopped;
+
+    QContentSet *documents;
+    QContentSetModel *model;
+
+    QContentSet *largeDocuments;
+    DocumentListModel *largeModel;
+
+    QWaitWidget *waitWidget;
+};
+
+class DocumentsCleanupDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    DocumentsCleanupDialog(QWidget* parent = 0);
+private:
+    QProgressBar* progressBar;
+    QLabel*       label;
+    QPushButton*  pushButton;
+
+friend class DocumentListSelectionPage;
+};
+
+
+class FinalSummaryPage : public QWizardPage
+{
+    Q_OBJECT
+public:
+    FinalSummaryPage(QWidget* parent = 0);
+    int nextId() const;
+    void initializePage();
+public slots:
+    void documentsDeleted(int d,bool a){ docDeleted = d;
+                                         cleanupAborted = a; };
+private:
+    int docDeleted;
+    bool cleanupAborted;
+    QLabel* header;
+    QLabel* summary;
 };
 
 #endif

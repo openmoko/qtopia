@@ -3,5 +3,5 @@ File=QtopiaServices
 Context=Photo Edit
 [Service]
 Actions = "editImage(QDSActionRequest)"
-Icon=PhotoEdit
+Icon=photoedit/ImageViewer
 Name[]=Photo Edit

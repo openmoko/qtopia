@@ -1,8 +1,14 @@
+!qbuild{
 qtopia_project(qtopia core app)
 TARGET=atinterface
 CONFIG+=no_tr singleexec_main
 
-!platform:enable_cell:DEFINES+=ATINTERFACE_SMS
+enable_cell:depends(libraries/qtopiamail)
+depends(libraries/qtopiaphone)
+enable_cell:depends(libraries/qtopiapim)
+depends(libraries/qtopiacomm/serial)
+depends(libraries/qtopiacomm/usb)
+}
 
 HEADERS	= \
     atcustom.h \
@@ -41,23 +47,13 @@ enable_bluetooth {
 
 enable_cell {
     HEADERS	+= \
-        atgsmcellcommands.h
+        atgsmcellcommands.h\
+        atsmscommands.h
+
     SOURCES	+= \
-        atgsmcellcommands.cpp
-
-    !platform {
-        HEADERS	+= \
-            atsmscommands.h
-        SOURCES	+= \
-            atsmscommands.cpp
-
-        depends(libraries/qtopiamail)
-    }
+        atgsmcellcommands.cpp\
+        atsmscommands.cpp
 }
-
-depends(libraries/qtopiaphone)
-depends(libraries/qtopiapim)
-depends(libraries/qtopiacomm/serial)
 
 pkg.desc=AT interface for remote access to the device over a cable
 pkg.domain=trusted
@@ -65,3 +61,12 @@ pkg.domain=trusted
 modememulservice.files=$$QTOPIA_DEPOT_PATH/services/ModemEmulator/atinterface
 modememulservice.path=/services/ModemEmulator
 INSTALLS+=modememulservice
+
+usbservice.files=$$QTOPIA_DEPOT_PATH/services/UsbGadget/Serial/atinterface
+usbservice.path=/services/UsbGadget/Serial
+INSTALLS+=usbservice
+
+usbservicehelp.source=$$QTOPIA_DEPOT_PATH/help
+usbservicehelp.files=usbgadget-serial-atinterface.html
+usbservicehelp.hint=help
+INSTALLS+=usbservicehelp

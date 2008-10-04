@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QContact Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QContact Class Reference<br /><span class="small-subtitle">[<a href="qtmessagingmodule.html">QtMessagingModule</a>, <a href="qtpimmodule.html">QtPimModule</a>, <a href="qttelephonymodule.html">QtTelephonyModule</a>, <a href="qtuimodule.html">QtUiModule</a>]</span>
+</h1>
 <p>The QContact class holds the data of an address book entry. <a href="#details">More...</a></p>
 <pre>    #include &lt;QContact&gt;</pre><p>Inherits <a href="qpimrecord.html">QPimRecord</a>.</p>
 <ul>
@@ -288,15 +289,15 @@
 <p>See also <a href="qcontact.html#setBusinessZip">setBusinessZip</a>().</p>
 <h3 class="fn"><a name="changePortrait"></a>void QContact::changePortrait ( const <a href="qpixmap.html">QPixmap</a> &amp; <i>p</i> )</h3>
 <p>Changes the contacts portrait to the given pixmap <i>p</i>. The pixmap is saved to the contactimages directory in the Qtopia &quot;addressbook&quot; application storage directory, and removes the file previously used as the contact's portrait. The corresponding filename will be set as the <tt>Portrait</tt> field of this contact.</p>
-<p>Note: the previous image is removed immediately, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
+<p>Note: the previous image is removed immediately if it is in the &quot;addressbook&quot; application data storage area, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
 <h3 class="fn"><a name="changePortrait-2"></a>void QContact::changePortrait ( const <a href="qimage.html">QImage</a> &amp; <i>image</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Changes the contacts portrait to the given <i>image</i>. The image is saved to the contactimages directory in the Qtopia &quot;addressbook&quot; application storage directory, and removes the file previously used as the contact's portrait. The corresponding filename will be set as the <tt>Portrait</tt> field of this contact.</p>
-<p>Note: the previous image is removed immediately, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
+<p>Note: the previous image is removed immediately if it is in the &quot;addressbook&quot; application data storage area, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
 <h3 class="fn"><a name="changePortrait-3"></a>void QContact::changePortrait ( const <a href="qstring.html">QString</a> &amp; <i>imageLocation</i>, const <a href="qrect.html">QRect</a> &amp; <i>rect</i> = QRect() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Changes the contacts portrait to the image at the given <i>imageLocation</i>. The image is loaded, scaled and then saved to the contactimages directory in the Qtopia &quot;addressbook&quot; application storage directory. If the specified clip rectangle <i>rect</i> is not null, only the clip area of the image specified is used. The file previously used as the contact's portrait is removed. The corresponding filename will be set as the <tt>Portrait</tt> field of this contact.</p>
-<p>Note: the previous image is removed immediately, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
+<p>Note: the previous image is removed immediately if it is in the &quot;addressbook&quot; application data storage area, but the database will not be updated until <tt>QContactModel::updateContact</tt> is called.</p>
 <h3 class="fn"><a name="children"></a><a href="qstring.html">QString</a> QContact::children () const</h3>
 <p>Returns the children of the contact.</p>
 <p>See also <a href="qcontact.html#setChildren">setChildren</a>().</p>
@@ -385,7 +386,7 @@
 <p>See also <a href="qcontact.html#labelFormat">labelFormat</a>() and <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="labelFormat"></a><a href="qstring.html">QString</a> QContact::labelFormat ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the format for contact labels.</p>
-<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="qtopiadesktop/qdautoplugin-cpp.html">_</a> for a space, an identifier as from identifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
+<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="qtopiadesktop/src-tools-qdsync-task-xsd.html">_</a> for a space, an identifier as from identifierKey(), or any string. The format for label will the first pattern for which all fields specified are non null for the contact.</p>
 <p>For example: <tt>lastname , _ firstname | lastname | firstname | company</tt></p>
 <p>See also <a href="qcontact.html#setLabelFormat">setLabelFormat</a>(), <a href="qcontact.html#labelFields">labelFields</a>(), and <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="lastName"></a><a href="qstring.html">QString</a> QContact::lastName () const</h3>
@@ -421,7 +422,7 @@
 <p>Returns the office for the contact.</p>
 <p>See also <a href="qcontact.html#setOffice">setOffice</a>().</p>
 <h3 class="fn"><a name="parseLabel"></a>QContact QContact::parseLabel ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, const QContact &amp; <i>contact</i> = QContact() )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Parses the the <i>text</i> using contact name formatting rules and merges the information with <i>contact</i>. Returns the merged contact.</p>
+<p>Parses the given <i>text</i> using contact name formatting rules and merges the information with <i>contact</i>. Returns the merged contact.</p>
 <p>Formatting rules include using () for the nick name, &quot;&quot; for pronunciation, standard name titles and suffixes as well as detecting first, middle and last name ordering, similar to the default label formatting.</p>
 <p>See also <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="phoneIcon"></a><a href="qicon.html">QIcon</a> QContact::phoneIcon ( <a href="qcontact.html#PhoneType-enum">PhoneType</a> <i>type</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -442,7 +443,7 @@
 <p>Returns the portrait of the contact as a pixmap. If there is no portrait set for the contact, this will return a default pixmap based on the contact's fields.</p>
 <p>See also <a href="qcontact.html#icon">icon</a>() and <a href="qcontact.html#portraitSize">portraitSize</a>().</p>
 <h3 class="fn"><a name="portraitFile"></a><a href="qstring.html">QString</a> QContact::portraitFile () const</h3>
-<p>Returns the path for the portrait file of the contact. This is either a resource file path (e.g&#x2e; <tt>&quot;:icon/happyface&quot;</tt>) or the name of a file that is stored in the &quot;addressbook/contactimages&quot; directory in the Qtopia application data storage directory.</p>
+<p>Returns the path for the portrait file of the contact. This is either a resource file path (e.g&#x2e; <tt>&quot;:icon/happyface&quot;</tt>) or the name of a file that is stored in the <tt>&quot;addressbook/contactimages&quot;</tt> directory in the Qt Extended application data storage directory.</p>
 <p>See also <a href="qcontact.html#setPortraitFile">setPortraitFile</a>().</p>
 <h3 class="fn"><a name="portraitSize"></a><a href="qsize.html">QSize</a> QContact::portraitSize ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the size of the portrait pixmap of a contact.</p>
@@ -588,7 +589,7 @@
 <p>See also <a href="qcontact.html#jobTitle">jobTitle</a>().</p>
 <h3 class="fn"><a name="setLabelFormat"></a>void QContact::setLabelFormat ( const <a href="qstring.html">QString</a> &amp; <i>f</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets the format for contact labels to that described by <i>f</i>.</p>
-<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="qtopiadesktop/qdautoplugin-cpp.html">_</a> for a space, an identifier as from identifierKey(), or any string. The format used for <a href="qcontact.html#label">label</a>() will be the first pattern for which all fields specified are non null for the contact.</p>
+<p>The format is a set of pattern separated by '|'s. Each pattern is a set of space separated tokens. A token can either be <a href="qtopiadesktop/src-tools-qdsync-task-xsd.html">_</a> for a space, an identifier as from identifierKey(), or any string. The format used for <a href="qcontact.html#label">label</a>() will be the first pattern for which all fields specified are non null for the contact.</p>
 <p>For example: <tt>lastname , _ firstname | lastname | firstname | company</tt></p>
 <p>See also <a href="qcontact.html#labelFormat">labelFormat</a>(), <a href="qcontact.html#labelFields">labelFields</a>(), and <a href="qcontact.html#label">label</a>().</p>
 <h3 class="fn"><a name="setLastName"></a>void QContact::setLastName ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
@@ -625,6 +626,7 @@
 <p>See also <a href="qcontact.html#phoneNumbers">phoneNumbers</a>().</p>
 <h3 class="fn"><a name="setPortraitFile"></a>void QContact::setPortraitFile ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the path for the portrait file of the contact to <i>str</i>.</p>
+<p>The string is interpreted as follows: - if the path starts with a ':' character, it is interpreted as a Qt Resource system path - otherwise, the string will be interpreted as a path relative to the &quot;contactimages&quot; subdirectory of the &quot;addressbook&quot; application storage directory (retrieved using Qtopia::applicationFileName).</p>
 <p>See also <a href="qcontact.html#portraitFile">portraitFile</a>().</p>
 <h3 class="fn"><a name="setProfession"></a>void QContact::setProfession ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )</h3>
 <p>Sets the profession of the contact to <i>str</i>.</p>
@@ -689,8 +691,8 @@
 <p>Compares to <i>other</i> contact and returns true if it is equivalent. Otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

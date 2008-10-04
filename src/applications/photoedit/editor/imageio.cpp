@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -40,29 +38,33 @@ ImageIO::~ImageIO()
 
 ImageIO::Status ImageIO::load( const QContent& lnk, int levels )
 {
-    static const int maxSize = 2097152;
-    static const int maxArea = 1920000;
+    static const int maxFileSize = 2097152;
+
     _lnk = lnk;
 
     QImageReader reader( lnk.fileName() );
 
     _format = reader.format();
 
+    int maxArea = maxSize().width() * maxSize().height();
+
     QImage image;
 
     if( reader.supportsOption( QImageIOHandler::Size ) )
     {
-        QSize size = reader.size();
+        image_size = reader.size();
 
-        if( size.width() * size.height() > maxArea )
+        if( !image_size.isValid() || image_size.width() * image_size.height() > maxArea )
         {
             _status = SIZE_ERROR;
 
             return _status;
         }
     }
-    else if( QFileInfo( lnk.file() ).size() > maxSize )
+    else if( QFileInfo( lnk.file() ).size() > maxFileSize )
     {
+        image_size = QSize();
+
         _status = SIZE_ERROR;
 
         return _status;
@@ -81,6 +83,8 @@ ImageIO::Status ImageIO::load( const QImage& image, int levels )
 #define SUPPORTED_DEPTH QImage::Format_ARGB32
     // Remove previously loaded image samples
     delete[] image_samples;
+
+    image_size = image.size();
 
     // Create image levels
     image_samples = new QImage[ image_levels = levels ];
@@ -230,3 +234,12 @@ QImage ImageIO::image( const QRect& rect, int level ) const
 
     return image_samples[ level ].copy( area );
 }
+
+QSize ImageIO::maxSize()
+{
+    static const int maxWidth = 1600;
+    static const int maxHeight = 1200;
+
+    return QSize(maxWidth, maxHeight);
+}
+

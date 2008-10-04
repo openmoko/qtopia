@@ -27,5 +27,5 @@ pkg.domain=trusted
 pkg.name=filtering
 pkg.desc=This is a command line tool used to demonstrate database access and filtering
 pkg.version=1.0.0-1
-pkg.maintainer=Trolltech (www.trolltech.com)
+pkg.maintainer=Qt Extended <info@qtextended.org>
 pkg.license=GPL

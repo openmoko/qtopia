@@ -1,31 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-
-
 #include "readmail.h"
-#include "accountlist.h"
-#include "maillistview.h"
-#include "emailfolderlist.h"
-#include "smsclient.h"
 
 #include <qtopiaapplication.h>
 #include <qtopiaipcenvelope.h>
@@ -34,10 +26,10 @@
 #include <qsoftmenubar.h>
 #include <qthumbnail.h>
 
-#include <qtopia/pim/qcontact.h>
-#include <qtopia/pim/qcontactmodel.h>
+#include <qcontact.h>
+#include <qcontactmodel.h>
 
-#include <qtopia/mail/qmailviewer.h>
+#include <qmailviewer.h>
 
 #include <qlabel.h>
 #include <qimage.h>
@@ -58,24 +50,123 @@
 #include <qalgorithms.h>
 #include <qtmailwindow.h>
 #include <QContactSelector>
-#include <QMailStore>
+#include <QContactFieldDefinition>
+#include <QMailAccount>
 #include <QMailComposerFactory>
+#include <QMailFolder>
+#include <QMailStore>
 #include <QDrmContentPlugin>
+#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QMenuBar>
+
+#ifdef QTOPIA_HOMEUI
+#include <private/homewidgets_p.h>
+#endif
 
 
-ReadMail::ReadMail( QWidget* parent,  const QString name, Qt::WFlags fl )
-    : QMainWindow(parent, fl)
+class SaveContactDialog : public QDialog
 {
-    setObjectName( name );
-    sending = false;
-    receiving = false;
-    initialized = false;
-    firstRead = false;
-    mailView = 0;
-    accountList = 0;
-    contactModel = 0;
-    modelUpdatePending = false;
+    Q_OBJECT
 
+public:
+    enum Selection { None = 0, Create, Existing };
+
+    SaveContactDialog(const QMailAddress &address, QWidget *parent = 0)
+        : QDialog(parent),
+          sel(None),
+#ifdef QTOPIA_HOMEUI
+          createButton(new HomeActionButton(tr("Create new contact"), QtopiaHome::Green)),
+          existingButton(new HomeActionButton(tr("Add to existing"), QtopiaHome::Green)),
+          cancelButton(new HomeActionButton(tr("Cancel"), QtopiaHome::Red))
+#else
+          createButton(new QPushButton(tr("Create new contact"))),
+          existingButton(new QPushButton(tr("Add to existing")))
+#endif
+    {
+        setObjectName("SaveContactDialog");
+        setModal(true);
+
+        setWindowTitle(tr("Save"));
+
+        connect(createButton, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+        connect(existingButton, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+#ifdef QTOPIA_HOMEUI
+        connect(cancelButton, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+#endif
+
+        QString text = tr("Saving '%1' to Contacts.", "%1=name/address/number").arg(address.address());
+        text += "\n";
+        text += tr("Create new contact or add to an existing contact?");
+
+        QPlainTextEdit* textEdit = new QPlainTextEdit(text, this);
+        textEdit->setReadOnly(true);
+        textEdit->setFocusPolicy(Qt::NoFocus);
+        textEdit->setFrameStyle(QFrame::NoFrame);
+        textEdit->viewport()->setBackgroundRole(QPalette::Window);
+
+        QVBoxLayout *vbl = new QVBoxLayout;
+        vbl->setSpacing(4);
+        vbl->setContentsMargins(0, 0, 0, 0);
+        vbl->addWidget(textEdit);
+#ifdef QTOPIA_HOMEUI
+        QGridLayout* grid = new QGridLayout;
+        grid->addWidget(createButton, 0, 0);
+        grid->addWidget(existingButton, 0, 1);
+        grid->addWidget(cancelButton, 1, 1);
+        vbl->addLayout(grid);
+#else
+        vbl->addWidget(createButton);
+        vbl->addWidget(existingButton);
+#endif
+        setLayout(vbl);
+
+#ifdef QTOPIA_HOMEUI
+        QtopiaHome::setPopupDialogStyle(this);
+#endif
+    }
+
+    Selection selection() const { return sel; }
+
+protected slots:
+    void buttonClicked()
+    {
+        if (sender() == createButton) {
+            sel = Create;
+        } else if (sender() == existingButton) {
+            sel = Existing;
+        } else {
+            reject();
+            return;
+        }
+
+        accept();
+    }
+
+private:
+    Selection sel;
+#ifdef QTOPIA_HOMEUI
+    HomeActionButton *createButton;
+    HomeActionButton *existingButton;
+    HomeActionButton *cancelButton;
+#else
+    QPushButton *createButton;
+    QPushButton *existingButton;
+#endif
+};
+
+
+ReadMail::ReadMail( QWidget* parent, Qt::WFlags fl )
+    : QMainWindow(parent, fl),
+      sending(false),
+      receiving(false),
+      firstRead(false),
+      hasNext(false),
+      hasPrevious(false),
+      initialized(false),
+      contactModel(0),
+      modelUpdatePending(false)
+{
     init();
 }
 
@@ -86,10 +177,6 @@ ReadMail::~ReadMail()
 
 void ReadMail::init()
 {
-#ifndef QTOPIA_NO_MMS
-    smilView = 0;
-#endif
-
     QDrmContentPlugin::initialize();
 
     getThisMailButton = new QAction( QIcon(":icon/getmail"), tr("Get message"), this );
@@ -115,49 +202,64 @@ void ReadMail::init()
     modifyButton->setWhatsThis( tr("Opens this message in the composer so that you can make modifications to it.") );
 
     previousButton = new QAction( QIcon( ":icon/up" ), tr( "Previous" ), this );
-    connect( previousButton, SIGNAL(triggered()), this, SLOT( previous() ) );
+    connect( previousButton, SIGNAL(triggered()), this, SIGNAL(viewPrevious()) );
     previousButton->setWhatsThis( tr("Read the previous message in the folder.") );
 
     nextButton = new QAction( QIcon( ":icon/down" ), tr( "Next" ), this );
-    connect( nextButton, SIGNAL(triggered()), this, SLOT( next() ) );
+    connect( nextButton, SIGNAL(triggered()), this, SIGNAL(viewNext()) );
     nextButton->setWhatsThis( tr("Read the next message in the folder.") );
 
     attachmentsButton = new QAction( QIcon( ":icon/attach" ), tr( "Attachments" ), this );
     connect( attachmentsButton, SIGNAL(triggered()), this,
-            SLOT( viewAttachments() ) );
+            SLOT(viewAttachments()) );
     attachmentsButton->setWhatsThis( tr("View the attachments in the message.") );
 
     deleteButton = new QAction( QIcon( ":icon/trash" ), tr( "Delete" ), this );
-    connect( deleteButton, SIGNAL(triggered()), this, SLOT( deleteItem() ) );
+    connect( deleteButton, SIGNAL(triggered()), this, SLOT(deleteItem()) );
     deleteButton->setWhatsThis( tr("Move this message to the trash folder.  If the message is already in the trash folder it will be deleted. ") );
 
-    storeButton = new QAction( QIcon( ":icon/save" ), tr( "Save to Contacts" ), this );
-    connect( storeButton, SIGNAL(triggered()), this, SLOT( storeContact() ) );
+    storeButton = new QAction( QIcon( ":icon/save" ), tr( "Save Sender" ), this );
+    connect( storeButton, SIGNAL(triggered()), this, SLOT(storeContact()) );
     
     views = new QStackedWidget(this);
-
-    // Create a viewer for static content
-    QString key = QMailViewerFactory::defaultKey( QMailViewerFactory::StaticContent );
-    emailView = QMailViewerFactory::create( key, views );
-    emailView->setObjectName( "read-message" );
-
-    connect(emailView, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkClicked(QUrl)) );
-    connect(emailView, SIGNAL(finished()), this, SLOT(closeView()) );
-
-    QWidget* viewer = emailView->widget();
-    viewer->setWhatsThis( tr("This view displays the contents of the message.") );
-
-    views->addWidget(viewer);
-    views->setCurrentWidget(viewer);
-
     setCentralWidget(views);
 
-    context = QSoftMenuBar::menuFor( this );
+    // Update the view if the displayed message changes
+    connect(QMailStore::instance(), SIGNAL(messagesUpdated(QMailMessageIdList)), 
+            this, SLOT(messagesUpdated(QMailMessageIdList)));
 }
 
-void ReadMail::setAccountList(AccountList* list)
+QMailMessageId ReadMail::displayedMessage() const 
 {
-    accountList = list;
+    return mail.id();
+}
+
+bool ReadMail::handleIncomingMessages(const QMailMessageIdList &list) const
+{
+    if (currentViewer()) {
+        if (currentViewer()->handleIncomingMessages(list)) {
+            // Mark each of these messages as read
+            foreach (const QMailMessageId &id, list) {
+                QMailMessageMetaData metaData(id);
+                metaData.setStatus(QMailMessage::New, false);
+                metaData.setStatus(QMailMessage::Read, true);
+                QMailStore::instance()->updateMessage(&metaData);
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ReadMail::handleOutgoingMessages(const QMailMessageIdList &list) const
+{
+    if (currentViewer()) {
+        return currentViewer()->handleOutgoingMessages(list);
+    }
+
+    return false;
 }
 
 /*  We need to be careful here. Don't allow clicking on any links
@@ -166,107 +268,143 @@ void ReadMail::setAccountList(AccountList* list)
 */
 void ReadMail::linkClicked(const QUrl &lnk)
 {
-#ifdef QTOPIA4_TODO
-    // Why does lnk have "&amp;" etc. in it?
-    QString str = Qtopia::plainString(lnk.toString());
-#else
     QString str = lnk.toString();
-#endif
+    QRegExp commandPattern("(\\w+);(.+)");
 
-    int pos = str.indexOf(";");
-    if ( pos != -1 ) {
-        QString command = str.left(pos);
-        QString param = str.mid(pos + 1);
+    if (commandPattern.exactMatch(str)) {
+        QString command = commandPattern.cap(1);
+        QString param = commandPattern.cap(2);
 
-        if ( command == "attachment" ) { // No tr
+        if (command == "attachment") {
             if (param == "view") { // No tr
                 viewAttachments();
-            } else if ( param.startsWith("scrollto;") ) {
-                emailView->scrollToAnchor( param.mid(9) );
+            } else if (param.startsWith("scrollto;")) {
+                if (currentViewer())
+                    currentViewer()->scrollToAnchor(param.mid(9));
             } else if (param == "play") {
                 if (isMms)
                     viewMms();
             }
-        } else if ( command == "dial" ) {
-            dialNumber( param );
+        } else if (command == "dial") {
+            dialNumber(param);
+        } else if (command == "message") {
+            emit sendMessageTo(QMailAddress(param), QMailMessage::Sms);
+        } else if (command == "store") {
+            storeContact(QMailAddress(param), mail.messageType());
+        } else if (command == "contact") {
+            displayContact(QUniqueId(param));
         }
-    } else {
-        if ( str.startsWith("mailto:") )  {
-            emit mailto( str );
-        } else if ( str.startsWith("http://") ) {
-            QtopiaServiceRequest e( "WebAccess", "openURL(QString)" );
-            e << str;
-            e.send();
-        } else if ( str == "download") {
-            getThisMail();
-        } else if( mail.messageType() == QMailMessage::System && str.startsWith( QLatin1String( "qtopiaservice:" ) ) ) {
-            int commandPos  = str.indexOf( QLatin1String( "::" ) ) + 2;
-            int argPos      = str.indexOf( '?' ) + 1;
-            QString service = str.mid( 14, commandPos - 16 );
-            QString command;
-            QStringList args;
+    } else if (str.startsWith("mailto:")) {
+        // strip leading 'mailto:'
+        emit sendMessageTo( QMailAddress(str.mid(7)), mail.messageType() );
+    } else if (str.startsWith("http://")) {
+        QtopiaServiceRequest e( "WebAccess", "openURL(QString)" );
+        e << str;
+        e.send();
+    } else if (mail.messageType() == QMailMessage::System && str.startsWith(QLatin1String("qtopiaservice:"))) {
+        int commandPos  = str.indexOf( QLatin1String( "::" ) ) + 2;
+        int argPos      = str.indexOf( '?' ) + 1;
+        QString service = str.mid( 14, commandPos - 16 );
+        QString command;
+        QStringList args;
 
-            if( argPos > 0 )
-            {
-                command = str.mid( commandPos, argPos - commandPos - 1 );
-                args    = str.mid( argPos ).split( ',' );
-            }
-            else
-                command = str.mid( commandPos );
-
-            QtopiaServiceRequest e( service, command );
-
-            foreach( QString arg, args )
-                e << arg;
-
-            e.send();
+        if (argPos > 0) {
+            command = str.mid( commandPos, argPos - commandPos - 1 );
+            args    = str.mid( argPos ).split( ',' );
+        } else {
+            command = str.mid( commandPos );
         }
+
+        QtopiaServiceRequest e( service, command );
+        foreach( const QString &arg, args )
+            e << arg;
+        e.send();
     }
 }
 
-static QString displayName(const QMailMessage& mail)
+QString ReadMail::displayName(const QMailMessage& mail)
 {
-    QString name(mail.from().displayName());
+    const bool outgoing(mail.status() & QMailMessage::Outgoing);
+
+    QString name;
+    if (outgoing) {
+        if (!mail.to().isEmpty())
+            name = mail.to().first().displayName();
+    } else {
+        name = mail.from().displayName();
+    }
+
     if (name.isEmpty()) {
         // Use the type of this message as the title
         QString key(QMailComposerFactory::defaultKey(mail.messageType()));
         if (!key.isEmpty())
-            name = QMailComposerFactory::displayName(key);
+            name = QMailComposerFactory::displayName(key, mail.messageType());
         else 
-            name = qApp->translate("ReadMail", "Message");
+            name = tr("Message");
 
         if (!name.isEmpty())
             name[0] = name[0].toUpper();
     }
 
+    if (outgoing)
+        name.prepend(tr("To:") + ' ');
+
     return name;
 }
 
-void ReadMail::updateView()
+void ReadMail::updateView(QMailViewerFactory::PresentationType type)
 {
-    if ( !lastMailId.isValid() )
+    if ( !mail.id().isValid() )
         return;
 
-    switchView(emailView->widget(), displayName(mail));
-    if ( !(mail.status() & QMailMessage::Read) ) {
-        mail.setStatus( QMailMessage::Read, true );
-        QMailStore::instance()->updateMessage(&mail);
-        firstRead = true;
+    if (type == QMailViewerFactory::AnyPresentation) {
+        type = QMailViewerFactory::StandardPresentation;
+        if (mail.messageType() == QMailMessage::Instant) {
+            type = QMailViewerFactory::ConversationPresentation;
+        }
     }
-    else
-        firstRead = false;
 
-    //report currently viewed mail so that it will be
-    //placed first in the queue of new mails to download.
-    emit viewingMail(mail);
+    QMailMessage::ContentType content(mail.content());
+    if ((content == QMailMessage::NoContent) || (content == QMailMessage::UnknownContent)) {
+        // Attempt to show the message as text, from the subject if necessary
+        content = QMailMessage::PlainTextContent;
+    }
 
-    emailView->clear();
+    QMailViewerInterface* view = viewer(content, type);
+    if (!view) {
+        qLog(Messaging) << "Unable to view message" << mail.id() << "with content:" << content;
+        return;
+    }
+
+    // Mark message as read before showing viewer, to avoid reload on change notification
+    updateReadStatus();
+
+    view->clear();
 
     if (!isSmil && (mail.messageType() != QMailMessage::System)) {
-        initImages(emailView);
+        initImages(view);
     }
 
-    emailView->setMessage(mail);
+    view->setMessage(mail);
+    context = QSoftMenuBar::menuFor(view->widget());
+    context->clear();
+    context->addAction(getThisMailButton);
+    context->addAction(sendThisMailButton);
+#ifndef QTOPIA_HOMEUI
+    context->addAction(replyButton);
+    context->addAction(replyAllAction);
+    context->addAction(forwardAction);
+#endif
+    context->addAction(modifyButton);
+#ifndef QTOPIA_HOMEUI
+    context->addAction(deleteButton);
+#endif
+    context->addAction(storeButton);
+    
+    context->addSeparator();
+    view->addActions(context);
+
+    switchView(view, displayName(mail));
 }
 
 void ReadMail::keyPressEvent(QKeyEvent *e)
@@ -278,11 +416,11 @@ void ReadMail::keyPressEvent(QKeyEvent *e)
             break;
         case Qt::Key_P:
             if ( previousButton->isEnabled() )
-                previous();
+                emit viewPrevious();
             break;
         case Qt::Key_N:
             if ( nextButton->isEnabled() )
-                next();
+                emit viewNext();
             break;
         case Qt::Key_Delete:
             deleteItem();
@@ -302,48 +440,21 @@ void ReadMail::keyPressEvent(QKeyEvent *e)
 }
 
 //update view with current EmailListItem (item)
-void ReadMail::viewSelectedMail(MailListView *view)
+void ReadMail::displayMessage(const QMailMessageId& id, QMailViewerFactory::PresentationType type, bool nextAvailable, bool previousAvailable)
 {
-    mailView = view;
-    EmailListItem *current = static_cast<EmailListItem *>( view->currentItem() );
-
-    if ( !current || !view->isItemSelected( current ) ) {
-        close();
+    if (!id.isValid())
         return;
-    }
+       
+    hasNext = nextAvailable;
+    hasPrevious = previousAvailable;
 
-    showMail(current->id());
-
-    QString mailbox = mailView->currentMailbox();
-
-    context->clear();
-
-    if ( hasGet(mailbox) )
-        context->addAction( getThisMailButton );
-    else if ( hasSend(mailbox) )
-        context->addAction( sendThisMailButton );
-
-    if ( hasReply(mailbox) ) {
-        // You can't reply to a system message
-        if (mail.messageType() != QMailMessage::System) {
-            context->addAction( replyButton );
-            context->addAction( replyAllAction );
-        }
-
-        context->addAction( forwardAction );
-    }
-
-    if ( hasEdit(mailbox) )
-        context->addAction( modifyButton );
-
-    deleteButton->setText( hasDelete(mailbox) ? tr("Delete") : tr("Move to Trash") );
-    context->addAction( deleteButton );
-    context->addAction( storeButton );
-
-    context->addSeparator();
-    emailView->addActions( context );
+    showMessage(id, type);
 
     updateButtons();
+
+    //report currently viewed mail so that it will be
+    //placed first in the queue of new mails to download.
+    emit viewingMail(mail);
 }
 
 void ReadMail::buildMenu(const QString &mailbox)
@@ -351,25 +462,40 @@ void ReadMail::buildMenu(const QString &mailbox)
     Q_UNUSED(mailbox);
 }
 
-void ReadMail::mailUpdated(const QMailId& id)
+void ReadMail::messagesUpdated(const QMailMessageIdList& list)
 {
-    if ( lastMailId == id ) {
-        //reload the mail
-        mail = QMailMessage(id,QMailMessage::HeaderAndBody);
-        updateView();
+    if (!mail.id().isValid())
+        return;
+
+    if (list.contains(mail.id())) {
+        loadMessage(mail.id());
+        if (currentViewer())
+            currentViewer()->setMessage(mail);
+        return;
     }
     
     updateButtons();
 }
 
-void ReadMail::showMail(const QMailId& id)
+void ReadMail::showMessage(const QMailMessageId& id, QMailViewerFactory::PresentationType type)
 {
-    mail = QMailMessage(id,QMailMessage::HeaderAndBody);
-    lastMailId = id;
+    loadMessage(id);
 
-    forwardAction->setVisible(mail.messageType() == QMailMessage::Email);
-    replyAllAction->setVisible(mail.messageType() == QMailMessage::Email);
-    
+    updateView(type);
+}
+
+void ReadMail::messageChanged(const QMailMessageId &id)
+{
+    // Ignore updates from viewers that aren't currently top of the stack
+    if (sender() == static_cast<QObject*>(currentViewer())) {
+        loadMessage(id);
+    }
+}
+
+void ReadMail::loadMessage(const QMailMessageId &id)
+{
+    mail = QMailMessage(id);
+
     isMms = false;
     isSmil = false;
 
@@ -384,10 +510,10 @@ void ReadMail::showMail(const QMailId& id)
     }
 #endif
 
-    updateView();
+    updateButtons();
 }
 
-void ReadMail::closeView()
+void ReadMail::viewFinished()
 {
     //check for read reply flag
 #ifndef QTOPIA_NO_MMS
@@ -395,139 +521,108 @@ void ReadMail::closeView()
     QString msgClass = mail.headerFieldText("X-Mms-Message-Class");
     QString readReply = mail.headerFieldText("X-Mms-Read-Reply");
 
-    if (mmsType.contains("m-retrieve-conf") && !msgClass.contains("Auto")
-        && readReply.contains("Yes") && firstRead) {
+    if (mmsType.contains("m-retrieve-conf") && 
+        !msgClass.contains("Auto") && 
+        readReply.contains("Yes") && 
+        firstRead) {
         emit readReplyRequested(mail);
-        }
-
-    if (smilView && views->currentWidget() == smilView->widget()) {
-        switchView(emailView->widget(), displayName(mail));
-        smilView->clear();
-        return;
     }
 #endif
-    cleanup();
-    emit cancelView();
+
+    closeView();
 }
 
-void ReadMail::cleanup()
+void ReadMail::closeView()
 {
-    emailView->clear();
-}
+    if (currentViewer()) {
+        if ((mail.messageType() == QMailMessage::Sms) && (mail.headerFieldText("X-Sms-Class") == "0")) {
+            // This is a 'flash' message just displayed - we should delete it after viewing
+            QMailMessageId deleteId(mail.id());
 
-//gets next item in listview, exits if there is no next
-void ReadMail::next()
-{
-    EmailListItem *item = static_cast<EmailListItem *>( mailView->currentItem() );
-    if (item && mailView->isItemSelected(item) &&
-        mailView->row( item ) + 1 < mailView->rowCount() )
-        item = static_cast<EmailListItem*>(mailView->item( mailView->row( item ) + 1, 0 ));
-    else
-       item = 0;
+            mail = QMailMessage();
+            emit removeMessage(deleteId, false);
+        }
 
-    if (item != NULL) {
-        mailView->setSelectedItem(item);
-        viewSelectedMail(mailView);
-    }
-}
-
-//gets previous item in listview, exits if there is no previous
-void ReadMail::previous()
-{
-    EmailListItem *item = static_cast<EmailListItem *>( mailView->currentItem() );
-    if (item && mailView->isItemSelected(item) &&
-        mailView->row( item ) > 0 )
-        item = static_cast<EmailListItem*>(mailView->item( mailView->row( item ) - 1, 0 ));
-    else
-        item = 0;
-
-    if (item != NULL) {
-        mailView->setSelectedItem(item);
-        viewSelectedMail(mailView);
+        currentView.pop();
+        if (currentView.isEmpty()) {
+            // Clear the current message record
+            mail = QMailMessage();
+            emit cancelView();
+        } else {
+            QTMailWindow::singleton()->setWindowTitle(currentView.top().second);
+            views->setCurrentWidget(currentView.top().first->widget());
+        }
     }
 }
 
 //deletes item, tries bringing up next or previous, exits if unsucessful
 void ReadMail::deleteItem()
 {
-    EmailListItem *item = static_cast<EmailListItem *>( mailView->currentItem() );
-    emit removeItem(item);
+    if (deleteButton->isVisible()) {
+        QMailMessageId deleteId(mail.id());
+
+        if (deleteId.isValid()) {
+            // After deletion, we're finished viewing
+            viewFinished();
+
+            // Clear the current message, otherwise we will think it is updated by the deletion event
+            mail = QMailMessage();
+
+            emit removeMessage(deleteId, true);
+        }
+    }
 }
 
 void ReadMail::updateButtons()
 {
-    EmailListItem *current = static_cast<EmailListItem *>( mailView->currentItem() );
+    static const QMailFolder trashFolder(QMailFolder::TrashFolder);
+    static const QMailFolder draftsFolder(QMailFolder::DraftsFolder);
 
-    if ( !current || !mailView->isItemSelected( current ) ) {
-        close();
+    if (!mail.id().isValid())
         return;
-    }
 
-    /*  Safety precaution.  The mail might have been moved internally/externally
-        away from the mailbox.  Verify that we actually still have access to the
-        same mail   */
-    if ( current->id() != lastMailId ) {
-        viewSelectedMail( mailView );
-        mail = QMailMessage(current->id(),QMailMessage::HeaderAndBody);
-        return;
-    }
+    bool incoming(mail.status() & QMailMessage::Incoming);
+    bool sent(mail.status() & QMailMessage::Sent);
+    bool outgoing(mail.status() & QMailMessage::Outgoing);
+    bool downloaded(mail.status() & QMailMessage::Downloaded);
+    bool removed(mail.status() & QMailMessage::Removed);
+    bool system(mail.messageType() == QMailMessage::System);
+    bool messageSent(sent || sending);
+    bool messageReceived(downloaded || receiving);
 
-    if ( (mail.status() & QMailMessage::Sent) || sending ) {
-        sendThisMailButton->setVisible(false);
-    } else {
-        sendThisMailButton->setVisible(mail.hasRecipients());
-    }
+    sendThisMailButton->setVisible( !messageSent && outgoing && mail.hasRecipients() );
+    modifyButton->setVisible( !messageSent && outgoing && (mail.parentFolderId() == draftsFolder.id()) );
 
-    modifyButton->setVisible( !((mail.status() & QMailMessage::Sent) || sending ) );
+    getThisMailButton->setVisible( !messageReceived && !removed && incoming );
 
-    bool needsDownload = (mail.status() & QMailMessage::Downloaded) || receiving;
-    bool removed = (mail.status() & QMailMessage::Removed);
-    getThisMailButton->setVisible( !needsDownload && !removed );
-
-    if (!needsDownload) {
+    if (!downloaded || system) {
         // We can't really forward/reply/reply-to-all without the message content
         replyButton->setVisible(false);
         replyAllAction->setVisible(false);
         forwardAction->setVisible(false);
     } else {
-        bool replyable(true);
         bool otherReplyTarget(!mail.cc().isEmpty() || mail.to().count() > 1);
 
-        if (accountList) {
-            if (QMailAccount* account = accountList->getAccountById(mail.fromAccount())) {
-                QString accountAddress(account->emailAddress());
-                // TODO: if we have no email address, we should try to get our own phone number...
+        // TODO: handle cases where: a) a Mail-Followup-To is specified, and 
+        // b) a singular To address is not our own address, and is probably a mailing list...
 
-                // We can't reply to messages from ourself
-                if (mail.from().address() == accountAddress) {
-                    replyable = false;
-                } else {
-                    // We can reply to all, if there are CC addresses or if the mail was sent
-                    // an address other than ours (a list, probably)
-                    const QList<QMailAddress>& toList(mail.to());
-                    if (!toList.isEmpty() && (toList.first().address() != accountAddress))
-                        otherReplyTarget = true;
-                }
-            }
-        }
+        replyButton->setVisible(incoming);
+        replyAllAction->setVisible(incoming && otherReplyTarget);
 
-        replyButton->setVisible(replyable);
-        replyAllAction->setVisible(replyable && otherReplyTarget);
         forwardAction->setVisible(true);
     }
 
     attachmentsButton->setVisible( mail.partCount() );
 
-    nextButton->setVisible(mailView->row(current) + 1 < mailView->rowCount());
-    previousButton->setVisible(mailView->row(current) > 0);
+    nextButton->setVisible(hasNext);
+    previousButton->setVisible(hasPrevious);
 
-    // Show the 'Store to Contacts' action if we don't have a matching contact
+    deleteButton->setText( mail.parentFolderId() == trashFolder.id() ? tr("Delete") : tr("Move to Trash") );
+
+    // Show the 'Save Sender' action if we don't have a matching contact
     QMailAddress fromAddress(mail.from());
     bool unknownContact = !fromAddress.matchesExistingContact();
-    storeButton->setVisible(unknownContact);
-
-    if ( current )
-        current->updateState();
+    storeButton->setVisible(!fromAddress.isNull() && unknownContact);
 }
 
 void ReadMail::viewAttachments()
@@ -540,72 +635,71 @@ void ReadMail::viewAttachments()
 void ReadMail::viewMms()
 {
 #ifndef QTOPIA_NO_MMS
-    if (!smilView) {
-        // Create a viewer for SMIL content
-        QString key = QMailViewerFactory::defaultKey( QMailViewerFactory::SmilContent );
-        smilView = QMailViewerFactory::create( key, views );
-        smilView->setObjectName( "smilView" );
-
-        connect(smilView, SIGNAL(finished()), this, SLOT(mmsFinished()));
-
-        QWidget* viewer = smilView->widget();
-        views->addWidget(viewer);
-
-        QSoftMenuBar::setLabel(viewer, QSoftMenuBar::menuKey(), QSoftMenuBar::NoLabel);
-        QSoftMenuBar::setLabel(viewer, Qt::Key_Select, QSoftMenuBar::Next);
-    }
+    QMailViewerInterface* smilView = viewer(QMailMessage::SmilContent); 
+    smilView->setObjectName( "smilView" );
 
     if (smilView->setMessage(mail)) {
-        switchView(smilView->widget(), tr("MMS"));
+        updateReadStatus();
+        switchView(smilView, tr("MMS"));
     } else {
         QMessageBox::warning(this, tr("Cannot view MMS"),
-            tr("<qt>Cannot play improperly formatted MMS</qt>"), QMessageBox::Ok, QMessageBox::NoButton);
+            tr("<qt>Cannot play improperly formatted MMS.</qt>"), QMessageBox::Ok, QMessageBox::NoButton);
     }
 #endif
 }
 
-void ReadMail::mmsFinished()
-{
-    switchView(emailView->widget(), displayName(mail));
-}
-
 void ReadMail::reply()
 {
-    emit resendRequested(mail, Reply);
+#ifdef QTOPIA_HOMEUI
+    int replyType = 0;
+    if (mail.messageType() == QMailMessage::Instant) {
+        // Neither Reply-to-all nor Forward are sensible options
+        replyType = Reply;
+
+        if (mail.status() & QMailMessage::Outgoing) {
+            // Although we're technically replying to a message we sent, we should
+            // interpret this as a reply to the recipient of the message
+            emit sendMessageTo(mail.to().first(), mail.messageType());
+            return;
+        }
+    }
+
+    emit resendRequested(mail, replyType);
+#else
+    if (replyButton->isVisible())
+        emit resendRequested(mail, Reply);
+#endif    
 }
 
 void ReadMail::replyAll()
 {
-    emit resendRequested(mail, ReplyToAll);
+    if (replyAllAction->isVisible())
+        emit resendRequested(mail, ReplyToAll);
 }
 
 void ReadMail::forward()
 {
-    emit resendRequested(mail, Forward);
+    if (forwardAction->isVisible())
+        emit resendRequested(mail, Forward);
 }
 
 void ReadMail::setStatus(int id)
 {
-    QMailMessage::Status prevStatus(mail.status());
-    QMailMessage::Status newStatus(prevStatus);
+    quint64 prevStatus(mail.status());
+    quint64 newStatus(prevStatus);
 
     switch( id ) {
         case 1:
-            newStatus &= ~QMailMessage::Status( QMailMessage::Replied | 
-                                                QMailMessage::RepliedAll | 
-                                                QMailMessage::Forwarded |
-                                                QMailMessage::Read );
+            newStatus &= ~( QMailMessage::Replied | QMailMessage::RepliedAll | QMailMessage::Forwarded | QMailMessage::Read );
             break;
 
         case 2:
-            newStatus &= ~QMailMessage::Status( QMailMessage::RepliedAll | 
-                                                QMailMessage::Forwarded );
+            newStatus &= ~( QMailMessage::RepliedAll | QMailMessage::Forwarded );
             newStatus |= QMailMessage::Replied;
             break;
 
         case 3:
-            newStatus &= ~QMailMessage::Status( QMailMessage::Replied | 
-                                                QMailMessage::RepliedAll );
+            newStatus &= ~( QMailMessage::Replied | QMailMessage::RepliedAll );
             newStatus |= QMailMessage::Forwarded;
             break;
 
@@ -628,27 +722,30 @@ void ReadMail::setStatus(int id)
 
 void ReadMail::modify()
 {
-    emit modifyRequested(mail);
+    if (modifyButton->isVisible())
+        emit modifyRequested(mail);
 }
 
 void ReadMail::getThisMail()
 {
-    emit getMailRequested(mail);
+    if (getThisMailButton->isVisible())
+        emit getMailRequested(mail);
 }
 
 void ReadMail::sendThisMail()
 {
-    emit sendMailRequested(mail);
+    if (sendThisMailButton->isVisible())
+        emit sendMailRequested(mail);
 }
 
-void ReadMail::isSending(bool on)
+void ReadMail::setSendingInProgress(bool on)
 {
     sending = on;
     if ( isVisible() )
         updateButtons();
 }
 
-void ReadMail::isReceiving(bool on)
+void ReadMail::setRetrievalInProgress(bool on)
 {
     receiving = on;
     if ( isVisible() )
@@ -699,31 +796,6 @@ void ReadMail::initImages(QMailViewerInterface* view)
         view->setResource( it.key(), it.value() );
 }
 
-bool ReadMail::hasGet(const QString &mailbox)
-{
-    return (mailbox == MailboxList::InboxString); 
-}
-
-bool ReadMail::hasSend(const QString &mailbox)
-{
-    return (mailbox == MailboxList::OutboxString); 
-}
-
-bool ReadMail::hasEdit(const QString &mailbox)
-{
-    return (mailbox == MailboxList::DraftsString);
-}
-
-bool ReadMail::hasReply(const QString &mailbox)
-{
-    return (mailbox != MailboxList::OutboxString); 
-}
-
-bool ReadMail::hasDelete(const QString &mailbox)
-{
-    return (mailbox == MailboxList::TrashString); 
-}
-
 void ReadMail::dialNumber(const QString& number)
 {
     if ( !number.isEmpty() ) {
@@ -733,91 +805,130 @@ void ReadMail::dialNumber(const QString& number)
     }
 }
 
-void ReadMail::switchView(QWidget* widget, const QString& title)
+void ReadMail::switchView(QMailViewerInterface* viewer, const QString& title)
 {
-    QTMailWindow::singleton()->setWindowTitle(title);
-    views->setCurrentWidget(widget);
+    if (currentViewer() == viewer)
+        currentView.pop();
+
+    lastTitle = title;
+    updateWindowTitle();
+
+    views->setCurrentWidget(viewer->widget());
+
+    currentView.push(qMakePair(viewer, title));
+}
+
+void ReadMail::updateWindowTitle() const
+{
+    QTMailWindow::singleton()->setWindowTitle(lastTitle);
+}
+
+QMailViewerInterface* ReadMail::currentViewer() const 
+{
+    if (currentView.isEmpty())
+        return 0;
+
+    return currentView.top().first;
+}
+
+static void addContactAddress(QContact &contact, QMailMessage::MessageType type, const QString &address)
+{
+    if (type == QMailMessage::Instant) {
+        // Treat this address as a jabber URI
+        QStringList chatFields = QContactFieldDefinition::fields("chat");
+        if (!chatFields.isEmpty()) {
+            // Just use the first type; if there are multiple ones, we need to prevail 
+            // upon PIM to provide services that delegate this stuff to addressbook...
+            QContactFieldDefinition field(chatFields.first());
+            field.setValue(contact, field.id() + ':' + address);
+        }
+    } else {
+        contact.insertEmail(address);
+    }
+}
+
+void ReadMail::storeContact(const QMailAddress &address, QMailMessage::MessageType type)
+{
+    if (!address.isPhoneNumber() && !address.isEmailAddress()) {
+        qWarning() << "Unable to store unknown address type:" << address.toString();
+    } else {
+        SaveContactDialog dialog(address);
+
+        if ((QtopiaApplication::execDialog(&dialog) == QDialog::Accepted) &&
+            (dialog.selection() != SaveContactDialog::None)) {
+            bool newContact = (dialog.selection() == SaveContactDialog::Create);
+
+            if (!contactModel) {
+                // Once we have registered the new contact, we need to update our message display
+                contactModel = new QContactModel();
+                connect(contactModel, SIGNAL(modelReset()), this, SLOT(contactModelReset()) );
+            }
+
+            modelUpdatePending = true;
+
+            if (address.isPhoneNumber()) {
+                QtopiaServiceRequest req( "Contacts", (newContact ? "createNewContact(QString)"
+                                                                  : "addPhoneNumberToContact(QString)") );
+                req << address.toString();
+                req.send();
+            } else {
+                // The Contacts app doesn't provide email address services at this time
+                if (newContact) {
+                    QContact contact;
+                    addContactAddress(contact, type, address.address());
+
+                    QtopiaServiceRequest req( "Contacts", "addAndEditContact(QContact)" );
+                    req << contact;
+                    req.send();
+                } else {
+                    // For now, we need to do this ourselves
+                    QContactSelector selector;
+                    selector.setObjectName("select-contact");
+
+                    QContactModel model(&selector);
+
+                    QSettings config( "Trolltech", "Contacts" );
+                    config.beginGroup( "default" );
+                    if (config.contains("SelectedSources/size")) {
+                        int count = config.beginReadArray("SelectedSources");
+                        QSet<QPimSource> set;
+                        for(int i = 0; i < count; ++i) {
+                            config.setArrayIndex(i);
+                            QPimSource s;
+                            s.context = QUuid(config.value("context").toString());
+                            s.identity = config.value("identity").toString();
+                            set.insert(s);
+                        }
+                        config.endArray();
+                        model.setVisibleSources(set);
+                    }
+
+                    selector.setModel(&model);
+                    selector.setAcceptTextEnabled(false);
+
+                    selector.showMaximized();
+                    if (QtopiaApplication::execDialog(&selector) == QDialog::Accepted) {
+                        QContact contact(selector.selectedContact());
+                        addContactAddress(contact, type, address.address());
+
+                        if (!model.updateContact(contact)) {
+                            qWarning() << "Unable to update contact:" << contact.label();
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 void ReadMail::storeContact()
 {
-    QMailAddress fromAddress = mail.from();
-    if (!fromAddress.isPhoneNumber() && !fromAddress.isEmailAddress()) {
-        qWarning() << "Unable to store unknown address type:" << fromAddress.toString();
-    } else {
-        QString text = "<qt>" + tr("Create a new contact?") + "</qt>";
-        bool newContact = (QMessageBox::warning(0,
-                                                tr("Save to Contacts"), 
-                                                text, 
-                                                QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
-
-        if (!contactModel) {
-            // Once we have registered the new contact, we need to update our message display
-            contactModel = new QContactModel();
-            connect(contactModel, SIGNAL(modelReset()), this, SLOT(contactModelReset()) );
-        }
-
-        modelUpdatePending = true;
-
-        if (fromAddress.isPhoneNumber()) {
-            QtopiaServiceRequest req( "Contacts", (newContact ? "createNewContact(QString)"
-                                                              : "addPhoneNumberToContact(QString)") );
-            req << fromAddress.toString();
-            req.send();
-        } else {
-            // The Contacts app doesn't provide email address services at this time
-            if (newContact) {
-                QContact contact;
-                contact.insertEmail(fromAddress.address());
-
-                QtopiaServiceRequest req( "Contacts", "addAndEditContact(QContact)" );
-                req << contact;
-                req.send();
-            } else {
-                // For now, we need to do this ourselves
-                QContactSelector selector;
-                selector.setObjectName("select-contact");
-
-                QContactModel model(&selector);
-
-                QSettings config( "Trolltech", "Contacts" );
-                config.beginGroup( "default" );
-                if (config.contains("SelectedSources/size")) {
-                    int count = config.beginReadArray("SelectedSources");
-                    QSet<QPimSource> set;
-                    for(int i = 0; i < count; ++i) {
-                        config.setArrayIndex(i);
-                        QPimSource s;
-                        s.context = QUuid(config.value("context").toString());
-                        s.identity = config.value("identity").toString();
-                        set.insert(s);
-                    }
-                    config.endArray();
-                    model.setVisibleSources(set);
-                }
-
-                selector.setModel(&model);
-                selector.setAcceptTextEnabled(false);
-
-                selector.showMaximized();
-                if (QtopiaApplication::execDialog(&selector) == QDialog::Accepted) {
-                    QContact contact(selector.selectedContact());
-                    contact.insertEmail(fromAddress.address());
-
-                    if (!model.updateContact(contact)) {
-                        qWarning() << "Unable to update contact:" << contact.label();
-                        return;
-                    }
-                } else {
-                    return;
-                }
-            }
-        }
-
-        if (mailView) {
-            // Force update of from address in GUI
-            mailView->resetNameCaches();
-        }
+    if (storeButton->isVisible()) {
+        // Store the address of the correspondent
+        if (mail.status() & QMailMessage::Incoming)
+            storeContact(mail.from(), mail.messageType());
+        else
+            storeContact(mail.to().first(), mail.messageType());
     }
 }
 
@@ -828,8 +939,93 @@ void ReadMail::contactModelReset()
         // our update may not include the change we requested...
         //modelUpdatePending = false;
 
-        updateView();
+        if (QMailViewerInterface *view = currentViewer()) {
+            // Update the view to reflect any changes in details from the contact model
+            view->setMessage(mail);
+
+            if (view->objectName() != "smilView") {
+                // Update the window title also
+                QTMailWindow::singleton()->setWindowTitle(displayName(mail));
+            }
+        }
+
         updateButtons();
     }
 }
 
+QMailViewerInterface* ReadMail::viewer(QMailMessage::ContentType content, QMailViewerFactory::PresentationType type)
+{
+    ViewerMap::iterator it = contentViews.find(qMakePair(content, type));
+    if (it == contentViews.end()) {
+        QString key = QMailViewerFactory::defaultKey(content, type);
+        if (key.isEmpty())
+            return 0;
+
+        QMailViewerInterface* view = QMailViewerFactory::create(key, views);
+
+        view->setObjectName("read-message");
+        view->widget()->setWhatsThis(tr("This view displays the contents of the message."));
+
+        connect(view, SIGNAL(replyToSender()), replyButton, SLOT(trigger()));
+        connect(view, SIGNAL(replyToAll()), replyAllAction, SLOT(trigger()));
+        connect(view, SIGNAL(completeMessage()), getThisMailButton, SLOT(trigger()));
+        connect(view, SIGNAL(forwardMessage()), forwardAction, SLOT(trigger()));
+        connect(view, SIGNAL(deleteMessage()), deleteButton, SLOT(trigger()));
+        connect(view, SIGNAL(saveSender()), storeButton, SLOT(trigger()));
+        connect(view, SIGNAL(contactDetails(QContact)), this, SLOT(displayContact(QContact)));
+        connect(view, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkClicked(QUrl)));
+        connect(view, SIGNAL(messageChanged(QMailMessageId)), this, SLOT(messageChanged(QMailMessageId)));
+        connect(view, SIGNAL(viewMessage(QMailMessageId,QMailViewerFactory::PresentationType)), this, SIGNAL(viewMessage(QMailMessageId,QMailViewerFactory::PresentationType)));
+        connect(view, SIGNAL(sendMessage(QMailMessage)), this, SIGNAL(sendMessage(QMailMessage)));
+
+        // Note: this connection must be queued to prevent spurious emission of close events:
+        connect(view, SIGNAL(finished()), this, SLOT(viewFinished()), Qt::QueuedConnection);
+
+        QWidget* viewWidget = view->widget();
+        viewWidget->setGeometry(geometry());
+        views->addWidget(viewWidget);
+
+        QSoftMenuBar::clearLabel(viewWidget, QSoftMenuBar::menuKey());
+        QSoftMenuBar::clearLabel(viewWidget, Qt::Key_Select);
+
+        it = contentViews.insert(qMakePair(content, type), view);
+    }
+
+    return it.value();
+}
+
+void ReadMail::displayContact(const QContact &contact)
+{
+    displayContact(contact.uid());
+}
+
+void ReadMail::displayContact(const QUniqueId &uid)
+{
+    QtopiaServiceRequest req("Contacts", "showContact(QUniqueId)");
+    req << uid;
+    req.send();
+}
+
+void ReadMail::updateReadStatus()
+{
+    if (mail.id().isValid()) {
+        bool newMessage(mail.status() & QMailMessage::New);
+
+        // This message is no longer new
+        if (newMessage)
+            mail.setStatus(QMailMessage::New, false);
+
+        // Do not mark as read unless it has been downloaded
+        if (mail.status() & QMailMessage::Downloaded) {
+            firstRead = !(mail.status() & QMailMessage::Read);
+            if (firstRead)
+                mail.setStatus(QMailMessage::Read, true);
+        }
+
+        if (newMessage || firstRead) {
+            QMailStore::instance()->updateMessage(&mail);
+        }
+    }
+}
+
+#include "readmail.moc"

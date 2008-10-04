@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,17 +22,20 @@
 #include "pluginlist.h"
 
 #include <qcombobox.h>
-#include <qradiobutton.h>
-#include <qbuttongroup.h>
 #include <qsettings.h>
 #include <qtopiaapplication.h>
+#include <qformlayout.h>
+#include <qstorage.h>
+#include <qstoragedeviceselector.h>
+
+#include "custom.h"
 
 
 // Default quality settings, if not yet set in the configuration.
-static QualitySetting DefaultQualities[] = {
-    {11025, 1, "audio/x-wav", "pcm"},
-    {22050, 2, "audio/x-wav", "pcm"},
-    {44100, 2, "audio/x-wav", "pcm"},
+static const QualitySetting DefaultQualities[] = {
+    {8000, 1, "audio/x-wav", "pcm"},
+    {22050, 1, "audio/x-wav", "pcm"},
+    {44100, 1, "audio/x-wav", "pcm"},
     {8000, 1, "audio/x-wav", "pcm"},
 };
 
@@ -43,19 +44,60 @@ static const char * const ConfigSections[MaxQualities] = {
     "VoiceQuality", "MusicQuality", "CDQuality", "CustomQuality"
 };
 
-
 ConfigureRecorder::ConfigureRecorder( QualitySetting *_qualities, MediaRecorderPluginList *_plugins, QWidget *parent, Qt::WFlags f )
     : QDialog( parent, f )
     , qualities( _qualities )
     , plugins( _plugins )
     , quality( CustomQuality )
 {
-    // Create the UI.
-    conf = new Ui::ConfigureRecorderBase();
-    conf->setupUi( this );
     setObjectName( "settings" );     // To display the correct help page.
 
+    // Create the UI.
+    QFormLayout *layout = new QFormLayout( this );
+
+    presetQualities = new QComboBox();
+    presetQualities->addItem( tr("Voice") );
+#ifndef EXCLUSIVE_AUDIO_SETTING
+    presetQualities->addItem( tr("Music") );
+    presetQualities->addItem( tr("CD") );
+    presetQualities->addItem( tr("Custom") );
+#endif
+    layout->addRow( tr("Quality"), presetQualities );
+
+    channels = new QComboBox();
+#ifndef EXCLUSIVE_AUDIO_SETTING
+    channels->addItem( tr("Mono") );
+#else
+    if(EXCLUSIVE_AUDIO_CHANNELS == 1)
+        channels->addItem( tr("Mono") );
+    else
+        channels->addItem( tr("Stereo") );
+#endif
+    layout->addRow( tr("Channels"), channels );
+
+    sampleRate = new QComboBox();
+#ifndef EXCLUSIVE_AUDIO_SETTING
+    sampleRate->addItem( tr("8 kHz") );
+    sampleRate->addItem( tr("11 kHz") );
+    sampleRate->addItem( tr("22 kHz") );
+    sampleRate->addItem( tr("44 kHz") );
+#else
+    QString str = QString("%1 kHz").arg(EXCLUSIVE_AUDIO_RATE/1000);
+    sampleRate->addItem( str );
+#endif
+    layout->addRow( tr("Sample Rate"), sampleRate );
+
+    format = new QComboBox();
+    layout->addRow( tr("Format"), format );
+
+    storageLocation = new QStorageDeviceSelector;
+    QFileSystemFilter *fsf = new QFileSystemFilter;
+    fsf->documents = QFileSystemFilter::Set;
+    storageLocation->setFilter(fsf);
+    layout->addRow( tr("Location"), storageLocation );
+
     // Load the default quality settings.
+#ifndef EXCLUSIVE_AUDIO_SETTING
     int qual;
     for ( qual = 0; qual < MaxQualities; ++qual ) {
         qualities[qual].frequency = DefaultQualities[qual].frequency;
@@ -63,52 +105,39 @@ ConfigureRecorder::ConfigureRecorder( QualitySetting *_qualities, MediaRecorderP
         qualities[qual].mimeType = DefaultQualities[qual].mimeType;
         qualities[qual].formatTag = DefaultQualities[qual].formatTag;
     }
+#else
+    qualities[0].frequency = EXCLUSIVE_AUDIO_RATE;
+    qualities[0].channels = EXCLUSIVE_AUDIO_CHANNELS;
+    qualities[0].mimeType = "audio/x-wav";
+    qualities[0].formatTag = "pcm";
+#endif
 
     // Load configuration overrides.
     loadConfig();
-
-    // Populate the list of sample rates.
-    conf->sampleRate->addItem( tr("8 kHz") );
-    conf->sampleRate->addItem( tr("11 kHz") );
-    conf->sampleRate->addItem( tr("22 kHz") );
-    conf->sampleRate->addItem( tr("44 kHz") );
 
     // Populate the list of formats.
     if ( plugins != 0 ) {
         uint numPlugins = plugins->count();
         for ( uint plugin = 0; plugin < numPlugins; ++plugin ) {
-            conf->format->addItem( plugins->formatNameAt( plugin ) );
+            format->addItem( plugins->formatNameAt( plugin ) );
         }
     }
 
-    // Group Quality settings buttons
-    QButtonGroup*   qualitybuttonGroup = new QButtonGroup(this);
-    qualitybuttonGroup->addButton(conf->voiceQuality, VoiceQuality);
-    qualitybuttonGroup->addButton(conf->musicQuality, MusicQuality);
-    qualitybuttonGroup->addButton(conf->cdQuality, CDQuality);
-    qualitybuttonGroup->addButton(conf->customQuality, CustomQuality);
-
-    connect(qualitybuttonGroup, SIGNAL(buttonClicked(int)), this, SLOT(setQuality(int)));
-
-    // Group channel setting buttons
-    QButtonGroup*   channelButtonGroup = new QButtonGroup(this);
-    channelButtonGroup->addButton(conf->monoChannels, 0);
-    channelButtonGroup->addButton(conf->stereoChannels, 1);
-
-    connect(channelButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(setChannels(int)));
-
     // Hook up interesting signals.
-    connect( conf->sampleRate, SIGNAL(activated(int)),
-             this, SLOT(setSampleRate(int)) );
-    connect( conf->format, SIGNAL(activated(int)),
-             this, SLOT(setFormat(int)) );
-}
+    connect( presetQualities, SIGNAL(activated(int)), this, SLOT(setQuality(int)) );
+    connect( channels, SIGNAL(activated(int)), this, SLOT(setChannels(int)) );
+    connect( sampleRate, SIGNAL(activated(int)), this, SLOT(setSampleRate(int)) );
+    connect( format, SIGNAL(activated(int)), this, SLOT(setFormat(int)) );
 
+    // If preset quality is Custom, other fields are disabled
+    channels->setEnabled( quality == CustomQuality );
+    sampleRate->setEnabled( quality == CustomQuality );
+    format->setEnabled( quality == CustomQuality );
+}
 
 ConfigureRecorder::~ConfigureRecorder()
 {
 }
-
 
 static void copyQualities( QualitySetting *dest, QualitySetting *src, int num )
 {
@@ -129,6 +158,7 @@ void ConfigureRecorder::processPopup()
     QualitySetting savedQualities[MaxQualities];
     int savedQuality = quality;
     copyQualities( savedQualities, qualities, MaxQualities );
+    QString location = storageLocation->documentPath();
 
     // Update the configuration dialog's display with the current state.
     setQuality( quality );
@@ -138,109 +168,80 @@ void ConfigureRecorder::processPopup()
         // Copy the saved configuration back.
         copyQualities( qualities, savedQualities, MaxQualities );
         quality = savedQuality;
+        storageLocation->setLocation( location );
     }
 }
 
+const QFileSystem* ConfigureRecorder::fileSystem()
+{
+    return storageLocation->fileSystem();
+}
+
+QString ConfigureRecorder::documentPath()
+{
+    return storageLocation->documentPath();
+}
 
 void ConfigureRecorder::setQuality( int index )
 {
     // Set the quality value.
     quality = index;
-    switch ( quality ) {
-        case VoiceQuality:
-            conf->voiceQuality->setChecked( true );
-            break;
-
-        case MusicQuality:
-            conf->musicQuality->setChecked( true );
-            break;
-
-        case CDQuality:
-            conf->cdQuality->setChecked( true );
-            break;
-
-        case CustomQuality:
-            conf->customQuality->setChecked( true );
-            break;
-    }
+    presetQualities->setCurrentIndex( quality );
 
     // Set the number of channels.
-    conf->stereoChannels->setDisabled(true);
-    if ( qualities[quality].channels == 1) {
-        conf->monoChannels->setChecked( true );
-    } else {
-        //conf->stereoChannels->setChecked( true );
-        conf->monoChannels->setChecked( true );
-    }
+    channels->setCurrentIndex( qualities[quality].channels - 1 );
 
     // Set the sample rate frequency.
     switch ( qualities[quality].frequency ) {
-        case 8000:
-            conf->sampleRate->setCurrentIndex( 0 );
-            break;
-
-        case 11025:
-            conf->sampleRate->setCurrentIndex( 1 );
-            break;
-
-        case 22050:
-            conf->sampleRate->setCurrentIndex( 2 );
-            break;
-
-        case 44100:
-            conf->sampleRate->setCurrentIndex( 3 );
-            break;
+#ifndef EXCLUSIVE_AUDIO_SETTING
+        case 8000:  sampleRate->setCurrentIndex( 0 ); break;
+        case 11025: sampleRate->setCurrentIndex( 1 ); break;
+        case 22050: sampleRate->setCurrentIndex( 2 ); break;
+        case 44100: sampleRate->setCurrentIndex( 3 ); break;
+#else
+        case EXCLUSIVE_AUDIO_RATE:  sampleRate->setCurrentIndex( 0 ); break;
+#endif
     }
 
     // Set the format.
-    int formatIndex = plugins->indexFromType
-            ( qualities[quality].mimeType, qualities[quality].formatTag );
+    int formatIndex = plugins->indexFromType( qualities[quality].mimeType, qualities[quality].formatTag );
     if( formatIndex >= 0 ) {
-        conf->format->setCurrentIndex( formatIndex );
+        format->setCurrentIndex( formatIndex );
     }
-}
 
+    channels->setEnabled( quality == CustomQuality );
+    sampleRate->setEnabled( quality == CustomQuality );
+    format->setEnabled( quality == CustomQuality );
+}
 
 void ConfigureRecorder::setChannels( int index )
 {
-    updateConfig( index + 1, qualities[quality].frequency,
-                  qualities[quality].mimeType, qualities[quality].formatTag );
+    qualities[quality].channels = index + 1;
 }
-
 
 void ConfigureRecorder::setSampleRate( int index )
 {
     int frequency;
 
     switch ( index ) {
-        case 0:     frequency = 8000; break;
-        case 1:     frequency = 11025; break;
-        case 2:     frequency = 22050; break;
-        default:    frequency = 44100; break;
+#ifndef EXCLUSIVE_AUDIO_SETTING
+        case 0:  frequency = 8000; break;
+        case 1:  frequency = 11025; break;
+        case 2:  frequency = 22050; break;
+        default: frequency = 44100; break;
+#else
+        default:  frequency = EXCLUSIVE_AUDIO_RATE; break;
+#endif
     }
 
-    updateConfig( qualities[quality].channels, frequency,
-                  qualities[quality].mimeType, qualities[quality].formatTag );
+    qualities[quality].frequency = frequency;
 }
-
 
 void ConfigureRecorder::setFormat( int index )
 {
-    updateConfig( qualities[quality].channels,
-                  qualities[quality].frequency,
-                  plugins->at( (uint)index )->pluginMimeType(),
-                  plugins->formatAt( (uint)index ) );
+    qualities[quality].mimeType = plugins->at( (uint)index )->pluginMimeType();
+    qualities[quality].formatTag = plugins->formatAt( (uint)index );
 }
-
-
-void ConfigureRecorder::updateConfig( int channels, int frequency, const QString& mimeType, const QString& formatTag )
-{
-    qualities[quality].channels = channels;
-    qualities[quality].frequency = frequency;
-    qualities[quality].mimeType = mimeType;
-    qualities[quality].formatTag = formatTag;
-}
-
 
 void ConfigureRecorder::loadConfig()
 {
@@ -251,6 +252,12 @@ void ConfigureRecorder::loadConfig()
     if (qvalue == "") {
         quality = VoiceQuality;
     }
+
+    QString l = cfg.value("Location").toString();
+    if ( !l.isEmpty() )
+        storageLocation->setLocation(l);
+    else
+        storageLocation->setLocation(QFileSystem::documentsFileSystem().documentsPath());
 
     for ( int qual = 0; qual < MaxQualities; ++qual ) {
         if ( qvalue == ConfigSections[qual] ) {
@@ -267,8 +274,7 @@ void ConfigureRecorder::loadConfig()
         }
 
         value = cfg.value( "Frequency" ).toInt();
-        if ( value == 8000 || value == 11025 ||
-             value == 22050 || value == 44100 ) {
+        if ( value == 8000 || value == 11025 || value == 22050 || value == 44100 ) {
             qualities[qual].frequency = value;
         }
 
@@ -292,7 +298,6 @@ void ConfigureRecorder::loadConfig()
     }
 }
 
-
 void ConfigureRecorder::saveConfig()
 {
     // Write out only what is different from the defaults, which
@@ -307,6 +312,8 @@ void ConfigureRecorder::saveConfig()
     } else {
         cfg.remove( "Quality" );
     }
+
+    cfg.setValue( "Location", storageLocation->documentPath() );
 
     for ( int qual = 0; qual < MaxQualities; ++qual ) {
         cfg.endGroup();

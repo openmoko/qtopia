@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Keypad Button Behavior<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Keypad Button Behavior<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#keypad-button-behavior">Keypad Button Behavior</a></li>
 <ul><li><a href="#user-definable-button-mappings">User Definable Button Mappings</a></li>
@@ -33,7 +33,7 @@
 <p>The description of the buttons should be included in <tt>defaultbuttons.conf</tt> on the device, or <tt>defaultbuttons-&lt;platform&gt;.conf</tt> if in the build tree.</p>
 <p>An example of what this may look like:</p>
 <pre>    [Button]
-    Count=2
+    Count=3
     [Button0]
     Name=Calendar Button
     Key=F9
@@ -56,7 +56,13 @@
     PressedActionMessage=multitask()
     HeldActionMappable=0
     HeldActionService=TaskManager
-    HeldActionMessage=showRunningTasks()</pre>
+    HeldActionMessage=showRunningTasks()
+    [Button3]
+    Name=Power Button
+    Key=Hangup
+    HeldActionService=Launcher
+    HeldActionMessage=execute(QString)
+    HeldActionArgs=@ByteArray(\0\0\0\x1\0\0\0\n\0\0\0\0\x10\0s\0h\0u\0t\0\x64\0o\0w\0n)</pre>
 <p>This example describes a device with three hardware buttons. One that opens the calendar application, one that opens the contacts application or beams the owners business card, and a third that is used for multitasking.</p>
 <pre>    [Button]
     Count=3</pre>
@@ -66,7 +72,7 @@
     [Translation]
     File=QtopiaDefaults
     Context=Buttons</pre>
-<p>This describes the name of the button. Qtopia provides a Buttons application where the user can change the button mapping for shortcut buttons on their device. The Name of a button is how the button is described to them. The translation for the button's name can be found in <tt>$QPEDIR/i18n/&lt;your-lang&gt;/QtopiaDefaults.ts</tt>.</p>
+<p>This describes the name of the button. Qt Extended provides a Buttons application where the user can change the button mapping for shortcut buttons on their device. The Name of a button is how the button is described to them. The translation for the button's name can be found in <tt>$QPEDIR/i18n/&lt;your-lang&gt;/QtopiaDefaults.ts</tt>.</p>
 <p>Images can be provided for the buttons by placing them in <tt>pics/Button/</tt>. The name of the image should be the number of the button as described in <tt>defaultbuttons.conf</tt>. For this example, the image for the calendar button would be <tt>Button/0.png</tt>.</p>
 <pre>    Key=F9</pre>
 <p>This describes the Qt keycode the button maps to. These are the codes listed in <tt>qnamespace.h</tt> found in the Qt include directory.</p>
@@ -75,7 +81,7 @@
     PressedActionMessage=raiseToday()
     HeldActionService=Calendar
     HeldActionMessage=raise()</pre>
-<p>These describe what occurs when a button is pressed or held. The Service is a Qtopia Service, described in <a href="services.html">Qtopia Application Services </a>. In this case the name of the services is calendar, and the action is raise(), or raiseToday(). Both the service and actions are already provided for the Qtopia calendar application. Only actions that take no parameters can be used.</p>
+<p>These describe what occurs when a button is pressed or held. The Service is a Qt Extended Service, described in <a href="services.html">Qt Extended Application Services </a>. In this case the name of the services is calendar, and the action is raise(), or raiseToday(). Both the service and actions are already provided for the Qt Extended calendar application. Only actions that take no parameters can be used.</p>
 <p>The &quot;Multitasking Button&quot; in the example uses:</p>
 <pre>    HeldActionMappable=0</pre>
 <p>To disable the user from changing the button's functionality. This could be important for certain usability or branding considerations.</p>
@@ -105,7 +111,7 @@
     7=Applications/simapp.desktop{@/Telephony/Status/SimToolkitAvailable},Applications/calculator.desktop
     8=Applications
     9=Documents</pre>
-<p>Note the example for button 7 is a <i>list</i> of alternatives separated by commas. The first alternative (simapp.desktop) is only used if the bracketed <a href="qexpressionevaluator.html">Qtopia Expression</a> evaluates to true. By using an expression that references the <a href="qvaluespaceitem.html">Qtopia Value Space</a>, this mechanism allows the function associated with a button to be determined dynamically.</p>
+<p>Note the example for button 7 is a <i>list</i> of alternatives separated by commas. The first alternative (simapp.desktop) is only used if the bracketed <a href="qexpressionevaluator.html">Qt Extended Expression</a> evaluates to true. By using an expression that references the <a href="qvaluespaceitem.html">Value Space</a>, this mechanism allows the function associated with a button to be determined dynamically.</p>
 <a name="phone-buttons"></a>
 <h3>Phone Buttons</h3>
 <p>The dialing and other buttons of a phone are configured by the <i>SystemButtons</i>, <i>TextButtons</i>, <i>PhoneTextButtons</i>, and <i>LocaleTextButtons</i> sections of the <tt>defaultbuttons.conf</tt> file.</p>
@@ -178,7 +184,7 @@
     Key2=Back</pre>
 <a name="usual-key-meanings"></a>
 <h3>Usual Key Meanings</h3>
-<p>This section describes the usual key meanings that Qtopia uses, across many different device categories. If your device has a similar key, it is recommended that you choose the mapping in this list.</p>
+<p>This section describes the usual key meanings that Qt Extended uses, across many different device categories. If your device has a similar key, it is recommended that you choose the mapping in this list.</p>
 <p>The following keys are handled specially in the source code, and should be mapped exactly as listed here:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Key</th><th>Usual meaning</th></tr></thead>
@@ -191,9 +197,10 @@
 <tr valign="top" class="odd"><td><tt>Key_Up</tt>, <tt>Key_Down</tt>, <tt>Key_Left</tt>, <tt>Key_Right</tt></td><td>Directional movement keys.</td></tr>
 <tr valign="top" class="even"><td><tt>Key_VolumeUp</tt>, <tt>Key_VolumeDown</tt></td><td>Adjust the volume of the currently playing media or the current phone call.</td></tr>
 <tr valign="top" class="odd"><td><tt>Key_Flip</tt></td><td>Key that is sent whenever a flip phone is opened or closed. A key release event should be sent when the flip is opened, and a key press event sent when the flip is closed.</td></tr>
-<tr valign="top" class="even"><td><tt>Key_F27</tt></td><td>Handset cradle on desk phones. A key release event should be sent when the handset is picked up, and a key press event should be sent when the handset is replaced in the cradle.</td></tr>
-<tr valign="top" class="odd"><td><tt>Key_F28</tt></td><td>Key on the headphones, which indicates whether to accept the incoming call or hang up the current call.</td></tr>
-<tr valign="top" class="even"><td><tt>Key_F29</tt></td><td>Lock key, for locking/unlocking the keypad.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F26</tt></td><td>Input method mode switch key. If an input method has several modes (e.g&#x2e; multi-tap vs word matching modes), then it can offer the user the option to quickly switch between the modes using this key.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F27</tt></td><td>Handset cradle on desk phones. A key release event should be sent when the handset is picked up, and a key press event should be sent when the handset is replaced in the cradle.</td></tr>
+<tr valign="top" class="even"><td><tt>Key_F28</tt></td><td>Key on the headphones, which indicates whether to accept the incoming call or hang up the current call.</td></tr>
+<tr valign="top" class="odd"><td><tt>Key_F29</tt></td><td>Lock key, for locking/unlocking the keypad.</td></tr>
 </table></p>
 <p>The following table indicates special functions that are usually handled in the <tt>defaultbuttons.conf</tt> file rather than in the source code. Keys that only appear in <tt>defaultbuttons.conf</tt> can be mapped to any function key, but the following mappings are recommended for consistency across device types:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -218,8 +225,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

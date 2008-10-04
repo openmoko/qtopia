@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "iothread.h"
@@ -25,11 +23,11 @@ QD_LOG_OPTION(Modem)
 #include <windows.h>
 
 IOThread::IOThread( QObject *parent )
-    : QThread( parent ), handle( INVALID_HANDLE_VALUE )
+    : QThread( parent ), handle( INVALID_HANDLE_VALUE ), dsr( false )
 {
-    writeSem = CreateEvent(NULL, FALSE, FALSE, NULL); // This lets the main thread signal the IO thread
+    writeSem = CreateEvent(NULL, false, false, NULL); // This lets the main thread signal the IO thread
     Q_ASSERT(writeSem);
-    quitSem = CreateEvent(NULL, FALSE, FALSE, NULL); // This lets the main thread signal the IO thread
+    quitSem = CreateEvent(NULL, false, false, NULL); // This lets the main thread signal the IO thread
     Q_ASSERT(quitSem);
     currentState = Idle;
     nextState = Idle;
@@ -52,9 +50,17 @@ void IOThread::run()
     LONG ret;
     bool ok;
 
+    // Check for an initial DSR ON state
+    if ( !brokenSerial && GetCommModemStatus( handle, &evt ) ) {
+        if ( (evt & MS_DSR_ON) ) {
+            dsr = true; // We don't notify about this because the connection isn't actually "up" yet
+            LOG() << "DSR up (initially).";
+        }
+    }
+
     OVERLAPPED o;
     memset( &o, 0, sizeof(OVERLAPPED) );
-    o.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    o.hEvent = CreateEvent(NULL, true, false, NULL);
     Q_ASSERT(o.hEvent);
 
 #define HANDLES 3
@@ -101,9 +107,14 @@ void IOThread::run()
                 } else if ( evt == EV_DSR ) {
                     LOG() << "DSR";
                     if ( !brokenSerial && GetCommModemStatus( handle, &evt ) ) {
-                        if ( !(evt & MS_DSR_ON) ) {
-                            LOG() << "DSR dropped. Closing the connection.";
-                            nextState = Quit;
+                        if ( (evt & MS_DSR_ON) ) {
+                            dsr = true;
+                            emit dsrChanged(dsr);
+                            LOG() << "DSR up.";
+                        } else {
+                            dsr = false;
+                            emit dsrChanged(dsr);
+                            LOG() << "DSR dropped.";
                         }
                     }
                 } else {

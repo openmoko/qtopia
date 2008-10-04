@@ -1,8 +1,12 @@
+!qbuild{
 qtopia_project(qtopia plugin)
-
-#
 TARGET = gstreamer
 CONFIG += no_tr
+LIBS += -lgstvideo-0.10 -lqtopiamedia
+depends(libraries/qtopiamedia)
+depends(libraries/qtopiavideo)
+depends(3rdparty/libraries/gstreamer)
+}
 
 HEADERS	= \
         gstreamerengine.h \
@@ -10,11 +14,13 @@ HEADERS	= \
         gstreamerenginefactory.h \
         gstreamerurisessionbuilder.h \
         gstreamerplaybinsession.h \
-        gstreamerdirectpainterwidget.h \
+        gstreamervideowidget.h \
         gstreamerqtopiavideosink.h \
         gstreamerbushelper.h \
         gstreamermessage.h \
-        gstreamersinkwidget.h
+        gstreamersinkwidget.h \
+        gstreamerrtpsession.h \
+        gstreamerqtopiacamerasource.h
 
 SOURCES	= \
         gstreamerengine.cpp \
@@ -22,17 +28,14 @@ SOURCES	= \
         gstreamerenginefactory.cpp \
         gstreamerurisessionbuilder.cpp \
         gstreamerplaybinsession.cpp \
-        gstreamerdirectpainterwidget.cpp \
+        gstreamervideowidget.cpp \
         gstreamerqtopiavideosink.cpp \
         gstreamerbushelper.cpp \
         gstreamermessage.cpp \
-        gstreamersinkwidget.cpp
+        gstreamersinkwidget.cpp \
+        gstreamerrtpsession.cpp \
+        gstreamerqtopiacamerasource.cpp
 
-LIBS += -lgstvideo-0.10
-depends(libraries/qtopiamedia)
-depends(3rdparty/libraries/gstreamer)
-
-#
-gstreamer_settings.files=$$QTOPIA_DEPOT_PATH/src/plugins/mediaengines/gstreamer/gstreamer.conf
+gstreamer_settings.files=$$device_overrides($$project()gstreamer.conf)
 gstreamer_settings.path=/etc/default/Trolltech
 INSTALLS += gstreamer_settings

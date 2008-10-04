@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,30 +22,22 @@
 #ifndef READMAIL_H
 #define READMAIL_H
 
-#include <qaction.h>
-#include <qmainwindow.h>
-#include <qmenudata.h>
-#include <qmenubar.h>
-#include <qtoolbar.h>
-#include <qtoolbutton.h>
-#include <qmime.h>
+#include <QMap>
+#include <QStack>
 
-#include <quuid.h>
-#include <qurl.h>
-#include <qmap.h>
-
-#include "emaillistitem.h"
 #include "viewatt.h"
 #include <QMailMessage>
+#include <QMailViewerFactory>
+#include <QMainWindow>
 
+class QAction;
+class QContactModel;
 class QLabel;
-class MailListView;
+class QMailViewerInterface;
 class QMenu;
 class QStackedWidget;
-class QContactModel;
-class QMailViewerInterface;
-class AccountList;
-class QContactModel;
+class QUniqueId;
+class QUrl;
 
 class ReadMail : public QMainWindow
 {
@@ -56,39 +46,46 @@ class ReadMail : public QMainWindow
 public:
     enum ResendAction { Reply = 1, ReplyToAll = 2, Forward = 3 };
 
-    ReadMail( QWidget* parent = 0, const QString name = QString(), Qt::WFlags fl = 0 );
+    ReadMail( QWidget* parent = 0, Qt::WFlags fl = 0 );
     ~ReadMail();
 
-    void setAccountList(AccountList* list);
+    void displayMessage(const QMailMessageId& message, QMailViewerFactory::PresentationType, bool nextAvailable, bool previousAvailable);
+    QMailMessageId displayedMessage() const;
 
-    void viewSelectedMail(MailListView *view);
-    void mailUpdated(const QMailId& message);
+    bool handleIncomingMessages(const QMailMessageIdList &list) const;
+    bool handleOutgoingMessages(const QMailMessageIdList &list) const;
+
+    void updateWindowTitle() const;
 
 private slots:
-    void updateView();
+    void updateView(QMailViewerFactory::PresentationType);
+    void messagesUpdated(const QMailMessageIdList& list);
+    void displayContact(const QContact& contact);
 
 signals:
     void resendRequested(const QMailMessage&, int);
-    void mailto(const QString &);
+    void sendMessageTo(const QMailAddress&, QMailMessage::MessageType);
     void modifyRequested(const QMailMessage&);
-    void removeItem(EmailListItem *);
-    void viewingMail(const QMailMessage&);
-    void getMailRequested(const QMailMessage&);
-    void sendMailRequested(const QMailMessage&);
-    void readReplyRequested(const QMailMessage&);
+    void removeMessage(const QMailMessageId& id, bool userRequest);
+    void viewingMail(const QMailMessageMetaData&);
+    void getMailRequested(const QMailMessageMetaData&);
+    void sendMailRequested(const QMailMessageMetaData&);
+    void readReplyRequested(const QMailMessageMetaData&);
     void cancelView();
+    void viewNext();
+    void viewPrevious();
+    void viewMessage(const QMailMessageId &id, QMailViewerFactory::PresentationType);
+    void sendMessage(const QMailMessage &message);
 
 public slots:
-    void cleanup();
-    void isSending(bool);
-    void isReceiving(bool);
+    void closeView();
+    void setSendingInProgress(bool);
+    void setRetrievalInProgress(bool);
 
 protected slots:
     void linkClicked(const QUrl &lnk);
-    void closeView();
-
-    void next();
-    void previous();
+    void messageChanged(const QMailMessageId &id);
+    void viewFinished();
 
     void deleteItem();
     void viewAttachments();
@@ -111,43 +108,44 @@ private:
     void viewMms();
 
     void init();
-    void showMail(const QMailId& message);
+    void showMessage(const QMailMessageId &id, QMailViewerFactory::PresentationType);
+    void loadMessage(const QMailMessageId &id);
     void updateButtons();
     void buildMenu(const QString &mailbox);
     void initImages(QMailViewerInterface* view);
 
-    bool hasGet(const QString &mailbox);
-    bool hasSend(const QString &mailbox);
-    bool hasEdit(const QString &mailbox);
-    bool hasReply(const QString &mailbox);
-    bool hasDelete(const QString &mailbox);
-
     void dialNumber(const QString&);
+    void storeContact(const QMailAddress &address, QMailMessage::MessageType);
+    void displayContact(const QUniqueId &uid);
 
-    void switchView(QWidget* widget, const QString& title);
+    void switchView(QMailViewerInterface* viewer, const QString& title);
+
+    QMailViewerInterface* currentViewer() const;
+
+    QMailViewerInterface* viewer(QMailMessage::ContentType content, QMailViewerFactory::PresentationType type = QMailViewerFactory::StandardPresentation);
+
+    static QString displayName(const QMailMessage &);
+
+    void updateReadStatus();
 
 private slots:
-    void mmsFinished();
     void contactModelReset();
 
 private:
     QStackedWidget *views;
-    MailListView *mailView;
     bool sending, receiving;
     QMailMessage mail;
-    QMailId lastMailId;
     ViewAtt *viewAtt;
     bool isMms;
     bool isSmil;
     bool firstRead;
+    bool hasNext, hasPrevious;
 
     QMenu *context;
 
     QAction *deleteButton;
     bool initialized;
     QAction *nextButton;
-    QMailViewerInterface *emailView;
-    QMailViewerInterface *smilView;
     QAction *attachmentsButton;
     QAction *previousButton;
     QAction *replyButton;
@@ -157,9 +155,15 @@ private:
     QAction *sendThisMailButton;
     QAction *modifyButton;
     QAction *storeButton;
-    AccountList *accountList;
     QContactModel *contactModel;
     bool modelUpdatePending;
+    QString lastTitle;
+
+    typedef QStack<QPair<QMailViewerInterface*, QString> > ViewerStack;
+    ViewerStack currentView;
+
+    typedef QMap<QPair<QMailMessage::ContentType, QMailViewerFactory::PresentationType>, QMailViewerInterface*> ViewerMap;
+    ViewerMap contentViews;
 };
 
-#endif // READMAIL_H
+#endif

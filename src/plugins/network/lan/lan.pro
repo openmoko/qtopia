@@ -1,10 +1,10 @@
+!qbuild{
 qtopia_project(qtopia plugin)
 TARGET=lan
-
 depends(libraries/qtopiacomm/network)
-
 # Packaged by settings/network
 CONFIG+=no_pkg
+}
 
 FORMS       = wirelessbase.ui \
               wirelessencryptbase.ui \
@@ -19,7 +19,8 @@ HEADERS	    = lanplugin.h \
               roamingconfig.h \
               roamingmonitor.h \
               wnet.h\
-              wlanregistrationprovider.h
+              wlanregistrationprovider.h \
+              wirelessipconfig.h
                 
 SOURCES	    = lanplugin.cpp \
               lan.cpp \
@@ -30,27 +31,28 @@ SOURCES	    = lanplugin.cpp \
               roamingconfig.cpp \
               roamingmonitor.cpp \
               wnet.cpp\
-              wlanregistrationprovider.cpp
+              wlanregistrationprovider.cpp \
+              wirelessipconfig.cpp
 
-conf.files	= $$QTOPIA_DEPOT_PATH/etc/network/lan.conf \
-                  $$QTOPIA_DEPOT_PATH/etc/network/lan-pcmcia.conf \
-                  $$QTOPIA_DEPOT_PATH/etc/network/wlan-pcmcia.conf \
-                  $$QTOPIA_DEPOT_PATH/etc/network/wlan.conf 
-                  
-conf.path	= /etc/network
-INSTALLS += conf
+isEmpty(LAN_NETWORK_CONFIGS):LAN_NETWORK_CONFIGS=lan lan-pcmcia wlan-pcmcia wlan
+for(l,LAN_NETWORK_CONFIGS) {
+    conf.files+=$$device_overrides(/etc/network/$${l}.conf)
+}
+conf.path=/etc/network
+INSTALLS+=conf
 
-script=$$PWD/lan-network
-variable=$$LAN_NETWORK_SCRIPT
-include(../network_script.pri)
+bin.files=$$device_overrides(/src/plugins/network/lan/lan-network)
+bin.path=/bin
+bin.hint=script
+INSTALLS+=bin
 
 pics.files	= $$QTOPIA_DEPOT_PATH/pics/Network/lan/* 
 pics.path	= /pics/Network/lan
 pics.hint=pics
 INSTALLS+=pics
 
-icons.files     = $$QTOPIA_DEPOT_PATH/pics/Network/icons/*
-icons.path      = /pics/Network/icons
+icons.files     = $$QTOPIA_DEPOT_PATH/pics/Network/icons/lan/*
+icons.path      = /pics/Network/icons/lan
 icons.hint=pics
 INSTALLS+=icons
 

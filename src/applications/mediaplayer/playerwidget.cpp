@@ -1,27 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "playerwidget.h"
 
-#include "playlist.h"
 #include "elidedlabel.h"
 #include "visualization.h"
 #include "keyfilter.h"
@@ -36,18 +33,28 @@
 #endif
 #include <qmediavideocontrol.h>
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>
 #include <custom.h>
-#endif
 
 #include <qtranslatablesettings.h>
 #include <qtopiaapplication.h>
 #include <qthumbnail.h>
 
+#include <QMarqueeLabel>
+#include <QScreenInformation>
+#include <QFrame>
+#include <qscreen_qws.h>
+#include <qwsevent_qws.h>
+#include <QMediaPlaylist>
+
+#include <private/qmediametainfocontrol_p.h>
+
+#define PLAYERWIDGET_DEBUG 0
+
 #ifndef NO_HELIX
 class HelixLogo : public QWidget
 {
+    Q_OBJECT
 public:
     HelixLogo( QWidget* parent = 0 );
 
@@ -58,18 +65,28 @@ protected:
     // QWidget
     void resizeEvent( QResizeEvent* e );
     void paintEvent( QPaintEvent* e );
+    void showEvent ( QShowEvent * event );
 
 private:
     QImage m_helixlogo;
     QPoint m_helixlogopos;
+    QTimeLine timeLine;
+    qreal opacity;
+
+private slots:
+    void setOpacity(int);
+    void checkTimeLine();
 };
+
+static const QString HELIX_LOGO_PATH = ":image/mediaplayer/helixlogo";
 
 HelixLogo::HelixLogo( QWidget* parent )
     : QWidget( parent )
 {
-    static const QString HELIX_LOGO_PATH = ":image/mediaplayer/helixlogo";
-
     m_helixlogo = QImage( HELIX_LOGO_PATH );
+    timeLine.setFrameRange(0, 255);
+    connect(&timeLine, SIGNAL(frameChanged(int)), this, SLOT(setOpacity(int)));
+    connect(&timeLine, SIGNAL(finished()), this, SLOT(checkTimeLine()));
 }
 
 void HelixLogo::resizeEvent( QResizeEvent* )
@@ -81,9 +98,41 @@ void HelixLogo::resizeEvent( QResizeEvent* )
 void HelixLogo::paintEvent( QPaintEvent* )
 {
     QPainter painter( this );
-
+    qreal oldopacity = painter.opacity();
+    painter.setOpacity( opacity );
     painter.drawImage( m_helixlogopos, m_helixlogo );
+    painter.setOpacity( oldopacity );
 }
+
+void HelixLogo::showEvent( QShowEvent * )
+{
+    timeLine.setDirection(QTimeLine::Forward);
+    timeLine.setDuration(500);
+    timeLine.start();
+}
+
+void HelixLogo::setOpacity(int pOpacity)
+{
+    qreal oldopacity=opacity;
+    opacity=(qreal)pOpacity/255.0;
+    if(oldopacity != opacity)
+        repaint();
+}
+
+void HelixLogo::checkTimeLine()
+{
+    if(timeLine.direction()==QTimeLine::Forward)
+    {
+        timeLine.setDirection(QTimeLine::Backward);
+        timeLine.setDuration(1500);
+        timeLine.start();
+    }
+    else
+    {
+        hide();
+    }
+}
+
 #endif
 
 #ifndef NO_HELIX
@@ -217,43 +266,143 @@ void MediaPlayerSettingsDialog::applySettings()
 
 class ThumbnailWidget : public QWidget
 {
+    Q_OBJECT
 public:
-    ThumbnailWidget( QWidget* parent = 0 )
-        : QWidget( parent )
-    { }
+    ThumbnailWidget( PlayerControl* control, QWidget* parent = 0 );
 
-    void setFile( const QString& file );
+    void setPlaylist( const QMediaPlaylist &playlist );
+
+    QSize sizeHint() const { return m_thumb.size(); }
 
 protected:
-    void resizeEvent( QResizeEvent* ) { m_thumb = QPixmap(); }
-
     // Load thumbnail and draw onto widget
     void paintEvent( QPaintEvent* );
+    void resizeEvent( QResizeEvent * ) { updatePlaylistThumbnail(); }
+
+private slots:
+    void hideThumbnail();
+    void showThumbnail();
+    void updatePlaylistThumbnail();
+    void findInfo(QMediaContent* content);
+    void metaInfoChanged(QString const& value);
 
 private:
-    QString m_file;
+    QMediaPlaylist m_playlist;
 
     QPixmap m_thumb;
+    QPixmap m_scaledThumb;
     QPoint m_thumbpos;
+
+    bool showingThumbnail;
+    bool showingHelixLogo;
+    bool isHelixLogo;
+    PlayerControl *m_control;
+    QMediaControlNotifier *m_notifier;
+    QMediaMetaInfoControl* m_metaInfo;
 };
 
-void ThumbnailWidget::setFile( const QString& file )
+ThumbnailWidget::ThumbnailWidget( PlayerControl* control, QWidget* parent )
+    : QWidget(parent)
+        , showingThumbnail(true)
+        , showingHelixLogo(false)
+        , isHelixLogo(false)
+        , m_control(control)
 {
-    m_file = file;
-    m_thumb = QPixmap();
+    m_notifier = new QMediaControlNotifier( QMediaVideoControl::name(), this );
+    connect( m_notifier, SIGNAL(valid()), this, SLOT(hideThumbnail()) );
+    connect( m_notifier, SIGNAL(invalid()), this, SLOT(showThumbnail()) );
 
-    update();
+    connect( m_control, SIGNAL(contentChanged(QMediaContent*)), m_notifier, SLOT(setMediaContent(QMediaContent*)));
+    connect( &m_playlist, SIGNAL(playingChanged(QModelIndex)), this, SLOT(updatePlaylistThumbnail()) );
+
+    connect(m_control, SIGNAL(contentChanged(QMediaContent*)), SLOT(findInfo(QMediaContent*)));
 }
 
-void ThumbnailWidget::paintEvent( QPaintEvent* )
+void ThumbnailWidget::hideThumbnail()
 {
-    if( m_thumb.isNull() && !m_file.isNull() ) {
-        m_thumb = QThumbnail( m_file ).pixmap( size() );
-        m_thumbpos = QPoint( (width() - m_thumb.width())/2, (height() - m_thumb.height())/2 );
+    showingThumbnail = false;
+    updatePlaylistThumbnail();
+}
+
+void ThumbnailWidget::showThumbnail()
+{
+    showingThumbnail = true;
+    updatePlaylistThumbnail();
+}
+
+void ThumbnailWidget::findInfo(QMediaContent* content)
+{
+    if (content != 0) {
+        m_metaInfo = new QMediaMetaInfoControl(content);
+        connect(m_metaInfo, SIGNAL(valueChanged(QString)), SLOT(metaInfoChanged(QString)));
+    }
+}
+
+void ThumbnailWidget::metaInfoChanged(QString const& value)
+{
+    if (value == "engine" &&
+        m_metaInfo->value("engine") == "Helix" &&
+        !showingHelixLogo) {
+
+        showingHelixLogo = true;
+        update();
+    }
+}
+
+void ThumbnailWidget::paintEvent(QPaintEvent*)
+{
+    if (!showingThumbnail || m_scaledThumb.isNull() || (isHelixLogo && !showingHelixLogo))
+        return;
+
+    QPainter painter(this);
+
+    m_thumbpos = QPoint((width() - m_scaledThumb.width()) / 2, (height() - m_scaledThumb.height()) / 2);
+
+    if (!isHelixLogo)
+        qDrawShadeRect(&painter, m_thumbpos.x()-1, m_thumbpos.y()-1, m_scaledThumb.width()+2, m_scaledThumb.height()+2, style()->standardPalette());
+
+    painter.drawPixmap(m_thumbpos, m_scaledThumb);
+}
+
+void ThumbnailWidget::setPlaylist( const QMediaPlaylist &playlist )
+{
+    m_playlist = playlist;
+
+    updatePlaylistThumbnail();
+}
+
+void ThumbnailWidget::updatePlaylistThumbnail()
+{
+    isHelixLogo = false;
+    showingHelixLogo = false;
+    if(showingThumbnail)
+    {
+        QModelIndex playing = m_playlist.playing();
+        m_thumb = m_playlist.data( playing, QMediaPlaylist::AlbumCover ).value<QPixmap>();
+#ifndef NO_HELIX
+        if(m_thumb.isNull()) {
+            m_thumb = QPixmap(HELIX_LOGO_PATH);
+            isHelixLogo = true;
+        }
+#endif
+    }
+    else
+    {
+#ifndef NO_HELIX
+        isHelixLogo = true;
+        m_thumb = QPixmap(HELIX_LOGO_PATH);
+#else
+        m_thumb = QPixmap();
+#endif
     }
 
-    QPainter painter( this );
-    painter.drawPixmap( m_thumbpos, m_thumb );
+    if(!m_thumb.isNull() && (m_thumb.width() > width()-2 || m_thumb.height() > height()-2))
+        m_scaledThumb = m_thumb.scaled(QSize(width()-2, height()-2), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    else
+        m_scaledThumb = m_thumb;
+
+    updateGeometry();
+    update();
 }
 
 static QImage load_scaled_image( const QString& filename, const QSize& size, Qt::AspectRatioMode mode = Qt::IgnoreAspectRatio )
@@ -328,7 +477,6 @@ protected:
     void reizeEvent( QResizeEvent* ) { m_buffer = QImage(); }
 
     void paintEvent( QPaintEvent* );
-
 private:
     QString m_filename;
 
@@ -366,13 +514,13 @@ class PlaylistLabel : public QWidget
 public:
     PlaylistLabel( QWidget* parent = 0 );
 
-    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
+    void setPlaylist( const QMediaPlaylist &playlist );
 
 private slots:
     void updateLabel();
 
 private:
-    QExplicitlySharedDataPointer< Playlist > m_playlist;
+    QMediaPlaylist m_playlist;
 
     QLabel *m_label;
     IconWidget *m_myshuffleicon;
@@ -381,6 +529,13 @@ private:
 PlaylistLabel::PlaylistLabel( QWidget* parent )
     : QWidget( parent ), m_myshuffleicon( 0 )
 {
+    connect( &m_playlist, SIGNAL(playingChanged(QModelIndex)),
+        this, SLOT(updateLabel()) );
+    connect( &m_playlist, SIGNAL(rowsInserted(QModelIndex,int,int)),
+        this, SLOT(updateLabel()) );
+    connect( &m_playlist, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+        this, SLOT(updateLabel()) );
+
     m_label = new QLabel ( tr( "- of -", "song '- of -'") );
 
     QVBoxLayout *layout = new QVBoxLayout;
@@ -391,16 +546,11 @@ PlaylistLabel::PlaylistLabel( QWidget* parent )
     setLayout( layout );
 }
 
-void PlaylistLabel::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
+void PlaylistLabel::setPlaylist( const QMediaPlaylist &playlist )
 {
-    // Disconnect from old playlist
-    if( m_playlist.data() != NULL ) {
-        m_playlist->disconnect( this );
-    }
-
     m_playlist = playlist;
 
-    if( qobject_cast<PlaylistMyShuffle*>( playlist.data() ) ) {
+    if( playlist.isShuffle() ) {
         m_label->hide();
         if(m_myshuffleicon == NULL)
         {
@@ -413,14 +563,6 @@ void PlaylistLabel::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist
         m_myshuffleicon->show();
     } else {
 
-        // Connect to new playlist
-        connect( m_playlist, SIGNAL(playingChanged(QModelIndex)),
-            this, SLOT(updateLabel()) );
-        connect( m_playlist, SIGNAL(rowsInserted(QModelIndex,int,int)),
-            this, SLOT(updateLabel()) );
-        connect( m_playlist, SIGNAL(rowsRemoved(QModelIndex,int,int)),
-            this, SLOT(updateLabel()) );
-
         updateLabel();
 
         m_label->show();
@@ -431,10 +573,10 @@ void PlaylistLabel::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist
 
 void PlaylistLabel::updateLabel()
 {
-    int count = m_playlist->rowCount();
+    int count = m_playlist.rowCount();
 
     if( count ) {
-        QModelIndex playing = m_playlist->playing();
+        QModelIndex playing = m_playlist.playing();
         if( playing.isValid() ) {
             m_label->setText( tr( "%1 of %2", " e.g. '4 of 6' as in song 4 of 6" ).arg( playing.row() + 1 ).arg( count ) );
         } else {
@@ -478,7 +620,7 @@ class ProgressView : public QWidget
 public:
     ProgressView( RepeatState* repeatstate, QWidget* parent = 0 );
 
-    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
+    void setPlaylist( const QMediaPlaylist &playlist );
 
     QWidget* keyEventHandler() const { return m_progress; }
 
@@ -536,7 +678,7 @@ void ProgressView::setMediaContent( QMediaContent* content )
     m_context->setMediaContent( content );
 }
 
-void ProgressView::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
+void ProgressView::setPlaylist( const QMediaPlaylist &playlist )
 {
     if(!m_context)
         init();
@@ -753,8 +895,7 @@ void ToolButtonStyle::drawComplexControl( ComplexControl cc, const QStyleOptionC
                 if( !m_focusedbuttonbuffer.isNull() || m_focusedbuttonbuffer.size() != button.size() ) {
                     m_focusedbuttonbuffer = QIcon( ":icon/mediaplayer/black/vote-button-focused" ).pixmap( button.size() );
                 }
-
-                icon = &m_focusedbuttonbuffer;
+                    icon = &m_focusedbuttonbuffer;
             } else {
                 if( !m_buttonbuffer.isNull() || m_buttonbuffer.size() != button.size() ) {
                     m_buttonbuffer = QIcon( ":icon/mediaplayer/black/vote-button" ).pixmap( button.size() );
@@ -902,9 +1043,8 @@ VoteDialog::VoteDialog( QWidget* parent, Qt::WindowFlags f )
 
 void VoteDialog::voteFavorite()
 {
-    PlaylistMyShuffle *myshuffle = qobject_cast<PlaylistMyShuffle*>(MediaPlayer::instance()->playlist().data());
-    if( myshuffle ) {
-        myshuffle->setProbability( MediaPlayer::instance()->playlist()->playing(), PlaylistMyShuffle::Frequent );
+    if( MediaPlayer::instance()->playlist().isShuffle() ) {
+        const_cast<QMediaPlaylist&>(MediaPlayer::instance()->playlist()).setProbability( MediaPlayer::instance()->playlist().playing(), QMediaPlaylist::Frequent );
 
         emit favoriteVoted();
     }
@@ -914,9 +1054,8 @@ void VoteDialog::voteFavorite()
 
 void VoteDialog::voteSnooze()
 {
-    PlaylistMyShuffle *myshuffle = qobject_cast<PlaylistMyShuffle*>(MediaPlayer::instance()->playlist().data());
-    if( myshuffle ) {
-        myshuffle->setProbability( MediaPlayer::instance()->playlist()->playing(), PlaylistMyShuffle::Infrequent );
+    if( MediaPlayer::instance()->playlist().isShuffle() ) {
+        const_cast<QMediaPlaylist&>(MediaPlayer::instance()->playlist()).setProbability( MediaPlayer::instance()->playlist().playing(), QMediaPlaylist::Infrequent );
 
         emit snoozeVoted();
     }
@@ -926,14 +1065,167 @@ void VoteDialog::voteSnooze()
 
 void VoteDialog::voteBan()
 {
-    PlaylistMyShuffle *myshuffle = qobject_cast<PlaylistMyShuffle*>(MediaPlayer::instance()->playlist().data());
-    if( myshuffle ) {
-        myshuffle->setProbability( MediaPlayer::instance()->playlist()->playing(), PlaylistMyShuffle::Never );
+    if( MediaPlayer::instance()->playlist().isShuffle() ) {
+        const_cast<QMediaPlaylist&>(MediaPlayer::instance()->playlist()).setProbability( MediaPlayer::instance()->playlist().playing(), QMediaPlaylist::Never );
 
         emit banVoted();
     }
 
     accept();
+}
+
+class SkipDialog : public ToolButtonDialog
+{
+    Q_OBJECT
+public:
+    SkipDialog( QWidget* parent = 0, Qt::WindowFlags f = 0 );
+
+    QTimer*       timer;
+
+private slots:
+    void next();
+    void previous();
+    void play();
+    void stop();
+    void timeout();
+
+public slots:
+    void setPlayIcon();
+    void setPauseIcon();
+
+protected:
+    // QWidget
+    void keyPressEvent( QKeyEvent* e );
+private:
+    PlayerWidget* p;
+    QToolButton*  nxt;
+    QToolButton*  prv;
+    QToolButton*  stp;
+    QToolButton*  ply;
+
+    QIcon playIcon;
+    QIcon pauseIcon;
+};
+
+SkipDialog::SkipDialog( QWidget* parent, Qt::WindowFlags f )
+    : ToolButtonDialog( parent, f )
+{
+    p = qobject_cast<PlayerWidget*>(parent);
+
+    prv = addToolButton( QIcon( ":icon/mediaplayer/black/skip-prev" ),
+        tr( "Skip to previous track") );
+    connect( prv, SIGNAL(clicked()), this, SLOT(previous()) );
+    prv->setFocusPolicy(Qt::NoFocus);
+
+    playIcon = QIcon( ":icon/mediaplayer/black/touch-play" );
+    pauseIcon = QIcon( ":icon/mediaplayer/black/touch-pause" );
+
+    ply = addToolButton( pauseIcon, tr( "Play track") );
+    connect( ply, SIGNAL(clicked()), this, SLOT(play()) );
+    ply->setFocusPolicy(Qt::NoFocus);
+
+    stp = addToolButton( QIcon( ":icon/mediaplayer/black/touch-stop" ),
+        tr( "Stop track") );
+    connect( stp, SIGNAL(clicked()), this, SLOT(stop()) );
+    stp->setFocusPolicy(Qt::NoFocus);
+
+    nxt = addToolButton( QIcon( ":icon/mediaplayer/black/skip-next" ),
+        tr( "Skip to next track" ) );
+    connect( nxt, SIGNAL(clicked()), this, SLOT(next()) );
+    nxt->setFocusPolicy(Qt::NoFocus);
+
+
+    timer = new QTimer(this);
+    connect(timer,SIGNAL(timeout()), this, SLOT(timeout()));
+
+    connect(p->m_statewidget, SIGNAL(playing()), this, SLOT(setPauseIcon()));
+    connect(p->m_statewidget, SIGNAL(paused()), this, SLOT(setPlayIcon()));
+    connect(p->m_statewidget, SIGNAL(stopped()), this, SLOT(setPlayIcon()));
+
+}
+
+void SkipDialog::keyPressEvent( QKeyEvent* e )
+{
+    switch( e->key() )
+    {
+    case Qt::Key_1:
+        e->accept();
+        previous();
+        break;
+    default:
+        ToolButtonDialog::keyPressEvent( e );
+        break;
+    }
+}
+
+void SkipDialog::previous()
+{
+    timer->start(3000);
+    if( p->m_mediacontrol && p->m_mediacontrol->position() > 3000 ) {
+        p->m_mediacontrol->seek( 0 );
+    } else {
+            p->m_playlist.playPrevious();
+    }
+}
+
+void SkipDialog::play()
+{
+    if (p->m_mediacontrol) {
+        timer->start(3000);
+        if( p->m_mediacontrol->playerState() == QtopiaMedia::Paused ||
+                p->m_mediacontrol->playerState() == QtopiaMedia::Stopped) {
+            p->m_mediacontrol->start();
+            p->changeState(QtopiaMedia::Playing);
+            p->m_playercontrol->setState( PlayerControl::Playing );
+            setPauseIcon();
+        } else {
+            p->m_mediacontrol->pause();
+            p->changeState(QtopiaMedia::Paused);
+            p->m_playercontrol->setState( PlayerControl::Paused );
+            setPlayIcon();
+        }
+    }
+}
+
+void SkipDialog::stop()
+{
+    if (p->m_mediacontrol) {
+        timer->start(3000);
+        p->m_mediacontrol->stop();
+        p->m_playercontrol->setState( PlayerControl::Stopped );
+        p->changeState(QtopiaMedia::Stopped);
+        setPlayIcon();
+    }
+}
+
+void SkipDialog::next()
+{
+    timer->start(3000);
+    QModelIndex index = p->m_playlist.nextIndex();
+    if( index.isValid() ) {
+        p->m_playlist.setPlaying( index );
+    } else {
+        // If repeat state is repeat all, skip to beginning
+        if( p->m_repeatstate->state() == RepeatState::RepeatAll ) {
+            p->m_playlist.playFirst();
+        }
+    }
+}
+
+void SkipDialog::timeout()
+{
+    timer->stop();
+    hide();
+}
+
+void SkipDialog::setPauseIcon()
+{
+    ply->setIcon( pauseIcon );
+}
+
+void SkipDialog::setPlayIcon()
+{
+    ply->setIcon( playIcon );
 }
 
 class RepeatDialog : public ToolButtonDialog
@@ -1013,162 +1305,155 @@ void RepeatDialog::repeatNone()
     accept();
 }
 
-class TrackInfoDialog : public PlayerDialog
-{
-    Q_OBJECT
-public:
-    TrackInfoDialog( QWidget* parent = 0, Qt::WindowFlags f = 0 );
-
-    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
-
-private slots:
-    void updateInfo();
-
-private:
-    QExplicitlySharedDataPointer< Playlist > m_playlist;
-
-    ElidedLabel *m_track, *m_artist, *m_album;
-    ThumbnailWidget *m_cover;
-};
-
-TrackInfoDialog::TrackInfoDialog( QWidget* parent, Qt::WindowFlags f )
-    : PlayerDialog( parent, f )
-{
-    static const int STRETCH_MAX = 1;
-
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->setMargin( 6 );
-    layout->setSpacing( 6 );
-
-    QVBoxLayout *vbox = new QVBoxLayout;
-    vbox->setMargin( 0 );
-    vbox->setSpacing( 4 );
-
-    m_cover = new ThumbnailWidget;
-    int side = QtopiaApplication::style()->pixelMetric(QStyle::PM_SmallIconSize)*3 + vbox->spacing()*2;
-    m_cover->setMinimumSize( QSize( side, side ) );
-
-    layout->addWidget( m_cover );
-
-    m_track = new ElidedLabel;
-    vbox->addWidget( m_track );
-
-    m_album = new ElidedLabel;
-    vbox->addWidget( m_album );
-
-    m_artist = new ElidedLabel;
-    vbox->addWidget( m_artist );
-
-    layout->addLayout( vbox, STRETCH_MAX );
-
-    setLayout( layout );
-}
-
-void TrackInfoDialog::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
-{
-    // Disconnect from old playlist
-    if( m_playlist.data() != NULL ) {
-        m_playlist->disconnect( this );
-    }
-
-    m_playlist = playlist;
-
-    // Connect to new playlist
-    connect( m_playlist, SIGNAL(playingChanged(QModelIndex)),
-        this, SLOT(updateInfo()) );
-
-    updateInfo();
-}
-
-void TrackInfoDialog::updateInfo()
-{
-    QModelIndex playing = m_playlist->playing();
-
-    QVariant variant = m_playlist->data( playing, Playlist::Title );
-    if( variant.isValid() ) {
-        m_track->setText( variant.toString() );
-    } else {
-        m_track->setText( tr( "Unknown Track" ) );
-    }
-
-    variant = m_playlist->data( playing, Playlist::Album );
-    if( variant.isValid() ) {
-        m_album->setText( variant.toString() );
-    } else {
-        m_album->setText( tr( "Unknown Album" ) );
-    }
-
-    variant = m_playlist->data( playing, Playlist::Artist );
-    if( variant.isValid() ) {
-        m_artist->setText( variant.toString() );
-    } else {
-        m_artist->setText( tr( "Unknown Artist" ) );
-    }
-
-    variant = m_playlist->data( playing, Playlist::AlbumCover );
-    if( variant.isValid() ) {
-        m_cover->setFile( variant.toString() );
-        m_cover->show();
-    } else {
-        m_cover->hide();
-    }
-}
-
 class TrackInfoWidget : public QWidget
 {
     Q_OBJECT
 public:
-    TrackInfoWidget( QWidget* parent = 0 );
+    TrackInfoWidget( PlayerControl* control, QWidget* parent = 0 );
+    ~TrackInfoWidget();
 
-    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
+    void setPlaylist( const QMediaPlaylist &playlist );
 
 private slots:
     void updateInfo();
+    void hideExtraLines();
+    void showExtraLines();
+    void rotateFinished();
+    void brightnessChanged(int);
 
 private:
-    QExplicitlySharedDataPointer<Playlist> m_playlist;
 
-    ElidedLabel *m_label;
+    virtual void hideEvent ( QHideEvent * );
+    //virtual void resizeEvent ( QResizeEvent * ) { updateInfo(); };
+    virtual void showEvent ( QShowEvent * ) { updateInfo(); };
+
+    void stopRotating();
+
+    QMediaPlaylist m_playlist;
+    QMarqueeLabel *m_track;
+    QMarqueeLabel *m_album;
+    QMarqueeLabel *m_artist;
+    bool showingExtraLines;
+
+    PlayerControl *m_control;
+    QMediaControlNotifier *m_notifier;
+    QtopiaIpcAdaptor *ipcAdaptor;
 };
 
-TrackInfoWidget::TrackInfoWidget( QWidget* parent )
+TrackInfoWidget::TrackInfoWidget( PlayerControl* control, QWidget* parent )
     : QWidget( parent )
+        ,showingExtraLines(true)
+        ,m_control(control)
 {
-    m_label = new ElidedLabel;
-    m_label->setAlignment( Qt::AlignRight );
-
-    QFont italicfont = font();
-    italicfont.setItalic( true );
-
-    m_label->setFont( italicfont );
+    m_track = new QMarqueeLabel;
+    m_track->setAlignment( Qt::AlignRight );
+    m_album = new QMarqueeLabel;
+    m_album->setAlignment( Qt::AlignRight );
+    m_artist = new QMarqueeLabel;
+    m_artist->setAlignment( Qt::AlignRight );
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin( 0 );
 
-    layout->addWidget( m_label );
+    layout->addWidget( m_track );
+    layout->addWidget( m_album );
+    layout->addWidget( m_artist );
+    layout->addStretch();
     setLayout( layout );
+
+    m_notifier = new QMediaControlNotifier( QMediaVideoControl::name(), this );
+    connect( m_notifier, SIGNAL(valid()), this, SLOT(hideExtraLines()) );
+    connect( m_notifier, SIGNAL(invalid()), this, SLOT(showExtraLines()) );
+    connect( m_control, SIGNAL(contentChanged(QMediaContent*)), m_notifier, SLOT(setMediaContent(QMediaContent*)));
+    connect( m_track, SIGNAL(rotateFinished()), this, SLOT(rotateFinished()) );
+    connect( m_album, SIGNAL(rotateFinished()), this, SLOT(rotateFinished()) );
+    connect( m_artist, SIGNAL(rotateFinished()), this, SLOT(rotateFinished()) );
+    connect( &m_playlist, SIGNAL(playingChanged(QModelIndex)),
+        this, SLOT(updateInfo()) );
+
+    ipcAdaptor = new QtopiaIpcAdaptor("Qtopia/PowerStatus");
+    QtopiaIpcAdaptor::connect(ipcAdaptor, MESSAGE(brightnessChanged(int)), this, SLOT(brightnessChanged(int)));
 }
 
-void TrackInfoWidget::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
+TrackInfoWidget::~TrackInfoWidget()
 {
-    // Disconnect from old playlist
-    if( m_playlist.data() != NULL ) {
-        m_playlist->disconnect( this );
-    }
+    delete ipcAdaptor;
+}
 
+void TrackInfoWidget::setPlaylist( const QMediaPlaylist &playlist )
+{
     m_playlist = playlist;
-
-    // Connect to new playlist
-    connect( m_playlist.data(), SIGNAL(playingChanged(QModelIndex)),
-        this, SLOT(updateInfo()) );
 
     updateInfo();
 }
 
 void TrackInfoWidget::updateInfo()
 {
-    QModelIndex playing = m_playlist->playing();
-    m_label->setText( m_playlist->data( playing, Playlist::Title ).toString() );
+    QModelIndex playing = m_playlist.playing();
+    m_track->setText( m_playlist.data( playing, QMediaPlaylist::Title ).toString() );
+    if(m_track->text().isEmpty())
+        m_track->hide();
+    else
+        m_track->show();
+
+    m_album->setText(m_playlist.data( playing, QMediaPlaylist::Album ).toString());
+    if(!m_album->text().isEmpty() && showingExtraLines)
+        m_album->show();
+    else
+        m_album->hide();
+
+    m_artist->setText(m_playlist.data( playing, QMediaPlaylist::Artist ).toString());
+    if(!m_artist->text().isEmpty() && showingExtraLines)
+        m_artist->show();
+    else
+        m_artist->hide();
+
+    stopRotating();
+    QMarqueeLabel::startRotating(m_track, m_album, m_artist);
+
+    update();
+}
+
+void TrackInfoWidget::hideExtraLines()
+{
+    showingExtraLines = false;
+    updateInfo();
+}
+
+void TrackInfoWidget::showExtraLines()
+{
+    showingExtraLines = true;
+    updateInfo();
+}
+
+void TrackInfoWidget::rotateFinished()
+{
+    if(sender()==NULL || sender() == m_artist)
+        QMarqueeLabel::startRotating(m_track, m_album, m_artist);
+    else if(sender() == m_track)
+        QMarqueeLabel::startRotating(m_album, m_artist, m_track);
+    else if(sender() == m_album)
+        QMarqueeLabel::startRotating(m_artist, m_track, m_album);
+}
+
+void TrackInfoWidget::hideEvent( QHideEvent * )
+{
+    stopRotating();
+}
+
+void TrackInfoWidget::stopRotating()
+{
+    m_track->stopRotate();
+    m_album->stopRotate();
+    m_artist->stopRotate();
+}
+
+void TrackInfoWidget::brightnessChanged(int value)
+{
+    if(value >=0 && value <=1)
+        stopRotating();
+    else if(!m_track->isRotating() && !m_album->isRotating() && !m_artist->isRotating())
+        QMarqueeLabel::startRotating(m_track, m_album, m_artist);
 }
 
 class ThrottleWidget : public QWidget
@@ -1500,7 +1785,7 @@ private:
 };
 
 ThrottleKeyMapper::ThrottleKeyMapper( ThrottleControl* control, QObject* parent )
-    : QObject( parent ), m_mapping( LeftRight )
+    : QObject( parent ), m_mapping( LeftRight ), m_lastpressed(0)
 {
     connect( control, SIGNAL(intensityChanged(int)),
         this, SLOT(processIntensityChange(int)) );
@@ -1631,34 +1916,78 @@ void PileLayout::setGeometry( const QRect& rect )
 static const int KEY_SELECT_HOLD = Qt::Key_unknown + Qt::Key_Select;
 
 PlayerWidget::PlayerWidget( PlayerControl* control, QWidget* parent )
-    : QWidget( parent ),
-      m_playercontrol( control ),
-      m_content( 0 ),
-      m_mediacontrol( 0 ),
-#ifdef QTOPIA_KEYPAD_NAVIGATION
+    : QWidget( parent )
+      , m_playercontrol( control )
+      , m_content( 0 )
+      , m_mediacontrol( 0 )
+      , m_videoControl( 0 )
 #ifndef NO_HELIX
-      m_settingsaction( 0 ),
+      , m_settingsaction( 0 )
 #endif
+      , m_videowidget( 0 )
+#ifndef NO_THUMBNAIL
+      , m_thumbnail( 0 )
 #endif
-      m_videowidget( 0 ),
-      m_muteaction( 0 ),
-      m_muteicon( 0 ),
-      m_voteaction( 0 ),
-      m_votedialog( 0 ),
-      m_repeataction( 0 ),
-      m_repeatdialog( 0 )
+      , m_currentview( None )
+      , m_fullscreen( false )
+      , m_fullscreenaction( 0 )
+      , m_muteaction( 0 )
+      , m_muteicon( 0 )
+      , m_voteaction( 0 )
+      , m_votedialog( 0 )
+      , m_repeataction( 0 )
+      , m_repeatdialog( 0 )
+      , m_skipdialog( 0 )
+#ifndef NO_VISUALIZATION
+      , m_visualization( 0 )
+#endif
+      , m_tvScreen(0)
 {
     static const int HOLD_THRESHOLD = 500;
     static const int STRETCH_MAX = 1;
 
     m_repeatstate = new RepeatState( this );
 
-    QVBoxLayout *background = new QVBoxLayout;
-    background->setMargin( 0 );
+    m_fullscreenWidget = new QFrame;
+    m_fullscreenWidget->setLineWidth(0);
+    //m_fullscreenwidget->setLineWidth(2);
+    //m_fullscreenwidget->setFrameStyle( QFrame::Box );
+    m_fullscreenWidget->setWindowTitle( tr( "Video" ) );
+    m_fullscreenWidget->installEventFilter( this );
+    m_fullscreenWidget->setFocusPolicy( Qt::StrongFocus );
+    m_fullscreenWidget->setFocusProxy(this);
 
+
+    m_fullscreenWidgetLayout = new QVBoxLayout;
+    m_fullscreenWidgetLayout->setSpacing( 0 );
+    m_fullscreenWidgetLayout->setMargin( 0 );
+
+    m_fullscreenWidget->setLayout( m_fullscreenWidgetLayout );
+    m_fullscreenWidget->hide();
+
+    m_fullscreenControls = new QWidget;
+    m_fullscreenControls->setWindowTitle( tr( "Fullscreen Video Controls" ) );
+    m_fullscreenControls->setMask( QRegion( -1, -1, 1, 1 ) );
+    m_fullscreenControls->installEventFilter( this );
+    m_fullscreenControls->setFocusPolicy( Qt::StrongFocus );
+    m_fullscreenControls->setFocusProxy(this);
+
+    m_fullscreenControlsLayout = new QVBoxLayout;
+    m_fullscreenControlsLayout->setSpacing( 0 );
+    m_fullscreenControlsLayout->setMargin( 0 );
+    m_fullscreenControlsLayout->addStretch();
+
+    m_fullscreenControls->setLayout( m_fullscreenControlsLayout );
+    m_fullscreenControls->hide();
+
+    m_background = new QVBoxLayout;
+    m_background->setMargin( 0 );
+
+#ifndef NO_VISUALIZATION
     m_visualization = new VisualizationWidget;
-    background->addWidget( m_visualization );
-    setLayout( background );
+    m_background->addWidget( m_visualization );
+#endif
+    setLayout( m_background );
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin( 6 );
@@ -1666,43 +1995,52 @@ PlayerWidget::PlayerWidget( PlayerControl* control, QWidget* parent )
     m_statewidget = new StateWidget( control );
 
     QHBoxLayout *hbox = new QHBoxLayout;
-    hbox->addWidget( m_statewidget );
+    QVBoxLayout *stateWidgetVBox=new QVBoxLayout;
+    stateWidgetVBox->addWidget(m_statewidget);
+    stateWidgetVBox->addStretch();
+    hbox->addLayout( stateWidgetVBox );
 
     m_muteicon = new QMediaVolumeLabel( QMediaVolumeLabel::MuteVolume );
     hbox->addWidget( m_muteicon );
 
-    m_trackinfo = new TrackInfoWidget;
-    hbox->addWidget( m_trackinfo, STRETCH_MAX );
+    hbox->addStretch();
 
     layout->addLayout( hbox );
-    layout->addStretch();
 
     m_videolayout  = new QVBoxLayout;
 
+    m_skipdialog = new SkipDialog( this );
 #ifndef NO_HELIX
-    m_helixlogoaudio = new HelixLogo;
-    m_videolayout->addWidget( m_helixlogoaudio );
+    //m_helixlogoaudio = new HelixLogo;
+    //m_videolayout->addWidget( m_helixlogoaudio );
+#endif
+
+#ifndef NO_THUMBNAIL
+    m_thumbnail = new ThumbnailWidget( control, this );
+    m_videolayout->addWidget( m_thumbnail );
 #endif
 
     m_videolayout->setMargin( 0 );
 
     layout->addLayout( m_videolayout, STRETCH_MAX );
 
-    QVBoxLayout *vbox = new QVBoxLayout;
-    vbox->setMargin( 0 );
-    vbox->addStretch();
+    layout->addStretch();
+
+    m_controlsLayout = new QVBoxLayout;
+    m_controlsLayout->setMargin( 0 );
+    m_controlsLayout->addStretch();
 
     m_progressview = new ProgressView( m_repeatstate );
-    vbox->addWidget( m_progressview );
+    m_controlsLayout->addWidget( m_progressview );
 
     m_volumeview = new VolumeView;
-    vbox->addWidget( m_volumeview );
+    m_controlsLayout->addWidget( m_volumeview );
 
     m_seekview = new SeekView;
-    vbox->addWidget( m_seekview );
+    m_controlsLayout->addWidget( m_seekview );
 
-    PileLayout *pile = new PileLayout;
-    pile->addLayout( vbox );
+    pile = new PileLayout;
+    pile->addLayout( m_controlsLayout );
 
     ThrottleControl *throttle = new ThrottleControl;
     connect( throttle, SIGNAL(clicked()), this, SLOT(cycleView()) );
@@ -1715,38 +2053,39 @@ PlayerWidget::PlayerWidget( PlayerControl* control, QWidget* parent )
     hbox->addLayout( pile );
 
 #ifndef NO_HELIX
-    m_helixlogovideo = new HelixLogo;
-    hbox->addWidget( m_helixlogovideo );
+    //m_helixlogovideo = new HelixLogo;
+    //hbox->addWidget( m_helixlogovideo );
 #endif
 
     layout->addLayout( hbox );
 
+#ifndef NO_VISUALIZATION
     m_visualization->setLayout( layout );
-
-    m_trackinfodialog = new TrackInfoDialog( this );
-
-    mediaplayer::KeyFilter *filter = new mediaplayer::KeyFilter( m_trackinfodialog, this, this );
-    filter->addKey( Qt::Key_Left );
-    filter->addKey( Qt::Key_Right );
+#else
+    m_background->addLayout( layout );
+#endif
 
     QTimer::singleShot(1, this, SLOT(delayMenuCreation()));
 
-    // Initialize view
-    setView( Progress );
+    m_trackinfo = new TrackInfoWidget( control, this );
+    //hbox->addWidget( m_trackinfo, STRETCH_MAX );
 
     m_ismute = false;
+    m_keepMutedState = false;
     m_muteicon->hide();
 
 #ifndef NO_HELIX
-    m_helixlogovideo->hide();
+    //m_helixlogovideo->hide();
 #endif
 
     new KeyHold( Qt::Key_Left, KEY_LEFT_HOLD, HOLD_THRESHOLD, this, this );
     new KeyHold( Qt::Key_Right, KEY_RIGHT_HOLD, HOLD_THRESHOLD, this, this );
+    new KeyHold( Qt::Key_MediaPrevious, KEY_LEFT_HOLD, HOLD_THRESHOLD, this, this );
+    new KeyHold( Qt::Key_MediaNext, KEY_RIGHT_HOLD, HOLD_THRESHOLD, this, this );
 
     // Activity monitor
     m_monitor = new ActivityMonitor( 4000, this );
-    connect( m_monitor, SIGNAL(inactive()), this, SLOT(showProgress()) );
+    connect( m_monitor, SIGNAL(inactive()), this, SLOT(processInactivity()) );
 
     m_pingtimer = new QTimer( this );
     m_pingtimer->setInterval( 1000 );
@@ -1768,46 +2107,56 @@ PlayerWidget::PlayerWidget( PlayerControl* control, QWidget* parent )
     m_context->addObject( notifier );
 
     setFocusProxy( m_statewidget );
+    setFocusPolicy( Qt::StrongFocus );
 
     // Filter application key events for media keys
     qApp->installEventFilter( this );
 
     // Context sensitive help hint
     setObjectName( "playback" );
+
+    setView( Progress );
+
+    m_fullscreen = true; // to ensure showNormalVideo will do his job
+    showNormalVideo();
+
+    QRect rect = QApplication::desktop()->availableGeometry( QScreenInformation( QScreenInformation::Normal ).screenNumber() );
+    m_fullscreenWidget->setGeometry(rect);
+    m_fullscreenControls->setGeometry(rect);
+
+    m_tvScreen = new QScreenInformation(QScreenInformation::Television);
+    if ( m_tvScreen->screenNumber() != -1) {
+        connect(m_tvScreen, SIGNAL(changed()), this, SLOT(tvScreenChanged()));
+    }
+    else {
+        delete m_tvScreen;
+        m_tvScreen = 0;
+    }
+    connect( &m_playlist, SIGNAL(playingChanged(QModelIndex)),
+        this, SLOT(playingChanged(QModelIndex)) );
+
+    connect( QApplication::desktop(), SIGNAL(resized(int)),  this, SLOT(updateVideoRotation()) );
+
+    QTimer *maskUpdateTimer = new QTimer( this );
+    maskUpdateTimer->setSingleShot( false );
+    connect( maskUpdateTimer,  SIGNAL(timeout()),  this,  SLOT(updateFullScreenControlsMask()) );
+    maskUpdateTimer->start(1000);
 }
 
 PlayerWidget::~PlayerWidget()
 {
+    toggleFullScreenVideo( false );
     if( m_videowidget ) {
         delete m_videowidget;
     }
 }
 
-void PlayerWidget::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
+void PlayerWidget::setPlaylist( const QMediaPlaylist &playlist )
 {
-    // Disconnect from old playlist
-    if( m_playlist.data() != NULL ) {
-        m_playlist->disconnect( this );
-    }
-
     m_playlist = playlist;
 
-    if ( m_playlist == NULL )
-        return;
-
-    // Connect to new playlist
-    connect( m_playlist, SIGNAL(playingChanged(QModelIndex)),
-        this, SLOT(playingChanged(QModelIndex)) );
-
-    if( m_playlist ) {
-        setCurrentTrack( m_playlist->playing() );
-        if( !m_currenttrack.isValid() ) {
-            setCurrentTrack( m_playlist->index( 0 ) );
-        }
-
-        if( m_currenttrack.isValid() ) {
-            openCurrentTrack();
-        }
+    if( m_playlist.rowCount() > 0 ) {
+        openCurrentTrack();
     } else {
         qLog(Media) << "PlayerWidget::setPlaylist playlist is null";
     }
@@ -1816,7 +2165,7 @@ void PlayerWidget::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist 
     // Otherwise, disable voting and enable repeat
     if( m_voteaction != NULL)
     {
-        if( playlist->inherits("PlaylistMyShuffle") ) {
+        if( playlist.isShuffle() ) {
             m_voteaction->setVisible( true );
             m_repeataction->setVisible( false );
         } else {
@@ -1830,43 +2179,57 @@ void PlayerWidget::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist 
 
     m_progressview->setPlaylist( m_playlist );
     m_trackinfo->setPlaylist( m_playlist );
-    m_trackinfodialog->setPlaylist( m_playlist );
+#ifndef NO_THUMBNAIL
+    m_thumbnail->setPlaylist( m_playlist );
+#endif
 }
 
 bool PlayerWidget::eventFilter( QObject* o, QEvent* e )
 {
-/*
     // Guard against recursion
     static QEvent* d = 0;
-    if( o != this && d != e && (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) ) {
-        QKeyEvent *ke = (QKeyEvent*)e;
 
-        if( ke->isAutoRepeat() ) { return false; }
+    //this require fixing qt to pass mouse events to embedder window instread of embedded direct painter surface
+    if ( o == m_videowidget && e->type() == QEvent::MouseButtonRelease ) {
+        toggleFullScreenVideo( !isFullScreenVideo() );
+        return true;
+    }
 
-        switch( ke->key() )
-        {
-        case Qt::Key_VolumeUp:
+    //pass the key events from the full screen container to PlayerWidget
+    if (isFullScreenVideo() &&
+        (o == m_fullscreenWidget || o == m_fullscreenControls) &&
+        d != e) {
+
+        if ((e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease)) {
+            QKeyEvent *ke = static_cast<QKeyEvent*>(e);
+
+            switch( ke->key() )
             {
-            QKeyEvent event = QKeyEvent( e->type(), Qt::Key_VolumeUp, Qt::NoModifier );
-            QCoreApplication::sendEvent( this, d = &event );
-            d = 0;
+            case Qt::Key_Select:
+            case KEY_SELECT_HOLD:
+                {
+                d = e;
+                QCoreApplication::sendEvent( m_statewidget, e );
+                d = 0;
+                break;
+                }
+            case Qt::Key_Back:
+                break; // just close the fullscreen widget
+            default: {
+                    d = e;
+                    QCoreApplication::sendEvent( this, e );
+                    d = 0;
+                }
             }
+
             return true;
-        case Qt::Key_VolumeDown:
-            {
-            QKeyEvent event = QKeyEvent( e->type(), Qt::Key_VolumeDown, Qt::NoModifier );
-            QCoreApplication::sendEvent( this, d = &event );
-            d = 0;
-            }
+        }
+
+        if (e->type() == QEvent::Close) {
+            showNormalVideo();
             return true;
-        default:
-            // Ignore
-            break;
         }
     }
-*/
-    Q_UNUSED(o);
-    Q_UNUSED(e);
 
     return false;
 }
@@ -1894,6 +2257,12 @@ void PlayerWidget::activate()
         this, SLOT(setMuteDisplay(bool)) );
     connect( m_mediacontrol, SIGNAL(playerStateChanged(QtopiaMedia::State)),
         this, SLOT(changeState(QtopiaMedia::State)) );
+
+    if ( !m_keepMutedState )
+        setMuteDisplay( false );
+
+    m_keepMutedState = false;
+    m_mediacontrol->setMuted( m_ismute );
 }
 
 void PlayerWidget::deactivate()
@@ -1904,43 +2273,76 @@ void PlayerWidget::deactivate()
 
 void PlayerWidget::activateVideo()
 {
-    QMediaVideoControl control( m_content );
-    setVideo( control.createVideoWidget( this ) );
+#if PLAYERWIDGET_DEBUG
+    qDebug() << "PlayerWidget::activateVideo";
+#endif
+    m_videoControl = new QMediaVideoControl( m_content );
+    setVideo( m_videoControl->createVideoWidget( this ) );
+    updateVideoRotation();
+
+#ifndef NO_THUMBNAIL
+    m_thumbnail->setVisible(false);
+#endif
+
 }
 
 void PlayerWidget::deactivateVideo()
 {
+#if PLAYERWIDGET_DEBUG
+    qDebug() << "PlayerWidget::deactivateVideo";
+#endif
+    delete m_videoControl;
+    m_videoControl = 0;
     removeVideo();
+#ifndef NO_THUMBNAIL
+    m_thumbnail->setVisible(true);
+#endif
 }
 
 void PlayerWidget::displayErrorMessage( const QString& message )
 {
-    QMessageBox::warning( this, tr( "Media Player Error" ),
-        QString( "<qt>%1</qt>" ).arg( message ) );
+    QMessageBox mbox(QMessageBox::Warning, tr( "Media Player Error" ), QString( "<qt>%1</qt>" ).arg( message ), QMessageBox::Ok, this);
+    QTimer::singleShot(15000, &mbox, SLOT(accept()));
+    mbox.exec();
 }
 
 void PlayerWidget::changeState( QtopiaMedia::State state )
 {
+#if PLAYERWIDGET_DEBUG
+    qDebug() << "PlayerWidget::changeState" << state;
+#endif
     switch (state) {
+
     case QtopiaMedia::Playing:
-        if (m_videowidget != 0)
+        setView( Progress );
+        if (m_videowidget != 0) {
             QtopiaApplication::setPowerConstraint( QtopiaApplication::Disable );
+        }
         break;
 
     case QtopiaMedia::Paused:
+        setView( Progress );
         if (m_videowidget != 0)
             QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
         break;
 
     case QtopiaMedia::Stopped:
         if( m_playercontrol->state() == PlayerControl::Playing ) {
+            m_keepMutedState = true;
             continuePlaying();
-        }
+        } else
+            showNormalVideo();
         break;
 
     case QtopiaMedia::Error:
+        showNormalVideo();
         m_playercontrol->setState( PlayerControl::Stopped );
         displayErrorMessage( m_mediacontrol->errorString() );
+        if( m_playlist.rowCount() > 1 && m_playlist.nextIndex().isValid() ) {
+            m_keepMutedState = true;
+            continuePlaying();
+            m_playercontrol->setState( PlayerControl::Playing );
+        }
         break;
     default:
         // Ignore
@@ -1963,12 +2365,14 @@ void PlayerWidget::setMuteDisplay( bool mute )
         m_muteaction->setText( tr( "Mute On" ) );
         m_muteicon->hide();
     }
+
+    QResizeEvent e( size(), size() );
+    resizeEvent( &e );
 }
 
 void PlayerWidget::playingChanged( const QModelIndex& index )
 {
     if( index.isValid() ) {
-        setCurrentTrack( index );
         openCurrentTrack();
     } else {
         m_playercontrol->setState( PlayerControl::Stopped );
@@ -2005,6 +2409,8 @@ void PlayerWidget::cycleView()
     case Volume:
         setView( Progress );
         break;
+    case None:
+        break;
     }
 }
 
@@ -2013,22 +2419,24 @@ void PlayerWidget::continuePlaying()
     // If repeat state is repeat one, play again
     // Otherwise, skip forward one playlist item
     if (m_repeatstate->state() == RepeatState::RepeatOne ||
-        (m_repeatstate->state() == RepeatState::RepeatAll && m_playlist->rowCount() == 1)) {
+        (m_repeatstate->state() == RepeatState::RepeatAll && m_playlist.rowCount() == 1)) {
         m_mediacontrol->start();
     } else {
-        QModelIndex index = m_currenttrack.sibling( m_currenttrack.row() + 1, m_currenttrack.column() );
+        QModelIndex index = m_playlist.nextIndex();
 
         if (index.isValid()) {
-            m_playlist->setPlaying(index);
+            m_playlist.setPlaying(index);
         } else {
             // If repeat state is repeat all, play from begining
             if (m_repeatstate->state() == RepeatState::RepeatAll)
-                m_playlist->setPlaying(m_playlist->index(0));
+                m_playlist.playFirst();
             else {
                 m_playercontrol->setState(PlayerControl::Stopped);
 
-                if (m_videowidget != 0)
+                if (m_videowidget != 0) {
+                    showNormalVideo();
                     QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
+                }
             }
         }
     }
@@ -2043,16 +2451,24 @@ void PlayerWidget::toggleMute()
 void PlayerWidget::execSettings()
 {
 #ifndef NO_HELIX
+    if ( isFullScreenVideo() )
+        toggleFullScreenVideo( false );
+
     MediaPlayerSettingsDialog settingsdialog( this );
     QtopiaApplication::execDialog( &settingsdialog );
 #endif
 }
 
-void PlayerWidget::keyPressEvent( QKeyEvent* e )
+void PlayerWidget::keyPressEvent(QKeyEvent* e)
 {
+    //qDebug() << "PlayerWidget::keyPressEvent" << e->key() << e->text();
+
     static const unsigned int REPEAT_THRESHOLD = 3000; // 3 seconds
 
-    if( e->isAutoRepeat() || !m_mediacontrol ) { e->ignore(); return; }
+    if (e->isAutoRepeat() || !m_mediacontrol) {
+        e->ignore();
+        return;
+    }
 
     switch( e->key() )
     {
@@ -2083,29 +2499,28 @@ void PlayerWidget::keyPressEvent( QKeyEvent* e )
         }
         break;
     case Qt::Key_Left:
+    case Qt::Key_MediaPrevious:
         // If more than the repeat threshold into the track, seek to the beginning
         // Otherwise, skip backward one playlist item
         e->accept();
         if( m_mediacontrol->position() > REPEAT_THRESHOLD ) {
             m_mediacontrol->seek( 0 );
         } else {
-            QModelIndex index = m_currenttrack.sibling( m_currenttrack.row() - 1, m_currenttrack.column() );
-            if( index.isValid() ) {
-                m_playlist->setPlaying( index );
-            }
+            m_playlist.playPrevious();
         }
         break;
+    case Qt::Key_MediaNext:
     case Qt::Key_Right:
         {
             e->accept();
             // Skip forward one playlist item
-            QModelIndex index = m_currenttrack.sibling( m_currenttrack.row() + 1, m_currenttrack.column() );
+            QModelIndex index = m_playlist.nextIndex();
             if( index.isValid() ) {
-                m_playlist->setPlaying( index );
+                m_playlist.setPlaying( index );
             } else {
                 // If repeat state is repeat all, skip to beginning
                 if( m_repeatstate->state() == RepeatState::RepeatAll ) {
-                    m_playlist->setPlaying( m_playlist->index( 0 ) );
+                    m_playlist.playFirst();
                 }
             }
         }
@@ -2136,19 +2551,19 @@ void PlayerWidget::keyPressEvent( QKeyEvent* e )
         break;
     case Qt::Key_1:
         e->accept();
-        if( !qobject_cast<MyShufflePlaylist*>(m_playlist) ) {
+        if( !m_playlist.isShuffle() ) {
             m_repeatstate->setState( RepeatState::RepeatOne );
         }
         break;
     case Qt::Key_Asterisk:
         e->accept();
-        if( !qobject_cast<MyShufflePlaylist*>(m_playlist) ) {
+        if( !m_playlist.isShuffle() ) {
             m_repeatstate->setState( RepeatState::RepeatAll );
         }
         break;
     case Qt::Key_0:
         e->accept();
-        if( !qobject_cast<MyShufflePlaylist*>(m_playlist) ) {
+        if( !m_playlist.isShuffle() ) {
             m_repeatstate->setState( RepeatState::RepeatNone );
         }
         break;
@@ -2214,7 +2629,6 @@ void PlayerWidget::showEvent( QShowEvent* )
     if( m_videowidget ) {
         QtopiaApplication::setPowerConstraint( QtopiaApplication::Disable );
     }
-
 #ifndef NO_VISUALIZATION
     else {
         m_visualization->setActive( true );
@@ -2233,8 +2647,75 @@ void PlayerWidget::hideEvent( QHideEvent* )
 #endif
 }
 
+void PlayerWidget::mouseReleaseEvent( QMouseEvent* e)
+{
+    m_skipdialog->timer->start(3000);
+    QtopiaApplication::execDialog( m_skipdialog, false );
+
+    QWidget::mouseReleaseEvent(e);
+}
+
+void PlayerWidget::resizeEvent( QResizeEvent* e)
+{
+    QWidget::resizeEvent(e);
+
+    // adjust the trackinfo layouting.
+    QRect mappedRect;
+    QRect geom;
+    if(m_muteicon->isVisible())
+    {
+        mappedRect.setTopLeft(mapTo(this, m_muteicon->geometry().topLeft()));
+        mappedRect.setBottomRight(mapTo(this, m_muteicon->geometry().bottomRight()));
+        geom.setLeft(mappedRect.right()+5);
+        geom.setTop(mappedRect.top());
+    }
+    else
+    {
+        mappedRect.setTopLeft(mapTo(this, m_statewidget->geometry().topLeft()));
+        mappedRect.setBottomRight(mapTo(this, m_statewidget->geometry().bottomRight()));
+        geom.setLeft(mappedRect.right()+5);
+        geom.setTop(mappedRect.top());
+    }
+    mappedRect.setTopLeft(mapTo(this, pile->geometry().topLeft()));
+    mappedRect.setBottomRight(mapTo(this, pile->geometry().bottomRight()));
+    geom.setRight(mappedRect.right()-5);
+    mappedRect.setTopLeft(mapTo(this, pile->geometry().topLeft()));
+    mappedRect.setBottomRight(mapTo(this, pile->geometry().bottomRight()));
+    geom.setBottom(mappedRect.top()-5);
+
+    m_trackinfo->setGeometry(geom);
+    m_trackinfo->raise();
+    //m_trackinfo->update();
+
+    //ensure the volume/progress/seek bars have the same geometry
+    QList<QWidget*> views;
+    views << m_volumeview << m_progressview << m_seekview;
+    int maxHeight = 0;
+    foreach( QWidget *view, views )
+        maxHeight = qMax( maxHeight, view->sizeHint().height() );
+    foreach( QWidget *view, views )
+        view->setFixedHeight( maxHeight );
+
+}
+
 void PlayerWidget::setView( View view )
 {
+    if ( view == m_currentview ) {
+        return;
+    }
+
+    m_monitor->update();
+
+#if PLAYERWIDGET_DEBUG
+
+    QStringList viewNames = QString("Progress Volume Seek None").split(' ');
+    if ( m_currentview >= Progress && m_currentview <= None ) {
+        qDebug() << "set view from" << viewNames[m_currentview] << "to" << viewNames[view];
+    } else {
+        qDebug() << "set view to" << viewNames[view];
+    }
+#endif
+
     m_currentview = view;
 
     switch( m_currentview )
@@ -2260,24 +2741,191 @@ void PlayerWidget::setView( View view )
         m_seekview->show();
         m_mapper->setMapping( ThrottleKeyMapper::LeftRight );
         break;
+    case None:
+        m_progressview->hide();
+        m_volumeview->hide();
+        m_seekview->hide();
+
+        m_mapper->setMapping( ThrottleKeyMapper::LeftRight );
+        break;
+    }
+
+
+    updateFullScreenControlsMask();
+}
+
+
+void PlayerWidget::updateFullScreenControlsMask()
+{
+    if ( isFullScreenVideo() ) {
+        QList<QWidget*> views;
+        views << m_volumeview << m_seekview << m_progressview;
+        QRegion mask;
+
+        foreach( QWidget *viewWidget,  views ) {
+            if ( viewWidget->isVisible() ) {
+                if ( ! viewWidget->mask().isEmpty() )
+                    mask = mask.united( viewWidget->mask() );
+                else
+                    mask = mask.united( viewWidget->geometry() );
+            }
+        }
+
+        if ( mask.isEmpty() ) {
+            mask = QRegion( -1,  -1,  1, 1 );
+        } else {
+            // we need this as a workaround about the bug with drawing the
+            // child widgets if the parent's mask doesn't cover top pos.
+            mask = mask.united( QRect(0, 0, 1, 1 ) );
+        }
+
+        m_fullscreenControls->setMask( mask );
+        //qDebug() << "fullscreen controls geometry" << m_fullscreenControls->geometry() << "mask" << mask.boundingRect();
+        //qDebug() << "volume view geometry:" << m_volumeview->geometry();
+    }
+}
+
+void PlayerWidget::processInactivity()
+{
+    if ( isFullScreenVideo() ) {
+        setView( None );
+    } else {
+        setView( Progress );
+    }
+}
+
+
+void PlayerWidget::updateVideoRotation()
+{
+#ifdef Q_WS_QWS    
+    if ( m_videoControl ) {
+        QtopiaVideo::VideoRotation rotation = QtopiaVideo::Rotate0;
+
+        QScreen *screen = QScreen::instance();
+        if ( !screen->subScreens().isEmpty() ) {
+            int screenNum = screen->subScreenIndexAt( m_fullscreenWidget->mapToGlobal( m_fullscreenWidget->rect().center() ) );
+            if ( screenNum != -1 )
+                screen = screen->subScreens()[screenNum];
+        }
+
+        if ( m_fullscreen && ( screen->width() < screen->height() ) )
+            rotation = QtopiaVideo::Rotate90;
+
+        if ( m_tvScreen && m_tvScreen->isVisible() )
+            rotation = QtopiaVideo::Rotate0;
+
+        m_videoControl->setVideoRotation( rotation );
+    }
+#endif    
+}
+
+
+bool PlayerWidget::isFullScreenVideo() const
+{
+    return m_fullscreen;
+}
+
+void PlayerWidget::toggleFullScreenVideo( bool fullScreen )
+{
+    if ( fullScreen != m_fullscreen ) {
+        m_fullscreen = fullScreen;
+        if ( fullScreen && m_videowidget ) {
+#if PLAYERWIDGET_DEBUG
+            qDebug() << "Show Fullscreen";
+#endif
+            setView( None );
+        } else {
+            if ( view() == None )
+                setView( Progress );
+#if PLAYERWIDGET_DEBUG
+            qDebug() << "Show Normal";
+#endif
+        }
+        updateVideoRotation();
+        layoutVideoWidget();
+
+
+        if ( m_fullscreenaction )
+            m_fullscreenaction->setChecked( m_fullscreen );
+
+        m_monitor->update();
+    }
+}
+
+void PlayerWidget::showFullScreenVideo()
+{
+    toggleFullScreenVideo( true );
+}
+
+void PlayerWidget::showNormalVideo()
+{
+    toggleFullScreenVideo( false );
+}
+
+
+void PlayerWidget::layoutVideoWidget()
+{
+    if ( !m_videowidget )
+        return;
+
+    if ( isFullScreenVideo() ) {
+        QString title = m_fullscreenWidget->windowTitle();
+        m_fullscreenWidget->setWindowTitle( QLatin1String( "_allow_on_top_" ) );
+        m_fullscreenWidget->setWindowFlags( m_fullscreenWidget->windowFlags() | Qt::WindowStaysOnTopHint );
+        m_fullscreenWidget->setWindowState( Qt::WindowFullScreen );
+
+        m_fullscreenWidgetLayout->addWidget( m_videowidget, 1 );
+        m_fullscreenWidget->raise();
+        m_fullscreenWidget->setWindowTitle( title );
+
+        //show controls widgets over video:
+        title = m_fullscreenControls->windowTitle();
+        m_fullscreenControls->setWindowTitle( QLatin1String( "_allow_on_top_" ) );
+        m_fullscreenControls->setWindowFlags( m_fullscreenControls->windowFlags() | Qt::WindowStaysOnTopHint );
+        m_fullscreenControls->setWindowState( Qt::WindowFullScreen );
+
+        m_fullscreenControlsLayout->addWidget( m_progressview );
+        m_fullscreenControlsLayout->addWidget( m_seekview );
+        m_fullscreenControlsLayout->addWidget( m_volumeview );
+
+        m_fullscreenControls->raise();
+        //m_fullscreenControls->setWindowTitle( title );
+
+        updateFullScreenControlsMask();
+    } else {
+        m_fullscreenWidget->showNormal();
+        m_fullscreenWidget->hide();
+
+        m_fullscreenControls->showNormal();
+        m_fullscreenControls->hide();
+
+        m_videolayout->addWidget( m_videowidget );
+        m_controlsLayout->addWidget( m_progressview );
+        m_controlsLayout->addWidget( m_seekview );
+        m_controlsLayout->addWidget( m_volumeview );
     }
 }
 
 void PlayerWidget::setVideo( QWidget* widget )
 {
     m_videowidget = widget;
-    m_videowidget->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
-    m_videolayout->addWidget( m_videowidget );
+    m_videowidget->installEventFilter( this );
+
+    if (m_tvScreen != 0 && m_tvScreen->isVisible())
+        m_tvScreen->setClonedScreen(-1);
+    else
+        layoutVideoWidget();
 
 #ifndef NO_VISUALIZATION
     m_visualization->setActive( false );
 #endif
 
 #ifndef NO_HELIX
-    m_helixlogoaudio->hide();
-    m_helixlogovideo->show();
+    //m_helixlogoaudio->hide();
+    //m_helixlogovideo->show();
 #endif
 
+    m_fullscreenaction->setEnabled(true);
     QtopiaApplication::setPowerConstraint( QtopiaApplication::Disable );
 }
 
@@ -2286,38 +2934,31 @@ void PlayerWidget::removeVideo()
     delete m_videowidget;
     m_videowidget = 0;
 
+    if (m_tvScreen != 0)
+        m_tvScreen->setClonedScreen(QApplication::desktop()->primaryScreen());
+
 #ifndef NO_VISUALIZATION
     m_visualization->setActive( true );
 #endif
 
 #ifndef NO_HELIX
-    m_helixlogoaudio->show();
-    m_helixlogovideo->hide();
+    //m_helixlogovideo->hide();
+    //m_helixlogoaudio->show();
 #endif
 
+    if (m_fullscreenaction)
+        m_fullscreenaction->setEnabled(false);
     QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
-}
-
-void PlayerWidget::setCurrentTrack( const QModelIndex& index )
-{
-    m_currenttrack = index;
 }
 
 void PlayerWidget::openCurrentTrack()
 {
     // Open and play current playlist item
-    QString url = qvariant_cast<QString>(m_playlist->data( m_currenttrack, Playlist::Url ));
+    if(!m_playlist.playing().isValid())
+        m_playlist.playFirst();
+    QUrl url = qvariant_cast<QUrl>(m_playlist.data( m_playlist.playing(), QMediaPlaylist::Url ));
 
-    if( url.contains( "://" ) ) {
-        m_playercontrol->open( url );
-    } else {
-        m_playercontrol->open( QContent( url ) );
-    }
-}
-
-void PlayerWidget::execTrackInfoDialog()
-{
-    QtopiaApplication::execDialog( m_trackinfodialog, false );
+    m_playercontrol->open(url);
 }
 
 void PlayerWidget::execVoteDialog()
@@ -2337,13 +2978,23 @@ void PlayerWidget::execRepeatDialog()
         m_repeatdialog = new RepeatDialog( m_repeatstate, this );
 
     QtopiaApplication::execDialog( m_repeatdialog, false );
+
+    if ( isFullScreenVideo() )
+        layoutVideoWidget();
 }
 
 void PlayerWidget::delayMenuCreation()
 {
     // Construct soft menu bar
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QMenu *menu = QSoftMenuBar::menuFor( this );
+
+    m_fullscreenaction = new QAction( QIcon( ":icon/fullscreen" ), tr( "Show Fullscreen" ), this );
+    m_fullscreenaction->setCheckable(true);
+    m_fullscreenaction->setChecked( isFullScreenVideo() );
+    connect( m_fullscreenaction, SIGNAL(triggered(bool)), this, SLOT(toggleFullScreenVideo(bool)) );
+    menu->addAction( m_fullscreenaction );
+    m_fullscreenaction->setEnabled( m_videowidget != 0 );
+
 
     m_muteaction = new QAction( QIcon( ":icon/mute" ), tr( "Mute" ), this );
     connect( m_muteaction, SIGNAL(triggered()), this, SLOT(toggleMute()) );
@@ -2358,10 +3009,6 @@ void PlayerWidget::delayMenuCreation()
     connect( m_repeataction, SIGNAL(triggered()), this, SLOT(execRepeatDialog()) );
     menu->addAction( m_repeataction );
 
-    QAction *trackdetails = new QAction( QIcon( ":icon/info" ), tr( "Track Details..." ), this );
-    connect( trackdetails, SIGNAL(triggered()), this, SLOT(execTrackInfoDialog()) );
-    menu->addAction( trackdetails );
-
     menu->addSeparator();
 
 #ifndef NO_HELIX
@@ -2370,9 +3017,49 @@ void PlayerWidget::delayMenuCreation()
     menu->addAction( m_settingsaction );
 #endif
 
+    if( m_voteaction != NULL)
+    {
+        if( m_playlist.isShuffle() ) {
+            m_voteaction->setVisible( true );
+            m_repeataction->setVisible( false );
+        } else {
     m_voteaction->setVisible( false );
     m_repeataction->setVisible( true );
-#endif
+        }
+    }
+
+    // just to show menu button, PlayerWidget menu is used
+    // since key events are processed by PlayerWidget
+    QSoftMenuBar::menuFor( m_fullscreenWidget );
+
+}
+
+void PlayerWidget::tvScreenChanged()
+{
+    if (m_videowidget == 0)
+        return;
+
+    if (m_tvScreen->isVisible()) {
+        showNormalVideo();
+
+        QRect rect = QApplication::desktop()->availableGeometry(m_tvScreen->screenNumber());
+        m_fullscreenWidget->setGeometry(rect);
+        m_fullscreenControls->setGeometry(rect);
+
+        if ( m_videoControl )
+            m_videoControl->setVideoRotation( QtopiaVideo::Rotate0 );
+
+        showFullScreenVideo();
+
+    }
+    else {
+        showNormalVideo();
+
+        QRect rect = QApplication::desktop()->availableGeometry( QScreenInformation( QScreenInformation::Normal ).screenNumber() );
+        m_fullscreenWidget->setGeometry(rect);
+        m_fullscreenControls->setGeometry(rect);
+    }
 }
 
 #include "playerwidget.moc"
+

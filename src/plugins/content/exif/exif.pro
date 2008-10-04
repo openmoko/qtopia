@@ -1,12 +1,13 @@
+!qbuild{
 qtopia_project(qtopia plugin)
 TARGET=exif
-
 CONFIG+=no_tr
+depends(libraries/qtopia)
+}
 
 HEADERS		=  exifcontentplugin.h \
-                   ifd.h
+                   exifcontentproperties.h
 
 SOURCES	        =  exifcontentplugin.cpp \
-                   ifd.cpp
+                   exifcontentproperties.cpp
 
-depends(libraries/qtopia)

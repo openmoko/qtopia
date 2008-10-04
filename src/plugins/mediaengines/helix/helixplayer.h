@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -36,63 +34,13 @@
 #include <hxausvc.h>
 #include <hxerror.h>
 
+#include "helixvideowidget.h"
+
 
 class PlayerProgressAdvise;
 class PlayerStateAdvise;
 class PlayerVolumeAdvise;
 class PlayerErrorSink;
-
-class HelixVideo
-{
-public:
-    /*
-    template<typename _X>
-    HelixVideoContainer(_X* x)
-    {
-        _w = new hv<_X>(x);
-    }
-    */
-    HelixVideo(QDirectPainter* dp)
-    {
-        _w = new hv<QDirectPainter>(dp);
-    }
-
-    HelixVideo(QWidget* w)
-    {
-        _w = new hv<QWidget>(w);
-    }
-
-    ~HelixVideo()
-    {
-        delete _w;
-    }
-
-    int winId()
-    {
-        return _w->winId();
-    }
-
-private:
-    struct hvi
-    {
-        virtual ~hvi() { }
-        virtual int winId() const = 0;
-    };
-
-    template <typename _W>
-    struct hv : public hvi
-    {
-        hv(_W* w):_w(w) {}
-        ~hv() { delete _w; }
-        _W* _w;
-
-        int winId() const { return _w->winId(); }
-    };
-
-    hvi*  _w;
-};
-
-
 
 class HelixPlayer : public QObject,
     public BasicControl,
@@ -145,7 +93,7 @@ public:
 
     // VideoRender
     bool hasVideo() const;
-    HelixVideo* createVideoWidget();
+    VideoWidget* createVideoWidget();
 
     // ErrorReport
     QString errorString() const;
@@ -158,6 +106,9 @@ public:
     void update( Subject* subject );
 
     void hasStopped();
+
+private slots:
+    void updateVideoSurfaceFormats();
 
 private:
     void startProgressTimer();
@@ -181,4 +132,4 @@ private:
     GenericContext *m_context;
 };
 
-#endif // HELIXPLAYER_H
+#endif

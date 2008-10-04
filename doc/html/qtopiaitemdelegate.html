@@ -10,10 +10,12 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QtopiaItemDelegate Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QtopiaItemDelegate Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QtopiaItemDelegate class provides display and editing facilities for data items from a model. <a href="#details">More...</a></p>
 <pre>    #include &lt;QtopiaItemDelegate&gt;</pre><p>Inherits <a href="qitemdelegate.html">QItemDelegate</a>.</p>
+<p>Inherited by <a href="qmailmessagedelegate.html">QMailMessageDelegate</a>.</p>
 <ul>
 <li><a href="qtopiaitemdelegate-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -52,7 +54,7 @@
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qabstractitemdelegate.html#public-slots">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>2 signals inherited from <a href="qabstractitemdelegate.html#signals">QAbstractItemDelegate</a></li>
+<li><div class="fn"/>3 signals inherited from <a href="qabstractitemdelegate.html#signals">QAbstractItemDelegate</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
@@ -65,7 +67,7 @@
 <p>QtopiaItemDelegate can be used to provide custom display features and editor widgets for item views based on <a href="qabstractitemview.html">QAbstractItemView</a> subclasses. Using a delegate for this purpose allows the display and editing mechanisms to be customized and developed independently from the model and view.</p>
 <p>The QtopiaItemDelegate class is one of the <a href="model-view.html">Model/View Classes</a>.</p>
 <p>When displaying items from a custom model in a standard view, it is often sufficient to simply ensure that the model returns appropriate data for each of the <a href="qt.html#ItemDataRole-enum">roles</a> that determine the appearance of items in views. The default delegate used by Qt's standard views uses this role information to display items in most of the common forms expected by users. However, it is sometimes necessary to have even more control over the appearance of items than the default delegate can provide.</p>
-<p>This class provides default implementations of the functions for painting item data in a view, and editing data obtained from a model with the Qtopia look and feel.</p>
+<p>This class provides default implementations of the functions for painting item data in a view, and editing data obtained from a model with the Qt Extended look and feel.</p>
 <p>Default implementations of the <a href="qtopiaitemdelegate.html#paint">paint</a>() and <a href="qtopiaitemdelegate.html#sizeHint">sizeHint</a>() virtual functions, defined in <a href="qabstractitemdelegate.html">QAbstractItemDelegate</a>, are provided to ensure that the delegate implements the correct basic behavior expected by views. You can reimplement these functions in subclasses to customize the appearance of items.</p>
 <p>Delegates can be used to manipulate item data in two complementary ways: by processing events in the normal manner, or by implementing a custom editor widget. The item delegate takes the approach of providing a widget for editing purposes that can be supplied to QAbstractItemView::setDelegate() or the equivalent function in subclasses of <a href="qabstractitemview.html">QAbstractItemView</a>.</p>
 <p>Only the standard editing functions for widget-based delegates are reimplemented here: editor() returns the widget used to change data from the model; <a href="qitemdelegate.html#setEditorData">setEditorData</a>() provides the widget with data to manipulate; <a href="qitemdelegate.html#updateEditorGeometry">updateEditorGeometry</a>() ensures that the editor is displayed correctly with respect to the item view; <a href="qitemdelegate.html#setModelData">setModelData</a>() returns the updated data to the model; releaseEditor() indicates that the user has completed editing the data, and that the editor widget can be destroyed.</p>
@@ -142,8 +144,8 @@
 <p>Reimplemented from <a href="qabstractitemdelegate.html#sizeHint">QAbstractItemDelegate</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

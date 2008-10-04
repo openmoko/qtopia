@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -30,8 +28,16 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-// For releases, this define gets replaced with the appropriate year by the packaging scripts
-#define QTOPIA_COPYRIGHT_YEAR	2008
+// For releases, this defines get replaced with the appropriate data by the packaging scripts
+#define QT_EXTENDED_COPYRIGHT_YEAR	2008
+#define QT_EXTENDED_COPYRIGHT_COMPANY "Trolltech ASA"
+
+#ifndef QTOPIA_CHANGE
+#define QTOPIA_CHANGE "unknown"
+#endif
+#ifndef QT_CHANGE
+#define QT_CHANGE "unknown"
+#endif
 
 VersionInfo::VersionInfo( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f )
@@ -76,20 +82,20 @@ void VersionInfo::init()
     vBoxLayout1->setSpacing( 3 );
     QLabel *qtopiaName = new QLabel(this);
     qtopiaName->setFont(boldFont);
-    qtopiaName->setText(tr("Qtopia"));
+    qtopiaName->setText(tr("Qt Extended"));
     vBoxLayout1->addWidget(qtopiaName);
 
     QLabel *qtopiaVersion = new QLabel(this);
     qtopiaVersion->setWordWrap(true);
-    qtopiaVersion->setText(tr("Version:") + " " + Qtopia::version());
+    qtopiaVersion->setText(tr("Version:") + ' ' + Qtopia::version());
     vBoxLayout1->addWidget(qtopiaVersion);
     vBoxLayout1->addSpacing( 10 );
 
     QLabel *qtopiaCopyright = new QLabel(this);
-    qtopiaCopyright->setText(tr( "Copyright \251 %1", "%1 = 'year'" ).arg(QTOPIA_COPYRIGHT_YEAR));
+    qtopiaCopyright->setText(tr( "Copyright \251 %1", "%1 = 'year'" ).arg(QT_EXTENDED_COPYRIGHT_YEAR));
     vBoxLayout1->addWidget(qtopiaCopyright);
     QLabel* qtopiaCopyright1 = new QLabel( this );
-    qtopiaCopyright1->setText( "Trolltech ASA" );
+    qtopiaCopyright1->setText( QT_EXTENDED_COPYRIGHT_COMPANY );
     vBoxLayout1->addWidget(qtopiaCopyright1);
 
     vBoxLayout1->addSpacing( 10 );
@@ -108,6 +114,16 @@ void VersionInfo::init()
 
     qtopiaBuild = new QLabel(this);
     qtopiaBuild->setText(tr("Built on %1","1=date").arg(__DATE__));
+    vBoxLayout1->addWidget(qtopiaBuild);
+
+    QString qtopia_change( QTOPIA_CHANGE );
+    qtopiaBuild = new QLabel(this);
+    qtopiaBuild->setText(tr("Qt Extended Change #:\n    %1").arg(qtopia_change));
+    vBoxLayout1->addWidget(qtopiaBuild);
+
+    QString qt_change( QT_CHANGE );
+    qtopiaBuild = new QLabel(this);
+    qtopiaBuild->setText(tr("Qt Change #:\n    %1").arg(qt_change));
     vBoxLayout1->addWidget(qtopiaBuild);
 
     QSpacerItem *spacerItem = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
@@ -148,12 +164,12 @@ void VersionInfo::init()
     }
     QLabel *linuxVersion = new QLabel(this);
     linuxVersion->setWordWrap(true);
-    linuxVersion->setText(tr("Version:")+ " " + kernelVersionString);
+    linuxVersion->setText(tr("Version:")+ ' ' + kernelVersionString);
     vBoxLayout2->addWidget(linuxVersion);
 
     QLabel *linuxCompiledBy = new QLabel(this);
     linuxCompiledBy->setWordWrap(true);
-    linuxCompiledBy->setText(tr("Compiled by:") + " " + compiledByString);
+    linuxCompiledBy->setText(tr("Compiled by:") + ' ' + compiledByString);
     vBoxLayout2->addWidget(linuxCompiledBy);
 
     gridLayout2->addLayout(vBoxLayout2, 0, 1, 2, 1);

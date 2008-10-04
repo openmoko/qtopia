@@ -1,40 +1,39 @@
 HOWTO update zoneinfo data
+--------------------------
 
-- Ideally the system integrator should add the matching zoneinfo data to match the 
-glibc version of the toolchain.
-  Root file system default zoneinfo directory (/usr/share/zoneinfo)
+- Ideally the system integrator should add the matching zoneinfo data to match
+  the glibc version of their toolchain.  The default root file system directory
+  for zoneinfo data is /usr/share/zoneinfo.
 
-- An integrator can place these in a non default place, provided they set
-QTOPIA_ZONEINFO_PATH environmental variable to where the zoneinfo directory exists.
+- An integrator can place the zoneinfo data in a non default place, provided
+  they set the QTOPIA_ZONEINFO_PATH environmental variable to the zoneinfo
+  directory or set the QTOPIA_ZONEINFO_PATH macro in their custom.h file.
 
-- More information about zoneinfo can be found here:
- The tz home page
- http://www.twinsun.com/tz/tz-link.htm
+- More information about zoneinfo can be found on these websites:
+    The tz home page: http://www.twinsun.com/tz/tz-link.htm
+    Wikipedia page: http://en.wikipedia.org/wiki/Zoneinfo
 
-To Update the timezones, download and compile:
+- To update the timezones, download and compile the zoneinfo database by
+  running the following commands:
 
 wget 'ftp://elsie.nci.nih.gov/pub/tz*.tar.gz'
 gzip -dc tzcode*.tar.gz | tar -xf -
 gzip -dc tzdata*.tar.gz | tar -xf -
-
 make TOPDIR=$HOME/tzdir install
 
-
- http://en.wikipedia.org/wiki/Zoneinfo
-
-- To update with a new version of zoneinfo here:
-
+- To update the zoneinfo files shipped with Qtopia:
   + Remove all files in this zoneinfo directory except this zoneinfo.txt file.
-  + Download the tzdata and tzcode packages from ftp://elsie.nci.nih.gov/pub/
+  + Download the tzdata and tzcode packages as described above.
   + Read the README file in tzcode.
-  + Place them in one directory where you build.
-  + Run something like 'make TOPDIR=$HOME/tzdir install'. 
+  + Build the packages as described above.
   + Copy the $HOME/tzdir/etc/zoneinfo directory contents to this directory, 
-or where they will exist on your system.
+    or where they will exist on your system.
   + Estimated size 2M
-  + version 2007h
-  
-To add Beijing timezone, apply this patch.
+
+- The current zoneinfo version supplied with Qtopia is 2007k.
+
+- To add Beijing timezone, apply this patch (being careful to preserve the
+  literal tab characters in the patch).
 
 --- asia~	2008-01-25 07:07:13.000000000 +1000
 +++ asia	2008-01-25 07:08:26.000000000 +1000
@@ -42,9 +41,9 @@ To add Beijing timezone, apply this patch.
  			8:00	PRC	C%sT
  # Zhongyuan Time ("Central plain Time")
  # most of China
-+Zone  Asia/Beijing 8:05:52 - LMT 1928
-+      8:00  Shang C%sT  1949
-+      8:00  PRC C%sT
++Zone	Asia/Beijing	8:05:52	-	LMT	1928
++			8:00	Shang	C%sT	1949
++			8:00	PRC	C%sT
  Zone	Asia/Shanghai	8:05:52	-	LMT	1928
  			8:00	Shang	C%sT	1949
  			8:00	PRC	C%sT

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -31,9 +29,9 @@
 
 #include <Qtopia>
 
-#include <qtopia/mail/qmailaddress.h>
-#include <qtopia/mail/qmailmessage.h>
-#include <qtopia/mail/qmailtimestamp.h>
+#include <qmailaddress.h>
+#include <qmailmessage.h>
+#include <qmailtimestamp.h>
 
 #include <limits.h>
 
@@ -311,7 +309,7 @@ void Browser::displayPlainText(const QMailMessage* mail)
 
     QString text;
 
-    if (mail->messageType() != QMailMessage::Sms)
+    if ((mail->messageType() != QMailMessage::Sms) && (mail->messageType() != QMailMessage::Instant))
         text += tr("Subject") + ": " + mail->subject() + "\n";
 
     QMailAddress fromAddress(mail->from());
@@ -413,8 +411,8 @@ void Browser::displayHtml(const QMailMessage* mail)
     QList<TextPair> metadata;
 
     // For SMS messages subject is the same as body, so for SMS don't 
-    // show the message text twice
-    if (mail->messageType() != QMailMessage::Sms)
+    // show the message text twice (same for IMs)
+    if ((mail->messageType() != QMailMessage::Sms) && (mail->messageType() != QMailMessage::Instant))
         subjectText = mail->subject();
 
     QString from = mail->headerFieldText("From");
@@ -585,10 +583,23 @@ void Browser::displayHtml(const QMailMessage* mail)
 
     if (!subjectText.isEmpty()) {
         QString subjectTemplate = 
+#ifdef QTOPIA_HOMEUI
+"<div align=left><b>Received</b>: RECEIVED_TEXT<br><b>Subject</b>: SUBJECT_TEXT</div><hr>";
+
+        QDateTime timeStamp(mail->date().toLocalTime());
+        QString timeStampText(timeStamp.toString("MMMM d"));
+        if (timeStamp.date().daysTo(QDate::currentDate()) > 365)
+            timeStampText += timeStamp.toString(" yyyy");
+        timeStampText += timeStamp.toString(" h:mmap");
+
+        subjectTemplate = replaceLast(subjectTemplate, "RECEIVED_TEXT", Qt::escape(timeStampText));
+#else
 "<div align=center><b><big><font color=LINK_COLOR>SUBJECT_TEXT</font></big></b></div><br>";
 
         QString linkColor = palette().link().color().name();
         subjectTemplate = replaceLast(subjectTemplate, "LINK_COLOR", QString("\"%1\"").arg(linkColor));
+#endif
+
         pageData += replaceLast(subjectTemplate, "SUBJECT_TEXT", Qt::escape(subjectText));
     }
 
@@ -607,14 +618,15 @@ void Browser::displayHtml(const QMailMessage* mail)
 
     if (!bodyText.isEmpty()) {
         QString bodyTemplate = 
-"<div align=left>BODY_TEXT</div><hr>";
+"<div align=left>BODY_TEXT</div>";
 
         pageData += replaceLast(bodyTemplate, "BODY_TEXT", bodyText);
     }
 
+#ifndef QTOPIA_HOMEUI
     if (!metadata.isEmpty()) {
         QString metadataTemplate = 
-"<div align=left><font size=\"-5\">METADATA_TEXT</font></div>";
+"<hr><div align=left><font size=\"-5\">METADATA_TEXT</font></div>";
 
         QString itemTemplate = 
 "<b>ID_TEXT: </b>CONTENT_TEXT<br>";
@@ -628,6 +640,7 @@ void Browser::displayHtml(const QMailMessage* mail)
 
         pageData += replaceLast(metadataTemplate, "METADATA_TEXT", metadataText);
     }
+#endif
 
     setHtml(pageData);
 }
@@ -1138,11 +1151,6 @@ void Browser::keyPressEvent(QKeyEvent* event)
         case Qt::Key_Right:
             scrollBy(factor, 0);
             event->accept();
-            break;
-
-        case Qt::Key_Back:
-            event->accept();
-            emit finished();
             break;
 
         default:

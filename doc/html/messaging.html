@@ -3,15 +3,15 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Messages</title>
+  <title>Messages Client</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Messages<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Messages Client<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#features">Features</a></li>
@@ -26,13 +26,13 @@
 <li><a href="#writing-messages">Writing Messages</a></li>
 <li><a href="#writing-mms-messages">Writing MMS Messages</a></li>
 <li><a href="#retrieving-messages">Retrieving messages</a></li>
-<li><a href="#retrieving-mms-messages">Retrieving MMS Messages</a></li>
 <li><a href="#sending-messages">Sending messages</a></li>
+<li><a href="#requirements">Requirements</a></li>
 <li><a href="#dependencies">Dependencies</a></li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>The <i>Messages</i> application enables the user to receive emails from multiple mail servers as well as SMS and MMS messages from other mobile phone devices. It also provides the ability to send emails, MMS or SMS messages to multiple people with or without attachments.</p>
+<p>The <i>Messages</i> client application enables the user to receive emails from multiple mail servers as well as SMS and MMS messages from other mobile phone devices. It also provides the ability to send emails, MMS or SMS messages to multiple people with or without attachments.</p>
 <a name="features"></a>
 <h2>Features</h2>
 <p>Messages provides the following features:</p>
@@ -41,7 +41,7 @@
 <tr valign="top" class="odd"><td>Send email</td><td>Compose and send an email.</td></tr>
 <tr valign="top" class="even"><td>Send SMS / MMS</td><td>Send an SMS / MMS to another mobile phone.</td></tr>
 <tr valign="top" class="odd"><td>Receive email</td><td>Connect to a mail server and download emails to the device.</td></tr>
-<tr valign="top" class="even"><td>Reply to messages</td><td>Reply to a message received via a Qtopia device.</td></tr>
+<tr valign="top" class="even"><td>Reply to messages</td><td>Reply to a message received via a Qt Extended device.</td></tr>
 <tr valign="top" class="odd"><td>View an embedded image</td><td>View a message with an image either attached or embedded.</td></tr>
 <tr valign="top" class="even"><td>View specific messages</td><td>Filter the messages viewed. For example, view only messages in the current month.</td></tr>
 <tr valign="top" class="odd"><td>Search for a message</td><td>Search the contents of messages and retrieve valid messages.</td></tr>
@@ -56,14 +56,13 @@
 <thead><tr valign="top" class="qt-style"><th>Feature</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td>Accounts</td><td>Allows creation of an arbitrary number of mail accounts.</td></tr>
 <tr valign="top" class="even"><td>Email Protocols</td><td>The following email protocols are available:<ul>
-<li>POP: remembers the server mail list so a server copy of emails can be retained</li>
-<li>SMTP: allows additional SMTP accounts to allow for more than one profile</li>
-<li>IMAP: allows individual synchronization settings for each mailbox.</li>
+<li>POP</li>
+<li>IMAP</li>
+<li>SMTP</li>
 </ul>
 </td></tr>
 <tr valign="top" class="odd"><td>Message Protocols</td><td>The following email protocols are available:<ul>
 <li>SMS</li>
-<li>EMS</li>
 <li>MMS</li>
 </ul>
 </td></tr>
@@ -95,11 +94,10 @@
 <p>The following virtual folder features are available:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Feature</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td>Folder properties: defines the search criteria for mails that appear in a folder.</td></tr>
-<tr valign="top" class="even"><td>Search keys: allows case-insensitive pattern matching with support for optional keys in the same field.</td></tr>
-<tr valign="top" class="odd"><p>Virtual properties: the same mail logically appears in several folders. </tr>
+<tr valign="top" class="odd"><td>Folder properties</td><td>defines the search criteria for mails that appear in a folder.</td></tr>
+<tr valign="top" class="even"><td>Search keys</td><td>allows case-insensitive pattern matching with support for optional keys in the same field.</td></tr>
+<tr valign="top" class="odd"><td>Virtual properties</td><td>the same mail logically appears in several folders.</td></tr>
 </table></p>
-</p>
 <a name="message-properties"></a>
 <h2>Message Properties</h2>
 <p>The following message properties can be handled:</p>
@@ -107,7 +105,7 @@
 <thead><tr valign="top" class="qt-style"><th>Property</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td>Date</td><td>this is converted to match your current time zone setting</td></tr>
 <tr valign="top" class="even"><td>Attachments</td><td>these are only stored as files when you request it</td></tr>
-<tr valign="top" class="odd"><td>Usability</td><td>support exists for most messages conforming to RFC822 and RFC2045-RFC2049</td></tr>
+<tr valign="top" class="odd"><td>Usability</td><td>support exists for most messages conforming to RFC2822 and RFC2045-RFC2049</td></tr>
 </table></p>
 <a name="viewing-mail"></a>
 <h2>Viewing mail</h2>
@@ -126,32 +124,33 @@
 </table></p>
 <a name="viewing-mms-messages"></a>
 <h2>Viewing MMS Messages</h2>
-<p>The following features are required:</p>
-<ul>
-<li>Display of images and text and playing sounds.</li>
-<li>Playing MMS messages containing SMIL presentaion.</li>
-<li>Reply: it is possible to reply to or forward the currently viewed message.</li>
-<li>Delete: it is possible to delete the currently viewed message</li>
-</ul>
+<p>The following features are available:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Feature</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>Media</td><td>display of images and text and playing sounds.</td></tr>
+<tr valign="top" class="even"><td>SMIL</td><td>display messages containing SMIL slide-show presentations.</td></tr>
+<tr valign="top" class="odd"><td>Responding</td><td>it is possible to reply to or forward the currently viewed message.</td></tr>
+<tr valign="top" class="even"><td>Delete</td><td>it is possible to delete the currently viewed message</td></tr>
+</table></p>
 <a name="writing-messages"></a>
 <h2>Writing Messages</h2>
-<p>The following writing-related features are available:</p>
+<p>The following features are available:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Feature</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td>Fields</td><td>it is possible to add SMS <tt>/To/Cc/Bcc/From/Subject/body(text)</tt> and attach files to the mail</td></tr>
 <tr valign="top" class="even"><td>Modify</td><td>it is possible to make changes as necessary to mails in the Drafts and <tt>Outbox</tt> folder</td></tr>
-<tr valign="top" class="odd"><td>Auto save</td><td>modified mails are automatically saved unless they are explicitly discarded</td></tr>
+<tr valign="top" class="odd"><td>Auto save</td><td>modified drafts are automatically saved unless they are explicitly discarded</td></tr>
 <tr valign="top" class="even"><td>Store</td><td>draft mails are stored in the Drafts folder and mails ready to send are stored in the <tt>Outbox</tt> folder</td></tr>
 </table></p>
 <a name="writing-mms-messages"></a>
 <h2>Writing MMS Messages</h2>
-<p>The following writing-related features are required:</p>
+<p>The following MMS-related features are available:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Feature</th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td>Fields</td><td>it is possible to specify <tt>To/Cc/Bcc/subject</tt>. It is possible to request delivery report and read reply.</td></tr>
 <tr valign="top" class="even"><td>Composing</td><td>a standard slide show with SMIL presentation is supported by the MMS composer. One image, text field and audio file are allowed per page of the slide show.</td></tr>
 <tr valign="top" class="odd"><td>Modify</td><td>it is possible to make changes as necessary to mails in the drafts and <tt>Outbox</tt> folder</td></tr>
-<tr valign="top" class="even"><td>Auto save</td><td>modified mails are automatically be saved unless they are explicitly discarded.</td></tr>
+<tr valign="top" class="even"><td>Auto save</td><td>modified drafts are automatically saved unless they are explicitly discarded.</td></tr>
 <tr valign="top" class="odd"><td>Store</td><td>draft mails are stored in the <tt>Drafts</tt> folder and mails ready to send are stored in the <tt>Outbox</tt> folder.</td></tr>
 </table></p>
 <a name="retrieving-messages"></a>
@@ -167,9 +166,6 @@
 <tr valign="top" class="even"><td>Resume</td><td>it is possible to cancel downloads and resume them later</td></tr>
 <tr valign="top" class="odd"><td>Safe</td><td>in case of a crash while downloading the client reverts to the state prior to the crash</td></tr>
 </table></p>
-<a name="retrieving-mms-messages"></a>
-<h2>Retrieving MMS Messages</h2>
-<p>The user will be notifed of the arrival of an MMS message. The user may then download and view the message immediately, or defer downloading to a later date.</p>
 <a name="sending-messages"></a>
 <h2>Sending messages</h2>
 <p>The following message sending- related features are available:</p>
@@ -184,17 +180,23 @@
 <tr valign="top" class="odd"><td>Flexible</td><td>default SMTP account or reply-to field is used where the from address does not match.</td></tr>
 <tr valign="top" class="even"><td>Diverse</td><td>it is possible to send a single message with both SMS and email addresses.</td></tr>
 </table></p>
-<a name="dependencies"></a>
-<h2>Dependencies</h2>
-<p>Qtopia <tt>Messages</tt> has the following dependencies:</p>
+<a name="requirements"></a>
+<h2>Requirements</h2>
+<p>Messages has the following requirements:</p>
 <ul>
 <li>Storage space : approximately 1.5 times the server mailbox size is required on a device</li>
-<li>Image viewing: the services of an image viewer are required to allow the display of attached images</li>
+</ul>
+<a name="dependencies"></a>
+<h2>Dependencies</h2>
+<p>Messages has the following dependencies:</p>
+<ul>
+<li>the <a href="qtextendedmail.html">Qt Extended Messaging Library</a></li>
+<li>the Qt Extended SMIL Library</li>
 </ul>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

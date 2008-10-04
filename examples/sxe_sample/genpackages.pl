@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-
 use Cwd;
 
 my @files = qw/
@@ -15,6 +14,7 @@ my @files = qw/
 
 my $proj_file = "malpkg.pro";
 my $desktop_file = "malpkg.desktop";
+my $qproj_file = "qbuild.pro";
 
 my @domains;
 {
@@ -28,6 +28,14 @@ open PRO, $proj_file or die "open $proj_file : $!\n";
 {
     local $/ = undef;
     $proj_def = <PRO>;
+}
+close PRO;
+
+my $qproj_def;
+open QPRO, $qproj_file or die "open $qproj_file : $!\n";
+{
+    local $/ = undef;
+    $qproj_def = <QPRO>;
 }
 close PRO;
 
@@ -91,19 +99,27 @@ for my $pkdir ( @projects )
         my $this_def = $proj_def;
         $this_def =~ s/malpkg/mal$pkdir/g ;
         $this_def =~ s/pkg.domain=untrusted/pkg.domain=${domains[$dom]}/ ;
-        $this_def =~ s/(help.files=mal)$pkdir(.html)/$1pkg$2/; 
 
         open PRO, ">$proj_file" or die "open $projroot/$proj_file : $!\n";
         print PRO $this_def;
         close PRO;
+    }
+    unless ( -f $qproj_file )
+    {
+        my $this_def = $qproj_def;
+        $this_def =~ s/(TARGET=mal)pkg/$1$pkdir/g ;
+
+        open QPRO, ">$qproj_file" or die "open $projroot/$qproj_file : $!\n";
+        print QPRO $this_def;
+        close QPRO;
     }
     symlink "../malpkg.cpp", "mal$pkdir.cpp" unless ( -l "mal$pkdir.cpp" );
     symlink "../malpkg.h", "mal$pkdir.h" unless ( -l "mal$pkdir.h" );
     mkdir "help" unless ( -d "help" );
     mkdir "help/html" unless ( -d "help/html" );
     symlink "../../../malpkg.html", "help/html/mal$pkdir.html" unless ( -l "help/html/mal$pkdir.html" );
-    system( "qtopiamake" );
-    system( "make packages FORMAT=qpk" );
+    system( "qbuild" );
+    system( "qbuild packages FORMAT=qpk" );
     while ( <*.qpk> ) { rename "$_", "../$_"; }
     chdir "..";
     $dom++;
@@ -115,6 +131,6 @@ print <<END
   Packages all built.  Now do:
 
   find . -name "*.qpk" -exec mv -f "{}" \$PWD \\;
-  \$QPEDIR/bin/mkPackages /path/to/webroot
+  \$QTOPIA_DEPOT_PATH/bin/mkPackages /path/to/webroot
 
 END

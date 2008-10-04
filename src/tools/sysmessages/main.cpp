@@ -1,31 +1,37 @@
 /****************************************************************************
 **
-**Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <qtopiaapplication.h>
 #include "sysmessages.h"
 
+#ifdef SINGLE_EXEC
+QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,sysmessages)
+#define MAIN_FUNC main_sysmessages
+#else
+#define MAIN_FUNC main
+#endif
+
 QSXE_APP_KEY
-int main( int argc, char *argv[] )
+int MAIN_FUNC( int argc, char **argv )
 {
     QSXE_SET_APP_KEY(argv[0]);
     QtopiaApplication app(argc, argv);
     new SysMessagesService( &app );
     return app.exec();
 }
+

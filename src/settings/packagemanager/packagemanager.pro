@@ -1,6 +1,13 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=packagemanager
 CONFIG+=qtopia_main
+depends(3rdparty/libraries/tar)
+depends(3rdparty/libraries/md5)
+enable_sxe:depends(libraries/qtopiasecurity)
+INCLUDEPATH+=$$QT_DEPOT_PATH/src/3rdparty/md5
+}
+
 # Give us a direct connection to the document system
 DEFINES+=QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION
 
@@ -18,7 +25,7 @@ HEADERS         = packageview.h \
                     sandboxinstall.h \
                     md5file.h \
                     packagemanagerservice.h \
-                    version.h \
+                    packageversion.h \
                     utils.h
 
 SOURCES         = main.cpp \
@@ -34,14 +41,13 @@ SOURCES         = main.cpp \
                     sandboxinstall.cpp \
                     md5file.cpp \
                     packagemanagerservice.cpp \
-                    version.cpp \
+                    packageversion.cpp \
                     utils.cpp
 
-INCLUDEPATH+=$$QT_DEPOT_PATH/src/3rdparty/md5
-
-depends(3rdparty/libraries/tar)
-depends(3rdparty/libraries/md5)
-enable_sxe:depends(libraries/qtopiasecurity)
+enable_sxe {
+    SOURCES+=domaininfo.cpp
+    HEADERS+=domaininfo.h
+}
 
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=packagemanager*
@@ -54,16 +60,10 @@ INSTALLS+=desktop
 pics.files=$$QTOPIA_DEPOT_PATH/pics/packagemanager/*
 pics.path=/pics/packagemanager
 pics.hint=pics
-            
-# This is documented in src/build/doc/src/deviceprofiles.qdoc
-!isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/etc/default/Trolltech/PackageManager.conf) {
-    secsettings.files+=$$DEVICE_CONFIG_PATH/etc/default/Trolltech/PackageManager.conf
-} else {
-    secsettings.files+=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/PackageManager.conf
-}
 INSTALLS+=pics
+            
+secsettings.files=$$device_overrides(/etc/default/Trolltech/PackageManager.conf)
 secsettings.path=/etc/default/Trolltech
-secsettings.hint=secsettings
 INSTALLS+=secsettings
 packagemanagerservice.files=$$QTOPIA_DEPOT_PATH/services/PackageManager/packagemanager
 packagemanagerservice.path=/services/PackageManager
@@ -74,13 +74,9 @@ INSTALLS+=qdspackagemanagerservice
 
 packages_category.files=$$QTOPIA_DEPOT_PATH/apps/Packages/.directory
 packages_category.path=/apps/Packages
-packages_category.hint=desktop
+packages_category.hint=desktop prep_db
+MODULES*=qtopia::prep_db
 INSTALLS+=packages_category
-
-enable_sxe {
-    SOURCES+=domaininfo.cpp
-    HEADERS+=domaininfo.h
-}
 
 pkg.desc=Safely download and install programs for Qtopia.
 pkg.domain=trusted

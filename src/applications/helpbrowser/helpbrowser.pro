@@ -1,6 +1,8 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=helpbrowser
 CONFIG+=qtopia_main
+}
 
 HEADERS		= helpbrowser.h \
 		    helppreprocessor.h \

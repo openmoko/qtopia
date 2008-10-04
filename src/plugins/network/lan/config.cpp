@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,6 +24,7 @@
 
 #include "config.h"
 #include "wirelessconfig.h"
+#include "wirelessipconfig.h"
 #include "encryptionconfig.h"
 #include "wirelessscan.h"
 #include "roamingconfig.h"
@@ -41,9 +40,7 @@
 
 #include <qtopialog.h>
 #include <qvaluespace.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 
 
 class LanUI : public QDialog
@@ -53,7 +50,6 @@ public:
     LanUI( LANConfig *c, QWidget* parent, Qt::WFlags flags = 0);
     ~LanUI();
 
-#ifdef QTOPIA_PHONE
     enum Entry {
         Account,
         IP,
@@ -66,17 +62,12 @@ public:
 #endif
 #endif
     };
-#endif
 
 public slots:
     void accept();
 private slots:
-#ifdef QTOPIA_PHONE
     void optionSelected(QListWidgetItem* item);
     void updateUserHint(QListWidgetItem* cur, QListWidgetItem* prev);
-#else
-    void optionSelected( int tabWidgetIdx );
-#endif
 
 private:
     void init();
@@ -89,6 +80,7 @@ private:
     AccountPage* accPage;
 #ifndef NO_WIRELESS_LAN
     WirelessPage* wirelessPage;
+    WirelessIPPage* wirelessIpPage;
     WirelessEncryptionPage* encryptPage;
     QtopiaNetworkProperties netSettings;
     int lastIndex;
@@ -97,13 +89,9 @@ private:
 #endif
 #endif //NO_WIRELESS_LAN
 
-#ifdef QTOPIA_PHONE
     QListWidget* options;
     QStackedWidget* stack;
     QLabel* userHint;
-#else
-    QTabWidget* tabWidget;
-#endif //QTOPIA_PHONE
 };
 
 
@@ -229,10 +217,8 @@ LanUI::LanUI(LANConfig *c, QWidget* parent, Qt::WFlags flags)
     type = QtopiaNetwork::toType( config->configFile() );
     init();
 
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this, true );
-#endif
 }
 
 LanUI::~LanUI()
@@ -251,77 +237,6 @@ void LanUI::init()
     if (!title.isEmpty())
         setWindowTitle( title );
 
-#ifndef QTOPIA_PHONE
-    tabWidget = new QTabWidget( this );
-
-    QScrollArea* scroll = new QScrollArea();
-    scroll->setWidgetResizable( true );
-    scroll->setFocusPolicy( Qt::NoFocus );
-    scroll->setFrameShape( QFrame::NoFrame );
-    accPage = new AccountPage( type,
-            knownProp );
-    scroll->setWidget( accPage );
-    tabWidget->addTab( scroll, tr("Account") );
-    tabWidget->setTabIcon( 0, QIcon(":icon/netsetup/account" ) );
-
-    scroll = new QScrollArea();
-    scroll->setWidgetResizable( true );
-    scroll->setFocusPolicy( Qt::NoFocus );
-    scroll->setFrameShape( QFrame::NoFrame );
-    ipPage = new IPPage( knownProp );
-    scroll->setWidget( ipPage );
-    tabWidget->addTab( scroll, tr("IP", "short for ip address") );
-    tabWidget->setTabIcon( 1, QIcon(":icon/netsetup/server") );
-
-    scroll = new QScrollArea();
-    scroll->setWidgetResizable( true );
-    scroll->setFocusPolicy( Qt::NoFocus );
-    scroll->setFrameShape( QFrame::NoFrame );
-    proxiesPage = new ProxiesPage( knownProp );
-    scroll->setWidget( proxiesPage );
-    tabWidget->addTab( scroll, tr("Proxy","for http traffic") );
-    tabWidget->setTabIcon( 2, QIcon(":icon/netsetup/proxies") );
-
-#ifndef NO_WIRELESS_LAN
-    if ( type & QtopiaNetwork::WirelessLAN) {
-        scroll = new QScrollArea();
-        scroll->setWidgetResizable( true );
-        scroll->setFocusPolicy( Qt::NoFocus );
-        scroll->setFrameShape( QFrame::NoFrame );
-        wirelessPage = new WirelessPage( knownProp );
-        scroll->setWidget( wirelessPage );
-        tabWidget->addTab( scroll, tr("Wireless", "Wireless LAN") );
-        tabWidget->setTabIcon( 3, QIcon(":icon/Network/lan/WLAN-online") );
-
-        scroll = new QScrollArea();
-        scroll->setWidgetResizable( true );
-        scroll->setFocusPolicy( Qt::NoFocus );
-        scroll->setFrameShape( QFrame::NoFrame );
-        encryptPage = new WirelessEncryptionPage( knownProp );
-        scroll->setWidget( encryptPage );
-        tabWidget->addTab( scroll, tr("Encryption", "Wireless LAN") );
-        tabWidget->setTabIcon( 4, QIcon(":icon/Network/lan/WLAN-online") );
-
-#if WIRELESS_EXT > 13
-        scroll = new QScrollArea();
-        scroll->setWidgetResizable( true );
-        scroll->setFocusPolicy( Qt::NoFocus );
-        scroll->setFrameShape( QFrame::NoFrame );
-        wirelessRoaming = new RoamingPage( knownProp );
-        scroll->setWidget( wirelessRoaming );
-        tabWidget->addTab( scroll, tr("Roaming", "Wireless LAN") );
-        tabWidget->setTabIcon( 5, QIcon(":icon/Network/lan/WLAN-online") );
-#endif
-        netSettings = encryptPage->properties(); //filter all non WirelessNetwork keys out
-        lastIndex = 0;
-   }
-#endif
-
-    vBox->addWidget( tabWidget );
-
-    connect(tabWidget, SIGNAL(currentChanged(int)),
-            this, SLOT(optionSelected(int)));
-#else
     stack = new QStackedWidget( this );
 
     QWidget* page = new QWidget();
@@ -337,6 +252,14 @@ void LanUI::init()
     item->setTextAlignment( Qt::AlignHCenter);
     item->setIcon( QIcon(":icon/netsetup/account") );
 
+#ifndef NO_WIRELESS_LAN
+    if ( type & QtopiaNetwork::WirelessLAN) {
+        item = new QListWidgetItem( tr("Wireless Networks"), options, Wireless );
+        item->setTextAlignment( Qt::AlignHCenter);
+        item->setIcon( QIcon(":icon/Network/lan/WLAN-online") );
+    }
+#endif
+
     item = new QListWidgetItem( tr("IP Settings", "short for ip address"), options,  IP );
     item->setTextAlignment( Qt::AlignHCenter);
     item->setIcon( QIcon(":icon/netsetup/server") );
@@ -347,10 +270,6 @@ void LanUI::init()
 
 #ifndef NO_WIRELESS_LAN
     if ( type & QtopiaNetwork::WirelessLAN) {
-        item = new QListWidgetItem( tr("Wireless Settings"), options, Wireless );
-        item->setTextAlignment( Qt::AlignHCenter);
-        item->setIcon( QIcon(":icon/Network/lan/WLAN-online") );
-
         item = new QListWidgetItem( tr("Wireless Encryption"), options, WirelessEncryption );
         item->setTextAlignment( Qt::AlignHCenter);
         item->setIcon( QIcon(":icon/Network/lan/WLAN-online") );
@@ -385,8 +304,16 @@ void LanUI::init()
     QScrollArea *scroll = new QScrollArea();
     scroll->setWidgetResizable( true );
     scroll->setFocusPolicy( Qt::NoFocus );
-    ipPage = new IPPage( knownProp );
-    scroll->setWidget( ipPage );
+    if ( type & QtopiaNetwork::WirelessLAN) {
+#ifndef NO_WIRELESS_LAN
+        wirelessIpPage = new WirelessIPPage( knownProp );
+        scroll->setWidget( wirelessIpPage );
+        ipPage = 0;
+#endif
+    } else {
+        ipPage = new IPPage( knownProp );
+        scroll->setWidget( ipPage );
+    }
     stack->addWidget( scroll );
 
     scroll = new QScrollArea();
@@ -414,7 +341,6 @@ void LanUI::init()
         stack->addWidget( scroll );
 
         scroll = new QScrollArea();
-        scroll->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
         scroll->setWidgetResizable( true );
         scroll->setFocusPolicy( Qt::NoFocus );
         encryptPage = new WirelessEncryptionPage( knownProp );
@@ -441,16 +367,14 @@ void LanUI::init()
     vBox->addWidget( stack );
     connect(options, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(optionSelected(QListWidgetItem*)));
-#endif
-
 }
 
 void LanUI::accept()
 {
-#ifdef QTOPIA_PHONE
     if (stack->currentIndex() == 0) {
-#endif
-        QtopiaNetworkProperties props = ipPage->properties();
+        QtopiaNetworkProperties props;
+        if ( !(type & QtopiaNetwork::WirelessLAN))
+            props = ipPage->properties();
         config->writeProperties(props);
         props = proxiesPage->properties();
         config->writeProperties(props);
@@ -464,10 +388,11 @@ void LanUI::accept()
 #endif
         markConfig();
         QDialog::accept();
-#ifdef QTOPIA_PHONE
     } else {
 #ifndef NO_WIRELESS_LAN
-        if ( lastIndex == 4 )
+        if ( lastIndex == 1 && (type & QtopiaNetwork::WirelessLAN ))
+            netSettings = wirelessIpPage->properties();
+        else if ( lastIndex == 4 )
             netSettings = wirelessPage->properties();
         else if ( lastIndex == 5 )
             netSettings = encryptPage->properties();
@@ -480,10 +405,8 @@ void LanUI::accept()
         stack->setCurrentIndex( 0 );
         setObjectName("lan-menu");
     }
-#endif
 }
 
-#ifdef QTOPIA_PHONE
 void LanUI::optionSelected(QListWidgetItem* item)
 {
     if (item) {
@@ -493,6 +416,12 @@ void LanUI::optionSelected(QListWidgetItem* item)
                 stack->setCurrentIndex( 3 );
                 break;
             case IP:
+#ifndef NO_WIRELESS_LAN
+                if ( type & QtopiaNetwork::WirelessLAN) {
+                    wirelessIpPage->setProperties( netSettings );
+                    setObjectName("tcpip");
+                }
+#endif
                 stack->setCurrentIndex(1);
                 break;
             case Proxy:
@@ -569,43 +498,6 @@ void LanUI::updateUserHint(QListWidgetItem* cur, QListWidgetItem* /*prev*/)
     }
     userHint->setText( desc );
 }
-
-#else //ifndef QTOPIA_PHONE
-
-void LanUI::optionSelected(int idx)
-{
-#ifndef NO_WIRELESS_LAN
-    if  ( lastIndex == 3 )
-        netSettings = wirelessPage->properties();
-    else if ( lastIndex == 4 )
-        netSettings = encryptPage->properties();
-#if WIRELESS_EXT > 13
-    else if ( lastIndex == 5 )
-        netSettings = wirelessRoaming->properties();
-#endif
-    switch( idx ) {
-        case 0: //Account
-        case 1: //IPPage
-        case 2: //Proxy
-            break;
-        case 3: //Wireless
-            wirelessPage->setProperties( netSettings );
-            break;
-        case 4: //Wireless encryption
-            encryptPage->setProperties( netSettings );
-            break;
-#if WIRELESS_EXT > 13
-        case 5: //Wireless roaming
-            wirelessRoaming->setProperties( netSettings );
-            break;
-#endif
-        default:
-            break;
-    }
-    lastIndex = idx;
-#endif
-}
-#endif //QTOPIA_PHONE
 
 /*
    We need the interface name in order to write all system dependent files.

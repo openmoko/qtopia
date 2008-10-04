@@ -24,6 +24,6 @@ INSTALLS+=help
 pkg.name=notesdemo
 pkg.desc=NotesDemo Application
 pkg.version=1.0.0-1
-pkg.maintainer=Trolltech (www.trolltech.com)
+pkg.maintainer=Qt Extended <info@qtextended.org>
 pkg.license=Commercial
 pkg.domain=trusted

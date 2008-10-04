@@ -3,7 +3,10 @@ File=QtopiaApplications
 Context=Help
 [Desktop Entry]
 Comment[]=A HTML Help Browser Program
-Exec=helpbrowser
+Type="Service/Help::setDocument(QString)"
+File="index.html"
+Role=Application
 Icon=helpbrowser/HelpBrowser
-Type=Application
 Name[]=Help
+[Help]
+File="helpbrowser.html"

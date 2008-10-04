@@ -36,7 +36,7 @@ VERBOSE=1
 test -x progress || gcc -o progress $SXE/progress.c
 
 if [ -z $CROSS ]; then
-    # default to Trolltech i686 qemu toolchain
+    # default to in-house i686 qemu toolchain
     TOOLBIN=/opt/toolchains/i686/gcc-3.4.3-glibc-2.3.4/i686-linux/bin
     if [ -x $TOOLBIN/i686-linux-gcc ]; then
         export PATH=$TOOLBIN:$PATH

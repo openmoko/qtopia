@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QVPNClient Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QVPNClient Class Reference</h1>
 <p>The QVPNClient class abstracts data and state of a virtual private network. <a href="#details">More...</a></p>
 <pre>    #include &lt;QVPNClient&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -69,14 +69,14 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QVPNClient class abstracts data and state of a virtual private network.</p>
-<p>An instance of a QVPNClient can be created by using <a href="qvpnfactory.html">QVPNFactory</a>. Qtopia currently supports <a href="qvpnclient.html#Type-enum">OpenVPN</a> only. New VPN implementations must subclass this abstract class.</p>
+<p>An instance of a QVPNClient can be created by using <a href="qvpnfactory.html">QVPNFactory</a>. Qt Extended currently supports <a href="qvpnclient.html#Type-enum">OpenVPN</a> only. New VPN implementations must subclass this abstract class.</p>
 <p>Each VPNClient instance operates in one of the follwoing two modes:</p>
 <ul>
-<li>Client mode - This mode is the most common way of using a QVPNClient object. Any Qtopia application that obtains a QVPNClient instance via <a href="qvpnfactory.html#create">QVPNFactory::create</a>() will create such an object. Essentially the return instance acts as a thin wrapper that forwards the VPN requests to the <a href="qtopiavpnmanager.html">QtopiaVpnManager</a>.</li>
+<li>Client mode - This mode is the most common way of using a QVPNClient object. Any Qt Extended application that obtains a QVPNClient instance via <a href="qvpnfactory.html#create">QVPNFactory::create</a>() will create such an object. Essentially the return instance acts as a thin wrapper that forwards the VPN requests to the <a href="qtopiavpnmanager.html">QtopiaVpnManager</a>.</li>
 <li>Server mode - Only the <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> can create such a QVPNObject instance. It performs the actual VPN operations by making the appropriate calls to the root file system.</li>
 </ul>
 <p>Every VPN can be identified via a unique identifier returned by <a href="qvpnclient.html#id">id</a>(), has a <a href="qvpnclient.html#name">name</a>() and a <a href="qvpnclient.html#type">type</a>(). The VPN configuration can be changed via <a href="qvpnclient.html#configure">configure</a>(). <a href="qvpnclient.html#connect">connect</a>() will establish the VPN connection. Once the VPN has been started its <a href="qvpnclient.html#state">state</a>() will change from <tt>QVPNCLient::Disconnected</tt> to <tt>QVPNClient::Pending</tt> and eventually to <tt>QVPNClient::Connected</tt>. Each state change is indicated via the <a href="qvpnclient.html#connectionStateChanged">connectionStateChanged</a>() signal. If an error occurs during the startup period the user can obtain a human-readable string describing the nature of the error.</p>
-<p>If the user decides to delete a VPN connection <a href="qvpnclient.html#cleanup">cleanup</a>() should be called to remove any configuration file that has been created previously. By default Qtopia saves VPN configuration files in <tt>$HOME/Applications/Netork/vpn</tt>.</p>
+<p>If the user decides to delete a VPN connection <a href="qvpnclient.html#cleanup">cleanup</a>() should be called to remove any configuration file that has been created previously. By default Qt Extended saves VPN configuration files in <tt>$HOME/Applications/Netork/vpn</tt>.</p>
 <p>See also <a href="qvpnfactory.html">QVPNFactory</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -93,18 +93,18 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QVPNClient::OpenVPN</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">VPN solution based on OpenVPN (for details see <a href="http://openvpn.net">http://openvpn.net</a>)</td></tr>
-<tr><td valign="top"><tt>QVPNClient::IPSec</tt></td><td align="center" valign="top"><tt>20</tt></td><td valign="top">VPN solution based on IPSec (not yet implemented in Qtopia and serves as place holder for future implementation)</td></tr>
+<tr><td valign="top"><tt>QVPNClient::IPSec</tt></td><td align="center" valign="top"><tt>20</tt></td><td valign="top">VPN solution based on IPSec (not yet implemented in Qt Extended and serves as place holder for future implementation)</td></tr>
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QVPNClient"></a>QVPNClient::QVPNClient ( bool <i>serverMode</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Creates a new <a href="qvpnclient.html">QVPNClient</a> instance with the given <i>parent</i>. <a href="qvpnclient.html">QVPNClient</a> instances can only be created via <a href="qvpnfactory.html#create">QVPNFactory::create</a>().</p>
-<p><i>serverMode</i> determines whether this VPN object operates in server mode. Qtopia applications usually obtain client mode instances of <a href="qvpnclient.html">QVPNClient</a>. In this mode all request are forwarded to the <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> which keeps a reference to a VPNClient instance running in server mode. This allows the synchronization of multiple VPN requests to the same VPN.</p>
+<p><i>serverMode</i> determines whether this VPN object operates in server mode. Qt Extended applications usually obtain client mode instances of <a href="qvpnclient.html">QVPNClient</a>. In this mode all request are forwarded to the <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> which keeps a reference to a VPNClient instance running in server mode. This allows the synchronization of multiple VPN requests to the same VPN.</p>
 <p>This constructor is used internally by <a href="qvpnfactory.html">QVPNFactory</a> whenever the user creates a new VPN that doesn't exist yet.</p>
 <p>See also <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> and <a href="qvpnfactory.html">QVPNFactory</a>.</p>
 <h3 class="fn"><a name="QVPNClient-2"></a>QVPNClient::QVPNClient ( bool <i>serverMode</i>, <a href="qtglobal.html#uint-typedef">uint</a> <i>vpnID</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Creates a new <a href="qvpnclient.html">QVPNClient</a> instance with the given <i>parent</i>. <a href="qvpnclient.html">QVPNClient</a> instances can only be created via <a href="qvpnfactory.html#create">QVPNFactory::create</a>().</p>
-<p><i>serverMode</i> determines whether this VPN object operates in server mode. Qtopia applications usually obtain client mode instances of <a href="qvpnclient.html">QVPNClient</a>. In this mode all request are forwarded to the <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> which keeps a reference to a VPNClient instance running in server mode. This allows the synchronization of multiple VPN requests to the same VPN.</p>
+<p><i>serverMode</i> determines whether this VPN object operates in server mode. Qt Extended applications usually obtain client mode instances of <a href="qvpnclient.html">QVPNClient</a>. In this mode all request are forwarded to the <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> which keeps a reference to a VPNClient instance running in server mode. This allows the synchronization of multiple VPN requests to the same VPN.</p>
 <p><i>vpnID</i> acts as an identifier for a particular VPN.</p>
 <p>See also <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> and <a href="qvpnfactory.html">QVPNFactory</a>.</p>
 <h3 class="fn"><a name="dtor.QVPNClient"></a>QVPNClient::~QVPNClient ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -117,7 +117,7 @@
 <p>This function starts the VPN connection.</p>
 <h3 class="fn"><a name="connectionStateChanged"></a>void QVPNClient::connectionStateChanged ( bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the state of the VPN connection changes.</p>
-<p><i>error</i> will be set to <tt>TRUE</tt> if an error occurred during the last state transition. A human-readable string of the error can be obtained via <a href="qvpnclient.html#errorString">errorString</a>()</p>
+<p><i>error</i> will be set to <tt>true</tt> if an error occurred during the last state transition. A human-readable string of the error can be obtained via <a href="qvpnclient.html#errorString">errorString</a>()</p>
 <p>This signal must be emitted by subclasses of <a href="qvpnclient.html">QVPNClient</a> when state transitions occur.</p>
 <h3 class="fn"><a name="disconnect"></a>void QVPNClient::disconnect ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function stops the active connection.</p>
@@ -135,8 +135,8 @@
 <p>See also <a href="qvpnclient.html#Type-enum">QVPNClient::Type</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

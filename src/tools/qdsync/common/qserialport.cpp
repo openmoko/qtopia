@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef Q_QDOC
@@ -23,6 +21,7 @@
 
 #include <trace.h>
 QD_LOG_OPTION(Modem)
+QD_LOG_OPTION(Modem_Status)
 
 #ifdef Q_OS_UNIX
 #include <qsocketnotifier.h>
@@ -120,7 +119,6 @@ public:
 
 /*!
     \class QSerialPort
-    \mainclass
     \brief The QSerialPort class provides a simple serial device interface.
     \ingroup io
     \ingroup telephony::serial
@@ -352,6 +350,8 @@ bool QSerialPort::open( OpenMode mode )
             d->timer = new QTimer( this );
             connect( d->timer, SIGNAL(timeout()), this, SLOT(statusTimeout()) );
             d->timer->start( 500 );
+        } else {
+            LOG() << "NOT TRACKING STATUS!";
         }
     }
 #endif
@@ -424,6 +424,7 @@ bool QSerialPort::open( OpenMode mode )
     d->io->brokenSerial = d->brokenSerial;
     connect( d->io, SIGNAL(emitReadyRead()), this, SLOT(internalReadyRead()) );
     connect( d->io, SIGNAL(ioThreadStopped()), this, SIGNAL(disconnected()) );
+    connect( d->io, SIGNAL(dsrChanged(bool)), this, SIGNAL(dsrChanged(bool)) );
     d->io->handle = handle;
     d->io->start();
 
@@ -760,15 +761,23 @@ void QSerialPort::setDtr( bool value )
 */
 bool QSerialPort::dsr() const
 {
+    TRACE(Modem) << "QSerialPort::dsr";
 #ifdef Q_OS_UNIX
 #ifdef USE_TERMIOS
     if ( d->fd != -1 && d->isTty ) {
         int status = 0;
         ::ioctl( d->fd, TIOCMGET, &status );
+        LOG() << ( ( status & TIOCM_DSR ) != 0 );
         return ( ( status & TIOCM_DSR ) != 0 );
     }
 #endif
+#else
+    if ( d->io ) {
+        LOG() << d->io->dsr;
+        return d->io->dsr;
+    }
 #endif
+    LOG() << false;
     return false;
 }
 
@@ -913,7 +922,7 @@ QProcess *QSerialPort::run( const QStringList& arguments,
 void QSerialPort::statusTimeout()
 {
 #ifdef Q_OS_UNIX
-    TRACE(Modem) << "QSerialPort::statusTimeout";
+    TRACE(Modem_Status) << "QSerialPort::statusTimeout";
 #ifdef USE_TERMIOS
     if ( d->fd != -1 && d->isTty ) {
         int old_status = d->status;

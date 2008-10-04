@@ -1,5 +1,9 @@
+!qbuild{
 qtopia_project(qtopia plugin)
 TARGET=bscidrmagent
+depends(libraries/qtopia)
+depends(3rdparty/libraries/drmagent)
+}
 
 HEADERS		=  bscidrmcontentplugin.h \
                    bscidrm.h \
@@ -19,8 +23,5 @@ SOURCES	        =  bscidrmcontentplugin.cpp \
 
 pki.files = $$QTOPIA_DEPOT_PATH/etc/bscidrm/*
 pki.path = /etc/bscidrm/
-
 INSTALLS += pki
 
-depends(libraries/qtopia)
-depends(3rdparty/libraries/drmagent)

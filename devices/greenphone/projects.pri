@@ -1,9 +1,11 @@
-PROJECTS-=\
-    settings/beaming
 PROJECTS*=\
     3rdparty/tools/atd\
     3rdparty/applications/target_sqlite\
-    tools/startupflags\
+    settings/startupflags\
     tools/phonebounce
-THEMES-=smudge
+
+PROJECTS-=\
+    settings/beaming
+
+THEMES-=finxi
 

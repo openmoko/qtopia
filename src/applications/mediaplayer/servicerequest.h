@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -29,7 +27,7 @@
 class ServiceRequest
 {
 public:
-    enum Type { PushTitle, PushMenu, OpenUrl, OpenPlaylist, CuePlaylist, PlayNow, ShowPlayer, TriggerSlot, Compound, User = 0xff };
+    enum Type { PushTitle, PushMenu, OpenUrl, CuePlaylist, PlayNow, ShowPlayer, TriggerSlot, Compound, ShowCoverArt, User = 0xff };
 
     virtual ~ServiceRequest() { }
 
@@ -74,11 +72,12 @@ private:
 class OpenUrlRequest : public ServiceRequest
 {
 public:
-    explicit OpenUrlRequest( const QString& url )
-        : m_url( url )
+    explicit OpenUrlRequest( const QString& url, bool closeOnFinish = false )
+        : m_url( url ), m_closeOnFinish( closeOnFinish )
     { }
 
     QString url() const { return m_url; }
+    bool closeOnFinish() const { return m_closeOnFinish; }
 
     // ServiceRequest
     Type type() const { return OpenUrl; }
@@ -86,59 +85,43 @@ public:
 
 private:
     QString m_url;
+    bool m_closeOnFinish;
 };
 
-class Playlist;
-
-class OpenPlaylistRequest : public ServiceRequest
-{
-public:
-    explicit OpenPlaylistRequest( QExplicitlySharedDataPointer<Playlist> playlist )
-        : m_playlist( playlist )
-    { }
-
-    QExplicitlySharedDataPointer<Playlist> playlist() const { return m_playlist; }
-
-    // ServiceRequest
-    Type type() const { return OpenPlaylist; }
-    ServiceRequest* clone() const { return new OpenPlaylistRequest( m_playlist ); }
-
-private:
-    QExplicitlySharedDataPointer<Playlist> m_playlist;
-};
+class QMediaPlaylist;
 
 class CuePlaylistRequest : public ServiceRequest
 {
 public:
-    explicit CuePlaylistRequest( QExplicitlySharedDataPointer<Playlist> playlist )
+    explicit CuePlaylistRequest( const QMediaPlaylist &playlist )
         : m_playlist( playlist )
     { }
 
-    QExplicitlySharedDataPointer<Playlist> playlist() const { return m_playlist; }
+    const QMediaPlaylist &playlist() const { return m_playlist; }
 
     // ServiceRequest
     Type type() const { return CuePlaylist; }
     ServiceRequest* clone() const { return new CuePlaylistRequest( m_playlist ); }
 
 private:
-    QExplicitlySharedDataPointer<Playlist> m_playlist;
+    QMediaPlaylist m_playlist;
 };
 
 class PlayNowRequest : public ServiceRequest
 {
 public:
-    explicit PlayNowRequest( QExplicitlySharedDataPointer<Playlist> playlist )
+    explicit PlayNowRequest( const QMediaPlaylist &playlist )
         : m_playlist( playlist )
     { }
 
-    QExplicitlySharedDataPointer<Playlist> playlist() const { return m_playlist; }
+    const QMediaPlaylist &playlist() const { return m_playlist; }
 
     // ServiceRequest
     Type type() const { return PlayNow; }
     ServiceRequest* clone() const { return new PlayNowRequest( m_playlist ); }
 
 private:
-    QExplicitlySharedDataPointer<Playlist> m_playlist;
+    QMediaPlaylist m_playlist;
 };
 
 class ShowPlayerRequest : public ServiceRequest
@@ -148,6 +131,16 @@ public:
     Type type() const { return ShowPlayer; }
     ServiceRequest* clone() const { return new ShowPlayerRequest; }
 };
+
+#ifdef USE_PICTUREFLOW
+class ShowCoverArtRequest : public ServiceRequest
+{
+public:
+    // ServiceRequest
+    Type type() const { return ShowCoverArt; }
+    ServiceRequest* clone() const { return new ShowCoverArtRequest; }
+};
+#endif
 
 class TriggerSlotRequest : public ServiceRequest
 {
@@ -198,4 +191,4 @@ inline CompoundRequest::~CompoundRequest()
     }
 }
 
-#endif // SERVICEREQUEST_H
+#endif

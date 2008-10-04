@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Image Viewer Tutorial: Part 3<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Image Viewer Tutorial: Part 3<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><a name="the-image-screen"></a>
 <h2>The Image Screen</h2>
@@ -152,7 +152,7 @@
         _rotation += 90.0;
         update();
     }</pre>
-<p>The _rotation field is a qreal field, which holds our current rotation. Every time the roation is called, 90 degres is added/substracted on the rotation. The _rotation field must be initialized to 0 in the constructor.</p>
+<p>The <a href="syscust-rotation.html">_rotation</a> field is a qreal field, which holds our current rotation. Every time the roation is called, 90 degres is added/substracted on the rotation. The <a href="syscust-rotation.html">_rotation</a> field must be initialized to 0 in the constructor.</p>
 <p>Now the paintEvent method needs some changes in order to reflect the rotation.</p>
 <pre>    void ImageScreen::paintEvent(QPaintEvent* event)
     {
@@ -211,8 +211,8 @@
 <p><a href="tut-iviewer-part2.html">Prev</a>|<a href="#top">Top</a>|<a href="tut-iviewer-part1.html">Start Page</a>|<a href="tut-iviewer-part4.html">Next</a></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

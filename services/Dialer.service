@@ -2,9 +2,11 @@
 File=QtopiaServices
 Context=Dialer
 [Service]
-Actions="dialVoiceMail()"
-Icon=Dialer
+Actions="dialVoiceMail();setDialToneOnlyHint(QString)"
+Icon=phone/phone
 Name[]=Dialer
 [dialVoiceMail()]
 Name[]="Call Voicemail"
 Icon = phone/voicemail
+[setDialToneOnlyHint(QString)]
+Icon = phone/calls

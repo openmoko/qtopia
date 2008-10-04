@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="contextbar" base="themes/classic" rect="0,0,0x10%">
+<page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="contextbar" base="themes/classic">
     <image rect="0,0,0x0" color="Button" src="contextbar-stretch" tile="yes" alpha="96" scale="vertical"/>
     <image rect="0,0,1x0" color="Button" src="contextbar-capleft" scale="vertical"/>
     <image rect="-1,0,1x0" color="Button" src="contextbar-capright" scale="vertical"/>
@@ -13,8 +13,8 @@
 	<image expanding="yes" name="button2" rect="0,0,0x0" align="vcenter" interactive="yes"/>
     </layout>
     <layout>
-	<text expanding="yes" name="button0" color="Text" rect="0,2,0x0" size="5" bold="yes" align="vcenter,hcenter" interactive="yes"/>
-    <text expanding="yes" name="button1" color="Text" rect="0,2,0x0" size="5" bold="yes" align="vcenter,hcenter" interactive="yes"/>
-    <text expanding="yes" name="button2" color="Text" rect="0,2,0x0" size="5" bold="yes" align="vcenter,hcenter" interactive="yes"/>
+	<text expanding="yes" name="tbutton0" color="Text" rect="0,2,0x0" size="5" bold="yes" align="vcenter,hcenter" interactive="yes"/>
+    <text expanding="yes" name="tbutton1" color="Text" rect="0,2,0x0" size="5" bold="yes" align="vcenter,hcenter" interactive="yes"/>
+    <text expanding="yes" name="tbutton2" color="Text" rect="0,2,0x0" size="5" bold="yes" align="vcenter,hcenter" interactive="yes"/>
     </layout>
 </page>

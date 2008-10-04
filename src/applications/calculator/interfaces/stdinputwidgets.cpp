@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "stdinputwidgets.h"
@@ -203,42 +201,6 @@ void InputWidget::init( int fromRow, int fromCol )
     PBEval->setText( tr( "=" ) );
     InputWidgetLayout->addWidget( PBEval, fromRow+3, fromCol+3, 2, 1 );
 
-#ifndef QTOPIA_PHONE
-    PB0->setFocusPolicy(Qt::TabFocus);
-    PB1->setFocusPolicy(Qt::TabFocus);
-    PB2->setFocusPolicy(Qt::TabFocus);
-    PB3->setFocusPolicy(Qt::TabFocus);
-    PB4->setFocusPolicy(Qt::TabFocus);
-    PB5->setFocusPolicy(Qt::TabFocus);
-    PB6->setFocusPolicy(Qt::TabFocus);
-    PB7->setFocusPolicy(Qt::TabFocus);
-    PB8->setFocusPolicy(Qt::TabFocus);
-    PB9->setFocusPolicy(Qt::TabFocus);
-    PBEval->setFocusPolicy(Qt::TabFocus);
-    PBDiv->setFocusPolicy(Qt::TabFocus);
-    PBPlus->setFocusPolicy(Qt::TabFocus);
-    PBMinus->setFocusPolicy(Qt::TabFocus);
-    PBTimes->setFocusPolicy(Qt::TabFocus);
-    PBNegate->setFocusPolicy(Qt::TabFocus);
-    PBBS->setFocusPolicy(Qt::TabFocus);
-
-    setTabOrder(PB0,PB1);
-    setTabOrder(PB1,PB2);
-    setTabOrder(PB2,PB3);
-    setTabOrder(PB3,PB4);
-    setTabOrder(PB4,PB5);
-    setTabOrder(PB5,PB6);
-    setTabOrder(PB6,PB7);
-    setTabOrder(PB7,PB8);
-    setTabOrder(PB8,PB9);
-    setTabOrder(PB9,PBBS);
-    setTabOrder(PBBS,PBDiv);
-    setTabOrder(PBDiv,PBTimes);
-    setTabOrder(PBTimes,PBMinus);
-    setTabOrder(PBMinus,PBPlus);
-    setTabOrder(PBPlus,PBEval);
-    setTabOrder(PBEval,PBNegate);
-#else
     if (Qtopia::mousePreferred()) {
         PB0->setFocusPolicy(Qt::NoFocus);
         PB1->setFocusPolicy(Qt::NoFocus);
@@ -258,7 +220,6 @@ void InputWidget::init( int fromRow, int fromCol )
         PBNegate->setFocusPolicy(Qt::NoFocus);
         PBBS->setFocusPolicy(Qt::NoFocus);
     }
-#endif
 
     // Connect
     connect (PB0, SIGNAL(clicked()), this, SLOT(val0Clicked()));
@@ -295,12 +256,8 @@ void DecimalInputWidget::init(int fromRow, int fromCol) {
     PBDecimal = new QPushButton( this );
     PBDecimal->setSizePolicy(sizePolicy());
     PBDecimal->setText( tr( ".", "decimal point" ) );
-#ifndef QTOPIA_PHONE
-    PBDecimal->setFocusPolicy(Qt::TabFocus);
-#else
     if (Qtopia::mousePreferred())
         PBDecimal->setFocusPolicy(Qt::NoFocus);
-#endif
     InputWidgetLayout->addWidget( PBDecimal, fromRow + 4, fromCol + 1);
     connect (PBDecimal, SIGNAL(clicked()), this, SLOT(decimalClicked()));
 }

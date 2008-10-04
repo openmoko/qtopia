@@ -10,10 +10,10 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Device Synchronization<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Device Synchronization<br /><span class="subtitle"></span>
 </h1>
-<p>Qtopia supports implementing PIM synchronization on the device through functions provided by <a href="qpimmodel.html">QPimModel</a>. The functions <a href="qpimmodel.html#added">QPimModel::added</a>(), <a href="qpimmodel.html#removed">QPimModel::removed</a>() and <a href="qpimmodel.html#modified">QPimModel::modified</a>() are provided as a way of accessing the internal changelog maintained by the PIM Library. This helps determine what data has changed since a previous synchronization action so to minimize the amount of data sent over a network when enacting the next synchronization. The functions <a href="qpimmodel.html#startSyncTransaction">QPimModel::startSyncTransaction</a>(), <a href="qpimmodel.html#abortSyncTransaction">QPimModel::abortSyncTransaction</a>() and <a href="qpimmodel.html#commitSyncTransaction">QPimModel::commitSyncTransaction</a>() are provided to atomically apply changes for synchronization as well as to increase performance by virtue of the SQL transaction and reduced load on calculating changelog timestamps.</p>
+<p>Qt Extended supports implementing PIM synchronization on the device through functions provided by <a href="qpimmodel.html">QPimModel</a>. The functions <a href="qpimmodel.html#added">QPimModel::added</a>(), <a href="qpimmodel.html#removed">QPimModel::removed</a>() and <a href="qpimmodel.html#modified">QPimModel::modified</a>() are provided as a way of accessing the internal changelog maintained by the PIM Library. This helps determine what data has changed since a previous synchronization action so to minimize the amount of data sent over a network when enacting the next synchronization. The functions <a href="qpimmodel.html#startSyncTransaction">QPimModel::startSyncTransaction</a>(), <a href="qpimmodel.html#abortSyncTransaction">QPimModel::abortSyncTransaction</a>() and <a href="qpimmodel.html#commitSyncTransaction">QPimModel::commitSyncTransaction</a>() are provided to atomically apply changes for synchronization as well as to increase performance by virtue of the SQL transaction and reduced load on calculating changelog timestamps.</p>
 <a name="retrieving-relevant-changes"></a>
 <h3>Retrieving relevant changes.</h3>
 <p>The <a href="qpimmodel.html">QPimModel</a> functions added, removed and modified are used to retrieve relevant changes for a sync. While these functions are implemented in <a href="qpimmodel.html">QPimModel</a>, it is important to use one of the subclasses, <a href="qcontactmodel.html">QContactModel</a>, <a href="qappointmentmodel.html">QAppointmentModel</a>, or <a href="qtaskmodel.html">QTaskModel</a>, in order to specify what PIM data type is to be synced.</p>
@@ -67,8 +67,8 @@
         contacts.commitSyncTransaction();</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

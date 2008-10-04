@@ -10,20 +10,20 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">SXE - Sandbox Model<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">SXE - Sandbox Model<br /><span class="subtitle"></span>
 </h1>
 <p>The SXE operates</p>
 <ul><li><a href="#the-implementation-of-the-sxe-logically-categorizes-all-applications-as-either-trusted-or-untrusted">The implementation of the SXE logically categorizes all applications as either trusted or untrusted.</a></li>
 </ul>
 <a name="the-implementation-of-the-sxe-logically-categorizes-all-applications-as-either-trusted-or-untrusted"></a>
 <h2>The implementation of the SXE logically categorizes all applications as either trusted or untrusted.</h2>
-<p>Trusted applications have no restrictions enforced upon them and all applications pre-installed on the Qtopia image are considered trusted.</p>
+<p>Trusted applications have no restrictions enforced upon them and all applications pre-installed on the Qt Extended image are considered trusted.</p>
 <p>Downloaded applications can be either untrusted or trusted (packagemanager can be configured only to install untrusted packages which will be subject to sandbox conditions).</p>
 <p>The restrictions in the capabilities and privileges of an application are enforced through two sets of rules.</p>
 <ol type="1">
 <li>The operating-system level MAC rules (which can be divided into file system and capability rules)</li>
-<li>The application level Qtopia rules.</li>
+<li>The application level Qt Extended rules.</li>
 </ol>
 <p>These are summarized in the table below:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -39,7 +39,7 @@
 <li><tt>CAP_SYS_ADMIN</tt> - range of actions incl forging the PID on a Unix Domain Socket</li>
 </ul>
 </td></tr>
-<tr valign="top" class="odd"><td>Application rule-sets</td><td>the Qtopia Safe Execution Environment system</td><td>requests for services</td><td><ul>
+<tr valign="top" class="odd"><td>Application rule-sets</td><td>the Safe Execution Environment system</td><td>requests for services</td><td><ul>
 <li><tt>QCop</tt> messages: <i>transmit sms</i>, <i>dial number</i></li>
 <li>sound server services</li>
 </ul>
@@ -48,8 +48,8 @@
 <p>When a package is installed a <i>program identity</i> is associated with the package executable which is recorded in the installation table. For Qtopia 4.3, there is a one is to one relationship between a <tt>progId</tt> and domain, for example <tt>progId</tt> 1 could refer to a trusted packages while 2 refers to untrusted. The program identity defines the MAC rules that are applied to an application and is used to index into the application rule-set to decide what controls to apply.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

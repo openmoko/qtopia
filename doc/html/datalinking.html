@@ -3,15 +3,15 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qtopia Data Linking (QDL)</title>
+  <title>Qt Extended Data Linking (QDL)</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Qtopia Data Linking (QDL)<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Qt Extended Data Linking (QDL)<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#how-it-works">How it Works</a></li>
@@ -30,12 +30,12 @@
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>Qtopia Data Linking (QDL) provides an API to associate data items across applications. A <a href="qdllink.html">QDLLink</a> is conceptually the same as an ordinary anchor on a webpage or as information which uniquely references an object in the same application, or another Qtopia application. When the user clicks the link the referenced object is accessed. For example, using QDL a user can create a meeting event in <tt>Calendar</tt> and a link to each person attending the meeting from <tt>Contacts</tt>. When the event is viewed, hypertext links appear for each linked contact. Activating a link sends a message to the <tt>Contacts</tt> application to display that contact.</p>
+<p>Qt Extended Data Linking (QDL) provides an API to associate data items across applications. A <a href="qdllink.html">QDLLink</a> is conceptually the same as an ordinary anchor on a webpage or as information which uniquely references an object in the same application, or another Qt Extended application. When the user clicks the link the referenced object is accessed. For example, using QDL a user can create a meeting event in <tt>Calendar</tt> and a link to each person attending the meeting from <tt>Contacts</tt>. When the event is viewed, hypertext links appear for each linked contact. Activating a link sends a message to the <tt>Contacts</tt> application to display that contact.</p>
 <a name="how-it-works"></a>
 <h2>How it Works</h2>
 <p>The linking process begins when the user edits a QDL enabled text field. These text fields are called the <i>client</i> in QDL and interface through an associated <a href="qdleditclient.html">QDLEditClient</a> object for QDL operations.</p>
 <p>The user selects an <i>Insert Link</i> context menu option in the text field which is connected to the {QDLEditClient::requestLink()} slot. This displays a dialog listing all applications providing a QDL service, known as QDL sources. The user then selects an application which contains the data item they wish to link to.</p>
-<p>Then a request for links is made with Qtopia Data Sharing (QDS) to the selected source. Typically, the source application will present the user with a list of items available for linking and the user then selects the desired items from the list. However, the source may carry out any specific processing required to determine the set of links.</p>
+<p>Then a request for links is made with Qt Extended Data Sharing (QDS) to the selected source. Typically, the source application will present the user with a list of items available for linking and the user then selects the desired items from the list. However, the source may carry out any specific processing required to determine the set of links.</p>
 <p>Once a source has determined the items to be linked, it creates links for all of the items and sends them back to the client. The client receives the links and inserts them into the text field.</p>
 <p>Links are edited and viewed as hypertext anchors. The links work like links on a standard webpage - clicking them accesses the object they refer to.</p>
 <a name="qdl-clients"></a>
@@ -47,7 +47,7 @@
 <p>To enable QDL on a <a href="qtextedit.html">QTextEdit</a> widget you create a <a href="qdleditclient.html">QDLEditClient</a> object and associate it with the <a href="qtextedit.html">QTextEdit</a> widget. The <a href="qdleditclient.html">QDLEditClient</a> is given a unique name to help identify its links during activation, loading and saving.</p>
 <pre>    QTextEdit* txtNote = new QTextEdit( this );
     QDLEditClient* txtNoteQDLClient = new QDLEditClient( txtNote, &quot;QDL Example&quot; );</pre>
-<p>To request a link from a QDL source <a href="qdleditclient.html#requestLinks">QDLEditClient::requestLinks</a>() is called. For Qtopia Phone Edition a &quot;Insert Link&quot; action can be added to the context menu of the <a href="qtextedit.html">QTextEdit</a> widget which is connected to this slot, this is done using QDLEditWidget::setupStandardContextMenu().</p>
+<p>To request a link from a QDL source <a href="qdleditclient.html#requestLinks">QDLEditClient::requestLinks</a>() is called. For Qt Extended a &quot;Insert Link&quot; action can be added to the context menu of the <a href="qtextedit.html">QTextEdit</a> widget which is connected to this slot, this is done using QDLEditWidget::setupStandardContextMenu().</p>
 <pre>    txtNoteQDLClient-&gt;requestLinks();</pre>
 <p>When the creation of the the rich-text document has finished, the links and the text need to be saved. The links for all QDL clients in the widget can be saved using <a href="qdl.html#saveLinks">QDL::saveLinks</a>() as in the example below, or for an individual QDL client using <a href="qdlclient.html#saveLinks">QDLClient::saveLinks</a>().</p>
 <pre>    QString links;
@@ -89,7 +89,7 @@
 <p>For devices which use SXE the application's project file must including <tt>qdl</tt> and <tt>qds</tt> in the package domain.</p>
 <a name="qdl-sources"></a>
 <h3>QDL Sources</h3>
-<p>A QDL source is any Qtopia service which provides QDS services for QDL link requests and activation. Naturally the Qtopia service will be part of an application which provides data items which are of interest to other applications, such as contacts, appointment or tasks. An example Qtopia service class is provided below.</p>
+<p>A QDL source is any Qt Extended service which provides QDS services for QDL link requests and activation. Naturally the Qt Extended service will be part of an application which provides data items which are of interest to other applications, such as contacts, appointment or tasks. An example Qt Extended service class is provided below.</p>
 <pre>    class MyQdlService : public QtopiaAbstractService
     {
     public slots:
@@ -101,10 +101,10 @@
     private:
         QDSData dataItemToQDLLink( DataItem data );
     }</pre>
-<p>As the QDL is implemented on top of QDS, a QDS service file needs to be defined. Refer to Qtopia Data Sharing for details.</p>
+<p>As the QDL is implemented on top of QDS, a QDS service file needs to be defined. Refer to Qt Extended Data Sharing for details.</p>
 <a name="link-requests"></a>
 <h4>Link Requests</h4>
-<p>For link requests the name of the service slot is not important, but the QDS service for link requests must have a request data type of &quot;text/x-qstring&quot;, a response data type of &quot;x-link/x-qlist-qdsdata&quot; (as returned by <a href="qdllink.html#listMimeType">QDLLink::listMimeType</a>(), and the attributes must contain &quot;qdl&quot; and &quot;request&quot;. For the service class above the service file <tt>&lt;Qtopia Runtime Prefix&gt;/etc/MyQslService</tt> would look like the one below.</p>
+<p>For link requests the name of the service slot is not important, but the QDS service for link requests must have a request data type of &quot;text/x-qstring&quot;, a response data type of &quot;x-link/x-qlist-qdsdata&quot; (as returned by <a href="qdllink.html#listMimeType">QDLLink::listMimeType</a>(), and the attributes must contain &quot;qdl&quot; and &quot;request&quot;. For the service class above the service file <tt>&lt;Qt Extended Runtime Prefix&gt;/etc/MyQslService</tt> would look like the one below.</p>
 <pre>    [Translation]
     File=QtopiaServices
     Context=MyQdlService
@@ -141,7 +141,7 @@
     }</pre>
 <a name="link-activation"></a>
 <h4>Link Activation</h4>
-<p>For link activation the name of the service slot is not important, but the QDS service for link activation must have a request data type of &quot;x-link/x-qdllink&quot; (as returned by <a href="qdllink.html#mimeType">QDLLink::mimeType</a>(), have no response data type, and the attributes must contain &quot;qdl&quot; and &quot;activate&quot;. For the service class above the service file <tt>&lt;Qtopia Runtime Prefix&gt;/etc/MyQslService</tt> would look like the one below.</p>
+<p>For link activation the name of the service slot is not important, but the QDS service for link activation must have a request data type of &quot;x-link/x-qdllink&quot; (as returned by <a href="qdllink.html#mimeType">QDLLink::mimeType</a>(), have no response data type, and the attributes must contain &quot;qdl&quot; and &quot;activate&quot;. For the service class above the service file <tt>&lt;Qt Extended Runtime Prefix&gt;/etc/MyQslService</tt> would look like the one below.</p>
 <pre>    [Translation]
     File=QtopiaServices
     Context=MyQdlService
@@ -249,8 +249,8 @@
     ...</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

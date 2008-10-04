@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -37,9 +35,9 @@
 
 #include <qtopiaapplication.h>
 #include <qtopianamespace.h>
-#include <qtopia/pim/qappointment.h>
-#include <qtopia/pim/qappointmentmodel.h>
-#include <qtopia/pim/qpimsourcedialog.h>
+#include <qappointment.h>
+#include <qappointmentmodel.h>
+#include <qpimsourcedialog.h>
 
 #include <QDL>
 #include <QDLLink>
@@ -291,9 +289,6 @@ void DateBook::qdlActivateLink( const QDSActionRequest& request )
             date = a.start().date();
         initDayView();
         showAppointmentDetails( QOccurrence( date, a ) );
-        showMaximized();
-        activateWindow();
-        raise();
         QDSActionRequest( request ).respond();
     } else {
         QMessageBox::warning(
@@ -811,10 +806,10 @@ void DateBook::removeOccurrence(const QOccurrence &o)
     {
         if (!Qtopia::confirmDelete(this->isVisible() ? this : 0, tr("Calendar"), Qt::escape(a.description())))
             return;
-        removeAppointmentQDLLink(a);
-        model->removeAppointment(a);
         if (viewStack->currentWidget() == appointmentDetails)
             hideAppointmentDetails();
+        removeAppointmentQDLLink(a);
+        model->removeAppointment(a);
     }
 
     updateIconsTimer->start( DATEBOOK_UPDATE_ICON_TIMEOUT );
@@ -1508,6 +1503,10 @@ void DateBook::raiseView(QWidget *widget)
         this->setObjectName(widget->objectName());
 
     viewStack->setCurrentIndex(viewStack->indexOf(widget));
+
+    showMaximized();
+    activateWindow();
+    raise();
 }
 
 QDate DateBook::currentDate()
@@ -1625,7 +1624,8 @@ void DateBook::showAlarms(const QDateTime &when, int warn)
 
 /*!
     \service CalendarService Calendar
-    \brief Provides the Qtopia Calendar service.
+    \inpublicgroup QtPimModule
+    \brief The CalendarService class provides the Calendar service.
 
     The \i Calendar service enables applications to access features of
     the Calendar application.
@@ -1743,7 +1743,9 @@ void CalendarService::nextView()
 }
 
 /*!
-    Show the appointment indicated by \a uid in the calendar application.
+    Show the appointment indicated by \a uid in the calendar application, wither
+    the next upcoming occurrence from the current date, or the first occurrence
+    if there is no upcoming occurrence.
 
     This slot corresponds to the QCop service message
     \c{Calendar::showAppointment(QUniqueId)}.
@@ -1752,6 +1754,8 @@ void CalendarService::showAppointment( const QUniqueId& uid )
 {
     QAppointment a = datebook->model->appointment(uid);
     QOccurrence o = a.nextOccurrence(QDate::currentDate());
+    if (!o.isValid())
+        o = a.firstOccurrence();
 
     if (o.isValid()) {
         datebook->showAppointmentDetails(o);

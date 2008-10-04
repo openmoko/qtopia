@@ -10,19 +10,16 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">messageviewer.cpp Example File<br /><span class="small-subtitle">messageviewer/messageviewer.cpp</span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">messageviewer.cpp Example File<br /><span class="small-subtitle">messageviewer/messageviewer.cpp</span>
 </h1>
 <pre><span class="comment">    /****************************************************************************
     **
-    ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+    ** This file is part of the Qt Extended Opensource Package.
     **
-    ** This file is part of the Opensource Edition of the Qtopia Toolkit.
+    ** Copyright (C) 2008 Trolltech ASA.
     **
-    ** $TROLLTECH_DUAL_LICENSE$
-    **
-    ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-    ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+    ** $QT_EXTENDED_DUAL_LICENSE$
     **
     ****************************************************************************/</span>
 
@@ -33,7 +30,7 @@
     #include &lt;QContactListView&gt;
     #include &lt;QKeyEvent&gt;
     #include &lt;QLabel&gt;
-    #include &lt;QMailId&gt;
+    #include &lt;QMailMessageId&gt;
     #include &lt;QSoftMenuBar&gt;
     #include &lt;QStandardItemModel&gt;
     #include &lt;QtopiaServiceRequest&gt;
@@ -92,11 +89,8 @@
 
             listView-&gt;setModel(&amp;model);
             listView-&gt;setItemDelegate(&amp;delegate);
-            listView-&gt;setResizeMode(QListView::Adjust);
-            listView-&gt;setLayoutMode(QListView::Batched);
             listView-&gt;setSelectionMode(QAbstractItemView::SingleSelection);
             listView-&gt;installEventFilter(this);
-            listView-&gt;setFrameStyle(QFrame::NoFrame);
 
             connect(listView, SIGNAL(activated(QModelIndex)), this, SLOT(activated(QModelIndex)));
 
@@ -108,12 +102,15 @@
             int vertical = style()-&gt;pixelMetric(QStyle::PM_LayoutTopMargin);
             label-&gt;setContentsMargins(horizontal, vertical, horizontal, 0);
             layout-&gt;setContentsMargins(0, 0, 0, 0);
+            listView-&gt;setResizeMode(QListView::Adjust);
+            listView-&gt;setLayoutMode(QListView::Batched);
+            listView-&gt;setFrameStyle(QFrame::NoFrame);
             <span class="comment">// end-Adjust</span>
         }
 
     signals:
         void listPrepared();
-        void messageSelected(const QMailId&amp; id);
+        void messageSelected(const QMailMessageId&amp; id);
         void done();
 
     public slots:
@@ -136,12 +133,9 @@
     {
         model.setContact(contact);
 
-        if (model.rowCount() == 0)
-        {
+        if (model.isEmpty()) {
             label-&gt;setText(tr(&quot;No messages exchanged with %1&quot;).arg(contact.label()));
-        }
-        else
-        {
+        } else {
             listView-&gt;selectionModel()-&gt;select(model.index(0, 0), QItemSelectionModel::Select);
             listView-&gt;scrollToTop();
             label-&gt;setText(tr(&quot;Select a message to view the content:&quot;));
@@ -154,12 +148,9 @@
     bool MessageSelector::eventFilter(QObject* obj, QEvent* event)
     {
         <span class="comment">// We need to capture the back key, so it doesn't close our window</span>
-        if ((obj == listView) &amp;&amp; (event-&gt;type() == QEvent::KeyPress))
-        {
-            if (QKeyEvent* keyEvent = static_cast&lt;QKeyEvent*&gt;(event))
-            {
-                if (keyEvent-&gt;key() == Qt::Key_Back)
-                {
+        if ((obj == listView) &amp;&amp; (event-&gt;type() == QEvent::KeyPress)) {
+            if (QKeyEvent* keyEvent = static_cast&lt;QKeyEvent*&gt;(event)) {
+                if (keyEvent-&gt;key() == Qt::Key_Back) {
                     emit done();
                     return true;
                 }
@@ -176,22 +167,24 @@
     {
         setupUi(this);
 
-        <span class="comment">// Necessary to create the menu (which contains our help entry):</span>
-        (void)QSoftMenuBar::menuFor(this);
-
         <span class="comment">// Connect our components</span>
         connect(contactSelector, SIGNAL(contactSelected(QContact)), messageSelector, SLOT(listMessages(QContact)));
         connect(messageSelector, SIGNAL(listPrepared()), this, SLOT(showMessageList()));
-        connect(messageSelector, SIGNAL(messageSelected(QMailId)), this, SLOT(viewMessage(QMailId)));
+        connect(messageSelector, SIGNAL(messageSelected(QMailMessageId)), this, SLOT(viewMessage(QMailMessageId)));
         connect(messageSelector, SIGNAL(done()), this, SLOT(showContactList()));
 
         widgetStack-&gt;addWidget(contactSelector);
         widgetStack-&gt;addWidget(messageSelector);
 
         QVBoxLayout* layout = new QVBoxLayout(this);
-        layout-&gt;setContentsMargins(0, 0, 0, 0);
         layout-&gt;addWidget(widgetStack);
 
+        <span class="comment">// Adjust MessageViewer</span>
+        layout-&gt;setContentsMargins(0, 0, 0, 0);
+
+        <span class="comment">// Necessary to create the menu (which contains our help entry):</span>
+        (void)QSoftMenuBar::menuFor(this);
+        <span class="comment">// end-Adjust</span>
         showContactList();
     }
 
@@ -204,10 +197,10 @@
         widgetStack-&gt;setCurrentWidget(messageSelector);
     }
 
-    void MessageViewer::viewMessage(const QMailId&amp; id)
+    void MessageViewer::viewMessage(const QMailMessageId&amp; id)
     {
         <span class="comment">// Request that some application display the selected message</span>
-        QtopiaServiceRequest req( &quot;Messages&quot;, &quot;viewMessage(QMailId)&quot; );
+        QtopiaServiceRequest req( &quot;Messages&quot;, &quot;viewMessage(QMailMessageId)&quot; );
         req &lt;&lt; id;
         req.send();
     }
@@ -220,8 +213,8 @@
     #include &quot;messageviewer.moc&quot;</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

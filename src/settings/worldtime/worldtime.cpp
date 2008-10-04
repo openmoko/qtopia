@@ -1,26 +1,26 @@
 /****************************************************************************
- **
- ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
- **
- ** This file is part of the Opensource Edition of the Qtopia Toolkit.
- **
- ** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file is part of the Qt Extended Opensource Package.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Copyright (C) 2008 Trolltech ASA.
+**
+** Contact: Qt Extended Information (info@qtextended.org)
+**
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
+**
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
 **
- **
- ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
- ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- **
- ****************************************************************************/
+****************************************************************************/
 
 // Qt4 Headers
 #include <QGridLayout>
+#include <QBoxLayout>
+
 #include <QTimerEvent>
 #include <QTimer>
 #include <QMenu>
@@ -28,13 +28,14 @@
 #include <QDesktopWidget>
 #include <QDebug>
 #include <QPainter>
-
+#include <QResizeEvent>
 // Local includes
 #include "worldtime.h"
 
 // Qtopia includes
 #include <qtopiaapplication.h>
 #include <QWorldmap>
+#include <QWorldmapDialog>
 
 #include <qtimestring.h>
 #include <qtimezone.h>
@@ -44,121 +45,75 @@
 #include <qtopiaipcenvelope.h>
 #include <qtopiaipcadaptor.h>
 #endif
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
 #include <QAction>
-#endif
+#include <QSpacerItem>
 
 WorldTime::WorldTime( QWidget *parent,
                       Qt::WFlags fl )
-   : QWidget( parent, fl )
- {
-#ifdef Q_WS_QWS
-   setWindowTitle(tr("World Time"));
-#endif
-    while (listCities.count())
-    { delete listCities.takeLast(); }
-    while (listTimes.count())
-    { delete listTimes.takeLast(); }
+   : QStackedWidget( parent )
+{
+    if (fl) setWindowFlags(fl);
+    setWindowTitle(tr("World Time"));
 
-     float dpi = QApplication::desktop()->screen()->logicalDpiY();
-     QFont font = QApplication::font();
-//     qWarning()<<"DPI:"<<dpi;
+    maxVisibleZones = 5; // XXX variable?
 
-     if(dpi < 100) {
-         mMode = Minimal;
-         setFont(font);
-         maxVisibleZones = 3;
-     } else if(dpi < 200) {
-         mMode = Medium;
-         font.setPointSize(font.pointSize() - 1);
-         setFont(font);
-         maxVisibleZones = 5;
-     } else {
-         mMode = Tall;
-         maxVisibleZones = 4;
-     }
+    isEditMode = false;
 
-   isEditMode = false;
+    // Time zones page...
 
-   int columns/*,rows*/;
-   columns = 3;/*rows = 3;*/
+    int columns/*,rows*/;
+    columns = 3;/*rows = 3;*/
 
+    zones = new QWidget(this);
+    QBoxLayout *gl = new QBoxLayout(QBoxLayout::TopToBottom,  zones);
+    gl->addStretch(6);
 
-   // Don't need a select softkey for touchscreen phones as it does nothing
-   if ( Qtopia::mousePreferred() )
-      QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::NoLabel );
+    for (int i = 0; i < maxVisibleZones; i++) {
+        listCities.append(new QPushButton(zones));
 
-   // first, work out current number of columns?
-   gl = new QGridLayout(this);
-   frmMap = new QWorldmap(this);
-   QSizePolicy sp = frmMap->sizePolicy();
+         listCities.at(i)->setMinimumHeight( qApp->desktop()->availableGeometry().height()
+                                             / maxVisibleZones + 1);
+        connect(listCities.at(i), SIGNAL(clicked()),
+                this, SLOT(slotSetZone()));
 
-   if ( qApp->desktop()->width() < qApp->desktop()->height() ) {
-       sp.setHeightForWidth(true);
-   }
+        listTimes.append(new CityInfo(zones));
+        listTimes.at(i)->hide();
+        gl->addWidget( listCities.at(i), 1,  Qt::Alignment(Qt::AlignBottom));
 
-   frmMap->setSizePolicy(sp);
-   gl->addWidget(frmMap, 0, 0, 0, columns, Qt::Alignment(Qt::AlignTop));
+    }
 
-   for(int i=0; i < maxVisibleZones + 1; i++) {
-       gl->setRowStretch(i, 1);
-   }
+    gl->setSpacing(4);
+    gl->setMargin(4);
 
-   gl->setColumnStretch(1,4);
-   int goodWidth = qApp->desktop()->width() / 2 + 5;
-
-   for (int i = 0; i < maxVisibleZones; i++) {
-
-       listCities.append(new QPushButton(this));
-       listCities.at(i)->setFixedWidth(goodWidth );
-       if(mMode == Medium)  listCities.at(i)->setMaximumHeight(20);
-
-       listCities.at(i)->setCheckable(true);
-
-       connect(listCities.at(i), SIGNAL(clicked()),
-               this, SLOT(slotSetZone()));
-
-       listTimes.append(new CityInfo(this));
-
-       gl->addWidget( listCities.at(i), i + 3, 0 );
-       gl->addWidget( listTimes.at(i), i + 3, 1, Qt::Alignment(Qt::AlignVCenter) | Qt::AlignHCenter);
-   }
-
-
-   QMenu *contextMenu = QSoftMenuBar::menuFor(this);
-
-   QAction *a = new QAction(QIcon(":icon/edit"),
-                            tr("Select City"), this);
-   connect(a, SIGNAL(triggered()), this, SLOT(beginNewTz()));
-   contextMenu->addAction(a);
-   contextMenu->addSeparator();
-
-   gl->setSpacing(4);
-   gl->setMargin(4);
-
-   readInTimes();
-   changed = false;
-   QObject::connect( qApp, SIGNAL(clockChanged(bool)),
+    readInTimes();
+    changed = false;
+    QObject::connect( qApp, SIGNAL(clockChanged(bool)),
                      this, SLOT(showTime()));
+    addWidget(zones);
 
-   // now start the timer so we can update the time quickly every second
-   timerEvent( 0 );
+    worldMapDialog = new QWorldmapDialog(this);
 
-   frmMap->setContinuousSelect(true);
+    QMenu *contextMenu = QSoftMenuBar::menuFor(this);
+    contextMenu->addSeparator();
 
-   connect( frmMap, SIGNAL(newZone(QTimeZone) ),
-            this, SLOT( slotNewTz(QTimeZone)));
+    QAction *a = new QAction(QIcon(":icon/cancel"), tr("Show Map"), this);
+    connect(a, SIGNAL(triggered()), this, SLOT(showMap()));
+    contextMenu->addAction(a);
+    contextMenu->addSeparator();
 
-   if( Qtopia::mousePreferred()) {
-       connect( frmMap, SIGNAL(buttonSelected()),
-             this, SLOT(selected()));
-   }
-   connect( frmMap, SIGNAL(selectZoneCanceled()),
-            this, SLOT(slotNewTzCancelled()));
+    a = new QAction(QIcon(":icon/cancel"), tr("Cancel"), this);
+    connect(a, SIGNAL(triggered()), this, SLOT(cancelChanges()));
+    contextMenu->addAction(a);
 
-   frmMap->setFocus();
-   QTimer::singleShot(0,this,SLOT(slotNewTzCancelled()));
+
+    QSoftMenuBar::addMenuTo( this, contextMenu );
+
+     if( !Qtopia::mousePreferred())
+         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
+
+// now start the timer so we can update the time quickly every second
+    timerEvent( 0 );
 }
 
 WorldTime::~WorldTime()
@@ -169,28 +124,15 @@ void WorldTime::saveChanges()
 {
     if (changed) {
         writeTimezoneChanges();
-        for (int i = 0;  i < maxVisibleZones; i++) {
-            if(listCities.at(i)->isChecked()) {
-                listCities.at(i)->setChecked(false);
-            }
-            listCities.at(i)->setEnabled( true);
-        }
-
         readInTimes();
+        changed = false;
     }
 }
 
 void WorldTime::cancelChanges()
 {
-    viewMode();
-    if(changed)
-          for (int i = 0;  i < maxVisibleZones; i++) {
-            if(listCities.at(i)->isChecked()) {
-                listCities.at(i)->setChecked(false);
-            }
-        }
-
     changed = false;
+    viewMode();
 }
 
 void WorldTime::writeTimezoneChanges()
@@ -203,70 +145,71 @@ void WorldTime::writeTimezoneChanges()
     for ( i = 0;  i < maxVisibleZones; i++) {
         if ( !strCityTz[i].isNull() ) {
             cfg.setValue("Zone"+QString::number(i), strCityTz[i]);
-            // qWarning()<<QString::number(i) << strCityTz[i];
         }
     }
 
     cfg.sync();
 
     emit timeZoneListChange();
-
-    viewMode();
-    changed = false;
- }
+}
 
 void WorldTime::timerEvent( QTimerEvent *)
 {
-   if ( timerId ){
-      killTimer( timerId );
-      timerId = 0;
-   }
-   // change the time again!!
-   showTime();
-   int ms = 1000 - QTime::currentTime().msec();
-   ms += (60-QTime::currentTime().second())*1000;
-   timerId = startTimer( ms );
+    if ( timerId ){
+        killTimer( timerId );
+        timerId = 0;
+    }
+    // change the time again!!
+    showTime();
+    int ms = 1000 - QTime::currentTime().msec();
+    ms += (60-QTime::currentTime().second())*1000;
+    timerId = startTimer( ms );
+}
+
+void WorldTime::keyPressEvent( QKeyEvent* ke )
+{
+    if ( ke->key()==Qt::Key_Back ) {
+        if ( !isEditMode ) {
+            saveChanges();
+        }
+    }
+    QStackedWidget::keyPressEvent(ke);
 }
 
 void WorldTime::showTime( void )
 {
-   QDateTime curUtcTime = QTimeZone::utcDateTime();
+    QDateTime curUtcTime = QTimeZone::utcDateTime();
 
-   for (int i=0; i< maxVisibleZones; i++)
-      listTimes.at(i)->setUtcTime(curUtcTime);
+    for (int i=0; i< maxVisibleZones; i++)
+        listTimes.at(i)->setUtcTime(curUtcTime);
+    readInTimes();
+
 }
 
 void WorldTime::slotSetZone()
 {
+
     QPushButton *sendButton = qobject_cast<QPushButton *>(sender());
-    if(! sendButton->isChecked()) {
-        sendButton->setChecked(true);
+    for (selButton = 0; selButton < maxVisibleZones && listCities.at(selButton)
+                     != sendButton; selButton++)
+        ;
+    if (selButton == maxVisibleZones)
         return;
-    }
-    int selButton = findCurrentButton();
 
     QTimeZone zone( strCityTz[selButton].toLocal8Bit());
-    frmMap->setZone(zone);
+    worldMapDialog->setZone(zone);
     editMode();
-    changed = true;
-    frmMap->selectNewZone();
-
-    setButtonAvailable(selButton);
-
-    listTimes.at( selButton )->setZone( zone.id());
 }
 
 void WorldTime::editMode()
 {
     setWindowTitle(tr("Select City"));
-    frmMap->setFocus();
     isEditMode = true;
     changed = true;
-     for ( int i=0; i < maxVisibleZones; i++ ) {
-         listCities.at(i)->setFocusPolicy( Qt::NoFocus );
-     }
-    if( !frmMap->isZoom())
-         frmMap->toggleZoom();
+    if ( QtopiaApplication::execDialog(worldMapDialog) == QDialog::Accepted
+       && worldMapDialog->selectedZone().isValid()) {
+              slotNewTz( worldMapDialog->selectedZone() );
+        }
 }
 
 
@@ -274,171 +217,72 @@ void WorldTime::viewMode()
 {
     setWindowTitle(tr("World Time"));
     isEditMode = false;
-    for ( int i=0; i < maxVisibleZones; i++ ) {
-        listCities.at(i)->setFocusPolicy( Qt::StrongFocus );
-    }
-    if( frmMap->isZoom())
-        frmMap->toggleZoom();
-
-    setButtonAvailable( -1);
-}
-
-int WorldTime::findCurrentButton()
-{
-    for (int i = 0; i < maxVisibleZones; i++) {
-        if(listCities.at(i)->isChecked()) {
-             return i;
-        }
-    }
-    return -2;
-}
-
-void WorldTime::setButtonAvailable(int selButton)
-{
-    if(selButton == -2) return;
-
-    for ( int i=0; i < maxVisibleZones; i++ ) {
-        if (selButton == -1) {
-            listCities.at(i)->setEnabled( true);
-        } else if(i == selButton) {
-            listCities.at(i)->setEnabled( true);
-        } else {
-            listCities.at(i)->setEnabled( false);
-        }
-    }
-}
-
-void WorldTime::beginNewTz()
-{
-    changed = false;
-
-    QString selectedTz;
-    int selButton = findCurrentButton();
-    if(selButton > 0) {
-        if(! listCities.at(selButton)->isChecked())
-            listCities.at(selButton)->setChecked(true);
-        return;
-    }
-
-    if(selButton == -2) {
-        selButton = 0;
-        listCities.at(0)->setChecked(true);
-        setButtonAvailable(0);
-    }
-
-    else if(selButton != -1 ) {
-        selectedTz = strCityTz[selButton];
-    }
-
-
-    if(selectedTz.isEmpty()) {
-        selectedTz = strCityTz[0];
-        listCities.at(0)->setChecked(true);
-    }
-
-    frmMap->setZone( QTimeZone( selectedTz.toLocal8Bit() ) );
-     frmMap->setFocus();
-     editMode();
-     frmMap->selectNewZone();
+    setCurrentWidget(zones);
+    saveChanges();
 
 }
 
 void WorldTime::slotNewTz( const QTimeZone& zone )
 {
-    if( Qtopia::mousePreferred()) {
-        changed = true;
-        return;
-    }
-    QTimeZone curZone;
-    int selButton = findCurrentButton();
-
-    if(selButton > -1 ) {
+    if (selButton > -1 ) {
         strCityTz[selButton] = zone.id();
-//        qWarning()<< "slotNewTz"<<strCityTz[selButton];
         listCities.at(selButton)->setText( zone.city());
         listTimes.at(selButton)->setZone( zone.id());
-
-        if( !isEditMode) {
-            changed = true;
-        }
+        changed = true;
     }
+    viewMode();
 }
 
 void WorldTime::slotNewTzCancelled()
 {
-   QString currTz;
-   if(isEditMode) {
-       int selButton = findCurrentButton();
-       currTz = strCityTz[selButton];
-       frmMap->setZone( QTimeZone( currTz.toLocal8Bit() ) );
-       slotNewTz( QTimeZone( currTz.toLocal8Bit() ) );
-           if( listCities.at(selButton)->isChecked())
-            listCities.at(selButton)->setChecked( false);
-
-   }
-
-   cancelChanges();
-   readInTimes();
+    qWarning() << "cancelled";
+    viewMode();
 }
 
 void WorldTime::readInTimes( )
 {
-   QSettings cfg("Trolltech", "WorldTime");
-   cfg.beginGroup("TimeZones");
+    QSettings cfg("Trolltech", "WorldTime");
+    cfg.beginGroup("TimeZones");
 
-   int i;
-   QString zn;
+    int i;
+    QString zn;
 
-//create zoneslist
-   for (i = 0; i < maxVisibleZones; i++ ) {
-       zn = cfg.value("Zone" + QString::number(i), QString(i)).toString();
-       strCityTz[i] = zn;
+    //create zoneslist
+    for (i = 0; i < maxVisibleZones; i++ ) {
+        zn = cfg.value("Zone" + QString::number(i)).toString();
+        strCityTz[i] = zn;
 
-       if ( zn.isEmpty() )
-           break;
-       QString nm =  zn.section("/",-1) ;
-       nm = nm.replace("_"," ");
-       strCityTz[i] = zn;
+        if ( zn.isEmpty() )
+            break;
 
-       listCities.at(i)->setText(nm);
+        QString nm =  zn.section("/",-1) ;
+        nm = nm.replace("_"," ");
+        strCityTz[i] = zn;
 
-//       int index = cfg.value("Clock"+QString::number(i), QString::number(i)).toInt();
-       zn = cfg.value("Zone" + QString::number(i), QString(i)).toString();
-       listTimes.at(i)->setZone(zn);
-   }
+        zn = cfg.value("Zone" + QString::number(i), QString(i)).toString();
+        listTimes.at(i)->setZone(zn);
 
-}
-
-void WorldTime::keyReleaseEvent( QKeyEvent *ke )
-{
-    switch(ke->key())  {
-    case  Qt::Key_Select:
-        if( isEditMode) {
-            selected();
-        }
-        break;
-    };
-}
-
-void WorldTime::selected()
-{
-
-    if(!changed){
-        changed = true;
-    } else {
-        QTimeZone zone = frmMap->zone();
-
-        int selButton = findCurrentButton();
-        if(selButton != -1 ) {
-            strCityTz[selButton] = zone.id();
-            //   qWarning() << "selected" << strCityTz[selButton] << zone.id();
-            listCities.at(selButton)->setText( zone.city());
-            listTimes.at(selButton)->setZone( zone.id());
-
-            saveChanges();
-             changed = false;
-        }
-        viewMode();
+          listCities.at(i)->setText( nm + "    "+ listTimes.at(i)->text() );
     }
 }
 
+void WorldTime::resizeEvent(QResizeEvent * /*event*/)
+{
+    QTimer::singleShot(0,this, SLOT(resetButtons()));
+}
+
+void WorldTime::resetButtons()
+{
+    qWarning() <<  qApp->desktop()->availableGeometry().width();
+    for (int i = 0; i < maxVisibleZones; i++) {
+        listCities.at(i)->setMinimumHeight( qApp->desktop()->availableGeometry().height() / maxVisibleZones + 1);
+    }
+}
+
+void WorldTime::showMap()
+{
+    QtopiaApplication::execDialog(worldMapDialog);
+    //  QWorldMap frmMap = new QWorldmap(0);
+    //  QSizePolicy sp = frmMap->sizePolicy();
+
+}

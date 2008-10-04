@@ -1,0 +1,15 @@
+TEMPLATE=lib
+CONFIG+=qtopia singleexec
+TARGET=qdsync_common
+
+MODULE_NAME=qdsync_common
+
+SOURCEPATH=.. ../..
+
+include(../common.pri)
+HEADERS+=$$QTOPIADESKTOP_HEADERS
+PRIVATE_HEADERS+=$$QTOPIADESKTOP_PRIVATE_HEADERS
+HEADERS+=$$QTOPIADESKTOP_HEADERS
+SOURCES+=$$QTOPIADESKTOP_SOURCES
+include(../common.pro)
+

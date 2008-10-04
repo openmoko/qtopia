@@ -1,6 +1,6 @@
+!qbuild {
 qtopia_project(qtopia app)
-TARGET=scribble
-CONFIG+=qtopia_main no_quicklaunch
+}
 
 HEADERS       = mainwindow.h \
                 scribblearea.h

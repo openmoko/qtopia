@@ -7,7 +7,7 @@ QMAKE_CFLAGS+=-fPIC
 QMAKE_CXXFLAGS+=-fPIC
 }
 
-HEADERS+=\
+PRIVATE_HEADERS+=\
     vcc_yacc_p.h\
     vobject_p.h\
 

@@ -1,28 +1,22 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#ifdef QUICKLAUNCHER_FORKED
-#include "quicklaunchforked.h"
-#else
 #include "quicklaunch.h"
-#endif
 
 #include <qpainter.h>
 #include <qtimer.h>
@@ -43,6 +37,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifndef QT_NO_SXE
+#include "qtransportauth_qws.h"
+#endif
 
 #ifdef SINGLE_EXEC
 #define MAIN_FUNC main_quicklaunch
@@ -106,11 +103,7 @@ int MAIN_FUNC( int argc, char** argv )
         QuickLauncher::exec( argc, argv );
     } else {
         QuickLauncher::eventLoop = new QEventLoop();
-#ifdef QUICKLAUNCHER_FORKED
-        qLog(Quicklauncher) << "QuickLauncherForked running";
-#else
         qLog(Quicklauncher) << "QuickLauncher running";
-#endif
 
         // Pre-load default fonts
         QFontMetrics fm( QApplication::font() );
@@ -134,39 +127,30 @@ int MAIN_FUNC( int argc, char** argv )
 
         // Create a widget to force initialization of title bar images, etc.
         QObject::disconnect(QuickLauncher::app, SIGNAL(lastWindowClosed()), QuickLauncher::app, SLOT(hideOrQuit()));
-#if QT_VERSION < 0x040400
-        // Avoid warning about Qt::Tool and Qt::FramelessWindowHint in Qt 4.2
         Qt::WindowFlags wFlags = Qt::WindowContextHelpButtonHint | Qt::Tool | Qt::FramelessWindowHint;
-#else
-        // We do want this behaviour.  Hopefully Qt 4.3 will have it.
-        Qt::WindowFlags wFlags = Qt::WindowContextHelpButtonHint|Qt::Tool;
-#endif
         QWidget *w = new QWidget(0,wFlags);
+        //showing this widget will cause QtopiaApplicationLifeCycle to declare quicklauncher
+        //as a UI app. This causes false positives (see QtopiaApplicationLifeCycle)
+        w->setObjectName("QuicklauncherSuppressWidget");
         w->setWindowTitle("_ignore_");  // no tr
         w->setAttribute(Qt::WA_DeleteOnClose);
         w->setGeometry( -100, -100, 10, 10 );
         w->show();
         QTimer::singleShot( 0, w, SLOT(close()) );
 
-#ifdef QUICKLAUNCHER_FORKED
-        QuickLauncher* ql = new QuickLauncher();
-#else
         (void)new QuickLauncher();
-#endif
         while (!QuickLauncher::validExitLoop)
             if(-1 == QuickLauncher::eventLoop->exec())
                 break;
-
-#ifdef QUICKLAUNCHER_FORKED
-        delete ql;
-#endif
     }
 
-    QPerformanceLog(QuickLauncher::app->applicationName()) << (QPerformanceLog::Begin|QPerformanceLog::EventLoop);
+    QByteArray appName = QuickLauncher::app->applicationName().toLocal8Bit();
+
+    qLog(Quicklauncher) << "begin event loop" << appName.constData();
     int rv = -1;
     if(QuickLauncher::app->willKeepRunning())
         QuickLauncher::app->exec();
-    QPerformanceLog(QuickLauncher::app->applicationName()) << (QPerformanceLog::End|QPerformanceLog::EventLoop);
+    qLog(Quicklauncher) << "end event loop" << appName.constData();
 
     if ( QuickLauncher::mainWindow )
         delete (QWidget*)QuickLauncher::mainWindow;
@@ -176,8 +160,6 @@ int MAIN_FUNC( int argc, char** argv )
         loader->releaseInterface( appIface );
     delete loader;
 */
-    // For performance testing
-    QString appName = QuickLauncher::app->applicationName();
 
     delete QuickLauncher::app;
     delete QuickLauncher::eventLoop;
@@ -185,7 +167,7 @@ int MAIN_FUNC( int argc, char** argv )
     delete QuickLauncher::loader;
 #endif
 
-    QPerformanceLog(appName)  << QPerformanceLog::End << "quicklauncher main";
+    qLog(Quicklauncher) << "end main" << appName.constData();
 
     return rv;
 }

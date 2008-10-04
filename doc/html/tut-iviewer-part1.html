@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Image Viewer Tutorial: Part 1<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Image Viewer Tutorial: Part 1<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><p>Welcome to the Image Viewer Tutorial.</p>
 <p>Image Viewer Tutorial Contents</p>
@@ -110,16 +110,17 @@
 <p>For the parts 1-7 the source code can be found in examples/imageviewer</p>
 <a name="initial-setup"></a>
 <h3>Initial Setup</h3>
-<p>First the project file has to be created (iviewer.pro) for the <a href="http://doc.trolltech.com/qtopia4.3/buildSystem.html">qtopia build system</a>.</p>
-<p>File: iviewer.pro</p>
-<pre>    qtopia_project(qtopia app)
+<p>First the project file has to be created (qbuild.pro) for the <a href="buildsystem/index.html">Qt Extended build system</a>.</p>
+<p>File: qbuild.pro</p>
+<pre>    TEMPLATE=app
+    CONFIG+=qtopia
+    TARGET=iviewer
 
-    TARGET = iviewer
-    CONFIG+=qtopia_main no_singleexec no_quicklaunch no_tr
+    CONFIG+=quicklaunch
 
     HEADERS += iviewer.h
     SOURCES += main.cpp iviewer.cpp</pre>
-<p>Here a qtopia application is declared (iviewer). The start code will be in main and the application in iviewer{.h,.cpp}.</p>
+<p>Here a Qt Extended application is declared (iviewer). The start code will be in main and the application in iviewer{.h,.cpp}.</p>
 <p>File: main.cpp</p>
 <pre>    #include &quot;iviewer.h&quot;
     #include &lt;qtopiaapplication.h&gt;
@@ -153,8 +154,9 @@
         _listScreen  = 0;
         _imageScreen = 0;
         setCurrentWidget(listScreen());
+        setWindowTitle(&quot;Image Viewer&quot;);
     }</pre>
-<p>Namespace: <a href="http://doc.trolltech.com/qtopia4.3/qt.html">Qt</a></p>
+<p>Namespace: <a href="http://doc.trolltech.com/qtextended4.4/qt.html">Qt</a></p>
 <p>It is now time for the first run. qtopiamake and make must be called. When the QVFB emulator is running, the application can be started with ./iviewer. This should display an empty application in the emulator. Great!</p>
 <a name="the-list-screen"></a>
 <h3>The List Screen</h3>
@@ -183,7 +185,7 @@
 
     #endif</pre>
 <p>Classes: <a href="qlistwidget.html">QListWidget</a></p>
-<p>As parent, the iviewer is passed and the pointer is stored in _iviewer. The forward declaration (class IViewer) is used to avoid dependency with the created header files. Dependencies to qt/qtopia header files do not have to be handled.</p>
+<p>As parent, the iviewer is passed and the pointer is stored in _iviewer. The forward declaration (class IViewer) is used to avoid dependency with the created header files. Dependencies to Qt/Qt Extended header files do not have to be handled.</p>
 <p>File: listscreen.cpp</p>
 <pre>    #include &quot;listscreen.h&quot;
     #include &quot;iviewer.h&quot;
@@ -191,16 +193,16 @@
     : QListWidget(viewer), _viewer(viewer)
     {
     }</pre>
-<p>The list widget is constructed and the _viewer is initialized. The project (iviewer.pro) should know about the new class. The following lines must be added to the .pro file:</p>
-<p>File: iviewer.pro</p>
+<p>The list widget is constructed and the _viewer is initialized. The project (qbuild.pro) should know about the new class. The following lines must be added to the .pro file:</p>
+<p>File: qbuild.pro</p>
 <pre>    SOURCES += listscreen.cpp
     HEADERS += listscreen.h</pre>
 <p>Now, qtopiamake and make can be run again. The application should still display an empty screen. To see something useful, the screen in the iviewer has to be created and the list must be populated with some content. This will be the next step.</p>
 <p><a href="#top">Top</a>|<a href="tut-iviewer-part2.html">Next</a></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

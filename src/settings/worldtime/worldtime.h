@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,7 +23,8 @@
 // Qt4 Headers
 #include <QTimerEvent>
 #include <QPushButton>
-#include <QGridLayout>
+#include <QStackedWidget>
+#include <QResizeEvent>
 
 #include "cityinfo.h"
 #include <qtopiaglobal.h>
@@ -36,10 +35,11 @@ const int CITIES = 6;    // the number of cities...
 #define WORLDTIME_EXPORT
 
 class QTimeZone;
-class QWorldmap;
+class QWorldmapDialog;
 class QComboBox;
+class QWorldmap;
 
-class WORLDTIME_EXPORT WorldTime : public QWidget
+class WORLDTIME_EXPORT WorldTime : public QStackedWidget
 {
     Q_OBJECT
 public:
@@ -47,52 +47,45 @@ public:
     ~WorldTime();
 
 public slots:
-    void beginNewTz();
     void slotNewTz( const QTimeZone& zone );
     void slotSetZone();
     void slotNewTzCancelled();
     void saveChanges();
     void cancelChanges();
- 
+
 signals:
     void timeZoneListChange();
 
 protected:
     bool isEditMode;
-    void timerEvent( QTimerEvent* );void keyReleaseEvent( QKeyEvent * );
-
+    void timerEvent( QTimerEvent* );
+    void keyPressEvent( QKeyEvent* );
 
 private slots:
     void showTime();
     void editMode();
     void viewMode();
-    void selected();
+    void resetButtons();
+    void showMap();
 
 private:
+    bool changed;
+    int selButton;
     int isHighlighted;
-    void readInTimes( void );   // a method to get information from the config
-    void writeTimezoneChanges();
-    int findCurrentButton();
-    void setButtonAvailable(int selButton);
-   
     int timerId;
     int maxVisibleZones;
-    QGridLayout *gl;
 
+    QWorldmapDialog *worldMapDialog;
+    QWidget *zones;
+
+    void readInTimes( void );   // a method to get information from the config
+    void writeTimezoneChanges();
+   
     // a spot to hold the time zone for each city
     QString strCityTz[CITIES];
     QList<QPushButton *> listCities;
-    QPushButton *currentPushButton;
     QList<CityInfo *> listTimes;
-    bool changed;
-
-    QWorldmap *frmMap;
-    enum SizeMode {
-        Minimal,
-        Medium,
-        Tall,
-        Wide
-    } mMode;
+    void resizeEvent(QResizeEvent * event ) ;
 };
 
 #endif

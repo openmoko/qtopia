@@ -1,0 +1,16 @@
+TEMPLATE=plugin
+CONFIG+=qtopia singleexec
+TARGET=dbmigrate
+
+PLUGIN_FOR=qtopia
+PLUGIN_TYPE=qtopiasqlmigrate
+
+MODULES*=sqlite
+QTOPIA.CONFIG=singleexec
+
+include(dbmigrate.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

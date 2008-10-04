@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ $1 = "--suspend" ]; then
-    usb-gadget.sh -noqcop unload
+    which usb-gadget.sh >/dev/null && usb-gadget.sh -noqcop unload
 fi
 
 killall -SIGSTOP klogd
@@ -12,5 +12,5 @@ killall -SIGCONT klogd
 
 if [ $1 = "--suspend" ]; then
     echo -n 0x00000041 > /proc/bulverde/registers/PSSR
-    usb-gadget.sh -noqcop boot
+    which usb-gadget.sh >/dev/null && usb-gadget.sh -noqcop boot
 fi

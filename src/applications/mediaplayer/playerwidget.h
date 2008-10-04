@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,7 +22,6 @@
 
 #include "playercontrol.h"
 #include "statewidget.h"
-#include "playlist.h"
 
 #include <media.h>
 #include <qmediacontent.h>
@@ -33,10 +30,14 @@
 #include <private/activitymonitor_p.h>
 
 #include <QtGui>
+#include <QMediaPlaylist>
+
+class QScreenInformation;
 
 class VisualizationWidget;
 
 class PlayerControl;
+class QMediaVideoControl;
 
 class ProgressView;
 class VolumeView;
@@ -45,34 +46,33 @@ class SeekView;
 class ThrottleKeyMapper;
 
 class TrackInfoWidget;
-class TrackInfoDialog;
 
 class VoteDialog;
 
 class RepeatState;
 class RepeatDialog;
+class SkipDialog;
+class ThumbnailWidget;
+
+class PileLayout;
 
 class PlayerWidget : public QWidget
 {
     Q_OBJECT
+        friend class SkipDialog;
 public:
     PlayerWidget( PlayerControl* control, QWidget* parent = 0 );
     ~PlayerWidget();
 
-   QExplicitlySharedDataPointer<Playlist> playlist() const { return m_playlist; }
+   const QMediaPlaylist &playlist() const { return m_playlist; }
     // Set playlist and begin playback
-    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
+    void setPlaylist( const QMediaPlaylist &playlist );
 
     bool eventFilter( QObject* o, QEvent* e );
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #ifndef NO_HELIX
     QAction *settingsAction(){ return m_settingsaction; }
 #endif
-#endif
-
-signals:
-    void contentChanged( QMediaContent* content );
 
 public slots:
     void setMediaContent( QMediaContent* content );
@@ -94,6 +94,8 @@ private slots:
 
     void pingMonitor();
 
+    void processInactivity();
+
     void showProgress();
 
     void cycleView();
@@ -104,13 +106,20 @@ private slots:
 
     void execSettings();
 
-    void execTrackInfoDialog();
-
     void execVoteDialog();
 
     void execRepeatDialog();
 
     void delayMenuCreation();
+
+    void showFullScreenVideo();
+    void showNormalVideo();
+    //void toggleFullScreenVideo();
+    void toggleFullScreenVideo( bool fullScreen );
+    void updateFullScreenControlsMask();
+    void updateVideoRotation();
+
+    void tvScreenChanged();
 
 protected:
     void keyPressEvent( QKeyEvent* e );
@@ -118,37 +127,55 @@ protected:
 
     void showEvent( QShowEvent* e );
     void hideEvent( QHideEvent* e );
+    void resizeEvent( QResizeEvent* e);
+    void mouseReleaseEvent( QMouseEvent* e );
 
 private:
-    enum View { Progress, Volume, Seek };
+    enum View { Progress, Volume, Seek, None };
 
     View view() const { return m_currentview; }
     void setView( View view );
 
     void setVideo( QWidget* widget );
     void removeVideo();
-
-    void setCurrentTrack( const QModelIndex& index );
+    void layoutVideoWidget();
 
     void openCurrentTrack();
-    void playCurrentTrack();
+
+    bool isFullScreenVideo() const;
+
 
     PlayerControl *m_playercontrol;
     StateWidget *m_statewidget;
 
     QMediaContent *m_content;
     QMediaControl *m_mediacontrol;
+    QMediaVideoControl *m_videoControl;
     QMediaContentContext *m_context;
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #ifndef NO_HELIX
     QAction *m_settingsaction;
 #endif
-#endif
+
+
+    QVBoxLayout *m_background;
+    PileLayout *pile;
 
     QVBoxLayout *m_videolayout;
     QWidget *m_videowidget;
+    QFrame *m_fullscreenWidget;
+    QWidget *m_fullscreenControls;
+
+    QVBoxLayout *m_controlsLayout;
+    QVBoxLayout *m_fullscreenControlsLayout;
+    QVBoxLayout *m_fullscreenWidgetLayout;
+
+#ifndef NO_VISUALIZATION
     VisualizationWidget *m_visualization;
+#endif
+#ifndef NO_THUMBNAIL
+    ThumbnailWidget *m_thumbnail;
+#endif
 
 #ifndef NO_HELIX
     QWidget *m_helixlogoaudio;
@@ -160,23 +187,24 @@ private:
     SeekView *m_seekview;
 
     View m_currentview;
+    bool m_fullscreen;
+    QAction *m_fullscreenaction;
 
     ActivityMonitor *m_monitor;
     QTimer *m_pingtimer;
 
     ThrottleKeyMapper *m_mapper;
 
-    QExplicitlySharedDataPointer< Playlist > m_playlist;
-    QPersistentModelIndex m_currenttrack;
+    QMediaPlaylist m_playlist;
 
     bool m_continue;
 
     bool m_ismute;
+    bool m_keepMutedState;
     QAction *m_muteaction;
     QWidget *m_muteicon;
 
     TrackInfoWidget *m_trackinfo;
-    TrackInfoDialog *m_trackinfodialog;
 
     QAction *m_voteaction;
     VoteDialog *m_votedialog;
@@ -184,6 +212,9 @@ private:
     QAction *m_repeataction;
     RepeatState *m_repeatstate;
     RepeatDialog *m_repeatdialog;
+    SkipDialog *m_skipdialog;
+
+    QScreenInformation* m_tvScreen;
 };
 
 #ifndef NO_HELIX
@@ -212,4 +243,4 @@ private:
 };
 #endif
 
-#endif // PLAYERWIDGET_H
+#endif

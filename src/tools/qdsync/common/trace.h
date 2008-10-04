@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef TRACE_H
@@ -91,11 +89,11 @@ template<class T> inline int _trace_opt(const T &) { return 1; }
 /* Catch compile time enums (at most one symbol) */
 template<> inline int _trace_opt<int>(const int & v) { return v; }
 
-#define TRACE_OPTION(dbgcat,expr) \
+#define TRACE_OPTION(dbgcat,expr,regfunc) \
     class dbgcat##_TraceLog { \
     public: \
-	static inline bool enabled() { return expr; }\
-	static inline _Trace trace() { return _Trace(#dbgcat, dbgcat##_TraceLog::enabled); }\
+        static inline bool enabled() { static char mem=0; if (!mem) { regfunc(&mem); mem=(expr)?3:2; } return mem&1; }\
+        static inline _Trace trace() { return _Trace(#dbgcat, dbgcat##_TraceLog::enabled); }\
     };
 
 // So that TRACE() can work.
@@ -118,12 +116,12 @@ public: \
 #include <qtopialog.h>
 
 #define QD_LOG_OPTION(x)\
-    QLOG_OPTION_VOLATILE(QDSync_##x,qtopiaLogRequested("QDSync_" #x))\
-    TRACE_OPTION(QDSync_##x,qtopiaLogRequested("QDSync_" #x))
+    QLOG_OPTION_SEMI_VOLATILE(QDSync_##x,qtopiaLogRequested("QDSync_" #x),qtopiaLogSemiVolatile)\
+    TRACE_OPTION(QDSync_##x,qtopiaLogRequested("QDSync_" #x),qtopiaLogSemiVolatile)
 
 // So that TRACE() can work.
-QLOG_OPTION_VOLATILE(QDSync_,qtopiaLogRequested("QDSync_"));
-TRACE_OPTION(QDSync_,qtopiaLogRequested("QDSync_"));
+QLOG_OPTION_SEMI_VOLATILE(QDSync_,qtopiaLogRequested("QDSync_"),qtopiaLogSemiVolatile);
+TRACE_OPTION(QDSync_,qtopiaLogRequested("QDSync_"),qtopiaLogSemiVolatile);
 
 #define TRACE(dbgcat)\
     /*qLog(TRACE) << "TRACE(" << #dbgcat << ") called in file" << __FILE__ << "line" << __LINE__;*/\
@@ -146,5 +144,4 @@ TRACE_OPTION(QDSync_,qtopiaLogRequested("QDSync_"));
 #define Q_ASSERT(x) if ( x ); else qFatal(QString("Q_ASSERT failed! %3 at %1 line %2").arg(__FILE__).arg(__LINE__).arg(#x).toLocal8Bit().constData())
 #endif
 
-#endif // TRACE_H
-
+#endif

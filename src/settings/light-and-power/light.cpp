@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "light.h"
@@ -96,7 +94,8 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     batteryMode.intervalDim = config.value( "Interval_Dim", 20 ).toInt();
     batteryMode.intervalLightOff = config.value("Interval_LightOff", 30).toInt();
     batteryMode.intervalSuspend = config.value("Interval", 60).toInt();
-    batteryMode.brightness = config.value("Brightness", qpe_sysBrightnessSteps()).toInt();
+    batteryMode.brightness = config.value("Brightness", 255).toInt();
+    batteryMode.brightness = qMax(1,batteryMode.brightness * qpe_sysBrightnessSteps() / 255);
     batteryMode.initBrightness = batteryMode.brightness;
     batteryMode.dim = config.value("Dim", true).toBool();
     batteryMode.lightoff = config.value("LightOff", false).toBool();
@@ -108,7 +107,8 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     externalMode.intervalDim = config.value( "Interval_Dim", 20 ).toInt();
     externalMode.intervalLightOff = config.value("Interval_LightOff", 30).toInt();
     externalMode.intervalSuspend = config.value("Interval", 240).toInt();
-    externalMode.brightness = config.value("Brightness", qpe_sysBrightnessSteps()).toInt();
+    externalMode.brightness = config.value("Brightness", 255).toInt();
+    externalMode.brightness = qMax(1,externalMode.brightness * qpe_sysBrightnessSteps() / 255);
     externalMode.initBrightness = externalMode.brightness;
     externalMode.dim = config.value("Dim", true).toBool();
     externalMode.lightoff = config.value("LightOff", false).toBool();   //default to leave on
@@ -168,10 +168,10 @@ void LightSettings::reject()
     // Restore brightness settings
     QSettings config("Trolltech", "qpe");
     config.beginGroup("BatteryPower");
-    config.setValue("Brightness", batteryMode.initBrightness);
+    config.setValue("Brightness", (batteryMode.initBrightness * 255 + qpe_sysBrightnessSteps()/2) / qpe_sysBrightnessSteps());
     config.endGroup();
     config.beginGroup("ExternalPower");
-    config.setValue("Brightness", externalMode.initBrightness);
+    config.setValue("Brightness", (externalMode.initBrightness * 255 + qpe_sysBrightnessSteps()/2) / qpe_sysBrightnessSteps());
     config.endGroup();
 
     QDialog::reject();
@@ -239,7 +239,7 @@ void LightSettings::writeMode(QSettings &config, PowerMode *mode)
     config.setValue( "LightOff", mode->lightoff );
     config.setValue( "Interval_Dim", mode->intervalDim );
     config.setValue( "Interval_LightOff", mode->intervalLightOff );
-    config.setValue( "Brightness", mode->brightness );
+    config.setValue( "Brightness", (mode->brightness * 255 + qpe_sysBrightnessSteps()/2) / qpe_sysBrightnessSteps() );
     if (mode->canSuspend) {
         config.setValue( "Interval", mode->intervalSuspend );
         config.setValue( "Suspend", mode->suspend );
@@ -278,7 +278,7 @@ void LightSettings::applyBrightness()
     else
         config.beginGroup("ExternalPower");
 
-    config.setValue("Brightness", currentMode->brightness);
+    config.setValue("Brightness", (currentMode->brightness * 255 + qpe_sysBrightnessSteps()/2) / qpe_sysBrightnessSteps());
 }
 
 void LightSettings::powerTypeChanged(int index)
@@ -346,7 +346,7 @@ QString LightSettings::status()
     return result;
 }
 
-void LightSettings::setStatus( QString details )
+void LightSettings::setStatus( const QString& details )
 {
     QStringList sl = details.split( ',' );
     currentMode = &batteryMode;

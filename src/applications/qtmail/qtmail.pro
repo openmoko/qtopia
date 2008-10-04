@@ -1,123 +1,95 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=qtmail
 CONFIG+=qtopia_main
+depends(libraries/qtopiamail)
+depends(libraries/qtopiapim)
+equals(QTOPIA_UI,home):depends(libraries/homeui)
+enable_telephony:depends(libraries/qtopiaphone)
+}
 
 enable_cell:contains(PROJECTS,libraries/qtopiasmil):CONFIG+=enable_mms
 else:DEFINES+=QTOPIA_NO_SMS QTOPIA_NO_MMS
 
-FORMS_MMS = mmseditaccountbase.ui
-FORMS = editaccountbasephone.ui searchviewbasephone.ui
+!enable_telephony:DEFINES+=QTOPIA_NO_COLLECTIVE
 
-enable_mms {
-    FORMS += $$FORMS_MMS
-    qtopia_depot:DEFINES+=ENABLE_UNCONDITIONAL_MMS_SEND
-}
+FORMS = editaccountbasephone.ui
 
 HEADERS+=\
-    account.h\
-    accountlist.h\
     accountsettings.h\
-    actionlistview.h\
-    addresslist.h\
-    client.h\
-    detailspage.h\
     editaccount.h\
     emailclient.h\
-    emailfolderlist.h\
-    emailhandler.h\
-    emaillistitem.h\
+    emailservice.h\
     emailpropertysetter.h\
-    folder.h\
-    folderlistview.h\
-    imapclient.h\
-    imapprotocol.h\
+    icontype.h\
     maillist.h\
-    maillistview.h\
-    mailtransport.h\
-    popclient.h\
+    messagefolder.h\
+    messagelistview.h\
+    messagesservice.h\
+    messagestore.h\
     qtmailwindow.h\
     readmail.h\
-    search.h\
-    searchview.h\
     selectfolder.h\
-    smsclient.h\
-    smsdecoder.h\
-    smtpclient.h\
+    smsservice.h\
     statusdisplay.h\
     viewatt.h\
-    writemail.h
+    writemail.h\
+    selectcomposerwidget.h\
+    folderdelegate.h\
+    foldermodel.h\
+    folderview.h\
+    actionfoldermodel.h\
+    actionfolderview.h\
+    emailfoldermodel.h\
+    emailfolderview.h
 
 SOURCES+=\
-    account.cpp\
-    accountlist.cpp\
     accountsettings.cpp\
-    actionlistview.cpp\
-    addresslist.cpp\
-    client.cpp\
-    detailspage.cpp\
     editaccount.cpp\
     emailclient.cpp\
-    emailfolderlist.cpp\
-    emailhandler.cpp\
-    emaillistitem.cpp\
+    emailservice.cpp\
     emailpropertysetter.cpp\
-    folder.cpp\
-    folderlistview.cpp\
-    imapclient.cpp\
-    imapprotocol.cpp\
     maillist.cpp\
-    maillistview.cpp\
-    mailtransport.cpp\
     main.cpp\
-    popclient.cpp\
+    messagefolder.cpp\
+    messagelistview.cpp\
+    messagesservice.cpp\
+    messagestore.cpp\
     qtmailwindow.cpp\
     readmail.cpp\
-    search.cpp\
-    searchview.cpp\
     selectfolder.cpp\
-    smsclient.cpp\
-    smsdecoder.cpp\
-    smtpclient.cpp\
+    smsservice.cpp\
     statusdisplay.cpp\
     viewatt.cpp\
-    writemail.cpp
+    writemail.cpp\
+    selectcomposerwidget.cpp\
+    folderdelegate.cpp\
+    foldermodel.cpp\
+    folderview.cpp\
+    actionfoldermodel.cpp\
+    actionfolderview.cpp\
+    emailfoldermodel.cpp\
+    emailfolderview.cpp
 
-MMS_SOURCES=\
-    mmsclient.cpp\
-    mmscomms.cpp\
-    mmseditaccount.cpp\
-    mmsmessage.cpp
+MMS.TYPE=CONDITIONAL_SOURCES
+MMS.CONDITION=enable_mms
+MMS.FORMS=mmseditaccountbase.ui
+MMS.HEADERS=mmseditaccount.h
+MMS.SOURCES=mmseditaccount.cpp
+!qbuild:CONDITIONAL_SOURCES(MMS)
 
-MMS_HEADERS=\
-    mmsclient.h\
-    mmscomms.h\
-    mmseditaccount.h\
-    mmsmessage.h
+COLLECTIVE.TYPE=CONDITIONAL_SOURCES
+COLLECTIVE.CONDITION=enable_telephony
+COLLECTIVE.HEADERS=instantmessageservice.h
+COLLECTIVE.SOURCES=instantmessageservice.cpp
+!qbuild:CONDITIONAL_SOURCES(COLLECTIVE)
 
-enable_mms:HEADERS+=$$MMS_HEADERS
-enable_mms:SOURCES+=$$MMS_SOURCES
-
-enable_mms {
-# To enable HTTP MMS comms:
-    MMSCOMMS_HEADERS=mmscomms_http.cpp
-    MMSCOMMS_SOURCES=mmscomms_http.h
-    SOURCES+=$$MMSCOMMS_HEADERS
-    HEADERS+=$$MMSCOMMS_SOURCES
-
-    DEFINES+=MMSCOMMS_HTTP
-}
-
-TRANSLATABLES +=    $$HEADERS\
-                    $$SOURCES\
-                    $$MMS_HEADERS\
-                    $$MMS_SOURCES\
-                    $$FORMS\
-                    $$FORMS_MMS\
-                    $$MMSCOMMS_HEADERS\
-                    $$MMSCOMMS_SOURCES
-
-depends(libraries/qtopiamail)
-depends(libraries/qtopiapim)
+NONHOME.TYPE=CONDITIONAL_SOURCES
+NONHOME.CONDITION=!equals(QTOPIA_UI,home)
+NONHOME.FORMS=searchviewbasephone.ui
+NONHOME.HEADERS=searchview.h
+NONHOME.SOURCES=searchview.cpp
+!qbuild:CONDITIONAL_SOURCES(NONHOME)
 
 pics.files=$$QTOPIA_DEPOT_PATH/pics/qtmail/*
 pics.path=/pics/qtmail
@@ -141,6 +113,9 @@ INSTALLS+=help
 smsservice.files=$$QTOPIA_DEPOT_PATH/services/SMS/qtmail
 smsservice.path=/services/SMS
 enable_cell:INSTALLS+=smsservice
+instantmessageservice.files=$$QTOPIA_DEPOT_PATH/services/InstantMessage/qtmail
+instantmessageservice.path=/services/InstantMessage
+enable_telephony:INSTALLS+=instantmessageservice
 messageservice.files=$$QTOPIA_DEPOT_PATH/services/Messages/qtmail
 messageservice.path=/services/Messages
 INSTALLS+=messageservice
@@ -148,6 +123,32 @@ qdssmsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/SMS
 qdssmsservice.path=/etc/qds
 enable_cell:INSTALLS+=qdssmsservice
 
+# Service entries to handle new message arrivals
+newsystemmessagearrivalservice.files=$$QTOPIA_DEPOT_PATH/services/NewSystemMessageArrival/qtmail
+newsystemmessagearrivalservice.path=/services/NewSystemMessageArrival
+INSTALLS+=newsystemmessagearrivalservice
+
+newemailarrivalservice.files=$$QTOPIA_DEPOT_PATH/services/NewEmailArrival/qtmail
+newemailarrivalservice.path=/services/NewEmailArrival
+INSTALLS+=newemailarrivalservice
+
+enable_cell {
+    newsmsarrivalservice.files=$$QTOPIA_DEPOT_PATH/services/NewSmsArrival/qtmail
+    newsmsarrivalservice.path=/services/NewSmsArrival
+    INSTALLS+=newsmsarrivalservice
+
+    newmmsarrivalservice.files=$$QTOPIA_DEPOT_PATH/services/NewMmsArrival/qtmail
+    newmmsarrivalservice.path=/services/NewMmsArrival
+    INSTALLS+=newmmsarrivalservice
+}
+
+enable_telephony {
+    newinstantmessagearrivalservice.files=$$QTOPIA_DEPOT_PATH/services/NewInstantMessageArrival/qtmail
+    newinstantmessagearrivalservice.path=/services/NewInstantMessageArrival
+    INSTALLS+=newinstantmessagearrivalservice
+}
+
 pkg.name=qpe-mail
 pkg.desc=Messaging application for Qtopia.
 pkg.domain=trusted
+

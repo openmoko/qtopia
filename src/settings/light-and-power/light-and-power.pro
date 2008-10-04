@@ -1,9 +1,10 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=light-and-power
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+}
 
 FORMS	= lightsettingsbase.ui 
-TRANSLATABLES = $${FORMS}
 HEADERS		= light.h minsecspinbox.h
 SOURCES		= light.cpp main.cpp minsecspinbox.cpp
 

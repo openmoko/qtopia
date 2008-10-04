@@ -1,11 +1,11 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=speeddial
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+}
 
 HEADERS		= speeddialedit.h
 SOURCES		= speeddialedit.cpp main.cpp
-
-TRANSLATABLES += speeddialedit.cpp
 
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/speeddial.desktop
 desktop.path=/apps/Settings

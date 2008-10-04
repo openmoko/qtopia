@@ -1,6 +1,14 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=sysinfo
 CONFIG+=qtopia_main
+# Always rebuild versioninfo.o so that the reported build date is correct
+create_raw_dependency($$OBJECTS_DIR/versioninfo.o,FORCE)
+depends(libraries/qtopiacomm)
+enable_cell:depends(libraries/qtopiaphone)
+}
+
+FORMS = documenttypeselector.ui
 
 HEADERS		= memory.h \
 		  graph.h \
@@ -8,9 +16,11 @@ HEADERS		= memory.h \
 		  storage.h \
 		  versioninfo.h \
 		  sysinfo.h \
-                  dataview.h \
-                  securityinfo.h 
-#                  cleanupwizard.h
+          dataview.h \
+          securityinfo.h \
+          networkinfo.h \
+          cleanupwizard.h \
+          deviceselector.h \
 
 SOURCES		= memory.cpp \
 		  graph.cpp \
@@ -19,22 +29,16 @@ SOURCES		= memory.cpp \
 		  versioninfo.cpp \
 		  sysinfo.cpp \
 		  main.cpp \
-                  dataview.cpp \
-                  securityinfo.cpp 
-#                  cleanupwizard.cpp
+          dataview.cpp \
+          securityinfo.cpp \
+          networkinfo.cpp \
+          cleanupwizard.cpp \
 
-# Always rebuild versioninfo.o so that the reported build date is correct
-create_raw_dependency($$OBJECTS_DIR/versioninfo.o,FORCE)
-
-depends(libraries/qtopiacomm)
-enable_cell {
-    HEADERS += siminfo.h modeminfo.h
-    SOURCES += siminfo.cpp modeminfo.cpp
-    depends(libraries/qtopiaphone)
-}
-
-TRANSLATABLES   += \
-                    cleanupwizard.h
+CELL.TYPE=CONDITIONAL_SOURCES
+CELL.CONDITION=enable_cell
+CELL.HEADERS=siminfo.h modeminfo.h
+CELL.SOURCES=siminfo.cpp modeminfo.cpp
+!qbuild:CONDITIONAL_SOURCES(CELL)
 
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=sysinfo*

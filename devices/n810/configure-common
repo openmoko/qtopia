@@ -1,0 +1,42 @@
+# This device uses the mobile UI
+# It works with the home UI too
+-ui-type mobile
+
+# Turn on features.
+-dynamic-rotation
+# The home UI does not support dynamic rotation
+-allow-fail dynamic_rotation
+-ssl
+-dbus
+-libamr
+-pictureflow
+
+# Features that are controlled via modules.
+-add-modules location
+#-add-modules cell
+#-add-modules infrared
+#-add-modules qtuitest
+-add-modules ipcomms
+-add-modules location
+-add-modules media
+-add-mediaengines cruxus
+-add-mediaengines gstreamer
+-add-modules telephony
+-add-modules bluetooth
+-add-modules pkgmanagement
+
+# Additional modules.
+-add-modules connectivity
+-add-modules devtools
+-add-modules essentials
+-add-modules games
+-add-modules inputmethods
+-add-modules messaging
+-add-modules pim
+-add-modules ui
+
+# Home is landscape, mobile is portrait (but supports rotation)
+-displaysize home:800x480,480x800
+-font dejavu_sans_condensed:10,12,13,16,28:50
+-font dejavu_sans_condensed:13,14,15,16,20,21,23,32,36:75
+

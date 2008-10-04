@@ -7,10 +7,10 @@ DEFINES += QT_NO_CAST_TO_ASCII QT_NO_CAST_FROM_ASCII QDBUS_MAKEDLL DBUS_API_SUBJ
 depends(libraries/qt/xml)
 depends(3rdparty/libraries/dbus)
 
-INCLUDEPATH += $$QTE_DEPOT_PATH/tools/qdbus/src
+INCLUDEPATH += $$QTE_DEPOT_PATH/src/dbus
 QMAKE_CXXFLAGS+=$$DBUS_CFLAGS
 
-VPATH += $$QTE_DEPOT_PATH/tools/qdbus/src
+VPATH += $$QTE_DEPOT_PATH/dbus
 
 HEADERS =  qdbusabstractadaptor.h \
            qdbusabstractinterface.h \
@@ -45,11 +45,10 @@ PRIVATE_HEADERS += qdbusabstractadaptor_p.h \
                    qdbusmessage_p.h \
                    qdbusmetaobject_p.h \
                    qdbusmetatype_p.h \
+                   qdbus_symbols_p.h \
                    qdbusthreaddebug_p.h \
                    qdbusutil_p.h \
                    qdbusxmlparser_p.h
-
-HEADERS += $$PRIVATE_HEADERS
 
 SOURCES += qdbusabstractadaptor.cpp \
            qdbusabstractinterface.cpp \
@@ -71,11 +70,11 @@ SOURCES += qdbusabstractadaptor.cpp \
            qdbusmisc.cpp \
            qdbusreply.cpp \
            qdbusserver.cpp \
+           qdbus_symbols.cpp \
            qdbusthread.cpp \
            qdbusutil.cpp \
            qdbusxmlgenerator.cpp \
-           qdbusxmlparser.cpp 
-
+           qdbusxmlparser.cpp
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)
 

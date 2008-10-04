@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -121,10 +119,10 @@ void EricssonCallProvider::ecavNotification( const QString& msg )
 
 EricssonModemService::EricssonModemService
         ( const QString& service, QSerialIODeviceMultiplexer *mux,
-          QObject *parent, bool trolltechExtensions )
+          QObject *parent, bool testExtensions )
     : QModemService( service, mux, parent )
 {
-    this->trolltechExtensions = trolltechExtensions;
+    this->testExtensions = testExtensions;
 
     // We need to do some extra stuff at reset time.
     connect( this, SIGNAL(resetModem()), this, SLOT(reset()) );
@@ -149,15 +147,15 @@ EricssonModemService::~EricssonModemService()
 void EricssonModemService::initialize()
 {
     // Always turn this on for now
-    //if ( trolltechExtensions ) {
+    //if ( testExtensions ) {
     {
 
         // We have a special SIM toolkit implementation that allows us
         // to perform GCF compliance testing.  Start it up now.
-        addInterface( new TrolltechSimToolkit( this ) );
+        addInterface( new TestSimToolkit( this ) );
 
         // Band selection.
-        addInterface( new TrolltechBandSelection( this ) );
+        addInterface( new TestBandSelection( this ) );
 
     }
 
@@ -222,20 +220,20 @@ void EricssonModemService::ttzNotification( const QString& msg )
     }
 }
 
-TrolltechSimToolkit::TrolltechSimToolkit( QModemService *service )
+TestSimToolkit::TestSimToolkit( QModemService *service )
     : QModemSimToolkit( service )
 {
     service->primaryAtChat()->registerNotificationType( "*TCMD:", this, SLOT(tcmd(QString)) );
     service->primaryAtChat()->registerNotificationType( "*TCC:", this, SLOT(tcc(QString)) );
 }
 
-TrolltechSimToolkit::~TrolltechSimToolkit()
+TestSimToolkit::~TestSimToolkit()
 {
 }
 
-void TrolltechSimToolkit::initialize()
+void TestSimToolkit::initialize()
 {
-    // Send the "Trolltech SIM Toolkit Begin" command, which will cause the
+    // Send the "Test SIM Toolkit Begin" command, which will cause the
     // phone simulator to send us the main menu, or to simply ignore us if
     // it does not support SIM toolkit.
     service()->chat( "AT*TSTB" );
@@ -244,19 +242,19 @@ void TrolltechSimToolkit::initialize()
     QModemSimToolkit::initialize();
 }
 
-void TrolltechSimToolkit::begin()
+void TestSimToolkit::begin()
 {
-    // Send the "Trolltech SIM Toolkit Begin" command.
+    // Send the "Test SIM Toolkit Begin" command.
     service()->chat( "AT*TSTB", this, SLOT(tstb(bool)) );
 }
 
-void TrolltechSimToolkit::end()
+void TestSimToolkit::end()
 {
-    // Send the "Trolltech SIM Toolkit End" command.
+    // Send the "Test SIM Toolkit End" command.
     service()->chat( "AT*TSTE" );
 }
 
-void TrolltechSimToolkit::tstb( bool ok )
+void TestSimToolkit::tstb( bool ok )
 {
     // If the initialization command failed, then bail out.
     // If it succeeded, the phone simulator will send us the main menu next.
@@ -264,7 +262,7 @@ void TrolltechSimToolkit::tstb( bool ok )
         emit beginFailed();
 }
 
-void TrolltechSimToolkit::tcmd( const QString& value )
+void TestSimToolkit::tcmd( const QString& value )
 {
     // "*TCMD: size" unsolicited notification indicating the size of the command to fetch.
     uint posn = 6;
@@ -272,7 +270,7 @@ void TrolltechSimToolkit::tcmd( const QString& value )
     fetchCommand( size );
 }
 
-void TrolltechSimToolkit::tcc( const QString& value )
+void TestSimToolkit::tcc( const QString& value )
 {
     // "*TCC: type,data" unsolicited notification for call control events.
     uint posn = 5;
@@ -282,30 +280,30 @@ void TrolltechSimToolkit::tcc( const QString& value )
     emit controlEvent( QSimControlEvent::fromPdu( type, pdu ) );
 }
 
-TrolltechBandSelection::TrolltechBandSelection
+TestBandSelection::TestBandSelection
         ( EricssonModemService *service )
     : QBandSelection( service->service(), service, Server )
 {
     this->service = service;
 }
 
-TrolltechBandSelection::~TrolltechBandSelection()
+TestBandSelection::~TestBandSelection()
 {
 }
 
-void TrolltechBandSelection::requestBand()
+void TestBandSelection::requestBand()
 {
     service->primaryAtChat()->chat
         ( "AT*TBAND?", this, SLOT(tbandGet(bool,QAtResult)) );
 }
 
-void TrolltechBandSelection::requestBands()
+void TestBandSelection::requestBands()
 {
     service->primaryAtChat()->chat
         ( "AT*TBAND=?", this, SLOT(tbandList(bool,QAtResult)) );
 }
 
-void TrolltechBandSelection::setBand
+void TestBandSelection::setBand
         ( QBandSelection::BandMode mode, const QString& value )
 {
     if ( mode == Automatic ) {
@@ -318,7 +316,7 @@ void TrolltechBandSelection::setBand
     }
 }
 
-void TrolltechBandSelection::tbandGet( bool, const QAtResult& result )
+void TestBandSelection::tbandGet( bool, const QAtResult& result )
 {
     QAtResultParser parser( result );
     if ( parser.next( "*TBAND:" ) ) {
@@ -332,12 +330,12 @@ void TrolltechBandSelection::tbandGet( bool, const QAtResult& result )
     }
 }
 
-void TrolltechBandSelection::tbandSet( bool, const QAtResult& result )
+void TestBandSelection::tbandSet( bool, const QAtResult& result )
 {
     emit setBandResult( (QTelephony::Result)result.resultCode() );
 }
 
-void TrolltechBandSelection::tbandList( bool, const QAtResult& result )
+void TestBandSelection::tbandList( bool, const QAtResult& result )
 {
     QStringList list;
     QAtResultParser parser( result );

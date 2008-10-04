@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -30,6 +28,8 @@
 
 #include <qtopialog.h>
 
+
+//#define DEBUG_SESSION
 
 namespace cruxus
 {
@@ -83,43 +83,63 @@ SimpleSession::SimpleSession
     connect(d->coder, SIGNAL(volumeMuted(bool)),SIGNAL(volumeMuted(bool)));
 
     connect(d->coder, SIGNAL(playerStateChanged(QtopiaMedia::State)), SLOT(stateChanged(QtopiaMedia::State)));
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()),SLOT(timeout()));
+
+    timer->start(3500);
+
+#ifdef DEBUG_SESSION
+    qLog(Media) <<"SimpleSession::SimpleSession() "<< this;
+#endif
 }
 
 SimpleSession::~SimpleSession()
 {
-    if (d->connected) {
-        d->coder->disconnectFromInput(d->source);
-        d->sink->disconnectFromInput(d->coder);
-    }
+#ifdef DEBUG_SESSION
+    qLog(Media) <<"SimpleSession::~SimpleSession() "<<this;
+#endif
+    timer->stop();
+
+    d->connected = false;
+    d->coder->disconnectFromInput(d->source);
+    d->sink->disconnectFromInput(d->coder);
 
     if (d->opened) {
         d->source->close();
         d->sink->close();
     }
 
-    delete d->coder;
-
     UriHandlers::destroyInputDevice(d->source);
-    OutputDevices::destroyOutputDevice(d->sink);
+    //OutputDevices::destroyOutputDevice(d->sink);
+
+    d->coder->deleteLater();
 
     delete d;
 }
 
 void SimpleSession::start()
 {
-    qLog(Media) <<"SimpleSession::start() begin "<<this;
+#ifdef DEBUG_SESSION
+    qLog(Media) << "SimpleSession::start() begin " << this;
+#endif
 
     if (d->state == QtopiaMedia::Playing || d->state == QtopiaMedia::Error)
         return;
 
-    qLog(Media) <<"SimpleSession::start() kickoff "<<this;
-
+#ifdef DEBUG_SESSION
+    qLog(Media) << "SimpleSession::start() kickoff " << this;
+#endif
     if (!d->opened) {
-        if (!d->source->open(QIODevice::ReadOnly) ||
-            !d->sink->open(QIODevice::WriteOnly | QIODevice::Unbuffered)) {
+#ifdef DEBUG_SESSION
+        qLog(Media) << "SimpleSession::start() not opened, open " << this;
+#endif
+        if(!d->sink->isOpen())
+            d->sink->open(QIODevice::WriteOnly | QIODevice::Unbuffered);
+
+        if (!d->source->open(QIODevice::ReadOnly)) {
             d->errorString = "Cruxus; Unable to open devices for media session";
             qWarning() << d->errorString;
-
             emit playerStateChanged(d->state = QtopiaMedia::Error);
         }
         else
@@ -127,50 +147,75 @@ void SimpleSession::start()
     }
 
     if (d->opened && !d->connected) {
+#ifdef DEBUG_SESSION
+        qLog(Media) <<"SimpleSession::start() no input, connect " << this;
+#endif
         d->coder->connectToInput(d->source);
         d->sink->connectToInput(d->coder);
 
         d->connected = true;
     }
-
-    if (d->connected)
+    if (d->connected) {
+#ifdef DEBUG_SESSION
+        qLog(Media) << "SimpleSession::start() decoder begin " << this;
+#endif
         d->coder->start();
+    }
 }
 
 void SimpleSession::pause()
 {
-    qLog(Media) <<"SimpleSession::pause() "<<this;
-
-    if (d->connected)
+    if (d->connected) {
+#ifdef DEBUG_SESSION
+        qLog(Media) <<"SimpleSession::pause() " << this;
+#endif
         d->coder->pause();
+    }
+#ifdef DEBUG_SESSION
+    else {
+        qLog(Media) << "SimpleSession::pause() not connected???" << this;
+    }
+#endif
 }
 
 void SimpleSession::stop()
 {
-    qLog(Media) <<"SimpleSession::stop() "<<this;
-
-    if (d->connected)
+    if (d->connected) {
+#ifdef DEBUG_SESSION
+        qLog(Media) << "SimpleSession::stop() " << this;
+#endif
         d->coder->stop();
+        d->coder->disconnectFromInput(d->source);
+        d->sink->disconnectFromInput(d->coder);
+        d->connected = false;
+    }
+#ifdef DEBUG_SESSION
+    else {
+        qLog(Media) << "SimpleSession::stop() not connected???" << this;
+    }
+#endif
+    d->connected = false;
 }
 
 void SimpleSession::suspend()
 {
-    qLog(Media) <<"SimpleSession::suspend() "<<this;
-
+#ifdef DEBUG_SESSION
+    qLog(Media) << "SimpleSession::suspend()" << this;
+#endif
     pause();
-
-    if (d->opened) {
-        d->source->close();
-        d->sink->close();
-        d->opened = false;
-    }
+    d->state = QtopiaMedia::Paused;
+    emit playerStateChanged(d->state);
 }
 
 void SimpleSession::resume()
 {
-    qLog(Media) <<"SimpleSession::resume() "<<this;
+#ifdef DEBUG_SESSION
+    qLog(Media) << "SimpleSession::resume()" << this;
+#endif
 
     start();
+    d->state = QtopiaMedia::Playing;
+    emit playerStateChanged(d->state);
 }
 
 void SimpleSession::seek(quint32 ms)
@@ -235,13 +280,27 @@ QString SimpleSession::id() const
 
 QString SimpleSession::reportData() const
 {
-    return QString();
+    return QString("engine:Cruxus");
 }
 
 void SimpleSession::stateChanged(QtopiaMedia::State state)
 {
     d->state = state;
 }
+
+void SimpleSession::timeout()
+{
+#ifdef DEBUG_SESSION
+    qLog(Media) << "SimpleSession::timeout() " << this;
+#endif
+
+    timer->stop();
+
+    if ((d->state == QtopiaMedia::Error) ||
+            ((!d->connected && !d->opened) && (d->state == QtopiaMedia::Playing)))
+        resume();
+}
+
 // }}}
 
 }   // ns cruxus

@@ -1,121 +1,53 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qmailmessage.h>
-#include <qsoftmenubar.h>
-#include <qtopiaapplication.h>
-
-#include <QFile>
-#include <QFileInfo>
-#include <QKeyEvent>
-#include <QAction>
-#include <QTextEdit>
-#include <QLabel>
-#include <QLayout>
-#include <QClipboard>
-#include <QMenu>
-#include <QSettings>
-#include <QTextCursor>
-#include <QContact>
-
 #include "genericcomposer.h"
 #include "templatetext.h"
-#include <qtopia/serial/qgsmcodec.h>
+
+#include <private/detailspage_p.h>
+#include <private/addressselectorwidget_p.h>
+#ifdef QTOPIA_HOMEUI
+#include <private/qtopiainputdialog_p.h>
+#endif
+#include <qcollectivenamespace.h>
+
+#include <QAction>
+#include <QContact>
+#include <QGsmCodec>
+#include <QInputContext>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QMailAccount>
+#include <QMailMessage>
+#include <QMenu>
+#include <QSettings>
+#include <QSoftMenuBar>
+#include <QStackedWidget>
+#include <QTextEdit>
+#include <QtopiaApplication>
+#include <QVBoxLayout>
+#ifndef QT_NO_CLIPBOARD
+#include <QClipboard>
+#endif
 
 #define SMS_CHAR_LIMIT 459
 
-#ifndef QTOPIA_NO_SMS
-//Qtmail sends either GSM or UCS2 encoded SMS messages
-//If another encoding is ultimately used to send the message,
-//these functions will return inaccurate results
-void GenericComposer::smsLengthInfo(uint& estimatedBytes, bool& isUnicode)
-{
-    //calculate the number of consumed bytes
-    //considering the gsm charset
-
-    unsigned short c;
-    unsigned short d;
-    uint count = 0;
-    QString unicodestr = text();
-    for(int i = 0; i < unicodestr.length(); ++i)
-    {
-        c = unicodestr[i].unicode();
-        if(c >= 256)
-        {
-            estimatedBytes = unicodestr.length() * 2;
-            isUnicode = true;
-            return;
-        }
-        else
-        {
-            d = QGsmCodec::twoByteFromUnicode(c);
-            if(d >= 256)
-                count += 2;
-            else if(d == 0x10) //0x10 is unrecognised char
-            {
-                estimatedBytes = unicodestr.length() * 2; //non gsm char, so go unicode
-                isUnicode = true;
-                return;
-            }
-            else
-                count += 1;
-        }
-    }
-    isUnicode = false;
-    estimatedBytes = count;
-}
-//estimates the number of messages that will be sent
-
-int GenericComposer::smsCountInfo()
-{
-    bool isUnicode = false;
-    uint numBytes = 0;
-    int numMessages = 0;
-    int len = text().length();
-
-    smsLengthInfo(numBytes,isUnicode);
-
-    if(isUnicode) //all 2 byte UCS2 so ok to use text length
-    {
-        if (len <= 70 ) {
-            numMessages = 1;
-        } else {
-            // 67 = 70 - fragment_header_size (3).
-            numMessages = ( len + 66 ) / 67;
-        }
-    }
-    else
-    {
-        //use byte length instead of text length
-        //as some GSM chars consume 2 bytes
-        if ( numBytes <= 160 ) {
-            numMessages = 1;
-        } else {
-        // 153 = 160 - fragment_header_size (7).
-            numMessages = ( numBytes + 152 ) / 153;
-        }
-    }
-    return numMessages;
-}
-#endif
 
 class ComposerTextEdit : public QTextEdit
 {
@@ -128,6 +60,9 @@ public:
     void limitedPaste();
 #endif
 
+    bool isComposing();
+    bool isEmpty();
+    
 signals:
     void finished();
 
@@ -148,23 +83,26 @@ ComposerTextEdit::ComposerTextEdit( QWidget *parent, const char *name )
     setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     setLineWrapMode( QTextEdit::WidgetWidth );
 
-    connect(this, SIGNAL(textChanged()), this, SLOT(updateLabel()));
+    connect(document(), SIGNAL(contentsChanged()), this, SLOT(updateLabel()));
+
     updateLabel();
 }
 
 void ComposerTextEdit::updateLabel()
 {
-    int charCount = toPlainText().length();
+    if (isEmpty()) {
+        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
+        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel);
+    } else {
+        if (isComposing())
+            QSoftMenuBar::clearLabel(this, Qt::Key_Select);
+        else
+            QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Next);
 
-    if (charCount > 0) {
-        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::Next);
-        if( Qtopia::mousePreferred() )
+        if (Qtopia::mousePreferred())
             QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Next);
         else
             QSoftMenuBar::clearLabel(this, Qt::Key_Back);
-    } else {
-        QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
-        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Cancel);
     }
 }
 
@@ -200,7 +138,6 @@ void ComposerTextEdit::keyPressEvent( QKeyEvent *e )
 
     if (e->key() == Qt::Key_Back) {
         if( Qtopia::mousePreferred() ) {
-//            e->ignore();
             e->accept();
             emit finished();
             return;
@@ -242,6 +179,20 @@ void ComposerTextEdit::limitedPaste()
 }
 #endif
 
+bool ComposerTextEdit::isComposing()
+{
+    return (inputContext() && inputContext()->isComposing());
+}
+
+bool ComposerTextEdit::isEmpty()
+{
+    if (!document()->isEmpty())
+        return false;
+
+    // Otherwise there may be pre-edit input queued in the input context
+    return !isComposing();
+}
+
 void ComposerTextEdit::mousePressEvent( QMouseEvent *e )
 {
     if( e->button() == Qt::RightButton )
@@ -263,11 +214,49 @@ void ComposerTextEdit::inputMethodEvent( QInputMethodEvent *e )
     QTextEdit::inputMethodEvent( e );
 }
 
-GenericComposer::GenericComposer( QWidget *parent )
-    : QWidget( parent ),
-      m_vCard( false ),
-      m_vCardData()
+static void addActionsFromWidget(QWidget* sourceWidget, QMenu* targetMenu)
 {
+    if(!sourceWidget) return;
+    foreach(QAction* a,sourceWidget->actions())
+        targetMenu->addAction(a);
+}
+
+GenericComposerInterface::GenericComposerInterface( QWidget *parent )
+    : QMailComposerInterface( parent ),
+    m_widgetStack(0),
+    m_composerWidget(0),
+    m_textEdit(0),
+    m_smsLimitIndicator(0),
+    m_vCard( false ),
+    m_vCardData(),
+    m_type(QMailMessage::Sms)
+{
+    init();
+}
+
+GenericComposerInterface::~GenericComposerInterface()
+{
+    QSettings cfg("Trolltech","qtmail");
+    cfg.beginGroup( "GenericComposer" );
+    cfg.setValue( "showSmsLimitIndicator", m_showLimitAction->isChecked() );
+}
+
+void GenericComposerInterface::init()
+{
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setSpacing(0);
+    layout->setContentsMargins(0,0,0,0);
+    QWidget::setLayout(layout);
+
+    //widget stack
+    m_widgetStack = new QStackedWidget(this);
+    m_widgetStack->setFocusPolicy(Qt::NoFocus);
+    layout->addWidget(m_widgetStack);
+
+    //composer widget
+    m_composerWidget = new QWidget(m_widgetStack);
+    m_widgetStack->addWidget(m_composerWidget);
+
     QSettings cfg("Trolltech","qtmail");
     cfg.beginGroup( "GenericComposer" );
 
@@ -279,83 +268,146 @@ GenericComposer::GenericComposer( QWidget *parent )
     m_templateTextAction = new QAction( tr("Insert template"), this );
     connect( m_templateTextAction, SIGNAL(triggered()), this, SLOT(templateText()) );
 
-    m_smsLimitIndicator = new QLabel( this );
-    m_smsLimitIndicator->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QVBoxLayout *l = new QVBoxLayout(m_composerWidget);
+    l->setContentsMargins(0, 0, 0, 0);
+    l->setSpacing(0);
 
-    m_textEdit = new ComposerTextEdit( this );
+#ifdef QTOPIA_HOMEUI
+    QHBoxLayout* toLayout = new QHBoxLayout;
+    toLayout->setContentsMargins(0, 0, 0, 0);
+    toLayout->setSpacing(0);
+
+    m_toEdit = new HomeFieldButton(tr("To:"), m_sizer, true);
+    connect(m_toEdit, SIGNAL(clicked()), this, SLOT(recipientsActivated()));
+    toLayout->addWidget(m_toEdit);
+
+    m_contactsButton = new HomeActionButton(tr("Contact"), QtopiaHome::Green);
+    m_contactsButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    m_contactsButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    m_contactsButton->setMaximumWidth(45);
+    m_contactsButton->setMinimumWidth(45);
+    connect(m_contactsButton, SIGNAL(clicked()), this, SLOT(selectRecipients()));
+    toLayout->addWidget(m_contactsButton);
+
+    l->addLayout(toLayout);
+#endif
+
+    m_smsLimitIndicator = new QLabel(m_composerWidget);
+    m_smsLimitIndicator->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    l->addWidget( m_smsLimitIndicator );
+
+    //main text field
+    m_textEdit = new ComposerTextEdit(m_composerWidget);
+    m_composerWidget->setFocusProxy(m_textEdit);
+    l->addWidget( m_textEdit );
 #ifdef QTOPIA4_TODO
     m_textEdit->setMaxLength( SMS_BYTE_LIMIT );
 #endif
     connect( m_textEdit, SIGNAL(textChanged()), this, SLOT(textChanged()) );
-    connect( m_textEdit, SIGNAL(textChanged()), this, SIGNAL(contentChanged()) );
-    connect( m_textEdit, SIGNAL(finished()), this, SIGNAL(finished()));
+    connect( m_textEdit, SIGNAL(textChanged()), this, SIGNAL(changed()) );
+#ifdef QTOPIA_HOMEUI
+    connect( m_textEdit, SIGNAL(finished()), this, SIGNAL(sendMessage()));
+#else
+    connect( m_textEdit, SIGNAL(finished()), this, SLOT(detailsPage()));
+#endif
 
-    QVBoxLayout *l = new QVBoxLayout( this );
-    l->setContentsMargins(0, 0, 0, 0);
-    l->setSpacing(0);
-    l->addWidget( m_smsLimitIndicator );
-    l->addWidget( m_textEdit );
+    //details widget
+    m_detailsWidget = new DetailsPage(m_widgetStack);
+    connect( m_detailsWidget, SIGNAL(changed()), this, SIGNAL(changed()));
+    connect( m_detailsWidget, SIGNAL(sendMessage()), this, SIGNAL(sendMessage()));
+    connect( m_detailsWidget, SIGNAL(cancel()), this, SIGNAL(cancel()));
+    connect( m_detailsWidget, SIGNAL(editMessage()),this, SLOT(composePage()));
+    m_widgetStack->addWidget(m_detailsWidget);
 
-    setFocusProxy( m_textEdit );
+    //menus
+    QMenu* textEditMenu = QSoftMenuBar::menuFor(m_textEdit);
+    textEditMenu->addSeparator();
+    textEditMenu->addAction(m_showLimitAction);
+    textEditMenu->addAction(m_templateTextAction);
+    addActionsFromWidget(QWidget::parentWidget(),textEditMenu);
 
+    composePage();
+    setContext("Create " + displayName(m_type));
     updateSmsLimitIndicator();
     textChanged();
 }
 
-GenericComposer::~GenericComposer()
+QString GenericComposerInterface::text() const
 {
-    QSettings cfg("Trolltech","qtmail");
-    cfg.beginGroup( "GenericComposer" );
-    cfg.setValue( "showSmsLimitIndicator", m_showLimitAction->isChecked() );
+    if ( m_vCard )
+        return m_vCardData;
+    else
+        return m_textEdit->toPlainText();
 }
 
-void GenericComposer::addActions(QMenu* menu)
+void GenericComposerInterface::setContext(const QString& title)
 {
-    menu->addAction(m_showLimitAction);
-    menu->addAction(m_templateTextAction);
+    m_title = title;
+    emit contextChanged();
 }
 
-void GenericComposer::updateSmsLimitIndicator()
+bool GenericComposerInterface::isEmpty() const
 {
-    if ( m_showLimitAction->isChecked() && !m_vCard ) {
-        if( m_smsLimitIndicator->isHidden() )
-            m_smsLimitIndicator->show();
-    } else {
-        if( !m_smsLimitIndicator->isHidden() )
-            m_smsLimitIndicator->hide();
+    if (m_vCard)
+        return m_vCardData.isEmpty();
+    else 
+        return m_textEdit->isEmpty();
+}
+
+void GenericComposerInterface::setMessage(const QMailMessage &mail )
+{
+    setBody( mail.body().data(), mail.headerField("Content-Type").content() );
+
+    //set the details
+    m_detailsWidget->setDetails(mail);
+    setTo(m_detailsWidget->to());
+}
+
+QMailMessage GenericComposerInterface::message() const
+{
+    QMailMessage mail;
+
+    QMailMessageContentType type( "text/plain; charset=UTF-8" );
+    mail.setBody( QMailMessageBody::fromData( text(), type, QMailMessageBody::Base64 ) );
+
+    mail.setMessageType(m_type);
+    if (m_type == QMailMessage::Sms) {
+        mail.setHeaderField("X-Sms-Type", "normal");
     }
+    if (isVCard()) {
+        mail.setHeaderField(QLatin1String("Content-Type"), QLatin1String("text/x-vCard"));
+    }
+
+    m_detailsWidget->getDetails(mail);
+
+    if (m_type == QMailMessage::Instant) {
+        // Turn any addresses that aren't valid for libcollective into jabber addresses
+        QList<QMailAddress> recipients;
+        foreach (const QMailAddress &addr, mail.to()) {
+            if (addr.isChatAddress()) {
+                recipients.append(addr);
+            } else {
+                QString jabberAddress = QCollective::encodeUri("jabber", addr.address());
+                if (addr.name() != addr.address()) {
+                    recipients.append(QMailAddress(addr.name(), jabberAddress));
+                } else {
+                    recipients.append(QMailAddress(jabberAddress));
+                }
+            }
+        }
+
+        mail.setTo(recipients);
+    }
+
+    return mail;
 }
 
-void GenericComposer::textChanged()
+void GenericComposerInterface::clear()
 {
-    static bool rtl = QApplication::isRightToLeft();
-
-    int charCount = m_textEdit->toPlainText().length();
-    int remaining = SMS_CHAR_LIMIT - charCount; 
-
-#ifndef QTOPIA_NO_SMS
-    int numMessages = smsCountInfo();
-#else
-    int numMessages = 1;
-#endif
-
-    QString info = tr("%1/%2","e.g. 5/7").arg( rtl ? numMessages : remaining )
-                                         .arg( rtl ? remaining : numMessages );
-    m_smsLimitIndicator->setText( ' ' + info + ' ' );
+    setBody( QString(), QString() );
 }
 
-void GenericComposer::templateText()
-{
-    TemplateTextDialog *templateTextDialog = new TemplateTextDialog( this, "template-text" );
-    QtopiaApplication::execDialog( templateTextDialog );
-
-    ComposerTextEdit *composer = qobject_cast<ComposerTextEdit *>( m_textEdit );
-    if (templateTextDialog->result() && composer)
-        composer->limitedInsert( templateTextDialog->text() );
-    delete templateTextDialog;
-}
-
-void GenericComposer::setText( const QString &t, const QString &type )
+void GenericComposerInterface::setBody( const QString& t, const QString &type )
 {
 #ifndef QTOPIA_NO_SMS
     if (type.contains(QLatin1String("text/x-vCard"), Qt::CaseInsensitive)) {
@@ -402,76 +454,95 @@ void GenericComposer::setText( const QString &t, const QString &type )
     if ( m_vCard ) {
         setFocusProxy( 0 );
     } else {
+        m_textEdit->moveCursor( QTextCursor::End );
         setFocusProxy( m_textEdit );
     }
     updateSmsLimitIndicator();
 }
 
-QString GenericComposer::text() const
+void GenericComposerInterface::setDefaultAccount(const QMailAccountId& id)
 {
-    if ( m_vCard )
-        return m_vCardData;
-    else
-        return m_textEdit->toPlainText();
+    m_detailsWidget->setDefaultAccount(id);
 }
 
-GenericComposerInterface::GenericComposerInterface( QWidget *parent )
-    : QMailComposerInterface( parent )
+void GenericComposerInterface::setTo(const QString& toAddress)
 {
-    m_composer = new GenericComposer( parent );
-    connect( m_composer, SIGNAL(contentChanged()), this, SIGNAL(contentChanged()) );
-    connect( m_composer, SIGNAL(finished()), this, SIGNAL(finished()) );
+    QStringList addressList;
+
+    // If the address is a complicated chat address, simplify it for presentation
+    foreach (const QMailAddress &addr, QMailAddress::fromStringList(toAddress)) {
+        if (addr.isChatAddress()) {
+            // Use the decoded form of the address for appearances
+            if (addr.name() != addr.address()) {
+                addressList.append(QMailAddress(addr.name(), addr.chatIdentifier()).toString());
+            } else {
+                addressList.append(addr.chatIdentifier());
+            }
+        } else {
+            addressList.append(addr.toString());
+        }
+    }
+
+    QString addressStr(addressList.join(", "));
+    m_detailsWidget->setTo(addressStr);
+#ifdef QTOPIA_HOMEUI
+    m_toEdit->setField(addressStr);
+#endif
 }
 
-GenericComposerInterface::~GenericComposerInterface()
+void GenericComposerInterface::setFrom(const QString& fromAddress)
 {
-    delete m_composer;
+    m_detailsWidget->setFrom(fromAddress);
 }
 
-bool GenericComposerInterface::isEmpty() const
+void GenericComposerInterface::setSubject(const QString& subject)
 {
-    return m_composer->text().isEmpty();
+    m_detailsWidget->setSubject(subject);
 }
 
-void GenericComposerInterface::setMessage(const QMailMessage &mail )
+void GenericComposerInterface::setMessageType(QMailMessage::MessageType type)
 {
-    setText( mail.body().data(), mail.headerField("Content-Type").content() );
+    m_type = type;
+
+    m_detailsWidget->setType(m_type);
+    updateSmsLimitIndicator();
 }
 
-QMailMessage GenericComposerInterface::message() const
+QString GenericComposerInterface::from() const
 {
-    QMailMessage mail;
-    if( isEmpty() )
-        return mail;
-
-    QMailMessageContentType type( "text/plain; charset=UTF-8" );
-    mail.setBody( QMailMessageBody::fromData( m_composer->text(), type, QMailMessageBody::Base64 ) );
-
-    mail.setMessageType(QMailMessage::Sms);
-    if (m_composer->isVCard())
-        mail.setHeaderField(QLatin1String("Content-Type"), QLatin1String("text/x-vCard"));
-
-    return mail;
+    return m_detailsWidget->from();
 }
 
-void GenericComposerInterface::clear()
+QString GenericComposerInterface::to() const
 {
-    m_composer->setText( QString(), QString() );
+    return m_detailsWidget->to();
 }
 
-void GenericComposerInterface::setText( const QString &txt, const QString &type )
+bool GenericComposerInterface::isReadyToSend() const
 {
-    m_composer->setText( txt, type );
+    return !to().trimmed().isEmpty();
 }
 
-QWidget *GenericComposerInterface::widget() const
+bool GenericComposerInterface::isDetailsOnlyMode() const
 {
-    return m_composer;
+    return m_detailsWidget->isDetailsOnlyMode();
 }
 
-void GenericComposerInterface::addActions(QMenu* menu) const
+void GenericComposerInterface::setDetailsOnlyMode(bool val)
 {
-    m_composer->addActions(menu);
+    m_detailsWidget->setDetailsOnlyMode(val);
+    if(val)
+        detailsPage();
+}
+
+QString GenericComposerInterface::contextTitle() const
+{
+    return m_title;
+}
+
+QMailAccount GenericComposerInterface::fromAccount() const
+{
+    return m_detailsWidget->fromAccount();
 }
 
 void GenericComposerInterface::attach( const QContent &, QMailMessage::AttachmentsAction )
@@ -479,42 +550,232 @@ void GenericComposerInterface::attach( const QContent &, QMailMessage::Attachmen
     qWarning("Unimplemented function called %s %d, %s", __FILE__, __LINE__, __FUNCTION__ );
 }
 
+void GenericComposerInterface::reply(const QMailMessage& source, int action)
+{
+    QString toAddress;
+    QMailMessage mail;
+
+    if (action == Forward) {
+        QString bodyText;
+        if (source.status() & QMailMessage::Incoming)  {
+            bodyText = source.from().displayName();
+            bodyText += ":\n\"";
+            bodyText += source.body().data();
+            bodyText += "\"\n--\n";
+        } else {
+            bodyText += source.body().data();
+        }
+
+        QMailMessageContentType contentType("text/plain; charset=UTF-8");
+        mail.setBody(QMailMessageBody::fromData(bodyText, contentType, QMailMessageBody::Base64));
+        setMessage(mail);
+    } else {
+        QMailAddress replyAddress(source.replyTo());
+        if (replyAddress.isNull())
+            replyAddress = source.from();
+
+        toAddress = replyAddress.address();
+
+        clear();
+    }
+    if (!toAddress.isEmpty())
+        setTo( toAddress );
+
+    QString task;
+    if ((action == Create) || (action == Forward)) {
+        task = (action == Create ? tr("Create") : tr("Forward"));
+        task += " " + displayName(m_type);
+    } else if (action == Reply) {
+        task = tr("Reply");
+    } else if (action == ReplyToAll) {
+        task = tr("Reply to all");
+    }
+    setContext(task);
+}
+
+void GenericComposerInterface::updateSmsLimitIndicator()
+{
+    if ( m_showLimitAction->isChecked() && m_type == QMailMessage::Sms && !m_vCard ) {
+        if( m_smsLimitIndicator->isHidden() )
+        {
+            m_smsLimitIndicator->show();
+            textChanged(); //force initial update
+        }
+    } else {
+        if( !m_smsLimitIndicator->isHidden() )
+            m_smsLimitIndicator->hide();
+    }
+}
+
+void GenericComposerInterface::textChanged()
+{
+    static bool rtl = QApplication::isRightToLeft();
+
+    if (!m_smsLimitIndicator->isHidden()) {
+        int charCount = m_textEdit->toPlainText().length();
+        int remaining = SMS_CHAR_LIMIT - charCount;
+
+#ifndef QTOPIA_NO_SMS
+        int numMessages = smsCountInfo();
+#else
+        int numMessages = 1;
+#endif
+
+        QString info = tr("%1/%2","e.g. 5/7").arg( rtl ? numMessages : remaining )
+                                            .arg( rtl ? remaining : numMessages );
+        m_smsLimitIndicator->setText( ' ' + info + ' ' );
+    }
+}
+
+void GenericComposerInterface::templateText()
+{
+    TemplateTextDialog *templateTextDialog = new TemplateTextDialog( this, "template-text" );
+    QtopiaApplication::execDialog( templateTextDialog );
+
+    ComposerTextEdit *composer = qobject_cast<ComposerTextEdit *>( m_textEdit );
+    if (templateTextDialog->result() && composer)
+        composer->limitedInsert( templateTextDialog->text() );
+    delete templateTextDialog;
+}
+
+#ifndef QTOPIA_NO_SMS
+//Qtmail sends either GSM or UCS2 encoded SMS messages
+//If another encoding is ultimately used to send the message,
+//these functions will return inaccurate results
+void GenericComposerInterface::smsLengthInfo(uint& estimatedBytes, bool& isUnicode)
+{
+    //calculate the number of consumed bytes
+    //considering the gsm charset
+
+    unsigned short c;
+    unsigned short d;
+    uint count = 0;
+    QString unicodestr = text();
+    for(int i = 0; i < unicodestr.length(); ++i)
+    {
+        c = unicodestr[i].unicode();
+        if(c >= 256)
+        {
+            estimatedBytes = unicodestr.length() * 2;
+            isUnicode = true;
+            return;
+        }
+        else
+        {
+            d = QGsmCodec::twoByteFromUnicode(c);
+            if(d >= 256)
+                count += 2;
+            else if(d == 0x10) //0x10 is unrecognised char
+            {
+                estimatedBytes = unicodestr.length() * 2; //non gsm char, so go unicode
+                isUnicode = true;
+                return;
+            }
+            else
+                count += 1;
+        }
+    }
+    isUnicode = false;
+    estimatedBytes = count;
+}
+//estimates the number of messages that will be sent
+
+int GenericComposerInterface::smsCountInfo()
+{
+    bool isUnicode = false;
+    uint numBytes = 0;
+    int numMessages = 0;
+    int len = text().length();
+
+    smsLengthInfo(numBytes,isUnicode);
+
+    if(isUnicode) //all 2 byte UCS2 so ok to use text length
+    {
+        if (len <= 70 ) {
+            numMessages = 1;
+        } else {
+            // 67 = 70 - fragment_header_size (3).
+            numMessages = ( len + 66 ) / 67;
+        }
+    }
+    else
+    {
+        //use byte length instead of text length
+        //as some GSM chars consume 2 bytes
+        if ( numBytes <= 160 ) {
+            numMessages = 1;
+        } else {
+        // 153 = 160 - fragment_header_size (7).
+            numMessages = ( numBytes + 152 ) / 153;
+        }
+    }
+    return numMessages;
+}
+#endif
+ 
+void GenericComposerInterface::detailsPage()
+{
+    if (isEmpty() && !isDetailsOnlyMode()) {
+        emit cancel();
+    } else {
+        m_widgetStack->setCurrentWidget(m_detailsWidget);
+        QWidget::setFocusProxy(m_detailsWidget);
+        setContext(displayName(m_type) + " " + tr("details"));
+    }
+}
+
+void GenericComposerInterface::composePage()
+{
+    m_widgetStack->setCurrentWidget(m_composerWidget);
+    QWidget::setFocusProxy(m_textEdit);
+}
+
+#ifdef QTOPIA_HOMEUI
+void GenericComposerInterface::selectRecipients()
+{
+    static const QString addressSeparator(", ");
+
+    QDialog selectionDialog(this);
+    selectionDialog.setWindowTitle(tr("Select Contacts"));
+
+    QVBoxLayout *vbl = new QVBoxLayout(&selectionDialog);
+    selectionDialog.setLayout(vbl);
+
+    AddressSelectorWidget* addressSelector= new AddressSelectorWidget(AddressSelectorWidget::InstantMessageSelection, &selectionDialog);
+    vbl->addWidget(addressSelector);
+
+    // For instant messages, pass only the actual address elements to the selector
+    QStringList addressList;
+    foreach (const QMailAddress &addr, QMailAddress::fromStringList(to()))
+        addressList.append(addr.address());
+    addressSelector->setSelectedAddresses(addressList);
+
+    if (QtopiaApplication::execDialog(&selectionDialog) == QDialog::Accepted) {
+        setTo(addressSelector->selectedAddresses().join(addressSeparator));
+    }
+}
+
+void GenericComposerInterface::recipientsActivated()
+{
+    bool ok = false;
+    QString ret = QtopiaInputDialog::getText(this, tr("To"), tr("To"), QLineEdit::Normal, QtopiaApplication::Words, QString(), m_toEdit->field(), &ok);
+    if (ok) {
+        // Create valid jabber addresses from this input
+        QStringList addresses;
+        foreach (const QString &portion, ret.split(","))
+            addresses.append(QCollective::encodeUri("jabber", portion.trimmed()));
+
+        setTo(addresses.join(", "));
+    }
+}
+#endif
+
+
 QTOPIA_EXPORT_PLUGIN( GenericComposerPlugin )
 
 GenericComposerPlugin::GenericComposerPlugin()
     : QMailComposerPlugin()
 {
-}
-
-QString GenericComposerPlugin::key() const
-{
-    return "GenericComposer";
-}
-
-QMailMessage::MessageType GenericComposerPlugin::messageType() const
-{
-    return QMailMessage::Sms;
-}
-
-QString GenericComposerPlugin::name() const
-{
-    return tr("Text message");
-}
-
-QString GenericComposerPlugin::displayName() const
-{
-    return tr("message");
-}
-
-QIcon GenericComposerPlugin::displayIcon() const
-{
-    static QIcon icon(":icon/txt");
-    return icon;
-}
-
-bool GenericComposerPlugin::isSupported( QMailMessage::MessageType type ) const
-{
-    return (type == QMailMessage::Sms);
 }
 
 QMailComposerInterface* GenericComposerPlugin::create( QWidget *parent )

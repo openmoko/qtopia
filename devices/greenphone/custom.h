@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -60,16 +58,21 @@
 #define QTOPIA_ENABLE_GLOBAL_BACKGROUNDS
 
 // Disable media player visualization
+#ifndef NO_VISUALIZATION
 #define NO_VISUALIZATION
+#endif
+
+// Set exclusive settings for mediarecorder!
+#define EXCLUSIVE_AUDIO_SETTING
+#define EXCLUSIVE_AUDIO_RATE      8000
+#define EXCLUSIVE_AUDIO_CHANNELS  1
 
 // Define the devices whose packages are compatible with this device,
 // by convention the first device listed is this device.
 #define QTOPIA_COMPATIBLE_DEVICES "Greenphone"
 
-// Start Synchronization daemons for TCP and Serial comms by default.
-#define QDSYNC_DEFAULT_PORTS QStringList() << "tcp" << "serial"
-// Specify the location of the serial port
-#define QDSYNC_DEFAULT_SERIAL_PORT "/dev/ttyUSB0"
+// Start Synchronization daemons for the USB gadget by default
+#define QDSYNC_DEFAULT_PORTS QStringList() << "gadget"
 // Specify the time to delay the first Synchronization instance from running
 #define QDSYNC_STARTUP_DELAY 30000 // 30 seconds
 // Specify the device name to report

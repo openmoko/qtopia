@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,6 +24,7 @@
 
 #include "qsmsmessagelist.h"
 
+class QSMSMessage;
 class HardwareManipulator : public QObject
 {
 Q_OBJECT
@@ -38,6 +37,8 @@ public slots:
     virtual void handleFromData( const QString& );
     virtual void handleToData( const QString& );
     virtual void setPhoneNumber( const QString& );
+    virtual void constructSMSMessage(const int type, const QString &sender, const QString &serviceCenter, const QString &text);
+    virtual void sendSMS( const QSMSMessage& m );
 
 signals:
     void unsolicitedCommand(const QString &cmd);
@@ -49,7 +50,6 @@ signals:
 protected:
     virtual QString constructCBMessage(const QString &messageCode, int geographicalScope, const QString &updateNumber, const QString &channel,
     const QString &scheme, int language, const QString &numPages, const QString &page, const QString &content);
-    virtual void constructSMSMessage(const QString &sender, const QString &serviceCenter, const QString &text);
     virtual void constructSMSDatagram(int port, const QString &sender,  const QByteArray &data, const QByteArray &contentType);
 
     virtual void warning(const QString &title, const QString &message);

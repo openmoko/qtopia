@@ -1,0 +1,15 @@
+TEMPLATE=plugin
+TARGET=pkim
+
+PLUGIN_FOR=qtopia
+PLUGIN_TYPE=inputmethods
+
+CONFIG+=qtopia singleexec
+MODULES*=inputmatch handwriting
+
+include(pkim.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

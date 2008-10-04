@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef CONTACTDOCUMENT_H
@@ -23,7 +21,7 @@
 
 #include <QObject>
 #ifdef QTOPIA_VOIP
-#include "qpresence.h"
+class QCollectivePresence;
 #endif
 #include <qtopiaservices.h>
 #include <QTextCharFormat>
@@ -36,6 +34,8 @@ class QTextDocument;
 class QTextCursor;
 class QWidget;
 class ContactAnchorData;
+class QContactFieldDefinition;
+class QStringList;
 #if defined(QTOPIA_TELEPHONY)
 class QContent;
 #endif
@@ -50,15 +50,16 @@ public:
     virtual ~ContactDocument();
 
     typedef enum {Details} ContactDocumentType;
-    typedef enum {None, DialLink, EmailLink, QdlLink} ContactAnchorType;
+    typedef enum {None, DialLink, EmailLink, QdlLink, CustomLink} ContactAnchorType;
 
-    void init(QWidget *widget, QContactModel* model, const QContact& contact, ContactDocumentType docType);
+    void init(QWidget *widget, const QContact& contact, ContactDocumentType docType);
 
     QTextDocument* textDocument() const { return mDocument; }
     QContact contact() const { return mContact; }
 
     ContactAnchorType getAnchorType(const QString& href);
     QString getAnchorTarget(const QString &href);
+    QString getAnchorField(const QString &href);
 
 signals:
     void externalLinkActivated();
@@ -91,15 +92,13 @@ protected:
     void createContactDetailsDocument();
 
     // Fragment helpers
-    void addPhoneFragment( QTextCursor& outCurs, const QString& img, const QString& num, LinkType link, QContactModel::Field type );
+    void addFieldFragments(QTextCursor &curs, const QString &tags);
+    void addFieldFragment( QTextCursor& outCurs, const QContactFieldDefinition &, const QString &);
 
     QString nameFragment();
     void addBusinessFragment( QTextCursor &outCurs );
     void addPersonalFragment( QTextCursor &outCurs );
-    void addBusinessPhoneFragment( QTextCursor &outCurs );
-    void addHomePhoneFragment( QTextCursor &outCurs );
     void addEmailFragment( QTextCursor &outCurs );
-    void addVoipFragment( QTextCursor& outCurs, const QString& img, const QString& uri, LinkType link, QContactModel::Field type );
 
     void addCachedPixmap(const QString& url, const QString& path);
 
@@ -115,10 +114,7 @@ protected:
                       const QTextBlockFormat& bf, const QTextCharFormat& bcf);
 
 #ifdef QTOPIA_VOIP
-    QPresence *mPresence;
-    QPixmap *mOnlinePixmap, *mOfflinePixmap;
-    QPixmap *getPresencePixmap(bool online);
-    QStringList mMonitoredURIs;
+    QCollectivePresence *mPresenceProvider;
 #endif
 
     QHash<QString, QPixmap> mCachedPixmaps;
@@ -129,10 +125,9 @@ protected:
 
     private slots:
 #ifdef QTOPIA_VOIP
-    void monitoredPresence( const QString& uri, QPresence::Status status );
+    void peerPresencesChanged(const QStringList &uri);
 #endif
 
 };
 
-#endif // CONTACTDOCUMENT_H
-
+#endif

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="title" base="themes/crisp" color="#FFFFFF" rect="0,0,0x13.64%">
+<page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="title" base="themes/crisp" color="#FFFFFF">
     <rect rect="0,0,0x40%" color="Base" brush="Base">
 	<text name="time" rect="1.5%,0,17%x100%" size="6" color="Text" bold="yes" onclick="color=Highlight" interactive="yes">
 	    expr:@/UI/DisplayTime/Time
@@ -32,9 +32,7 @@
 	<level name="battery" rect="-16,1,12x14" src="battery" count="5" width="12" onclick="color=Highlight" interactive="yes" min="0" max="100" delay="1000" loop="0" play="expr:@/Hardware/Accessories/QPowerSource/DefaultBattery/Charging == true">
             expr:@/Hardware/Accessories/QPowerSource/DefaultBattery/Charge
 	</level>
-	<widget name="inputmethod" rect="-31,1,30x14" transient="yes" active="expr:@/UI/IMVisible">
-	    <rect rect="-31,1,30x14" brush="Midlight"/>
-	</widget>
+    <inputmethods-plugin rect="-31,1,30x14" transient="yes" active="expr:@/UI/IMVisible"/>
 	<line rect="0,93.34%,0x1" color="Highlight"/>
     </rect>
 </page>

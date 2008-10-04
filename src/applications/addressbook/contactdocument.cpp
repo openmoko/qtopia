@@ -1,26 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "contactdocument.h"
 #include "contactbrowser.h"
+#include "qfielddefinition.h"
 
 #include <QApplication>
 #include <QPalette>
@@ -39,24 +38,29 @@
 #include "qthumbnail.h"
 #include <QDL>
 
-#ifdef QTOPIA_VOIP
-#include <QPresence>
-#endif
-
 #if defined(QTOPIA_TELEPHONY)
 #include "qcontent.h"
+#endif
+
+#if defined(QTOPIA_VOIP)
+#include <QCollectivePresence>
+#include <QCollectivePresenceInfo>
 #endif
 
 class ContactAnchorData {
     public:
         ContactDocument::ContactAnchorType type;
         QContactModel::Field field;
+        QString fieldId;
         QString number;
 };
 
 /* ContactDocument */
 ContactDocument::ContactDocument(QObject* parent)
     : QObject(parent)
+#ifdef QTOPIA_VOIP
+    , mPresenceProvider(0)
+#endif
 {
 #if defined(QTOPIA_TELEPHONY)
     bDialer = true;
@@ -65,13 +69,6 @@ ContactDocument::ContactDocument(QObject* parent)
 #endif
 
 #ifdef QTOPIA_VOIP
-    mPresence = new QPresence(QString(), this);
-    if ( mPresence->available() ) {
-        connect(mPresence, SIGNAL(monitoredPresence(QString,QPresence::Status)),
-                this, SLOT(monitoredPresence(QString,QPresence::Status)) );
-    }
-    mOnlinePixmap = NULL;
-    mOfflinePixmap = NULL;
     voipDialer = bDialer;
 #else
     voipDialer = false;
@@ -79,21 +76,19 @@ ContactDocument::ContactDocument(QObject* parent)
     mRtl = qApp->layoutDirection() == Qt::RightToLeft;
     mDocument = new QTextDocument(this);
     mDocument->setUndoRedoEnabled(false);
+    mModel = new QContactModel(this);
 }
 
 ContactDocument::~ContactDocument()
 {
 #ifdef QTOPIA_VOIP
-    delete mPresence;
-    delete mOnlinePixmap;
-    delete mOfflinePixmap;
+    delete mPresenceProvider;
 #endif
 }
 
-void ContactDocument::init( QWidget *widget, QContactModel *model, const QContact& contact, ContactDocumentType docType)
+void ContactDocument::init( QWidget *widget, const QContact& contact, ContactDocumentType docType)
 {
     mContact = contact;
-    mModel = model;
 
     QPalette thisPalette = qApp->palette(widget);
     QFont defaultFont = QApplication::font(widget);
@@ -124,12 +119,6 @@ void ContactDocument::init( QWidget *widget, QContactModel *model, const QContac
 
     mDocument->clear();
     mFields.clear();
-#if defined(QTOPIA_VOIP)
-    foreach(QString s, mMonitoredURIs) {
-        mPresence->stopMonitoring(s);
-    }
-    mMonitoredURIs.clear();
-#endif
 
     switch(docType) {
         case Details:
@@ -163,7 +152,7 @@ void ContactDocument::createContactDetailsDocument()
         thumbHtml = "<td><img src='addressbookdetailthumbnail'></td>";
     }
 
-    if (mModel && mModel->isPersonalDetails(mContact.uid())) {
+    if (mModel->isPersonalDetails(mContact.uid())) {
         QVariant detailsV = QIcon(":icon/addressbook/personaldetails").pixmap(QContact::thumbnailSize());
         QTextImageFormat img;
         mDocument->addResource(QTextDocument::ImageResource, QUrl("addressbookpersonaldetails"), detailsV);
@@ -196,28 +185,28 @@ void ContactDocument::createContactDetailsDocument()
 
     curs.insertHtml("<br>");
 
-    //
-    //  Voice and messaging...
-    //
-    if( isBus )
-    {
-        addBusinessPhoneFragment( curs );
-        addHomePhoneFragment( curs );
-    }
-    else
-    {
-        addHomePhoneFragment( curs );
-        addBusinessPhoneFragment( curs );
+    if (isBus) {
+        addFieldFragments(curs, "phone business -fax");
+        addFieldFragments(curs, "phone -business -fax");
+    } else {
+        addFieldFragments(curs, "phone -business -fax");
+        addFieldFragments(curs, "phone business -fax");
     }
 
     addEmailFragment( curs );
 
+    addFieldFragments(curs, "chat -phone");
+
+    if (isBus) {
+        addFieldFragments(curs, "phone business fax");
+        addFieldFragments(curs, "phone -business fax");
+    } else {
+        addFieldFragments(curs, "phone -business fax");
+        addFieldFragments(curs, "phone business fax");
+    }
+
     // XXX For now, no 'Messaging' support for faxes,
     // XXX but it's completely feasible to add.
-    addPhoneFragment(curs, ":icon/businessfax", mContact.businessFax(),
-        bDialer ? Dialer : NoLink, QContactModel::BusinessFax );
-    addPhoneFragment( curs,  ":icon/homefax", mContact.homeFax(),
-        bDialer ? Dialer : NoLink, QContactModel::HomeFax );
 
     if( isBus ) {
         addBusinessFragment( curs );
@@ -257,6 +246,73 @@ void ContactDocument::createContactDetailsDocument()
     }
 }
 
+void ContactDocument::addFieldFragments(QTextCursor &curs, const QString &tags)
+{
+    QStringList fields = QContactFieldDefinition::fields(tags);
+
+    foreach (QString field, fields) {
+        QContactFieldDefinition def(field);
+        QString value = def.value(mContact).toString();
+        if (!value.isEmpty())
+            addFieldFragment(curs, def, value);
+    }
+}
+
+void ContactDocument::addFieldFragment(QTextCursor &curs, const QContactFieldDefinition &def, const QString &fieldValue)
+{
+    QString value(fieldValue);
+    QString img = def.iconString();
+
+    QString escvalue = Qt::escape( value.replace( QRegExp(" "), "-" ) );
+    curs.insertBlock(bfCenter);
+
+    QString innerHtml = QString(mRtl ? "%2<img src='cached%1'>" : "<img src='cached%1'>%2").arg(img, value);
+    /* Use HTML for anchors to pick up stylesheet stuff */
+
+    QString fieldKey = QString("contactdocument:") + QString::number(mFields.count()); // no tr
+    ContactAnchorData *cfd = 0;
+    cfd = new ContactAnchorData;
+    cfd->type = CustomLink;
+    cfd->fieldId = def.id();
+    cfd->number = escvalue;
+    mFields.insert(fieldKey, cfd);
+
+    QString text("<a href='%1'>%2</a>");
+    curs.insertHtml(text.arg(fieldKey).arg(innerHtml));
+
+    curs.movePosition(QTextCursor::NextBlock);
+    addCachedPixmap(QString("cached") + img, img);
+#if defined(QTOPIA_VOIP)
+    bool isVoip = def.hasTag("voip");
+
+    if (isVoip) {
+        if ( !mPresenceProvider ) {
+            mPresenceProvider = new QCollectivePresence( "voip", this );
+            connect(mPresenceProvider, SIGNAL(peerPresencesChanged(QStringList)), this, SLOT(peerPresencesChanged(QStringList)));
+        }
+
+        QCollectivePresenceInfo::PresenceType presence = QCollectivePresenceInfo::None;
+        if (mPresenceProvider->available()) {
+            QCollectivePresenceInfo info = mPresenceProvider->peerInfo(fieldValue);
+            if (!info.isNull())
+                presence = mPresenceProvider->statusTypes()[info.presence()];
+        }
+
+        QString path;
+        if ( presence == QCollectivePresenceInfo::None )
+            path = ":icon/presence-none";
+        else if ( presence == QCollectivePresenceInfo::Online )
+            path = ":icon/presence-online";
+        else if ( presence == QCollectivePresenceInfo::Offline )
+            path = ":icon/presence-offline";
+        else
+            path = ":icon/presence-away";
+        addCachedPixmap( QString::number( presence ) + "addressbookvoipicon", path );
+        curs.insertHtml( QString("<img src='%1'>").arg( QString::number( presence ) + "addressbookvoipicon" ) );
+    }
+#endif
+}
+
 void ContactDocument::addCachedPixmap(const QString& url, const QString& path)
 {
     QPixmap pm = mCachedPixmaps.value(url);
@@ -270,35 +326,6 @@ void ContactDocument::addCachedPixmap(const QString& url, const QString& path)
 
     if (!pm.isNull() && mDocument->resource(QTextDocument::ImageResource, url).isNull())
         mDocument->addResource(QTextDocument::ImageResource, url, pm);
-}
-
-void ContactDocument::addPhoneFragment( QTextCursor &curs, const QString& img, const QString& num, LinkType link, QContactModel::Field phoneType)
-{
-    if ( ! num.isEmpty() ) {
-        QString escnum = num;
-        escnum = Qt::escape( escnum.replace( QRegExp(" "), "-" ) );
-
-        curs.insertBlock(bfCenter);
-
-        QString innerHtml = QString(mRtl ? "%2<img src='cached%1'>" : "<img src='cached%1'>%2").arg(img, num);
-        /* Use HTML for anchors to pick up stylesheet stuff */
-        if (link == Dialer) {
-            QString fieldKey = QString("contactdocument:") + QString::number(mFields.count()); // no tr
-            ContactAnchorData *cfd = 0;
-            cfd = new ContactAnchorData;
-            cfd->type = DialLink;
-            cfd->field = phoneType;
-            cfd->number = escnum;
-            mFields.insert(fieldKey, cfd);
-
-            QString text("<a href='%1'>%2</a>");
-            curs.insertHtml(text.arg(fieldKey).arg(innerHtml));
-        } else {
-            curs.insertHtml(innerHtml);
-        }
-        curs.movePosition(QTextCursor::NextBlock);
-        addCachedPixmap(QString("cached") + img, img);
-    }
 }
 
 QString ContactDocument::nameFragment()
@@ -337,28 +364,6 @@ QString ContactDocument::nameFragment()
     return value;
 }
 
-void ContactDocument::addBusinessPhoneFragment( QTextCursor &curs )
-{
-    addPhoneFragment( curs, ":icon/businessphone",
-        mContact.businessPhone(), bDialer ? Dialer:NoLink, QContactModel::BusinessPhone );
-    addPhoneFragment( curs, ":icon/businessmobile",
-        mContact.businessMobile(), bDialer ? Dialer:NoLink, QContactModel::BusinessMobile );
-    addVoipFragment( curs, ":icon/businessvoip",
-        mContact.businessVOIP(), voipDialer ? Dialer:NoLink, QContactModel::BusinessVOIP );
-    addPhoneFragment( curs, ":icon/businesspager",
-        mContact.businessPager(), NoLink, QContactModel::BusinessPager );
-}
-
-void ContactDocument::addHomePhoneFragment( QTextCursor &curs )
-{
-    addPhoneFragment( curs, ":icon/homephone",
-        mContact.homePhone(), bDialer ? Dialer:NoLink, QContactModel::HomePhone );
-    addPhoneFragment( curs, ":icon/homemobile",
-        mContact.homeMobile(), bDialer ? Dialer:NoLink, QContactModel::HomeMobile );
-    addVoipFragment( curs, ":icon/homevoip",
-        mContact.homeVOIP(), voipDialer ? Dialer:NoLink, QContactModel::HomeVOIP );
-}
-
 void ContactDocument::addEmailFragment( QTextCursor &curs )
 {
     QStringList emails = mContact.emailList();
@@ -386,59 +391,13 @@ void ContactDocument::addEmailFragment( QTextCursor &curs )
     }
 }
 
-void ContactDocument::addVoipFragment( QTextCursor &curs, const QString& img, const QString& num, LinkType link, QContactModel::Field phoneType)
-{
-    if ( ! num.isEmpty() ) {
-        curs.insertBlock(bfCenter);
-        QString innerHtml = QString(mRtl ? "%2<img src='%1'>" : "<img src='%1'>%2").arg(num + "addressbookvoipicon", num);
-        if (link == Dialer) {
-            QString fieldKey = QString("contactdocument:") + QString::number(mFields.count()); // no tr
-            ContactAnchorData *cfd = 0;
-            cfd = new ContactAnchorData;
-            cfd->type = DialLink;
-            cfd->field = phoneType;
-            cfd->number = num;
-            mFields.insert(fieldKey, cfd);
-
-            QString text("<center><a href='%1'>%2</center><br>");
-            curs.insertHtml(text.arg(fieldKey).arg(innerHtml));
-        } else {
-            QString text("<center>" + innerHtml + "</center><br>");
-            curs.insertHtml(text);
-            addCachedPixmap(num + "addressbookvoipicon", img);
-        }
-        curs.movePosition(QTextCursor::NextBlock);
 
 #if defined(QTOPIA_VOIP)
-        mMonitoredURIs += num;
-        mPresence->startMonitoring(num);
-        mDocument->addResource(QTextDocument::ImageResource, QUrl(num + "addressbookvoipicon"), *getPresencePixmap(mPresence->monitoredUriStatus(num) == QPresence::Available));
-#endif
-    }
-}
-
-#if defined(QTOPIA_VOIP)
-QPixmap *ContactDocument::getPresencePixmap(bool online)
+void ContactDocument::peerPresencesChanged(const QStringList &uris)
 {
-    if (online) {
-        if (!mOnlinePixmap)
-            mOnlinePixmap = new QPixmap(QIcon(":icon/online").pixmap(QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize)));
-        return mOnlinePixmap;
-    } else {
-        if (!mOfflinePixmap)
-            mOfflinePixmap = new QPixmap(QIcon(":icon/offline").pixmap(QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize)));
-        return mOfflinePixmap;
-    }
-}
-
-void ContactDocument::monitoredPresence( const QString& uri, QPresence::Status status )
-{
-    // monitoring information received from the phone server
-    qLog(Sip) << "VoIP presence report: " << uri << (int)status;
-
-    if (mMonitoredURIs.contains(uri)) {
-        // This updates the current pixmap
-        mDocument->addResource(QTextDocument::ImageResource, QUrl("addressbookvoipicon"), *getPresencePixmap(status == QPresence::Available));
+    if (uris.contains(mContact.businessVOIP()) || uris.contains(mContact.homeVOIP())) {
+        mDocument->clear();
+        createContactDetailsDocument();
     }
 }
 #endif
@@ -674,3 +633,16 @@ QString ContactDocument::getAnchorTarget(const QString &href)
     return QString();
 }
 
+QString ContactDocument::getAnchorField(const QString &href)
+{
+    if (href.startsWith("contactdocument:")) {
+        ContactAnchorData *cfd = mFields.value(href);
+        if (cfd)
+        {
+            if (!cfd->fieldId.isEmpty())
+                return cfd->fieldId;
+            return QContactModel::fieldIdentifier(cfd->field);
+        }
+    }
+    return QString();
+}

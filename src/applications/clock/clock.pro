@@ -1,17 +1,30 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=clock
 CONFIG+=qtopia_main
+}
 
-FORMS	= clockbase.ui stopwatchbase.ui alarmbase.ui
-HEADERS		= clockmain.h \
-		    clock.h \
-		    stopwatch.h \
-		    alarm.h
-SOURCES		= clockmain.cpp \
-		    clock.cpp \
-		    stopwatch.cpp \
-		    alarm.cpp \
-		    main.cpp
+FORMS=\
+    clockbase.ui\
+    stopwatchbase.ui\
+    alarmbase.ui
+
+HEADERS=\
+    clockmain.h\
+    clock.h\
+    stopwatch.h\
+    alarm.h\
+    alarmdaysedit.h\
+    ringcontrol.h
+
+SOURCES=\
+    clockmain.cpp\
+    clock.cpp\
+    stopwatch.cpp\
+    alarm.cpp\
+    alarmdaysedit.cpp\
+    ringcontrol.cpp\
+    main.cpp
 
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/clock.desktop
 desktop.path=/apps/Applications

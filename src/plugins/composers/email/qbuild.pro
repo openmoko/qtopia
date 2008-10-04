@@ -1,0 +1,15 @@
+TEMPLATE=plugin
+CONFIG+=qtopia singleexec
+TARGET=emailcomposer
+
+PLUGIN_FOR=qtopia
+PLUGIN_TYPE=composers
+
+QTOPIA*=mail
+
+include(email.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

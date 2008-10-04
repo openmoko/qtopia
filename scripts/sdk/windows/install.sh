@@ -26,7 +26,7 @@ more release.txt
 VMXFILE=`ls *.vmx`
 SDKNAME=`grep displayName $VMXFILE | awk 'BEGIN{FS="\""}{print $2}'`
 
-echo "Qtopia $SDKNAME SDK Linux Installation"
+echo "Qt Extended $SDKNAME SDK Linux Installation"
 echo
 if [ ! -n "$VMPLAYER_DIR" ] ; then
     echo "Installation of vmplayer"
@@ -36,7 +36,7 @@ if [ ! -n "$VMPLAYER_DIR" ] ; then
     echo -n "Unable to find vmplayer. Have you installed vmplayer? (y/n) : "
     read option
     if [ "$option" != "y" ] ; then
-        echo "Qtopia $SDKNAME SDK requires vmplayer or equivalent to be installed."
+        echo "Qt Extended $SDKNAME SDK requires vmplayer or equivalent to be installed."
         echo
         exit
     fi
@@ -88,7 +88,7 @@ if [ "$option" != "y" ] ; then
 fi
 
 
-echo "Installing $SDKNAME Qtopia SDK....please wait"
+echo "Installing $SDKNAME Qt Extended SDK....please wait"
 
 if [ -e "$dir/release.html" ]; then
   rm -f "$dir/release.html"
@@ -177,23 +177,23 @@ if [ "$ERROR" -ne "1" ]; then
 fi
 
 if [ "$ERROR" -ne "1" ]; then
-  if [ -e "$dir/qtopia.iso" ]; then
-    echo -n "Do you want to update the Qtopia update iso? (y/n) : "
+  if [ -e "$dir/qtextended.iso" ]; then
+    echo -n "Do you want to update the Qt Extended update iso? (y/n) : "
     read option
     if [ "$option" != "n" ] ; then
-			if !	rm -f "$dir/qtopia.iso"
+			if !	rm -f "$dir/qtextended.iso"
 					then
 						ERROR="1"
 						exit 1
 				fi
-      echo "Updating qtopia iso..... Part 6/6"
-      cp "$currentdir/qtopia.iso" "$dir"
-      chmod 664 "$dir/qtopia.iso"
+      echo "Updating qtextended iso..... Part 6/6"
+      cp "$currentdir/qtextended.iso" "$dir"
+      chmod 664 "$dir/qtextended.iso"
     fi
   else
-    echo "Installing qtopia iso....... Part 6/6"
-      cp "$currentdir/qtopia.iso" "$dir"
-      chmod 664 "$dir/qtopia.iso"
+    echo "Installing qtextended iso....... Part 6/6"
+      cp "$currentdir/qtextended.iso" "$dir"
+      chmod 664 "$dir/qtextended.iso"
   fi
 
 fi

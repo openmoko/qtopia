@@ -1,10 +1,11 @@
+!qbuild{
 qtopia_project(theme)
+}
 
 finxiconf.files=$$QTOPIA_DEPOT_PATH/etc/themes/finxi.conf
 finxiconf.path=/etc/themes
-finxiconf.trtarget=Qtopia
+finxiconf.trtarget=Theme-Finxi
 finxiconf.hint=themecfg
-finxiconf.outdir=$$PWD
 INSTALLS+=finxiconf
 finxidata.files=$$QTOPIA_DEPOT_PATH/etc/themes/finxi/*.xml $$QTOPIA_DEPOT_PATH/etc/themes/finxi/*rc
 finxidata.path=/etc/themes/finxi

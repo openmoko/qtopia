@@ -1,6 +1,10 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=phonenetworks
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+depends(libraries/qtopiapim)
+depends(libraries/qtopiaphone)
+}
 
 HEADERS		= phonenetworks.h \
                   modemnetwork.h \
@@ -8,9 +12,6 @@ HEADERS		= phonenetworks.h \
 SOURCES		= phonenetworks.cpp main.cpp \
                   modemnetwork.cpp \
                   voipnetwork.cpp
-
-depends(libraries/qtopiapim)
-depends(libraries/qtopiaphone)
 
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=phonenetworks*
@@ -27,7 +28,7 @@ pics.files=$$QTOPIA_DEPOT_PATH/pics/phonenetworks/*
 pics.path=/pics/phonenetworks
 pics.hint=pics
 INSTALLS+=pics
-settings.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/GsmOperatorCountry.conf
+settings.files=$$device_overrides(/etc/default/Trolltech/GsmOperatorCountry.conf)
 settings.path=/etc/default/Trolltech
 INSTALLS+=settings
 

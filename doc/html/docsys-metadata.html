@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Document System - Content Meta-data<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Document System - Content Meta-data<br /><span class="subtitle"></span>
 </h1>
 <ul><li><a href="#overview">Overview</a></li>
 <li><a href="#core-meta-data">Core Meta-data</a></li>
@@ -51,11 +51,11 @@
 <a name="properties"></a>
 <h2>Properties</h2>
 <p><a href="qcontent.html#property">Properties</a> are key-value pairs that are stored by the document system and can be used to filter and sort content.</p>
-<p>Property identifiers are composed of a group and a key the combination of which must be unique per content and value (reusing a group and key will overwrite the existing value). It's not necessary to use a property group as the document system will default to the global group <tt>none</tt> if no group is given, however when storing application specific properties it is recommended to use a group unique to the application to prevent key conflicts. Qtopia defines some keys for commonly occurring properties with the <a href="qcontent.html#Property-enum">QContent::Property</a> enumeration, all of these properties are in the <tt>none</tt> group.</p>
+<p>Property identifiers are composed of a group and a key the combination of which must be unique per content and value (reusing a group and key will overwrite the existing value). It's not necessary to use a property group as the document system will default to the global group <tt>none</tt> if no group is given, however when storing application specific properties it is recommended to use a group unique to the application to prevent key conflicts. Qt Extended defines some keys for commonly occurring properties with the <a href="qcontent.html#Property-enum">QContent::Property</a> enumeration, all of these properties are in the <tt>none</tt> group.</p>
 <a name="categories"></a>
 <h2>Categories</h2>
-<p>The document system utilizes the common Qtopia <a href="categories.html">category system</a> for grouping content. In order to <a href="qcontent.html#setCategories">assign</a> content a category it must have already been created using <a href="qcategorymanager.html">QCategoryManager</a>, categories from any scope may be assigned to content but typically only the global and <tt>Documents</tt> scope should be used as categories in other scopes cannot be selected in the document selector widgets or Qtopia launcher.</p>
-<p>The application folders in the Qtopia launcher are categories in the <tt>Applications</tt> scope, applications are added to these folders by assigning them one or more application categories.</p>
+<p>The document system utilizes the common Qt Extended <a href="categories.html">category system</a> for grouping content. In order to <a href="qcontent.html#setCategories">assign</a> content a category it must have already been created using <a href="qcategorymanager.html">QCategoryManager</a>, categories from any scope may be assigned to content but typically only the global and <tt>Documents</tt> scope should be used as categories in other scopes cannot be selected in the document selector widgets or Qt Extended launcher.</p>
+<p>The application folders in the Qt Extended launcher are categories in the <tt>Applications</tt> scope, applications are added to these folders by assigning them one or more application categories.</p>
 <a name="application-meta-data"></a>
 <h2>Application Meta-data</h2>
 <p>In addition to the regular meta-data shared by all content, applications also need to identify the types of documents they are able to open from the launcher. For each supported type the document system stores the type itself, an icon, and the DRM permission a document must have in order to be opened by the application. Only the first must be specified, if no icon is given then the application's icon will be used, and in the absence of a DRM permission the application is assumed to not support protected content.</p>
@@ -66,8 +66,8 @@
 <p>A content plug-in identifies a list of file extensions for MIME types it support reading and when installing or updating content meta-data the document system uses these extensions to identify a content plug-in capable of extracting embedded meta-data. If no content plug-in can be found for the content or some necessary information (name or MIME type) has not been provided the document will attempt to derive the missing information from the file name.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QPhoneCall Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QPhoneCall Class Reference<br /><span class="small-subtitle">[<a href="qttelephonymodule.html">QtTelephonyModule</a>]</span>
+</h1>
 <p>The QPhoneCall class provides an interface for managing individual incoming and outgoing phone calls. <a href="#details">More...</a></p>
 <pre>    #include &lt;QPhoneCall&gt;</pre><ul>
 <li><a href="qphonecall-members.html">List of all members, including inherited members</a></li>
@@ -139,7 +140,7 @@
 <a name="phone-call-providers"></a>
 <h4>Phone call providers</h4>
 <p>Phone call functionality is provided by back-end telephony services in their <a href="qphonecallprovider.html">QPhoneCallProvider</a> implementation. Each call is associated with with a <a href="qphonecallimpl.html">QPhoneCallImpl</a> object, whose functions mirror those in QPhoneCall.</p>
-<p>The Qtopia telephony API automatically routes requests from client applications to the appropriate <a href="qphonecallprovider.html">QPhoneCallProvider</a>, based on the <a href="qphonecall.html#callType">callType</a>(). State changes in the provider are routed back to client applications and appear as <tt>stateChanged()</tt> signals (use <a href="qphonecall.html#connectStateChanged">connectStateChanged</a>() to access these signals).</p>
+<p>The Qt Extended telephony API automatically routes requests from client applications to the appropriate <a href="qphonecallprovider.html">QPhoneCallProvider</a>, based on the <a href="qphonecall.html#callType">callType</a>(). State changes in the provider are routed back to client applications and appear as <tt>stateChanged()</tt> signals (use <a href="qphonecall.html#connectStateChanged">connectStateChanged</a>() to access these signals).</p>
 <p>See <a href="qphonecallprovider.html">QPhoneCallProvider</a> for more information on implementing phone call providers within telephony services.</p>
 <p>See also <a href="qphonecallmanager.html">QPhoneCallManager</a>, <a href="qdialoptions.html">QDialOptions</a>, <a href="qphonecallprovider.html">QPhoneCallProvider</a>, and <a href="qphonecallimpl.html">QPhoneCallImpl</a>.</p>
 <hr />
@@ -379,8 +380,8 @@
 <p>Copies <i>call</i> object to this object.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -10,17 +10,19 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">List of All Members for QContactModel</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">List of All Members for QContactModel</h1>
 <p>This is the complete list of members for <a href="qcontactmodel.html">QContactModel</a>, including inherited members.</p>
 <p><table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td width="45%" valign="top"><ul>
 <li><div class="fn"/>enum <a href="qcontactmodel.html#Field-enum">Field</a></li>
 <li><div class="fn"/>enum <a href="qcontactmodel.html#FilterFlags-enum">FilterFlags</a></li>
 <li><div class="fn"/>enum <a href="qcontactmodel.html#QContactModelRole-enum">QContactModelRole</a></li>
+<li><div class="fn"/>typedef <a href="qcontactmodel.html#SortField-typedef">SortField</a></li>
 <li><div class="fn"/><a href="qcontactmodel.html#QContactModel">QContactModel</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qcontactmodel.html#dtor.QContactModel">~QContactModel</a> ()</li>
 <li><div class="fn"/><a href="qpimmodel.html#abortSyncTransaction">abortSyncTransaction</a> () : bool</li>
+<li><div class="fn"/><a href="qpimmodel.html#abortTransaction">abortTransaction</a> () : bool</li>
 <li><div class="fn"/><a href="qcontactmodel.html#addContact">addContact</a> ( const QContact &amp;, const QPimSource &amp; ) : QUniqueId</li>
 <li><div class="fn"/><a href="qcontactmodel.html#addRecord">addRecord</a> ( const QByteArray &amp;, const QPimSource &amp;, const QString &amp; ) : QUniqueId</li>
 <li><div class="fn"/><a href="qpimmodel.html#added">added</a> ( const QDateTime &amp; ) const : QList&lt;QUniqueId&gt;</li>
@@ -39,12 +41,14 @@
 <li><div class="fn"/><a href="qobject.html#children">children</a> () const</li>
 <li><div class="fn"/><a href="qcontactmodel.html#clearFilter">clearFilter</a> ()</li>
 <li><div class="fn"/><a href="qcontactmodel.html#clearPersonalDetails">clearPersonalDetails</a> ()</li>
+<li><div class="fn"/><a href="qcontactmodel.html#clearPresenceFilter">clearPresenceFilter</a> ()</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#columnCount">columnCount</a> ( const QModelIndex &amp; ) const</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#columnsAboutToBeInserted">columnsAboutToBeInserted</a> ( const QModelIndex &amp;, int, int )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#columnsAboutToBeRemoved">columnsAboutToBeRemoved</a> ( const QModelIndex &amp;, int, int )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#columnsInserted">columnsInserted</a> ( const QModelIndex &amp;, int, int )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#columnsRemoved">columnsRemoved</a> ( const QModelIndex &amp;, int, int )</li>
 <li><div class="fn"/><a href="qpimmodel.html#commitSyncTransaction">commitSyncTransaction</a> () : bool</li>
+<li><div class="fn"/><a href="qpimmodel.html#commitTransaction">commitTransaction</a> () : bool</li>
 <li><div class="fn"/><a href="qobject.html#connect">connect</a> ( const QObject *, const char *, const QObject *, const char *, Qt::ConnectionType )</li>
 <li><div class="fn"/><a href="qobject.html#connect-2">connect</a> ( const QObject *, const char *, const char *, Qt::ConnectionType ) const</li>
 <li><div class="fn"/><a href="qobject.html#connectNotify">connectNotify</a> ( const char * )</li>
@@ -93,6 +97,7 @@
 <li><div class="fn"/><a href="qobject.html#findChild">findChild</a> ( const QString &amp; ) const</li>
 <li><div class="fn"/><a href="qobject.html#findChildren">findChildren</a> ( const QString &amp; ) const</li>
 <li><div class="fn"/><a href="qobject.html#findChildren-2">findChildren</a> ( const QRegExp &amp; ) const</li>
+<li><div class="fn"/><a href="qcontactmodel.html#firstSimIndex">firstSimIndex</a> ( const QPimSource &amp; ) const : int</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#flags">flags</a> ( const QModelIndex &amp; ) const</li>
 <li><div class="fn"/><a href="qpimmodel.html#flush">flush</a> () : bool</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#hasChildren">hasChildren</a> ( const QModelIndex &amp; ) const</li>
@@ -107,24 +112,28 @@
 <li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#insertColumn">insertColumn</a> ( int, const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#insertColumns">insertColumns</a> ( int, int, const QModelIndex &amp; )</li>
-</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qabstractitemmodel.html#insertRow">insertRow</a> ( int, const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#insertRows">insertRows</a> ( int, int, const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#installEventFilter">installEventFilter</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qcontactmodel.html#isPersonalDetails">isPersonalDetails</a> ( const QModelIndex &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qcontactmodel.html#isPersonalDetails-2">isPersonalDetails</a> ( int ) const : bool</li>
+</ul></td><td valign="top"><ul>
 <li><div class="fn"/><a href="qcontactmodel.html#isPersonalDetails-3">isPersonalDetails</a> ( const QUniqueId &amp; ) const : bool</li>
-<li><div class="fn"/><a href="qcontactmodel.html#isSIMCardContact">isSIMCardContact</a> ( const QModelIndex &amp; ) const : bool</li>
-<li><div class="fn"/><a href="qcontactmodel.html#isSIMCardContact-2">isSIMCardContact</a> ( const QUniqueId &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qcontactmodel.html#isSimCardContact">isSimCardContact</a> ( const QModelIndex &amp; ) const : bool</li>
+<li><div class="fn"/><a href="qcontactmodel.html#isSimCardContact-2">isSimCardContact</a> ( const QUniqueId &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#itemData">itemData</a> ( const QModelIndex &amp; ) const</li>
 <li><div class="fn"/><a href="qobject.html#killTimer">killTimer</a> ( int )</li>
 <li><div class="fn"/><a href="qcontactmodel.html#labelFields">labelFields</a> () : QList&lt;Field&gt;</li>
+<li><div class="fn"/><a href="qcontactmodel.html#lastSimIndex">lastSimIndex</a> ( const QPimSource &amp; ) const : int</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#layoutAboutToBeChanged">layoutAboutToBeChanged</a> ()</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#layoutChanged">layoutChanged</a> ()</li>
+<li><div class="fn"/><a href="qcontactmodel.html#loadingSim">loadingSim</a> ( const QPimSource &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qcontactmodel.html#localeNameTitles">localeNameTitles</a> () : QStringList</li>
 <li><div class="fn"/><a href="qcontactmodel.html#localeSuffixes">localeSuffixes</a> () : QStringList</li>
-<li><div class="fn"/><a href="qcontactmodel.html#match">match</a> ( const QModelIndex &amp;, int, const QVariant &amp;, int, Qt::MatchFlags ) const : QModelIndexList</li>
+<li><div class="fn"/><a href="qcontactmodel.html#match">match</a> ( Field, const QVariant &amp;, Qt::MatchFlags, int, int ) : QModelIndexList</li>
+<li><div class="fn"/><a href="qcontactmodel.html#match-2">match</a> ( const QModelIndex &amp;, int, const QVariant &amp;, int, Qt::MatchFlags ) const : QModelIndexList</li>
+<li><div class="fn"/><a href="qcontactmodel.html#matchChatAddress">matchChatAddress</a> ( const QString &amp;, const QString &amp; ) : QContact</li>
 <li><div class="fn"/><a href="qcontactmodel.html#matchEmailAddress">matchEmailAddress</a> ( const QString &amp; ) : QContact</li>
 <li><div class="fn"/><a href="qcontactmodel.html#matchPhoneNumber">matchPhoneNumber</a> ( const QString &amp; ) : QContact</li>
 <li><div class="fn"/><a href="qobject.html#metaObject">metaObject</a> () const</li>
@@ -143,6 +152,7 @@
 <li><div class="fn"/><a href="qcontactmodel.html#personalID">personalID</a> () const : QUniqueId</li>
 <li><div class="fn"/><a href="qcontactmodel.html#phoneFields">phoneFields</a> () : QList&lt;Field&gt;</li>
 <li><div class="fn"/><a href="qcontactmodel.html#phoneSource">phoneSource</a> () const : QPimSource</li>
+<li><div class="fn"/><a href="qcontactmodel.html#presenceFilter">presenceFilter</a> () const : QList&lt;QCollectivePresenceInfo::PresenceType&gt;</li>
 <li><div class="fn"/><a href="qobject.html#property">property</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qcontactmodel.html#record">record</a> ( const QUniqueId &amp;, const QString &amp; ) const : QByteArray</li>
@@ -174,18 +184,29 @@
 <li><div class="fn"/><a href="qobject.html#objectName-prop">setObjectName</a> ( const QString &amp; )</li>
 <li><div class="fn"/><a href="qobject.html#setParent">setParent</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qcontactmodel.html#setPersonalDetails">setPersonalDetails</a> ( const QUniqueId &amp; )</li>
+<li><div class="fn"/><a href="qcontactmodel.html#setPresenceFilter">setPresenceFilter</a> ( QList&lt;QCollectivePresenceInfo::PresenceType&gt; )</li>
 <li><div class="fn"/><a href="qobject.html#setProperty">setProperty</a> ( const char *, const QVariant &amp; )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#setSupportedDragActions">setSupportedDragActions</a> ( QFlags&lt;Qt::DropAction&gt; )</li>
 <li><div class="fn"/><a href="qpimmodel.html#setVisibleSources">setVisibleSources</a> ( const QSet&lt;QPimSource&gt; &amp; )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#sibling">sibling</a> ( int, int, const QModelIndex &amp; ) const</li>
 <li><div class="fn"/><a href="qobject.html#signalsBlocked">signalsBlocked</a> () const</li>
+<li><div class="fn"/><a href="qcontactmodel.html#simCardIdentity">simCardIdentity</a> () const : QString</li>
+<li><div class="fn"/><a href="qcontactmodel.html#simCardIndexes">simCardIndexes</a> ( const QUniqueId &amp;, const QPimSource &amp; ) const : QList&lt;int&gt;</li>
+<li><div class="fn"/><a href="qcontactmodel.html#simFreeIndexCount">simFreeIndexCount</a> ( const QPimSource &amp; ) const : int</li>
+<li><div class="fn"/><a href="qcontactmodel.html#simIndexCount">simIndexCount</a> ( const QPimSource &amp; ) const : int</li>
+<li><div class="fn"/><a href="qcontactmodel.html#simLabelLimit">simLabelLimit</a> ( const QPimSource &amp; ) const : int</li>
+<li><div class="fn"/><a href="qcontactmodel.html#simLoaded">simLoaded</a> ( const QPimSource &amp; )</li>
+<li><div class="fn"/><a href="qcontactmodel.html#simNumberLimit">simNumberLimit</a> ( const QPimSource &amp; ) const : int</li>
 <li><div class="fn"/><a href="qcontactmodel.html#simSource">simSource</a> () const : QPimSource</li>
-<li><div class="fn"/><a href="qcontactmodel.html#sort">sort</a> ( int, Qt::SortOrder )</li>
+<li><div class="fn"/><a href="qcontactmodel.html#simUsedIndexCount">simUsedIndexCount</a> ( const QPimSource &amp; ) const : int</li>
+<li><div class="fn"/><a href="qcontactmodel.html#sort">sort</a> ( QList&lt;SortField&gt; )</li>
+<li><div class="fn"/><a href="qcontactmodel.html#sort-2">sort</a> ( int, Qt::SortOrder )</li>
 <li><div class="fn"/><a href="qpimmodel.html#source">source</a> ( const QUniqueId &amp; ) const : QPimSource</li>
 <li><div class="fn"/><a href="qpimmodel.html#sourceExists">sourceExists</a> ( const QPimSource &amp;, const QUniqueId &amp; ) const : bool</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#span">span</a> ( const QModelIndex &amp; ) const</li>
 <li><div class="fn"/><a href="qpimmodel.html#startSyncTransaction">startSyncTransaction</a> ( const QDateTime &amp; ) : bool</li>
 <li><div class="fn"/><a href="qobject.html#startTimer">startTimer</a> ( int )</li>
+<li><div class="fn"/><a href="qpimmodel.html#startTransaction">startTransaction</a> () : bool</li>
 <li><div class="fn"/><a href="qobject.html#staticMetaObject-var">staticMetaObject</a> : </li>
 <li><div class="fn"/><a href="qobject.html#staticQtMetaObject-var">staticQtMetaObject</a> : </li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#submit">submit</a> ()</li>
@@ -204,8 +225,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

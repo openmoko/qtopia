@@ -1,5 +1,7 @@
-qtopia_project(embedded qtopia core plugin)
-depends(libraries/qtopia)
+!qbuild {
+    qtopia_project(embedded qtopia core plugin)
+    depends(libraries/qtopia)
+}
 TARGET = perftestqvfbscreen
 
 CONFIG+=no_tr

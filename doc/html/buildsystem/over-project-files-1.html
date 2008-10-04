@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Project Files<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qt Extended Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Build System Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Project Files<br /><span class="subtitle"></span>
 </h1>
 <a name="introduction"></a>
 <h3>Introduction</h3>
@@ -22,7 +22,7 @@
     # main.cpp uses the QTOPIA_ADD_APPLICATION/QTOPIA_MAIN macros
     CONFIG+=qtopia_main
     # Despite using the QTOPIA_MAIN macro, do not build this app as a
-    # quicklaunch plugin unless -force-quicklaunch was passed to configure
+    # quicklaunch plugin
     CONFIG+=no_quicklaunch
     # Do not build this app into a singleexec binary
     CONFIG+=no_singleexec
@@ -65,18 +65,18 @@
     pkg.name=example
     pkg.desc=Example Application
     pkg.version=1.0.0-1
-    pkg.maintainer=Trolltech (www.trolltech.com)
+    pkg.maintainer=Qt Extended &lt;info@qtextended.org&gt;
     pkg.license=Commercial</pre>
 <p>The following sections describe the parts of the project file.</p>
 <a name="project-type"></a>
 <h3>Project Type</h3>
-<p>It is mandatory to use the <a href="fn-qtopia-project-1.html">qtopia_project</a>() function to declare the type of project you are building. Third party applications will typically use <tt>qtopia_project(qtopia app)</tt> to declare a Qtopia application is being built.</p>
+<p>It is mandatory to use the <a href="task-porting-to-qbuild-1.html#qtopia-project">qtopia_project</a>() function to declare the type of project you are building. Third party applications will typically use <tt>qtopia_project(qtopia app)</tt> to declare a Qt Extended application is being built.</p>
 <a name="target"></a>
 <h3>TARGET</h3>
-<p>The TARGET is the name of the binary. In Qtopia applications must have unique names as several resources types are located using the application name.</p>
+<p>The TARGET is the name of the binary. In Qt Extended applications must have unique names as several resources types are located using the application name.</p>
 <a name="application-configuration"></a>
 <h3>Application configuration</h3>
-<p>Qtopia applications can be built in several ways. There are flags that you should set to indicate how your app can be built. See <a href="over-applications-1.html">Applications</a> for a discussion on this.</p>
+<p>Qt Extended applications can be built in several ways. There are flags that you should set to indicate how your app can be built. See <a href="over-applications-1.html">Applications</a> for a discussion on this.</p>
 <a name="internationalization"></a>
 <h3>Internationalization</h3>
 <p>You can specify what translations exist for your application. See <a href="syscust-internat.html">Internationalization</a> for more information.</p>
@@ -98,7 +98,7 @@
 <p>See also <a href="overviews.html">Overviews</a>, <a href="task-create-a-new-project-file-1.html">Create a new project file</a>, <a href="over-libraries-1.html">Libraries</a>, and <a href="over-applications-1.html">Applications</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 Trolltech</td>
-<td align="right">Qtopia Build System Documentation</td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
+<td align="right"><div align="right">Qt Extended  - Build System Documentation</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -27,8 +25,8 @@
 #include <QString>
 #include <QVariant>
 
-#include <qtopia/mail/qmailviewer.h>
-#include <qtopia/mail/qmailviewerplugin.h>
+#include <qmailviewer.h>
+#include <qmailviewerplugin.h>
 
 class QIODevice;
 class QUrl;
@@ -37,6 +35,8 @@ class QWidget;
 class QMailMessage;
 class SmilDataSource;
 class SmilView;
+class SmilDataLoader;
+class MMSWidget;
 
 // A viewer able to playback a SMIL MMS mail
 class SmilViewer : public QMailViewerInterface
@@ -59,15 +59,18 @@ protected:
 private slots:
     void requestTransfer(SmilDataSource* dataSource, const QString &src);
     void cancelTransfer(SmilDataSource *dataSource, const QString &src);
+    void loadingStarted();
+    void loadingFinished();
 
 private:
     void tweakView();
     void advanceSlide();
 
-    SmilView* view;
-    QMap<SmilDataSource*,QIODevice*> transfers;
+private:
     int menuKey;
     const QMailMessage* mail;
+    SmilDataLoader* m_loader;
+    MMSWidget* m_mmsWidget;
 };
 
 class SmilViewerPlugin : public QMailViewerPlugin
@@ -78,10 +81,9 @@ public:
     SmilViewerPlugin();
 
     virtual QString key() const;
-    virtual bool isSupported( QMailViewerFactory::ContentType type ) const;
+    virtual bool isSupported(QMailMessage::ContentType type, QMailViewerFactory::PresentationType pres) const;
 
-    QMailViewerInterface* create( QWidget* parent );
+    QMailViewerInterface *create(QWidget *parent);
 };
 
-#endif // SMILVIEWER_H
-
+#endif

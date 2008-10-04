@@ -342,8 +342,8 @@ KERNEL_NAME="Greenphone Kernel (2.4.19)"
 KERNEL_FILENAME=greenphone_kernel.bin
 KERNEL_SIZELIMIT=1048576
 ROOTFS_VERSION="unknown"
-DISK1_NAME="Greenphone Root/Qtopia Filesystem"
-DISK1_FILENAME=greenphone_rootqtopia.cramfs
+DISK1_NAME="Greenphone Root and Qtopia Filesystem"
+DISK1_FILENAME=greenphone_rootqtopia.bin
 DISK1_SIZELIMIT=44040192
 DISK1_PART1_NAME="Greenphone Root Filesystem"
 DISK1_PART1_FILENAME=greenphone_root.cramfs
@@ -371,7 +371,7 @@ while [ $# -ne 0 ]; do
             ;;
         --flash)
             OPTION_FLASH_IMAGE=1
-            DEFAULT_OPTIONS=0
+            DEFAULT_OPTIONS=1
             ;;
         --clean)
             OPTION_CLEAN=1

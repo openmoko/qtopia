@@ -2,3 +2,5 @@
 File=QtopiaServices
 Context=CaptureSetting
 [Service]
+Name[]=Settings Manager
+Icon=settings

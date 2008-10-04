@@ -1,14 +1,14 @@
 #!/bin/bash
 
-if [ -z $QTOPIA_DEPOT_PATH ]; then
+#if [ -z $QTOPIA_DEPOT_PATH ]; then
     REAL_PATH=`pwd`
-else
-    REAL_PATH=$QTOPIA_DEPOT_PATH
-fi
+#else
+#    REAL_PATH=$QTOPIA_DEPOT_PATH
+#fi
 
 version()
 {
-  cat $REAL_PATH/src/libraries/qtopiabase/version.h | grep QPE_VERSION |awk '{print $3}'|sed 's/"//g'
+  cat $QTOPIA_DEPOT_PATH/src/libraries/qtopiabase/version.h | grep QPE_VERSION |awk '{print $3}'|sed 's/"//g'
 }
 
 qt_version()

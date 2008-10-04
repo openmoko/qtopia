@@ -1,3 +1,5 @@
 [Translation]
 File=QtopiaServices
 Context=Service:Name
+[Service]
+Name[]="Virtual Keyboard"

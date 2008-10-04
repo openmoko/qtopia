@@ -1,6 +1,6 @@
 qtopia_project(qtopia plugin)
 TARGET=modifiedgsm0710multiplex
-requires(enable_modem)
+requires(enable_cell)
 
 CONFIG+=no_tr
 

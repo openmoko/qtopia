@@ -1,8 +1,11 @@
+!qbuild{
 qtopia_project(qtopia plugin)
 TARGET=bluetooth
-
 # Packaged by settings/network
 CONFIG+=no_pkg
+depends(libraries/qtopiacomm/network)
+depends(libraries/qtopiacomm/bluetooth)
+}
 
 FORMS       = advancedbtbase.ui dialingbtbase.ui
                 
@@ -18,23 +21,15 @@ SOURCES	    =   bluetoothplugin.cpp \
                 btdialupdevice.cpp \
                 configui.cpp
 
-depends(libraries/qtopiacomm/network)
-depends(libraries/qtopiacomm/bluetooth)
-                
-conf.files	= $$QTOPIA_DEPOT_PATH/etc/network/bluetoothDUN.conf
-conf.path	= /etc/network
+isEmpty(BLUETOOTH_NETWORK_CONFIGS):BLUETOOTH_NETWORK_CONFIGS=bluetoothDUN
+for(l,BLUETOOTH_NETWORK_CONFIGS) {
+    conf.files+=$$device_overrides(/etc/network/$${l}.conf)
+}
+conf.path=/etc/network
 INSTALLS+=conf
 
-script=$$PWD/btdun-network
-variable=$$BLUETOOTH_NETWORK_SCRIPT
-include(../network_script.pri)
-
-pics.files	= $$QTOPIA_DEPOT_PATH/pics/Network/bluetooth/*  
-pics.path	= /pics/Network/bluetooth
-pics.hint=pics
-INSTALLS+=pics
-icons.files     = $$QTOPIA_DEPOT_PATH/pics/Network/icons/*
-icons.path      = /pics/Network/icons
-icons.hint=pics
-INSTALLS+=icons
+bin.files=$$device_overrides(/src/plugins/network/bluetooth/btdun-network)
+bin.path=/bin
+bin.hint=script
+INSTALLS+=bin
 

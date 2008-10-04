@@ -1,0 +1,12 @@
+TEMPLATE=app
+CONFIG+=qtopia singleexec
+TARGET=language
+
+CONFIG+=quicklaunch
+
+include(language.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

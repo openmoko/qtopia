@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -60,14 +58,18 @@ SettingsDisplay::SettingsDisplay(QBluetoothLocalDevice *local, QCommDeviceContro
     QHBoxLayout *timeoutLayout = new QHBoxLayout;
     timeoutLayout->setAlignment(Qt::AlignLeft);
     timeoutLayout->addItem(new QSpacerItem(30, 1));
-    timeoutLayout->addWidget(new QLabel(tr("Timeout:")));
+    QLabel *timeout = new QLabel(tr("Timeout:"));
+    timeout->setBuddy(m_timeoutSpinBox);
+    timeoutLayout->addWidget(timeout);
     timeoutLayout->addWidget(m_timeoutSpinBox);
 
     m_optionsGroupBox = new QGroupBox(tr("Options"));
     QGridLayout *optionsLayout = new QGridLayout;
     optionsLayout->addWidget(m_visibilityCheckBox, 0, 0, 1, 2);
     optionsLayout->addLayout(timeoutLayout, 1, 0, 1, 2, Qt::AlignLeft);
-    optionsLayout->addWidget(new QLabel(tr("Name:")), 2, 0);
+    QLabel *name = new QLabel(tr("Name:"));
+    name->setBuddy(m_nameEdit);
+    optionsLayout->addWidget(name, 2, 0);
     optionsLayout->addWidget(m_nameEdit, 2, 1);
     optionsLayout->setRowStretch(3, 1);
     m_optionsGroupBox->setLayout(optionsLayout);
@@ -93,8 +95,6 @@ SettingsDisplay::SettingsDisplay(QBluetoothLocalDevice *local, QCommDeviceContro
 
     m_nameEdit->setText(m_local->name());
 
-    m_phoneProfileMgr = new QPhoneProfileManager(this);
-    planeModeChanged(m_phoneProfileMgr->planeMode());
     powerStateChanged(m_deviceController->powerState());
 
     QTimer::singleShot(0, this, SLOT(init()));
@@ -107,6 +107,15 @@ SettingsDisplay::~SettingsDisplay()
 void SettingsDisplay::toggleLocalPowerState(bool enable)
 {
     if (enable) {
+        QPhoneProfileManager mgr;
+        if (mgr.planeMode()) {
+            QMessageBox::warning(this,
+                    QObject::tr("Bluetooth Error"),
+                    QObject::tr("<P>Cannot turn on Bluetooth while in Airplane mode."));
+            m_powerCheckBox->setChecked(false);
+            return;
+        }
+
         m_deviceController->bringUp();
     } else {
         if (m_deviceController->sessionsActive()) {
@@ -164,26 +173,18 @@ int SettingsDisplay::getTimeout()
     return m_timeoutSpinBox->value() * 60;
 }
 
-void SettingsDisplay::planeModeChanged(bool enabled)
-{
-    m_powerCheckBox->setEnabled(!enabled);
-    setInteractive(!enabled);
-}
-
 void SettingsDisplay::powerStateChanged(QCommDeviceController::PowerState state)
 {
     // call setChecked() in case call didn't work and checkbox state needs
     // to be reverted
     bool enabled = (state != QCommDeviceController::Off);
     m_powerCheckBox->setChecked(enabled);
+    setInteractive(enabled);
 
     // if bluetooth is turned off, the discoverable timeout is lost,
     // so need to set it again
     if (enabled && m_visibilityCheckBox->isChecked())
         m_local->setDiscoverable(getTimeout());
-
-    if (!m_phoneProfileMgr->planeMode())
-        setInteractive(enabled);
 }
 
 void SettingsDisplay::deviceStateChanged(QBluetoothLocalDevice::State state)
@@ -252,22 +253,6 @@ void SettingsDisplay::init()
     // for device name
     connect(m_local, SIGNAL(nameChanged(QString)), SLOT(nameChanged(QString)));
     connect(m_nameEdit, SIGNAL(editingFinished()), SLOT(nameEditingFinished()));
-
-    // for airplane mode changes
-    connect(m_phoneProfileMgr, SIGNAL(planeModeChanged(bool)),
-            SLOT(planeModeChanged(bool)));
-
-    m_timeoutSpinBox->installEventFilter(this);
-}
-
-bool SettingsDisplay::eventFilter(QObject *, QEvent *event)
-{
-    if (event->type() == QEvent::LeaveEditFocus) {
-        // in Qt 4.3, editingFinished() isn't emitted when
-        // leaving edit focus, only on focus out
-        timeoutEditingFinished();
-    }
-    return false;
 }
 
 #include "settingsdisplay.moc"

@@ -1,34 +1,31 @@
 /****************************************************************************
- **
- ** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
- **
- ** This file is part of the Opensource Edition of the Qtopia Toolkit.
- **
- ** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file is part of the Qt Extended Opensource Package.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Copyright (C) 2008 Trolltech ASA.
+**
+** Contact: Qt Extended Information (info@qtextended.org)
+**
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
+**
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
 **
- **
- ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
- ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- **
- ****************************************************************************/
+****************************************************************************/
 
 #include "appviewer.h"
 #include <qdocumentselector.h>
-#include <qsoftmenubar.h>
 #include <qtopianamespace.h>
 
 #include <QFile>
 #include <QTextStream>
-#include <QMenu>
 #include <QDebug>
 #include <QKeyEvent>
+#include <QVBoxLayout>
 
 /*
  *  Constructs a AppViewer which is a child of 'parent', with the
@@ -39,14 +36,15 @@ AppViewer::AppViewer( QWidget *parent, Qt::WFlags f )
 {
     setWindowTitle( tr( "App Viewer" ));
 
-    textArea = new QTextEdit(this);
+    QVBoxLayout *vbox = new QVBoxLayout( this );
+
+    textArea = new QTextEdit();
     textArea->setReadOnly(true);
     appSelector = new QDocumentSelector();
+    appSelector->setFilter( QContentFilter(QContent::Application) );
 
-    QAction *actionOpen = new QAction(tr("Open Document"), this );
-    connect(actionOpen, SIGNAL(triggered()), this, SLOT(openDocument()));
-    QMenu* menu = QSoftMenuBar::menuFor(textArea);
-    menu->addAction(actionOpen);
+    vbox->addWidget( appSelector );
+    vbox->addWidget( textArea );
 
     connect( appSelector, SIGNAL(documentSelected(QContent)),
             this, SLOT(documentSelected(QContent)) );
@@ -57,7 +55,6 @@ AppViewer::AppViewer( QWidget *parent, Qt::WFlags f )
  */
 AppViewer::~AppViewer()
 {
-    delete appSelector;
     // no need to delete child widgets, Qt does it all for us
 }
 
@@ -78,7 +75,6 @@ void AppViewer::openApplicationInfo()
  */
 void AppViewer::documentSelected( const QContent &appContent )
 {
-    appSelector->hide();
     if ( appContent.isValid() )
     {
         textArea->setHtml( getInformation( appContent ));
@@ -102,7 +98,7 @@ QString AppViewer::getInformation( const QContent &appContent )
     QFileInfo fi( appContent.file() );
     QString info = tr( "Binary is: <b>%1</b><br>" ).arg( fi.fileName() );
 
-    qint64 chosenAppSize = fi.size();
+    qint64 chosenAppSize = appContent.size();
     info += tr( "Size is: <b>%1 bytes</b><br>" ).arg( chosenAppSize );
 
     enum Count { SMALL, LARGE };
@@ -126,7 +122,7 @@ QString AppViewer::getInformation( const QContent &appContent )
         }
     }
 
-    info += tr( ", bigger than <font color=\"#CC0000\">%1 percent</font> of Qtopia binaries" )
+    info += tr( ", bigger than <font color=\"#CC0000\">%1 percent</font> of Qt Extended binaries" )
         .arg( (int)( (float)qtopiaCounts[SMALL] * 100.0 / (float)qtopiaCounts[LARGE] ));
 
     if ( packageCounts[SMALL] > 0 || packageCounts[LARGE] > 0 )

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,6 +21,7 @@
 #include <QDebug>
 
 #include "gstreamersinkwidget.h"
+#include "qvideosurface.h"
 
 #include "gstreamerqtopiavideosink.h"
 
@@ -42,15 +41,63 @@ static GstVideoSinkClass*   parentClass;
 
 GstCaps* QtopiaVideoSink::get_caps(GstBaseSink* sink)
 {
-    GstCaps* caps = gst_caps_copy(gst_pad_get_pad_template_caps(sink->sinkpad));
-    if (GST_CAPS_IS_SIMPLE(caps)) {
-        GstStructure*   data = gst_caps_get_structure(caps, 0);
-        int             bpp = QScreen::instance()->depth() <= 16 ? 16 : 32;
+    QtopiaVideoSink*    self = G_TYPE_CHECK_INSTANCE_CAST(sink, QtopiaVideoSinkClass::get_type(), QtopiaVideoSink);
 
-        gst_structure_set(data, "bpp", G_TYPE_INT, bpp, NULL);
+    QStringList supportedBpp; // for RGB formats
+    QStringList supportedFourcc; // for YUV formats
+    QMap< QVideoFrame::PixelFormat, int > bppMap;
+    QMap< QVideoFrame::PixelFormat, QString > fourccMap;
+
+    bppMap[QVideoFrame::Format_ARGB32] = 32;
+    bppMap[QVideoFrame::Format_RGB32] = 32;
+    bppMap[QVideoFrame::Format_RGB24] = 24;
+    bppMap[QVideoFrame::Format_RGB565] = 16;
+
+    fourccMap[QVideoFrame::Format_YUV420P] = "I420";
+    fourccMap[QVideoFrame::Format_UYVY] = "UYVY";
+    fourccMap[QVideoFrame::Format_YV12] = "YV12";
+
+    QVideoFormatList formats = self->widget->videoSurface()->preferredFormats();
+    if ( formats.isEmpty() )
+        formats = self->widget->videoSurface()->supportedFormats();
+
+    if ( formats.isEmpty() )
+        formats << QVideoFrame::Format_RGB32;
+
+
+    foreach ( QVideoFrame::PixelFormat format, formats ) {
+        if ( bppMap.contains(format) )
+            supportedBpp << QString::number(bppMap[format]);
+
+        if ( fourccMap.contains(format) )
+            supportedFourcc << fourccMap[format];
     }
 
-    return caps;
+    QString capsString;
+
+    if (!supportedFourcc.isEmpty()) {
+        QString fourccCaps("video/x-raw-yuv, "
+                            "framerate = (fraction) [ 0, MAX ], "
+                            "width = (int) [ 1, MAX ], "
+                            "height = (int) [ 1, MAX ], "
+                            "format = (fourcc) { %1 }");
+        capsString += fourccCaps.arg(supportedFourcc.join(", "));
+    }
+
+    if (!supportedBpp.isEmpty()) {
+        QString rgbCaps("video/x-raw-rgb, "
+                        "framerate = (fraction) [ 0, MAX ], "
+                        "width = (int) [ 1, MAX ], "
+                        "height = (int) [ 1, MAX ], "
+                        "bpp = (int) { %1 }" );
+
+        if (!supportedFourcc.isEmpty())
+            capsString += "; ";
+
+        capsString += rgbCaps.arg(supportedBpp.join(", "));
+    }
+
+    return gst_caps_from_string(capsString.toLatin1());
 }
 
 gboolean QtopiaVideoSink::set_caps(GstBaseSink* sink, GstCaps* caps)
@@ -61,10 +108,33 @@ gboolean QtopiaVideoSink::set_caps(GstBaseSink* sink, GstCaps* caps)
         GstStructure*       data = gst_caps_get_structure(caps, 0);
         QtopiaVideoSink*    self = G_TYPE_CHECK_INSTANCE_CAST(sink, QtopiaVideoSinkClass::get_type(), QtopiaVideoSink);
 
+        char fourcc[5];
+        fourcc[4] = 0;
+
         gst_structure_get_int(data, "width", &self->width);
         gst_structure_get_int(data, "height", &self->height);
         gst_structure_get_int(data, "bpp", &self->bpp);
         gst_structure_get_int(data, "depth", &self->depth);
+        bool haveFourcc = gst_structure_get_fourcc(data, "format", (guint32*)fourcc);
+
+        if ( haveFourcc ) {
+            // YUV formats
+            QMap< QString, QVideoFrame::PixelFormat > formatsMap;
+            formatsMap["I420"] = QVideoFrame::Format_YUV420P;
+            formatsMap["YV12"] = QVideoFrame::Format_YV12;
+            formatsMap["Y444"] = QVideoFrame::Format_YUV444;
+            formatsMap["UYVY"] = QVideoFrame::Format_UYVY;
+            formatsMap["Y8"] = QVideoFrame::Format_Y8;
+
+            self->pixelFormat = formatsMap.value( QString(fourcc), QVideoFrame::Format_Invalid );
+        } else {
+            if ( self->bpp == 16 )
+                self->pixelFormat = QVideoFrame::Format_RGB565;
+            if ( self->bpp == 24 )
+                self->pixelFormat = QVideoFrame::Format_RGB24;
+            if ( self->bpp == 32 )
+                self->pixelFormat = QVideoFrame::Format_RGB32;
+        }
 
         self->widget->setVideoSize(self->width, self->height);
     }
@@ -87,10 +157,19 @@ GstFlowReturn QtopiaVideoSink::render(GstBaseSink* sink, GstBuffer* buf)
     {
         QtopiaVideoSink*    self = G_TYPE_CHECK_INSTANCE_CAST(sink, QtopiaVideoSinkClass::get_type(), QtopiaVideoSink);
 
-        self->widget->paint(QImage(GST_BUFFER_DATA(buf),
-                                   self->width,
-                                   self->height,
-                                   self->bpp == 16 ? QImage::Format_RGB16 : QImage::Format_RGB32));
+        if ( self->lastBuffer ) {
+            gst_buffer_unref(self->lastBuffer);
+        }
+
+        self->lastBuffer = buf;
+        gst_buffer_ref(self->lastBuffer);
+
+        QVideoFrame frame( self->pixelFormat,
+                           QSize( self->width, self->height ),
+                           GST_BUFFER_DATA(buf) );
+
+        if (self->widget)
+            self->widget->paint( frame );
     }
     else
         rc = GST_FLOW_ERROR;
@@ -98,11 +177,29 @@ GstFlowReturn QtopiaVideoSink::render(GstBaseSink* sink, GstBuffer* buf)
     return rc;
 }
 
+void QtopiaVideoSink::renderLastFrame()
+{
+    if ( lastBuffer ) {
+        QVideoFrame frame( pixelFormat,
+                           QSize( width, height ),
+                           GST_BUFFER_DATA(lastBuffer) );
+
+        if (widget)
+            widget->paint( frame );
+    }
+
+}
+
 static GstStaticPadTemplate template_factory =
+
     GST_STATIC_PAD_TEMPLATE("sink",
                             GST_PAD_SINK,
                             GST_PAD_ALWAYS,
                             GST_STATIC_CAPS("video/x-raw-rgb, "
+                                            "framerate = (fraction) [ 0, MAX ], "
+                                            "width = (int) [ 1, MAX ], "
+                                            "height = (int) [ 1, MAX ]; "
+                                            "video/x-raw-yuv, "
                                             "framerate = (fraction) [ 0, MAX ], "
                                             "width = (int) [ 1, MAX ], "
                                             "height = (int) [ 1, MAX ]"));
@@ -125,6 +222,8 @@ void QtopiaVideoSink::instance_init(GTypeInstance *instance, gpointer g_class)
     self->height = 0;
     self->bpp = 0;
     self->depth = 0;
+    self->pixelFormat = QVideoFrame::Format_Invalid;
+    self->lastBuffer = 0;
 }
 // }}}
 

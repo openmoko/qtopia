@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -58,16 +56,16 @@ QVariant MagicTextBrowser::loadResource(int type, const QUrl &name)
         if (filename.startsWith(QLatin1String("image/"))) {
             filename.prepend(":");
             QFileInfo fi(filename);
+            QImageReader reader(filename);
             if (fi.suffix() == "svg" || fi.suffix() == "pic") {
                 // We'll force a sensible size, otherwise we could get
                 // anything.
                 int size = style()->pixelMetric(QStyle::PM_ListViewIconSize);
-                QImageReader reader(filename);
                 reader.setScaledSize(QSize(size, size));
-                QImage img = reader.read();
-                QPixmap pm = QPixmap::fromImage(img);
-                return QVariant(pm);
             }
+            QImage img = reader.read();
+            QPixmap pm = QPixmap::fromImage(img);
+            return QVariant(pm);
         } else if (filename.startsWith(QLatin1String("icon/"))) {
             filename.prepend(":");
             QFileInfo fi(filename);
@@ -77,98 +75,24 @@ QVariant MagicTextBrowser::loadResource(int type, const QUrl &name)
                 return QVariant(icon.pixmap(size, size));
             }
         }
+        QVariant r = QTextBrowser::loadResource(type, name);
+        if (!r.isValid()) {
+            // Avoid "file-16.png" ugle, once.
+            QUrl unknown(filename.startsWith(":icon")
+                    ? ":icon/qpe/UnknownDocument" : ":image/qpe/UnknownDocument");
+            if (name != unknown)
+                return loadResource(QTextDocument::ImageResource, unknown);
+        }
+        return r;
     } else if (type == QTextDocument::HtmlResource) {
         QString filename(name.toLocalFile());
         HelpPreProcessor hpp(filename);
         QString result = hpp.text();
-
-        static const char* special[] = { "applications", "games", "settings", 0 };
-        for (int i=0; special[i]; ++i) {
-            QString specialname = special[i];
-            if (filename.endsWith("qpe-" + specialname + ".html")) {
-                QRegExp re( "<qtopia-" + specialname + ">.*</qtopia-" + specialname + ">" );
-                int start;
-                if( ( start = re.indexIn( result ) ) >= 0 ) {
-                    specialname[0] = specialname[0].toUpper();
-                    result.replace( start, re.matchedLength(), generate( specialname ) );
-                }
-                break;
-            }
-        }
-
         return QVariant(result);
     }
 
     return QTextBrowser::loadResource(type, name);
 }
-
-
-QString MagicTextBrowser::generate( const QString& name )
-{
-    QString s;
-    int size = style()->pixelMetric(QStyle::PM_ListViewIconSize);
-    QContentSet lnkset( QContentFilter::Category, name );
-    typedef QMap<QString,QContent> OrderingMap;
-    OrderingMap ordered;
-    QContentList linkList = lnkset.items();
-    foreach (const QContent &lnk, linkList) {
-        ordered[Qtopia::dehyphenate( lnk.name() )] = lnk;
-    }
-    for( OrderingMap::ConstIterator mit=ordered.begin(); mit!=ordered.end(); ++mit ) {
-        QString name = mit.key();
-        const QContent &lnk = *mit;
-        QString icon = ":image/" + lnk.iconName();
-        QString helpFile = lnk.executableName() + ".html";
-        QStringList helpPath = Qtopia::helpPaths();
-        QStringList::ConstIterator it;
-        const char* prefix[]={"","qpe-",0};
-        int pref=0;
-        for (; prefix[pref]; ++pref) {
-            for (it = helpPath.begin(); it != helpPath.end() && !QFile::exists( *it + "/" + prefix[pref] + helpFile ); ++it)
-                ;
-            if (it != helpPath.end())
-                break;
-        }
-        if (it != helpPath.end()) {
-            // SVG/PIC images are forced to load at a particular size (see above)
-            // Force all app icons to be this size (to prevent them from being
-            // different sizes, not all app icons are SVG/PIC).
-            s += QString("<br><a href=%1%2><img src=%3 width=%4 height=%5> %6</a>\n")
-                .arg( prefix[pref] )
-                .arg( helpFile )
-                .arg( icon )
-                .arg( size )
-                .arg( size )
-                .arg( name );
-#ifdef DEBUG
-        } else {
-            s += QString("<br>No <tt>%1</tt> for %2\n")
-                .arg( helpFile )
-                .arg( name );
-#endif
-        }
-    }
-    return s;
-}
-
-/*
-XXX - needs Qt functionality.
-
-void MagicTextBrowser::emitHistoryChanged()
-{
-    // Construct the parameters for the historyChanged() signal.
-    QString prevDocTitle, nextDocTitle;
-    if ( !backStack.isEmpty() ) {
-        prevDocTitle = backStack.top().title;
-    }
-    if ( !forwardStack.isEmpty() ) {
-        nextDocTitle = forwardStack.top().title;
-    }
-
-    emit historyChanged(prevDocTitle,nextDocTitle);
-}
-*/
-
 
 HelpBrowser::~HelpBrowser()
 {
@@ -211,10 +135,7 @@ void HelpBrowser::init()
     // When the browser's document queue changes condition, the previous and next
     // documents will also undergo changes. When this happens, navigationBar will
     // need to update its previous and next document titles.
-    /* XXX No such signal yet
-    connect(browser,SIGNAL(historyChanged(QString,QString)),
-            navigationBar,SLOT(labelsChanged(QString,QString)));
-    */
+    connect(browser,SIGNAL(historyChanged()), this,SLOT(updateLabels()));
 
     boxLayout->addWidget(navigationBar);
 
@@ -257,6 +178,14 @@ void HelpBrowser::init()
     browser->installEventFilter( this );
     browser->ensurePolished();
     browser->setSource( HOMEPAGE );
+
+    QSoftMenuBar::setLabel(browser, Qt::Key_Back, "close", tr("Close"));
+}
+
+void HelpBrowser::updateLabels()
+{
+    navigationBar->labelsChanged(browser->historyTitle(-1),
+                                 browser->historyTitle(+1));
 }
 
 void HelpBrowser::setDocument( const QString &doc )
@@ -325,7 +254,7 @@ void HelpBrowser::closeEvent( QCloseEvent* e )
 
 /*!
     \service HelpService Help
-    \brief Provides the Qtopia Help service.
+    \brief Provides the Qt Extended Help service.
 
     The \i Help service enables applications to display context-sensitive help.
 */

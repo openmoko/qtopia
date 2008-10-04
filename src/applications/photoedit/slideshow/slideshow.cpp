@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,13 +24,9 @@
 
 SlideShow::SlideShow( QObject* parent )
     : QObject( parent )
-    , collection_model( &collection )
     , collection_i( -1 )
-    , drm_content( QDrmRights::Display, QDrmContent::NoLicenseOptions )
+    , m_isPlaying(false)
 {
-    // When timeout advance to next image in collection
-    connect( &timer, SIGNAL(timeout()), this, SLOT(advance()) );
-    connect( this, SIGNAL(stopped()), &drm_content, SLOT(renderStopped()) );
 }
 
 SlideShow::~SlideShow()
@@ -45,21 +39,10 @@ void SlideShow::setFirstImage( const QContent& image )
 {
     // Find image in collection and update iterator with this image
 
-    for( collection_i = 0; collection_i < collection_model.rowCount(); collection_i++ )
+    for( collection_i = 0; collection_i < collection.count(); collection_i++ )
     {
-        if( collection_model.content( collection_i ).id() == image.id() )
-        {
-            if( (image.permissions() & QDrmRights::Automated) && drm_content.requestLicense( image ) )
-            {
-                drm_content.renderStarted();
-
-                emit changed(image);
-            }
-            else
-                QTimer::singleShot( 0, this, SLOT(advance()) );
-
+        if( collection.content( collection_i ).id() == image.id() )
             return;
-        }
     }
 }
 
@@ -74,12 +57,17 @@ void SlideShow::start()
     // doesn't suspend before the slides finish.
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Disable);
 
-    timer.start( pause*FACTOR );
+    m_isPlaying = true;
+
+    QContent image = collection.content(
+            collection_i < collection.count() ? collection_i : 0);
+
+    emit changed(image);
 }
 
 void SlideShow::stop()
 {
-    timer.stop();
+    m_isPlaying = false;
 
     // Re-enable power save (that was disabled in start()).
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
@@ -91,11 +79,12 @@ void SlideShow::advance()
 {
     // If at end of collection and not looping through, stop slideshow
     // Otherwise, advance to next image in collection
+    if (!m_isPlaying)
+        return;
+
     collection_i++;
     if (collection_i == collection.count() && !loop_through)
     {
-        //timer.stop();
-        //emit stopped();
         stop();
     }
     else
@@ -111,17 +100,16 @@ void SlideShow::advance()
                 QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
             }
 
-            QContent image = collection_model.content( collection_i );
+            QContent image = collection.content( collection_i );
 
-            if( (image.permissions() & QDrmRights::Automated) && drm_content.requestLicense( image ) )
-            {
-                drm_content.renderStarted();
-
-                emit changed(image);
-            }
-            else
-                QTimer::singleShot( 0, this, SLOT(advance()) );
+            emit changed(image);
 
         }
     }
+}
+
+void SlideShow::imageLoaded()
+{
+    if (m_isPlaying)
+        QTimer::singleShot(pause*FACTOR, this, SLOT(advance()));
 }

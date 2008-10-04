@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -39,7 +37,6 @@
 #include <qtopia/qsoftmenubar.h>
 
 #include <qaction.h>
-#include <qbuttongroup.h>
 #include <qcombobox.h>
 #include <qmessagebox.h>
 #include <qfile.h>
@@ -53,6 +50,8 @@
 #include <QtopiaIpcEnvelope>
 #include <QtopiaIpcAdaptor>
 
+#include <qaudiointerface.h>
+
 #include <stdlib.h>
 
 
@@ -64,7 +63,8 @@ MediaRecorder::MediaRecorder(QWidget *parent, Qt::WFlags f):
     contentsWidget( NULL ),
     config( 0 ),
     recorderPlugins( NULL ),
-    m_audioInput( new QAudioInput ),
+    m_audioInput( 0 ),
+    m_audioInstance( 0 ),
     audioDeviceIsReady( false ),
 #ifdef RECORD_THEN_SAVE
     samples( 0 ),
@@ -122,21 +122,16 @@ MediaRecorder::MediaRecorder(QWidget *parent, Qt::WFlags f):
     new VoiceRecordingService(this);
 
     m_mousePref = Qtopia::mousePreferred();
-
-
-    QtopiaIpcAdaptor         *mgr;
-    QByteArray               domain("Media");
-
-    mgr = new QtopiaIpcAdaptor("QPE/AudioStateManager", this);
-    mgr->send("setDomain(QByteArray,int)",domain,1);
-    QtopiaIpcEnvelope e("QPE/AudioVolumeManager", "setActiveDomain(QString)");
-    e << "Media";
 }
 
 
 MediaRecorder::~MediaRecorder()
 {
-    delete m_audioInput;
+    if(m_audioInput)
+        delete m_audioInput;
+    if(m_audioInstance)
+        delete m_audioInstance;
+
     delete recorderPlugins;
 
 #ifdef RECORD_THEN_SAVE
@@ -167,56 +162,20 @@ void MediaRecorder::initializeContents()
 
     // Load the initial quality settings.
     config = new ConfigureRecorder(qualities, recorderPlugins, this);
-    contents->qualityCombo->setCurrentIndex(config->currentQuality());
-    setQualityDisplay(qualities[config->currentQuality()]);
-    connect( contents->qualityCombo, SIGNAL(activated(int)),
-             this, SLOT(qualityChanged(int)) );
 
-    connect( contents->storageLocation, SIGNAL(newPath()),
-             this, SLOT(newLocation()) );
     recomputeMaxTime();
 
     // Create a menu with "Help" on the dialog.
     QSoftMenuBar::menuFor( config );
 
-#ifdef QTOPIA_PHONE
     // Disable the settings boxes in phone mode.
     contents->GroupBox1->hide();
-    contents->GroupBox2->hide();
-#endif
 }
-
-
-void MediaRecorder::setQualityDisplay( const QualitySetting& quality )
-{
-    // Map the MIME type to a format name.  Do the best we can with
-    // the MIME type and tag if that is all we have.
-    QString format;
-    int index = recorderPlugins->indexFromType( quality.mimeType, quality.formatTag );
-    if( index >= 0 ) {
-        format = recorderPlugins->formatNameAt( (uint)index );
-    } else if( quality.mimeType.startsWith( "audio/" ) ) {
-        format = quality.mimeType.mid(6) + " [" + quality.formatTag + "]";
-    } else {
-        format = quality.mimeType + " [" + quality.formatTag + "]";
-    }
-
-    // Format the details and display them.
-    int khz = (quality.frequency / 1000);
-    QString str;
-    if ( quality.channels == 1 ) {
-        str = tr("%1 kHz Mono - %2").arg(khz).arg(format);
-    } else {
-        str = tr("%1 kHz Stereo - %2").arg(khz).arg(format);
-    }
-    contents->details->setText( str );
-}
-
 
 void MediaRecorder::recomputeMaxTime()
 {
     // Determine the maximum available space on the device.
-    const QFileSystem *fs = contents->storageLocation->fileSystem();
+    const QFileSystem *fs = config->fileSystem();
 
     long availBlocks;
     long blockSize;
@@ -303,19 +262,6 @@ void MediaRecorder::recomputeMaxTime()
     maxRecordTime = maxSecs;
 }
 
-void MediaRecorder::qualityChanged( int id )
-{
-    config->setQuality( id );
-    config->saveConfig();
-    setQualityDisplay( qualities[id] );
-    recomputeMaxTime();
-}
-
-void MediaRecorder::newLocation()
-{
-    recomputeMaxTime();
-}
-
 
 bool MediaRecorder::startSave()
 {
@@ -325,15 +271,13 @@ bool MediaRecorder::startSave()
 
     // Open the document.
     QContent    doc;
-    QString     name = tr("%1 %2","date,time")
-            .arg(QTimeString::localYMD(QDate::currentDate(),QTimeString::Short))
-            .arg(QTimeString::localHM(QTime::currentTime()));
 
-    doc.setName(name);
+    doc.setName(tr("Voice, %1","date")
+        .arg(QTimeString::localYMDHMS(QDateTime::currentDateTime(),QTimeString::Short)));
     doc.setType( encoder->pluginMimeType() );
+    doc.setMedia( config->documentPath() );
 
     QList<QString>  cats;
-
     cats.append(recordingsCategory);
     doc.setCategories(cats);
 
@@ -369,8 +313,10 @@ void MediaRecorder::endSave()
     encoder->end();
 
     // Close the document.
-    io->close();
-    delete io;
+    if(io != NULL) {
+        io->close();
+        delete io;
+    }
     io = 0;
 
     // Clear the data for another recording.
@@ -380,6 +326,14 @@ void MediaRecorder::endSave()
 
 void MediaRecorder::startRecording()
 {
+    if(!m_audioInstance)
+        m_audioInstance = new QAudioInterface("Media", this);
+
+    if(!m_audioInput)
+        m_audioInput = new QAudioInput(this);
+
+    m_audioInstance->setInput(*m_audioInput);
+
     if ( config == 0 )
         switchToRecorder();
 
@@ -402,11 +356,12 @@ void MediaRecorder::startRecording()
     m_audioInput->setFrequency(recordQuality.frequency);
     m_audioInput->setChannels(recordQuality.channels);
 
-    m_audioInput->open(QIODevice::ReadOnly);
-
     // TODO: move to ctor
     connect(m_audioInput, SIGNAL(readyRead()),
             this, SLOT(processAudioData()));
+    connect(m_audioInstance, SIGNAL(audioStarted()), this, SLOT(audioStarted()));
+    connect(m_audioInstance, SIGNAL(audioStopped()), this, SLOT(audioStopped()));
+    m_audioInstance->startAudio();
 
     // Create the sample buffer, for recording the data temporarily.
 #ifdef RECORD_THEN_SAVE
@@ -434,8 +389,6 @@ void MediaRecorder::startRecording()
         if (configureAction)
             configureAction->setEnabled(false);
 
-        contents->qualityCombo->setEnabled( false );
-        contents->storageLocation->setEnabled( false );
         recordTime = 0;
         contents->progress->setMaximum( 120 );
         contents->progress->setValue( 0 );
@@ -453,14 +406,11 @@ void MediaRecorder::startRecording()
 
 void MediaRecorder::stopRecordingNoSwitch()
 {
-    m_audioInput->close();
     contents->waveform->reset();
 
     if (configureAction)
         configureAction->setEnabled( true );
 
-    contents->qualityCombo->setEnabled( true );
-    contents->storageLocation->setEnabled( true );
     if(m_mousePref) contents->recordButton->setEnabled(false);
     recording = false;
     setContextKey( Record );
@@ -493,6 +443,9 @@ void MediaRecorder::stopRecording()
 {
     stopRecordingNoSwitch();
     switchToFileSelector();
+
+    delete m_audioInstance;
+    m_audioInstance = 0;
 }
 
 
@@ -502,8 +455,6 @@ void MediaRecorder::startPlaying()
     if (configureAction)
         configureAction->setEnabled( false );
 
-    contents->qualityCombo->setEnabled( false );
-    contents->storageLocation->setEnabled( false );
     recordTime = 0;
 
     // Disable power save while playing so that the device
@@ -543,8 +494,6 @@ void MediaRecorder::stopPlayingNoSwitch()
     if ( configureAction )
         configureAction->setEnabled( true );
 
-    contents->qualityCombo->setEnabled( true );
-    contents->storageLocation->setEnabled( true );
     if(m_mousePref)contents->recordButton->setEnabled(true);
     playing = false;
     setContextKey( Play );
@@ -642,8 +591,8 @@ void MediaRecorder::processAudioData()
 void MediaRecorder::configure()
 {
     config->processPopup();
-    contents->qualityCombo->setCurrentIndex( config->currentQuality() );
-    qualityChanged( config->currentQuality() );
+    config->saveConfig();
+    recomputeMaxTime();
 }
 
 
@@ -734,13 +683,32 @@ void MediaRecorder::setContextKey( ContextKey key )
 
 void MediaRecorder::documentSelected(const QContent& doc)
 {
-    stopEverythingNoSwitch();
-
-    lastSaved = doc.fileName();
-
-    m_sound = new QSound( lastSaved );
-    m_sound->play();
-    playing = true;
+    if(playing && lastSaved == doc.fileName()) {
+        // Stop currently playing note
+        if(m_sound->isFinished()) {
+            stopPlayingNoSwitch();
+            lastSaved = doc.fileName();
+            m_sound = new QSound( lastSaved );
+            m_sound->play();
+            playing = true;
+        } else {
+            stopPlayingNoSwitch();
+            playing = false;
+        }
+    } else if(playing) {
+        // Stop currently playing one and start new one playing
+        stopPlayingNoSwitch();
+        lastSaved = doc.fileName();
+        m_sound = new QSound( lastSaved );
+        m_sound->play();
+        playing = true;
+    } else {
+        // Nothing playing just play
+        lastSaved = doc.fileName();
+        m_sound = new QSound( lastSaved );
+        m_sound->play();
+        playing = true;
+    }
 }
 
 
@@ -864,10 +832,6 @@ QWidget* MediaRecorder::getContentsWidget()
         contentsWidget = new QWidget(stack);
         contents = new Ui::MediaRecorderBase();
         contents->setupUi(contentsWidget);
-
-        QFileSystemFilter *fsf = new QFileSystemFilter;
-        fsf->documents = QFileSystemFilter::Set;
-        contents->storageLocation->setFilter(fsf);
         stack->addWidget( contentsWidget );
 
         // other init
@@ -904,9 +868,19 @@ void MediaRecorder::recordClicked()
     }
 }
 
+void MediaRecorder::audioStarted()
+{
+
+}
+
+void MediaRecorder::audioStopped()
+{
+}
+
 /*!
     \service VoiceRecordingService VoiceRecording
-    \brief Provides the Qtopia VoiceRecording service.
+    \inpublicgroup QtPimModule
+    \brief The VoiceRecordingService class provides the VoiceRecording service.
 
     The \i VoiceRecording service enables applications to toggle
     audio recording on or off.

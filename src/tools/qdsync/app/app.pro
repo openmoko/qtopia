@@ -1,12 +1,12 @@
+!qbuild{
 qtopia_project(qtopia app)
 TARGET=qdsync
+# Omit qtopia_main, thus forcing this app to not be quicklaunched.  This is 
+# because this is a daemon and it can get away with starting slow, unlike
+# other things at startup time.
 CONFIG+=no_tr singleexec_main
-
-#CONFIG+=qtopia_main no_tr no_quicklaunch
-## Force no quicklaunch (because this is a daemon and it can start slow, unlike other things at startup time)
-#CONFIG-=force_quicklaunch
-
 VPATH+=..
+}
 
 SOURCES+=\
     main.cpp\
@@ -20,11 +20,14 @@ pkg.multi=\
 
 desktop.files=../qdsync.desktop
 desktop.path=/apps/Applications
-desktop.hint=desktop
+desktop.hint=nct desktop
+desktop.trtarget=qdsync-nct
 INSTALLS+=desktop
 
 help.source=../help
-help.files=qdsync.html
+help.files=\
+    qdsync.html\
+    usbgadget-serial-qdsync.html
 help.hint=help
 INSTALLS+=help
 
@@ -32,3 +35,4 @@ pics.files=../pics/*
 pics.path=/pics/qdsync
 pics.hint=pics
 INSTALLS+=pics
+

@@ -1,6 +1,11 @@
+!qbuild{
 qtopia_project(qtopia app)
 TARGET=dbmigrate
 CONFIG+=no_tr singleexec_main
+depends(libraries/qtopia)
+depends(libraries/qtopiabase)
+depends(3rdparty/libraries/sqlite)
+}
 
 SOURCES	= \
     main.cpp \
@@ -8,11 +13,6 @@ SOURCES	= \
 
 HEADERS  = \
     dbmigrateservice.h
-
-depends(libraries/qtopia)
-depends(libraries/qtopiabase)
-depends(3rdparty/libraries/sqlite)
-depends(tools/dbmigrate)
 
 pkg.desc=Database upgrade migration utility
 pkg.domain=trusted

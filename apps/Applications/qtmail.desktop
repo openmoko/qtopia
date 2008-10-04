@@ -7,4 +7,4 @@ Exec=qtmail
 Icon=qtmail/EMail
 Type=Application
 Name[]=Mes\xadsages
-Categories=MainApplications
+Categories="MainApplications;DeskphoneLauncher"

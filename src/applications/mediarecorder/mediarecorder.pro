@@ -1,14 +1,16 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=mediarecorder
 CONFIG+=qtopia_main
+depends(libraries/qtopiaaudio)
+}
 
-FORMS      = mediarecorderbase.ui confrecorderbase.ui
+FORMS      = mediarecorderbase.ui
 HEADERS		= mediarecorder.h pluginlist.h \
 		  samplebuffer.h timeprogressbar.h confrecorder.h waveform.h audioparameters_p.h
 SOURCES		= mediarecorder.cpp pluginlist.cpp samplebuffer.cpp \
                   timeprogressbar.cpp confrecorder.cpp waveform.cpp main.cpp audioparameters.cpp
 
-depends(libraries/qtopiaaudio)
 
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/mediarecorder.desktop
 desktop.path=/apps/Applications

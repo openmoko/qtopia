@@ -1,5 +1,7 @@
-qtopia_project(embedded qtopia core plugin)
-depends(libraries/qtopia)
+!qbuild{
+    qtopia_project(embedded qtopia core plugin)
+    depends(libraries/qtopia)
+}
 TARGET = perftestlinuxfbscreen
 
 CONFIG+=no_tr

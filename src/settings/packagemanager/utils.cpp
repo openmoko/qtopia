@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -27,86 +25,165 @@
 #include <math.h>
 #include <QProcess>
 #include <QDebug>
+#include <sys/vfs.h>
 
-bool SizeUtils::isSufficientSpace(qlonglong size, QString &neededSpace)
+namespace SizeUtils
 {
-    QFileSystem packagesFs = QFileSystem::fromFileName( Qtopia::packagePath() );
-    qlonglong avail = (qlonglong)packagesFs.blockSize() * packagesFs.availBlocks();
-    
-    if ( avail < size )
+#ifndef PACKAGEMANAGER_UTILS_TEST
+/*  \internal
+    \a path must refer to an existing
+    file or directory */
+    qulonglong availableSpace( QString path )
     {
-        neededSpace = getSizeString(size - avail);
+        struct statfs stats;
+        statfs( path.toLocal8Bit(), &stats);
+        qulonglong bavail = (qulonglong)stats.f_bavail;
+        qulonglong bsize = (qulonglong)stats.f_bsize;
+
+        return bavail * bsize;
+    }
+
+#endif
+
+    bool isSufficientSpace( const InstallControl::PackageInfo &pkgInfo,
+            ErrorReporter *reporter )
+    {
+        bool ok;
+        //qpk size is always in bytes, see mkPackages script
+        qulonglong pkgFileSize = (qulonglong)pkgInfo.size.toLongLong( &ok );
+
+        QString installedSizeStr = pkgInfo.installedSize;
+        qulonglong installedSize =  parseInstalledSize(installedSizeStr);
+
+        //reqSize is the extracted size plus the size of
+        //the data.tar.gz(approx. qpk's size) and control file.
+        //All these will for a short period of time
+        //exist together on the filesystem.
+        //It is expected the control file is no larger than 10kb
+        qulonglong reqSize = installedSize
+                            + pkgFileSize + 10 * 1024;
+
+        qulonglong availableInstallSpace =
+            availableSpace(Qtopia::packagePath());
+
+        QString simpleError;
+        QString detailedError;
+
+        if (!ok)
+        {
+            simpleError =  QObject::tr("Invalid package download size supplied, contact package supplier");
+            detailedError ="SizeUtils::isSufficientSpace- Invalid package size supplied: %1";
+            detailedError = detailedError.arg(pkgInfo.size);
+            goto size_error;
+        }
+
+        if (installedSize  < 1)
+        {
+            simpleError =  QObject::tr( "Package did not supply valid installed size, contact package supplier" );
+            detailedError = "SizeUtils::isSufficientSpace:- Package supplied invalid size %1";
+            detailedError = detailedError.arg(installedSizeStr);
+            goto size_error;
+        }
+
+        if (pkgFileSize >= installedSize)
+        {
+            simpleError =  QObject::tr("Invalid package, contact package supplier");
+            detailedError = "SizeUtils::isSufficientSpace():- download file size >= installed size, "
+                "download size = %1, installed size = %2 ";
+            detailedError = detailedError.arg(pkgFileSize).arg(installedSize);
+            goto size_error;
+        }
+
+        if ( availableInstallSpace < reqSize)
+        {
+            QStorageMetaInfo * storage = QStorageMetaInfo::instance();
+            const QFileSystem * fs = storage->fileSystemOf(Qtopia::packagePath());
+
+            simpleError =  QObject::tr("Not enough space to install package, free up %1 from %2",
+                            "%1=size eg 2MB, %2=filesystem");
+            simpleError = simpleError.arg( getSizeString(reqSize) ).arg(fs->name());
+            detailedError = "SizeUtils::isSufficientSpace:- Insufficient space to install package "
+                "to %1, required space= %2, available space =%3";
+            detailedError = detailedError.arg(Qtopia::packagePath())
+                                        .arg(reqSize).arg(availableInstallSpace);
+            goto size_error;
+        }
+
+        return true;
+
+size_error:
+        if (reporter)
+            reporter->reportError(simpleError, detailedError);
         return false;
     }
-    return true;
+
+    //get a human readable string representing the size
+    //eg 10MB, 200KB etc
+    QString getSizeString( qulonglong size )
+    {
+        double s = size;
+        double scaledSize = s;
+        QString suffix;
+        bool skip = false;
+        if ( s < 0 ) s = 0;
+        if ( s < 1024 ) {
+            suffix = QObject::tr("B","bytes");
+            scaledSize = s;
+            skip = true;
+        }
+        s /= 1024;
+        if ( skip == false && s < 1024 ) {
+            suffix = QObject::tr("KB","kilobytes");
+            scaledSize = s;
+            skip = true;
+        }
+        s /= 1024;
+        if ( skip == false && s < 1024 ) {
+            suffix = QObject::tr("MB","megabytes");
+            scaledSize = s;
+            skip = true;
+        }
+        s /= 1024;
+        if ( skip == false && s < 1024 ) {
+            suffix = QObject::tr("GB","gigabytes");
+            scaledSize = s;
+            skip = true;
+        }
+        return QString().sprintf("%0.2f",scaledSize ) + suffix;
+
+    }
+
+    qulonglong parseInstalledSize( QString installedSize )
+    {
+        QRegExp rx("^(\\d+\\.?\\d+)([km]?)$");
+        installedSize = installedSize.trimmed().toLower();
+        long multiplier;
+        if ( rx.indexIn(installedSize) !=0 )
+            return -1;
+
+        QStringList captures = rx.capturedTexts();
+        if ( !captures.count() == 3 )
+            return -1;
+
+        if ( captures[2].isEmpty()  )
+            multiplier = 1;
+        else if ( captures[2] == "k" )
+            multiplier = 1024;
+        else if ( captures[2] == "m" )
+            multiplier = 1024 * 1024;
+        else
+            return -1;
+
+        bool ok = false;
+        double d = captures[1].toDouble( &ok );
+        if ( !ok )
+            return -1;
+        double rounded = round( d );
+        if ( floor(d) == rounded )
+            rounded = rounded + 0.5;
+        return (qulonglong)(rounded * multiplier) ;
+    }
 }
-
-QString SizeUtils::getSizeString( qlonglong size )
-{
-    double s = size;
-    double scaledSize = s;
-    QString suffix;
-    bool skip = false;
-    if ( s < 0 ) s = 0;
-    if ( s < 1024 ) {
-        suffix = QObject::tr("B","bytes");
-        scaledSize = s;
-        skip = true;
-    }
-    s /= 1024;
-    if ( skip == false && s < 1024 ) {
-        suffix = QObject::tr("KB","kilobytes");
-        scaledSize = s;
-        skip = true;
-    }
-    s /= 1024;
-    if ( skip == false && s < 1024 ) {
-        suffix = QObject::tr("MB","megabytes");
-        scaledSize = s;
-        skip = true;
-    }
-    s /= 1024;
-    if ( skip == false && s < 1024 ) {
-        suffix = QObject::tr("GB","gigabytes");
-        scaledSize = s;
-        skip = true;
-    }
-    return QString().sprintf("%0.2f",scaledSize ) + suffix;
-
-}
-
-qlonglong SizeUtils::parseInstalledSize( QString installedSize )
-{
-    QRegExp rx("^(\\d+\\.?\\d+)([km]?)$");
-    installedSize = installedSize.trimmed().toLower();
-    long multiplier;
-    if ( rx.indexIn(installedSize) !=0 )
-        return -1;
-
-    QStringList captures = rx.capturedTexts();
-    if ( !captures.count() == 3 )
-        return -1;
-
-    if ( captures[2].isEmpty()  )
-        multiplier = 1;
-    else if ( captures[2] == "k" )
-        multiplier = 1024;
-    else if ( captures[2] == "m" )
-        multiplier = 1024 * 1024;
-    else
-        return -1;
-
-    bool ok = false;
-    double d = captures[1].toDouble( &ok );
-    if ( !ok )
-        return -1;
-
-    double rounded = round( d );
-    if ( floor(d) == rounded )
-        rounded = rounded + 0.5;
-    return (qlonglong)(rounded * multiplier) ;
-}
-
 bool LidsUtils::isLidsEnabled()
 {
     return QFile::exists("/proc/sys/lids/locks");

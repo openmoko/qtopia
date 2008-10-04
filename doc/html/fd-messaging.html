@@ -10,9 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Messaging<br><small>Functional Description</small></h1><p>The <em>Messages</em> application provides the user interface to 
-messaging in Qtopia. It provides the facility to receive emails from 
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Messaging<br><small>Functional Description</small></h1><p>The <em>Messages</em> application provides the user interface to 
+messaging in Qt Extended. It provides the facility to receive emails from 
 multiple mail servers as well as SMS and MMS messages from other mobile phone devices. 
 It also allows email, MMS and SMS messages to be sent to 
 multiple people with or without attachments. <nop>SMS messages are 
@@ -25,19 +25,40 @@ Application requirements include available messaging storage on the
 device of approximately 1.5 times the server mailbox size and the 
 services of an image viewer are required for viewing image 
 attachments.
-
 <h2>Features</h2>
-<ul><li><a href="#QTOPIA-780">Folders</a>
+<ul><li><a href="#QTOPIA-804">Contact Selector</a>
+<li><a href="#QTOPIA-8104">Detailed message notifications</a>
+<li><a href="#QTOPIA-780">Folders</a>
+<li><a href="#QTOPIA-830">IMAP Folder Subscription</a>
+<li><a href="#QTOPIA-8078">Intuitive message view interface</a>
+<li><a href="#QTOPIA-7935">Message composer</a>
 <li><a href="#QTOPIA-7439">Messaging API</a>
+<li><a href="#QTOPIA-7553">Modular Messaging Architecture</a>
 <li><a href="#QTOPIA-776">Receiving messages</a>
+<li><a href="#QTOPIA-8349">Resume message composition after red-key interruption</a>
 <li><a href="#QTOPIA-783">Retrieving messages</a>
 <li><a href="#QTOPIA-779">Saving an attachment</a>
 <li><a href="#QTOPIA-775">Sending messages</a>
 <li><a href="#QTOPIA-784">Storage requirements</a>
+<li><a href="#QTOPIA-816">Store Sender to Contacts</a>
+<li><a href="#QTOPIA-7896">Unified inbox</a>
 <li><a href="#QTOPIA-778">Viewing an embedded image</a>
 <li><a href="#QTOPIA-781">Viewing messages</a>
 <li><a href="#QTOPIA-782">Writing messages</a>
-</ul><h3><a name=QTOPIA-780>Folders (QTOPIA-780)</a></h3>
+</ul><h3><a name=QTOPIA-804>Contact Selector</a></h3>
+<p>The contact selector provides easy selection of one or more contacts to send a message to.  It is also possible to select a group of contacts.
+<h3><a name=QTOPIA-8104>Detailed message notifications</a></h3>
+<p>This feature is provided as part of the Deskphone Reference Design.</p>
+<p>When a new message is received a message notification displayed on the Home screen indicate the type of message received, and the available actions associated with such a message.  The notification provides a short summary of the message, including:
+<ul>
+	<li>sender</li>
+	<li>time</li>
+	<li>subject or, in the case of an SMS, a snippet of the message.</li>
+</ul>
+
+
+<p>Messages containing attachments, such as video, indicate a file size or media play length</p>
+<h3><a name=QTOPIA-780>Folders</a></h3>
 <p>The following folder features are available:
 
 <ul>
@@ -46,14 +67,32 @@ attachments.
 	<li>Search: it is possible to quickly search for mails by using the search folder.</li>
 	<li>Mail Account: each mail account is automatically assigned a virtual folder.</li>
 </ul>
+<h3><a name=QTOPIA-830>IMAP Folder Subscription</a></h3>
+<p>This feature is provided as part of one or more Reference Designs.</p>
+<p>The Messaging application supports IMAP folder subscription.
+<h3><a name=QTOPIA-8078>Intuitive message view interface</a></h3>
+<p>This feature is provided as part of the Deskphone Reference Design.</p>
+<p>Users can view/play messages using a simple interface.
 
-<h3><a name=QTOPIA-7439>Messaging API (QTOPIA-7439)</a></h3>
+<ul>
+	<li>touch to open normal messages</li>
+	<li>touch media icon to play audio/video messages from either list or view</li>
+</ul>
+<h3><a name=QTOPIA-7935>Message composer</a></h3>
+<p>This feature is provided as part of the Deskphone Reference Design.</p>
+<p>Message composition is provided as a unified interface.  Depending on the configuration, the message composer supports creation of email messages, SMS messages, multimedia messages and instant messages.
+<h3><a name=QTOPIA-7439>Messaging API</a></h3>
 <p>Provides an API to allow storage, retrieval and display of SMS, MMS and email messages.  This API is used by Messaging clients and is also useful for applications that would like to display messages from a particular contact, for example.
-<h3><a name=QTOPIA-776>Receiving messages (QTOPIA-776)</a></h3>
+<h3><a name=QTOPIA-7553>Modular Messaging Architecture</a></h3>
+<p>The Messages application features a modular design allowing various components to be replaced without the need to modify the core parts of the application logic.  The Messages user-interface is separated from the storage and communication of messages.
+<h3><a name=QTOPIA-776>Receiving messages</a></h3>
 <p>Messages can be retrieved, listed in a summary format and individually displayed. <br/>
 For SMS / MMS messages this is possible without configuration, <br/>
 for Email this is possible after a valid incoming account has been created by the user.
-<h3><a name=QTOPIA-783>Retrieving messages (QTOPIA-783)</a></h3>
+<h3><a name=QTOPIA-8349>Resume message composition after red-key interruption</a></h3>
+<p>This feature is provided as part of the Touchscreen Phone Reference Design.</p>
+<p>When the Messages application is in the act of composing a message and the hangup key is pressed, the message is automatically saved as a draft, and Messages terminates.  When the Messages application is next raised by the user, the user is prompted to resume composition of the interrupted message if desired.
+<h3><a name=QTOPIA-783>Retrieving messages</a></h3>
 <p>The following message retrieval related features are available:
 
 <ul>
@@ -65,11 +104,10 @@ for Email this is possible after a valid incoming account has been created by th
 	<li>Resume: it is possible to cancel downloads and resume them later.</li>
 	<li>Safe: in case of a crash while downloading the client reverts to the state prior to the crash.</li>
 </ul>
-
-<h3><a name=QTOPIA-779>Saving an attachment (QTOPIA-779)</a></h3>
+<h3><a name=QTOPIA-779>Saving an attachment</a></h3>
 <p>It is possible for a user to receive a message with an attachment and select to save<br/>
 it in their documents for later viewing.
-<h3><a name=QTOPIA-775>Sending messages (QTOPIA-775)</a></h3>
+<h3><a name=QTOPIA-775>Sending messages</a></h3>
 <p>It is possible for a user to compose and send an SMS / MMS to another mobile phone. <br/>
 After configuring an outgoing account Email messages may be composed and sent by the user.
 
@@ -84,13 +122,27 @@ After configuring an outgoing account Email messages may be composed and sent by
 	<li>Flexible: default SMTP account or reply-to field is used where the from address does not match.</li>
 	<li>Diverse: it is possible to send a single message with both SMS and email addresses.</li>
 </ul>
-
-<h3><a name=QTOPIA-784>Storage requirements (QTOPIA-784)</a></h3>
+<h3><a name=QTOPIA-784>Storage requirements</a></h3>
 <p>Downloading a complete mailbox from the server uses approximately 1.5 times the server mailbox size is required on a device. During download of individual messages one copy of the message is temporarily created on the devices storage during download. While sending, an amount of RAM equal to the size of the message including attachments is used.
-<h3><a name=QTOPIA-778>Viewing an embedded image (QTOPIA-778)</a></h3>
+<h3><a name=QTOPIA-816>Store Sender to Contacts</a></h3>
+<p>This feature is provided as part of one or more Reference Designs.</p>
+<p>The Messages application has the ability to save a "From" address to a new or existing contact.
+<h3><a name=QTOPIA-7896>Unified inbox</a></h3>
+<p>This feature is provided as part of the Deskphone Reference Design.</p>
+<p>The inbox allows the user to see incoming messages of different types, for example
+<ul>
+	<li>voice and video mail</li>
+	<li>text messages</li>
+	<li>email</li>
+	<li>instant messages</li>
+</ul>
+
+
+<p>Presence information is displayed for the sender of a message, if available.  A small icon of standard colors indicates the user's online status - green, yellow and red for online, busy and offline respectively shows on the message list item.</p>
+<h3><a name=QTOPIA-778>Viewing an embedded image</a></h3>
 <p>It is possible for a user to receive and view a message with an<br/>
 image either attached or embedded.
-<h3><a name=QTOPIA-781>Viewing messages (QTOPIA-781)</a></h3>
+<h3><a name=QTOPIA-781>Viewing messages</a></h3>
 <p>The following features are available:
 
 <ul>
@@ -105,8 +157,7 @@ image either attached or embedded.
 	<li>Delete: it is possible to delete the currently viewed message.</li>
 	<li>Copy/move: it is possible to copy/move messages between folders stored on the device.</li>
 </ul>
-
-<h3><a name=QTOPIA-782>Writing messages (QTOPIA-782)</a></h3>
+<h3><a name=QTOPIA-782>Writing messages</a></h3>
 <p>The following writing-related features are available:
 
 <ul>
@@ -115,10 +166,9 @@ image either attached or embedded.
 	<li>Auto save: modified messages are automatically saved unless they are explicitly discarded.</li>
 	<li>Store: draft messages are stored in the <em>Drafts</em> folder and messages ready to send are stored in the <em>Outbox</em> folder.</li>
 </ul>
-
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div>

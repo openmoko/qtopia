@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,7 +21,11 @@
 #ifdef QTOPIA_DUMMY_RADIO
 #include "radiobanddummy.h"
 #endif
+#ifdef QTOPIA_CUSTOM_RADIO
+#include "radiobandcustom.h"
+#else
 #include "radiobandv4l.h"
+#endif
 #include <QTimer>
 #include <QSettings>
 
@@ -51,7 +53,11 @@ public:
             RadioBandDummy::createBands( bands, obj );
         else
     #endif
+    #ifdef QTOPIA_CUSTOM_RADIO
+            RadioBandCustom::createBands( bands, obj );
+    #else
             RadioBandV4L::createBands( bands, obj );
+    #endif
         if ( bands.size() == 0 ) {
             currentBand = -1;
         }
@@ -227,6 +233,35 @@ int RadioBandManager::volume() const
         return band->volume();
     else
         return 0;
+}
+
+/*#
+    Returns true if the audio is being routed to the hands-free speaker.
+
+    \sa setSpeakerActive(), speakerPresent()
+*/
+bool RadioBandManager::speakerActive() const
+{
+    RadioBand *band = currentBand();
+    if ( band )
+        return band->speakerActive();
+    else
+        return false;
+}
+
+/*#
+    Returns true if the radio band supports a hands-free speaker.
+    The default return value is false.
+
+    \sa speakerActive(), setSpeakerActive()
+*/
+bool RadioBandManager::speakerPresent() const
+{
+    RadioBand *band = currentBand();
+    if ( band )
+        return band->speakerPresent();
+    else
+        return false;
 }
 
 /*#
@@ -517,6 +552,18 @@ void RadioBandManager::adjustVolume( int diff )
     RadioBand *band = currentBand();
     if ( band )
         band->adjustVolume( diff );
+}
+
+/*#
+    Sets the active speaker mode to \a value.
+
+    \sa speakerActive(), speakerPresent()
+*/
+void RadioBandManager::setSpeakerActive( bool value )
+{
+    RadioBand *band = currentBand();
+    if ( band )
+        band->setSpeakerActive( value );
 }
 
 /*#

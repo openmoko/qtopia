@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -514,10 +512,10 @@ void SandboxInstallJob::reloadRules()
 
 /*!
   Create the sandbox directory structure and other settings for the untrusted
-  package.  The directory structure assumes a Qtopia file system similar to
+  package.  The directory structure assumes a Qt Extended file system similar to
   the following:
 
-  \image file-system.png
+  \image package.png
 
   Note that the installPath() includes the "package" directory, so that eg searches
   for binaries will include "package/bin".
@@ -533,7 +531,7 @@ void SandboxInstallJob::reloadRules()
   Icon=BomberMan/bomb
   \endcode
 
-  The Qtopia launcher must be able to find the binary, which therefore must be
+  The Qt Extended launcher must be able to find the binary, which therefore must be
   in the installPath() and must not clash with other binary names.
 
   So that the untrusted packages are found last (preventing an untrusted package
@@ -552,11 +550,11 @@ void SandboxInstallJob::reloadRules()
   This is also important for IPC messaging since the binary name (and argv[0]) is
   used to create messaging endpoints, and therefore must be unique Qtopia-wide.
 
-  The Qtopia launcher must also be able to find the icon.  Here again the
+  The Qt Extended launcher must also be able to find the icon.  Here again the
   installPath() is searched automatically for the value of the "Icon=" field
   so hence the BomberMan directory is symlinked from the "pic" directory.
 
-  The items which the Qtopia system must be able to locate within a sandboxed package
+  The items which the Qt Extended system must be able to locate within a sandboxed package
   are as follows, where the paths given are relative to the packages sandbox directory:
   \list
   \o executable binary, in "bin" as listed in the "Exec=" field of .desktop
@@ -586,7 +584,7 @@ void SandboxInstallJob::reloadRules()
 
   Note that since the binary is launched via the symlink named after its md5sum,
   this same string must be linked in the sandbox "pic" directory to locate image resources
-  The Qtopia resource system will search in "pic/" + argv[0] for images.
+  The Qt Extended resource system will search in "pic/" + argv[0] for images.
 */
 bool SandboxInstallJob::setupSandbox()
 {
@@ -697,9 +695,7 @@ bool SandboxInstallJob::setupSandbox()
                 if (reporter)
                 {
                     QString detailedMessage("Maximum number of LIDS rules exceeded");
-                    //Reminder: change error message to Cannot install package,
-                    //maximum number of packages reached
-                    reporter->reportError(tr( "Error occurred during installation" ),
+                    reporter->reportError(tr("Cannot install package, maximum number of packages reached"),
                                             detailedMessage);
                 }
                 return false;
@@ -1112,6 +1108,7 @@ bool SandboxInstallJob::setupSettingsFiles()
 /*
   \internal
   \class SandboxUninstallJob
+    \inpublicgroup QtPkgManagementModule
   \brief Uninstalls a package
 
   The SandboxUninstallJob is responsible for the particulars in deleting

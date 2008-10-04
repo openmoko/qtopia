@@ -1,8 +1,10 @@
+!qbuild{
 qtopia_project(external lib)
 TARGET      =   timidity
 VERSION     =   1.0.0
 license(LGPL)
 !free_package:idep(CONFIG+=no_singleexec,CONFIG)
+}
 
 HEADERS     = src/common.h \
                 src/dls1.h \
@@ -31,23 +33,32 @@ SOURCES = src/common.c \
             src/tables.c \
             src/timidity.c
 
-contains(QTOPIA_TARGET_ENDIAN,little):DEFINES+=LITTLE_ENDIAN
+equals(QTOPIA_TARGET_ENDIAN,little):DEFINES+=LITTLE_ENDIAN
 else:DEFINES+=BIG_ENDIAN
+DEFINES+=HAVE_CONFIG_H
 
 pkg.desc=Timidity MIDI library
 pkg.domain=trusted
 
+!qbuild{
+headers.files=$$HEADERS
+CONFIG+=syncqtopia
+headers.path=/include/timidity
+headers.hint=non_qt_headers
+INSTALLS+=headers
+
+qt_inc(timidity)
+idep(LIBS+=-l$$TARGET)
+}
+
 patches.files=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/libtimidity/config/*
 patches.path=/etc/timidity
-patches.hint=config files
 INSTALLS+=patches
 
-timidityconfig.commands=$$COMMAND_PREFIX\
+qbuild:timidityconfig.commands=\
+    "cat "$$path(.,project)"/timidity.cfg | sed 's:QTOPIA_PREFIX:$$QTOPIA_PREFIX:' >$$QTOPIA_IMAGE/etc/timidity/timidity.cfg"
+else:timidityconfig.commands=$$COMMAND_PREFIX\
     cat $$PWD/timidity.cfg | sed 's:QTOPIA_PREFIX:$$QTOPIA_PREFIX:' >$(INSTALL_ROOT)/etc/timidity/timidity.cfg
 timidityconfig.path=/etc/timidity
 INSTALLS+=timidityconfig
-
-# FIXME "make syncqtopia"
-dep(INCLUDEPATH+=$$PWD/src)
-idep(LIBS+=-l$$TARGET)
 

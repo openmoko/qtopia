@@ -1,0 +1,12 @@
+TEMPLATE=app
+CONFIG+=qtopia
+TARGET=helpbrowser
+
+CONFIG+=quicklaunch singleexec
+
+include(helpbrowser.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

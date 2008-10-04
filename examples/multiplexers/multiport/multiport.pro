@@ -1,6 +1,6 @@
 qtopia_project(qtopia plugin)
 TARGET=multiportmultiplex
-requires(enable_modem)
+requires(enable_cell)
 
 CONFIG+=no_tr
 

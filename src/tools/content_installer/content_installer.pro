@@ -1,35 +1,50 @@
+!qbuild{
 qtopia_project(desktop app)
 TARGET=content_installer
 CONFIG+=no_tr
 
-RESOURCES+=qtopia.qrc
-# for 4.3, link in the qrc and use QResource to iterate over the tables
-# RESOURCES+=qtopiapim.qrc
+VPATH+=\
+    $$QTOPIA_DEPOT_PATH/src/libraries/qtopiabase\
+    $$QTOPIA_DEPOT_PATH/src/libraries/qtopia\
+    $$QTOPIA_DEPOT_PATH/src/tools/dbmigrate
+INCLUDEPATH+=\
+    $$QTOPIA_DEPOT_PATH/src/libraries/qtopiabase\
+    $$QTOPIA_DEPOT_PATH/src/libraries/qtopia\
+    $$QTOPIA_DEPOT_PATH/src/tools/dbmigrate
+qt_inc(qtopia)
+depends(libraries/qtopia,fake)
+qt_inc(qtopiabase)
+depends(libraries/qtopiabase,fake)
+#qt_inc(qtopiapim)
+#depends(libraries/qtopiapim,fake)
+}
 
-### Needs routines from qtopia
-VPATH+=$$QTOPIA_DEPOT_PATH/src/libraries/qtopia
-INCLUDEPATH+=$$QPEDIR/include/qtopia
+DEFINES+=QTOPIA_CONTENT_INSTALLER 
+DEFINES+=QTOPIA_HOST 
 
-### Also needs qLog
-VPATH+=$$QTOPIA_DEPOT_PATH/src/libraries/qtopiabase
-INCLUDEPATH+=$$QPEDIR/include/qtopiabase
+# Semaphores might be required if local TCP ports cannot be used
+# but they require a 2.6 kernel and GLibC 2.5 or later.
+#CONFIG+=use_semaphores
 
-### Also needs the QtopiaPIM database stuff
-VPATH+=$$QTOPIA_DEPOT_PATH/src/libraries/qtopiapim
-INCLUDEPATH+=$$QPEDIR/include/qtopiapim
-RESOURCES+=qtopiapim.qrc
+RESOURCES=\
+    qtopia.qrc
 
-VPATH+=$$QTOPIA_DEPOT_PATH/src/tools/dbmigrate
-VPATH+=$$QTOPIA_DEPOT_PATH/src/tools/dbmigrate/qtopiapim
-INCLUDEPATH+=$$QPEDIR/src/tools/dbmigrate
+SOURCES=\
+    main.cpp\
 
-### Also needs the QtopiaPhone database schema
-VPATH+=$$QTOPIA_DEPOT_PATH/src/tools/dbmigrate/qtopiaphone
-RESOURCES+=phonemigrate.qrc
+HEADERS=\
+    qsystemsemaphore.h
 
-DEFINES+=QTOPIA_CONTENT_INSTALLER
+use_semaphores {
+    SOURCES+=qsystemsemaphore_sem.cpp
+    # because we can't guarantee cleanup by glibc's termination routines.
+    DEFINES+=USE_EVIL_SIGNAL_HANDLERS
+} else {
+    SOURCES+=qsystemsemaphore_tcp.cpp
+    QT*=network
+}
 
-SOURCES	= main.cpp \
+SOURCES+=\
     qtopiasql.cpp \
     qtopiasql_p.cpp \
     qtopialog.cpp \
@@ -57,8 +72,6 @@ SOURCES	= main.cpp \
     qsignalintercepter.cpp \
     quniqueid.cpp \
     migrateengine.cpp \
-    pimmigrate.cpp \
-    phonemigrate.cpp \
     qcategorystore.cpp \
     qsqlcategorystore.cpp \
     qcontentengine.cpp \
@@ -98,8 +111,6 @@ HEADERS = \
     qsignalintercepter.h \
     quniqueid.h \
     migrateengine.h \
-    pimmigrate.h \
-    phonemigrate.h \
     qcategorystore_p.h \
     qsqlcategorystore_p.h \
     qcontentstore_p.h \
@@ -107,16 +118,4 @@ HEADERS = \
     qcontentsetengine_p.h \
     qmimetypedata_p.h \
     qsqlcontentsetengine_p.h
-
-RESOURCES += pimmigrate.qrc
-
-INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite
-backup.TARGET=$$TARGET
-VPATH+=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite
-!build_qtopia_sqlite:CONFIG+=set_build_qtopia_sqlite
-set_build_qtopia_sqlite:CONFIG+=build_qtopia_sqlite
-include($$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite/sqlite.pro)
-set_build_qtopia_sqlite:CONFIG-=build_qtopia_sqlite
-CONFIG-=syncqtopia
-TARGET=$$backup.TARGET
 

@@ -1,52 +1,42 @@
+!qbuild {
 qtopia_project(qtopia app)
+DEFINES-=QT_NO_DEBUG 
 TARGET=camera
 CONFIG+=qtopia_main
+depends(libraries/qtopiavideo)
+enable_pictureflow:depends(3rdparty/libraries/pictureflow)
+}
 
 FORMS=camerabase.ui camerasettings.ui
 
 HEADERS = mainwindow.h \
-          thumbbutton.h \
-          videocaptureview.h \
-          videocapturedevice.h \
-          videocapturedevicefactory.h \
-          formatconverter.h \
-          bayerconverter.h \
           phototimer.h \
           minsecspinbox.h\
           noeditspinbox.h\
-          yuvconverter.h
+          videocaptureview.h\
+          camerastateprocessor.h\
+          cameraformatconverter.h\
+          zoomslider.h\
+          cameravideosurface.h
 
 SOURCES = mainwindow.cpp \
-          videocaptureview.cpp \
-          formatconverter.cpp \
-          bayerconverter.cpp \
           main.cpp \
           phototimer.cpp \
           minsecspinbox.cpp\
           noeditspinbox.cpp\
-          yuvconverter.cpp
+          videocaptureview.cpp\
+          camerastateprocessor.cpp\
+          cameraformatconverter.cpp\
+          zoomslider.cpp\
+          cameravideosurface.cpp
 
-# This is documented in src/build/doc/src/deviceprofiles.qdoc
-!isEmpty(DEVICE_CONFIG_PATH) {
-    DEVICE_HEADERS=$$files($$DEVICE_CONFIG_PATH/camera/*.h)
-    DEVICE_SOURCES=$$files($$DEVICE_CONFIG_PATH/camera/*.cpp)
+enable_pictureflow {
+    MODULES*=pictureflow
+    HEADERS+=imagebrowser.h
+    SOURCES+=imagebrowser.cpp
 }
 
-!isEmpty(DEVICE_SOURCES) {
-    HEADERS+=$$DEVICE_HEADERS
-    SOURCES+=$$DEVICE_SOURCES
-} else {
-    HEADERS+=\
-            dummyvideocapturedevice.h \
-            v4l1videocapturedevice.h \
-            v4l2videocapturedevice.h \
-            nodevice.h
-    SOURCES+=\
-            videocapturedevicefactory.cpp \
-            dummyvideocapturedevice.cpp \
-            v4l1videocapturedevice.cpp \
-            v4l2videocapturedevice.cpp
-}
+
 
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/camera.desktop
 desktop.path=/apps/Applications

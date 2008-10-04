@@ -1,6 +1,15 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=mediaplayer
 CONFIG+=qtopia_main
+depends(libraries/qtopiamedia)
+enable_pictureflow:depends(3rdparty/libraries/pictureflow)
+}
+
+enable_pictureflow:MODULES*=pictureflow
+
+DEFINES+=NO_VISUALIZATION
+#DEFINES+=NO_THUMBNAIL
 
 HEADERS = mediaplayer.h \
             playercontrol.h \
@@ -9,14 +18,14 @@ HEADERS = mediaplayer.h \
             playerwidget.h \
             mediabrowser.h \
             visualization.h \
-            playlist.h \
             browser.h \
             keyhold.h \
             menumodel.h \
             menuview.h \
             requesthandler.h \
             servicerequest.h \
-            keyfilter.h
+            keyfilter.h \
+            playmediaservice.h
 
 SOURCES = main.cpp \
             mediaplayer.cpp \
@@ -26,13 +35,13 @@ SOURCES = main.cpp \
             playerwidget.cpp \
             mediabrowser.cpp \
             visualization.cpp \
-            playlist.cpp \
             browser.cpp \
             keyhold.cpp \
             menumodel.cpp \
             menuview.cpp \
             requesthandler.cpp \
-            keyfilter.cpp
+            keyfilter.cpp \
+            playmediaservice.cpp
 
 !contains(QTOPIAMEDIA_ENGINES,helix) {
     DEFINES += NO_HELIX
@@ -53,8 +62,9 @@ help.files=mediaplayer*
 help.hint=help
 INSTALLS+=help
 
+playmediaservice.files = $$QTOPIA_DEPOT_PATH/services/PlayMedia/mediaplayer
+playmediaservice.path = /services/PlayMedia
+INSTALLS+=playmediaservice
 
 pkg.desc=Qtopia media player.
 pkg.domain=trusted
-
-depends(libraries/qtopiamedia)

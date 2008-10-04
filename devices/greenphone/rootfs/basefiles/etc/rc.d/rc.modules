@@ -62,6 +62,7 @@ case "$1" in
         insmod omega_spi
         insmod omega_vibrator
         insmod omega_kpbl
+        insmod omega_usb_detect
         insmod pseudo_serial
 
         # miniSD Card

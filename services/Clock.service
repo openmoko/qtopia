@@ -3,5 +3,5 @@ File=QtopiaServices
 Context=Clock
 [Service]
 Actions = "showClock()"
-Icon = Clock
+Icon=clock/Clock
 Name[]=Show Clock

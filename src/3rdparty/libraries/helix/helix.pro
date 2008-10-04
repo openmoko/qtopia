@@ -20,7 +20,6 @@ else {
 enable_rpath:!isEmpty(QTOPIA_RPATH):RPATHVALUE=$$QTOPIA_RPATH$$QTOPIA_PREFIX
 
 # setup the helix bulid tree
-# this code is copied into configure
 setup_helixbuild.commands=$$COMMAND_HEADER\
     if [ -d $$HELIX_PATH ]; then rm -rf $$HELIX_PATH; fi $$LINE_SEP\
     mkdir -p $$HELIX_PATH $$LINE_SEP\
@@ -36,9 +35,11 @@ setup_helixbuild.commands=$$COMMAND_HEADER\
         $$LITERAL_QUOTE$$HELIX_PATH/buildrc$$LITERAL_QUOTE\
         $$LITERAL_QUOTE$$LOGGING$$LITERAL_QUOTE $$LINE_SEP\
     cd $$HELIX_PATH;\
-    for patch in $$PWD/trolltech/patches/*.patch; do\
-        patch -g0 -t -p2 <\$$patch;\
-    done
+    if [ -d $$PWD/trolltech/patches ]; then\
+        for patch in $$PWD/trolltech/patches/*.patch; do\
+            patch -g0 -t -p2 <\$$patch;\
+        done;\
+    fi
 QMAKE_EXTRA_TARGETS+=setup_helixbuild
 regenerate.depends+=setup_helixbuild
 

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,20 +24,20 @@
 #include <qtopiaapplication.h>
 
 /*!
-  \service SysMessagesService SystemMessages
-  \brief Provides the Qtopia \i SystemMessages service.
+    \service SysMessagesService SystemMessages
+    \inpublicgroup QtPkgManagementModule
+    \brief The SysMessagesService class provides the SystemMessages service.
 
-  The \i SystemMessages service enables the sending of
-  system related messages as both warning dialogs and as synthetic messages which will end up in the users inbox.
-  Client applications can request the \i SystemMessages service
-  to send a message with the following code:
-  \code
-  QtopiaServiceRequest req( "SystemMessages", "QString, QString" );
-  req << subject;
-  req << text;
-  req.send();
-  \endcode
-
+    The \i SystemMessages service enables the sending of
+    system related messages as both warning dialogs and as synthetic messages which will end up in the users inbox.
+    Client applications can request the \i SystemMessages service
+    to send a message with the following code:
+    \code
+        QtopiaServiceRequest req( "SystemMessages", "QString, QString" );
+        req << subject;
+        req << text;
+        req.send();
+    \endcode
 */
 /**
    Implementation Notes:
@@ -122,13 +120,6 @@ void SysMessagesService::sendMessage( const QString &subject, const QString &tex
     passOnMessage( maxMessageId );
     maxMessageId++;
 
-    QSettings mailconf( "Trolltech", "qtmail" );
-    mailconf.beginGroup( "SystemMessages" );
-    int count = mailconf.value( "newSystemCount" ).toInt() + 1;
-    mailconf.setValue( "newSystemCount" , count);
-    QtopiaIpcEnvelope e( "QPE/System", "newSystemCount(int)" );
-    e << count;
-
     QtopiaApplication *qtopiaApp = qobject_cast<QtopiaApplication *>(qApp);
 
     //can't use qtopiaApp->willKeepRunning() since it will return true
@@ -152,25 +143,31 @@ void SysMessagesService::ackMessage( int messageId )
         qWarning() << "SysMessagesService: message corresponding to messageId, "
                    << messageId << ", could not be removed";
 
-    if ( sysMailMap.size() == 0 )
+    if ( sysMailMap.isEmpty() )
     {
         ( qobject_cast<QtopiaApplication *>(qApp) )->unregisterRunningTask( "QtopiaSysMessages" );
         keepRunning = false;
+
+        // Report that all messages have been processed
+        QtopiaIpcEnvelope e( "QPE/SysMessages", "processed()" );
     }
 }
 
 
 /*!
-  \internal
   Sends out all system messages on channel QPE/SysMessages
-  (should be invoked by qtmail, via QPE/SysMessages channel,
-  on startup to retrieve all pending system sms messages.)
+  on startup to retrieve all pending system sms messages.
  */
 void SysMessagesService::collectMessages()
 {
-    QMap<int, SysMail>::const_iterator it;
-    for ( it = sysMailMap.begin(); it != sysMailMap.end(); ++it )
-        passOnMessage( it.key() );
+    if (!sysMailMap.isEmpty()) {
+        QMap<int, SysMail>::const_iterator it;
+        for ( it = sysMailMap.begin(); it != sysMailMap.end(); ++it )
+            passOnMessage( it.key() );
+    } else {
+        // Report that all messages have been processed
+        QtopiaIpcEnvelope e( "QPE/SysMessages", "processed()" );
+    }
 }
 
 /*!
@@ -180,10 +177,9 @@ void SysMessagesService::collectMessages()
 */
 void SysMessagesService::received(const QString &message, const QByteArray &data)
 {
-    if ( message == "collectMessages()" )
+    if ( message == "collectMessages()" ) {
         collectMessages();
-    else if ( message == "ackMessage(int)" )
-    {
+    } else if ( message == "ackMessage(int)" ) {
         int messageId;
         QDataStream ds( data );
         ds >> messageId;

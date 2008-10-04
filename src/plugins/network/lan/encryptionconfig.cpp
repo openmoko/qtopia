@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -32,9 +30,7 @@
 
 #include <hexkeyvalidator.h>
 
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 
 QIcon crossOutIcon(const QString& icon)
 {
@@ -84,10 +80,8 @@ WirelessEncryptionPage::WirelessEncryptionPage( const QtopiaNetworkProperties& c
 
     init( cfg );
 
-#ifdef QTOPIA_PHONE
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this, true );
-#endif
     selectEncryptAlgorithm( ui.encrypt->currentIndex() );
     connect( ui.netSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(newNetSelected(int)) );
     connect( ui.encrypt, SIGNAL(currentIndexChanged(int)), this, SLOT(selectEncryptAlgorithm(int)) );
@@ -102,8 +96,11 @@ WirelessEncryptionPage::~WirelessEncryptionPage()
 
 QtopiaNetworkProperties WirelessEncryptionPage::properties()
 {
-    if ( !isEnabled() )
-        return QtopiaNetworkProperties();
+    if ( !isEnabled() ) {
+        QtopiaNetworkProperties p;
+        p.insert("WirelessNetworks/size", 0);
+        return p;
+    }
 
     saveConfig();
     return props;
@@ -122,6 +119,8 @@ void WirelessEncryptionPage::init( const QtopiaNetworkProperties& cfg )
     } else {
         setEnabled( false );
         ui.netSelector->addItem("<No WLAN defined>");
+        props.clear();
+        readConfig();
         return;
     }
     int idx = 0;

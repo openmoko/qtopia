@@ -1,0 +1,12 @@
+TEMPLATE=app
+CONFIG+=qtopia
+TARGET=textedit
+
+CONFIG+=quicklaunch singleexec
+
+include(textedit.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

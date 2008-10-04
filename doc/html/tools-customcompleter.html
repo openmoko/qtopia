@@ -3,15 +3,15 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Qt 4.3: Custom Completer Example</title>
+  <title>Qt 4.4: Custom Completer Example</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 class="title">Custom Completer Example<br /><span class="subtitle"></span>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="namespaces.html"><font color="#004faf">All&nbsp;Namespaces</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"></td></tr></table><h1 class="title">Custom Completer Example<br /><span class="subtitle"></span>
 </h1>
 <p>Files:</p>
 <ul>
@@ -133,7 +133,7 @@
 <pre> void TextEdit::keyPressEvent(QKeyEvent *e)
  {
      if (c &amp;&amp; c-&gt;popup()-&gt;isVisible()) {
-         <span class="comment">//</span> The following keys are forwarded by the completer to the widget
+         <span class="comment">// The following keys are forwarded by the completer to the widget</span>
         switch (e-&gt;key()) {
         case Qt::Key_Enter:
         case Qt::Key_Return:
@@ -141,21 +141,21 @@
         case Qt::Key_Tab:
         case Qt::Key_Backtab:
              e-&gt;ignore();
-             return; <span class="comment">//</span> let the completer do default behavior
+             return; <span class="comment">// let the completer do default behavior</span>
         default:
             break;
         }
      }
 
-     bool isShortcut = ((e-&gt;modifiers() &amp; Qt::ControlModifier) &amp;&amp; e-&gt;key() == Qt::Key_E); <span class="comment">//</span> CTRL+E
-     if (!c || !isShortcut) <span class="comment">//</span> dont process the shortcut when we have a completer
+     bool isShortcut = ((e-&gt;modifiers() &amp; Qt::ControlModifier) &amp;&amp; e-&gt;key() == Qt::Key_E); <span class="comment">// CTRL+E</span>
+     if (!c || !isShortcut) <span class="comment">// dont process the shortcut when we have a completer</span>
          QTextEdit::keyPressEvent(e);</pre>
 <p>We also handle other modifiers and shortcuts for which we do not want the completer to respond to.</p>
 <pre>     const bool ctrlOrShift = e-&gt;modifiers() &amp; (Qt::ControlModifier | Qt::ShiftModifier);
      if (!c || (ctrlOrShift &amp;&amp; e-&gt;text().isEmpty()))
          return;
 
-     static QString eow(&quot;~!@#$%^&amp;*()_+{}|:\&quot;&lt;&gt;?,./;'[]\\-=&quot;); <span class="comment">//</span> end of word
+     static QString eow(&quot;~!@#$%^&amp;*()_+{}|:\&quot;&lt;&gt;?,./;'[]\\-=&quot;); <span class="comment">// end of word</span>
      bool hasModifier = (e-&gt;modifiers() != Qt::NoModifier) &amp;&amp; !ctrlOrShift;
      QString completionPrefix = textUnderCursor();
 
@@ -172,7 +172,7 @@
      QRect cr = cursorRect();
      cr.setWidth(c-&gt;popup()-&gt;sizeHintForColumn(0)
                  + c-&gt;popup()-&gt;verticalScrollBar()-&gt;sizeHint().width());
-     c-&gt;complete(cr); <span class="comment">//</span> popup it up!
+     c-&gt;complete(cr); <span class="comment">// popup it up</span>!
  }</pre>
 <p>Finally, we pop up the completer.</p>
 <a name="mainwindow-class-definition"></a>
@@ -240,7 +240,9 @@
      if (!file.open(QFile::ReadOnly))
          return new QStringListModel(completer);
 
+ #ifndef QT_NO_CURSOR
      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+ #endif
      QStringList words;
 
      while (!file.atEnd()) {
@@ -249,7 +251,9 @@
              words &lt;&lt; line.trimmed();
      }
 
+ #ifndef QT_NO_CURSOR
      QApplication::restoreOverrideCursor();
+ #endif
      return new QStringListModel(words, completer);
  }</pre>
 <p>The <tt>about()</tt> function provides a brief description about the Custom Completer example.</p>
@@ -263,6 +267,8 @@
 <p>The <tt>main()</tt> function instantiates <tt>MainWindow</tt> and invokes the <a href="qwidget.html#show">show()</a> function.</p>
 <pre> int main(int argc, char *argv[])
  {
+     Q_INIT_RESOURCE(customcompleter);
+
      QApplication app(argc, argv);
      MainWindow window;
      window.show();
@@ -270,8 +276,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%" align="left">Copyright &copy; 2008 Nokia</td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.5</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.4.3</div></td>
 </tr></table></div></address></body>
 </html>

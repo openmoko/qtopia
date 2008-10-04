@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QSimMenuItem Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QSimMenuItem Class Reference<br /><span class="small-subtitle">[<a href="qttelephonymodule.html">QtTelephonyModule</a>]</span>
+</h1>
 <p>The QSimMenuItem class provides information about a menu item within a SIM toolkit application <a href="#details">More...</a></p>
 <pre>    #include &lt;QSimMenuItem&gt;</pre><ul>
 <li><a href="qsimmenuitem-members.html">List of all members, including inherited members</a></li>
@@ -27,12 +28,15 @@
 <li><div class="fn"/>bool <b><a href="qsimmenuitem.html#iconSelfExplanatory">iconSelfExplanatory</a></b> () const</li>
 <li><div class="fn"/>uint <b><a href="qsimmenuitem.html#identifier">identifier</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="qsimmenuitem.html#label">label</a></b> () const</li>
+<li><div class="fn"/>QByteArray <b><a href="qsimmenuitem.html#labelAttribute">labelAttribute</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qsimmenuitem.html#labelHtml">labelHtml</a></b> () const</li>
 <li><div class="fn"/>uint <b><a href="qsimmenuitem.html#nextAction">nextAction</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qsimmenuitem.html#setHasHelp">setHasHelp</a></b> ( bool <i>value</i> )</li>
 <li><div class="fn"/>void <b><a href="qsimmenuitem.html#setIconId">setIconId</a></b> ( uint <i>value</i> )</li>
 <li><div class="fn"/>void <b><a href="qsimmenuitem.html#setIconSelfExplanatory">setIconSelfExplanatory</a></b> ( bool <i>value</i> )</li>
 <li><div class="fn"/>void <b><a href="qsimmenuitem.html#setIdentifier">setIdentifier</a></b> ( uint <i>value</i> )</li>
 <li><div class="fn"/>void <b><a href="qsimmenuitem.html#setLabel">setLabel</a></b> ( const QString &amp; <i>value</i> )</li>
+<li><div class="fn"/>void <b><a href="qsimmenuitem.html#setLabelAttribute">setLabelAttribute</a></b> ( const QByteArray &amp; <i>value</i> )</li>
 <li><div class="fn"/>void <b><a href="qsimmenuitem.html#setNextAction">setNextAction</a></b> ( uint <i>value</i> )</li>
 <li><div class="fn"/>QSimMenuItem &amp; <b><a href="qsimmenuitem.html#operator-eq">operator=</a></b> ( const QSimMenuItem &amp; <i>value</i> )</li>
 </ul>
@@ -64,6 +68,14 @@
 <h3 class="fn"><a name="label"></a><a href="qstring.html">QString</a> QSimMenuItem::label () const</h3>
 <p>Returns the menu item's label.</p>
 <p>See also <a href="qsimmenuitem.html#setLabel">setLabel</a>().</p>
+<h3 class="fn"><a name="labelAttribute"></a><a href="qbytearray.html">QByteArray</a> QSimMenuItem::labelAttribute () const</h3>
+<p>Returns the menu item's text attributes for formatting <a href="qsimmenuitem.html#label">label</a>(). Returns an empty <a href="qbytearray.html">QByteArray</a> if the <a href="qsimmenuitem.html#label">label</a>() is not formatted.</p>
+<p>This function was introduced in Qtopia 4.4.</p>
+<p>See also <a href="qsimmenuitem.html#setLabelAttribute">setLabelAttribute</a>(), <a href="qsimmenuitem.html#label">label</a>(), and <a href="qsimmenuitem.html#labelHtml">labelHtml</a>().</p>
+<h3 class="fn"><a name="labelHtml"></a><a href="qstring.html">QString</a> QSimMenuItem::labelHtml () const</h3>
+<p>Returns the menu item's <a href="qsimmenuitem.html#label">label</a>() as a HTML string. If the menu item has <a href="qsimmenuitem.html#labelAttribute">labelAttribute</a>(), then they will be used to format the <a href="qsimmenuitem.html#label">label</a>() appropriately.</p>
+<p>This function was introduced in Qtopia 4.4.</p>
+<p>See also <a href="qsimmenuitem.html#label">label</a>() and <a href="qsimmenuitem.html#labelAttribute">labelAttribute</a>().</p>
 <h3 class="fn"><a name="nextAction"></a><a href="qtglobal.html#uint-typedef">uint</a> QSimMenuItem::nextAction () const</h3>
 <p>Returns the next action indicator for this menu item. Next action indicators have the same values as command types from the <a href="qsimcommand.html#Type-enum">QSimCommand::Type</a> list. The default value is zero, indicating no next action indicator for this menu item.</p>
 <p>See also <a href="qsimmenuitem.html#setNextAction">setNextAction</a>().</p>
@@ -82,6 +94,10 @@
 <h3 class="fn"><a name="setLabel"></a>void QSimMenuItem::setLabel ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the menu item's label to <i>value</i>.</p>
 <p>See also <a href="qsimmenuitem.html#label">label</a>().</p>
+<h3 class="fn"><a name="setLabelAttribute"></a>void QSimMenuItem::setLabelAttribute ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
+<p>Sets the menu item's text attributes for formatting <a href="qsimmenuitem.html#label">label</a>() to <i>value</i>. If <i>value</i> is an empty <a href="qbytearray.html">QByteArray</a>, then <a href="qsimmenuitem.html#label">label</a>() is not formatted.</p>
+<p>This function was introduced in Qtopia 4.4.</p>
+<p>See also <a href="qsimmenuitem.html#labelAttribute">labelAttribute</a>(), <a href="qsimmenuitem.html#label">label</a>(), and <a href="qsimmenuitem.html#labelHtml">labelHtml</a>().</p>
 <h3 class="fn"><a name="setNextAction"></a>void QSimMenuItem::setNextAction ( <a href="qtglobal.html#uint-typedef">uint</a> <i>value</i> )</h3>
 <p>Sets the next action indicator for this menu item to <i>value</i>. Next action indicators have the same values as command types from the <a href="qsimcommand.html#Type-enum">QSimCommand::Type</a> list. The value zero indicates that there is no next action indicator for this menu item.</p>
 <p>See also <a href="qsimmenuitem.html#nextAction">nextAction</a>().</p>
@@ -89,8 +105,8 @@
 <p>Make a copy of <i>value</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <simulator>
 
-<!-- Phone simulator definition file for the "Trolltech Pseudo Phone" -->
+<!-- Phone simulator definition file for the "Qt Extended Pseudo Phone" -->
 
 <!-- Note: dialing 199 will cause a dialback to simulate an incoming call -->
 <!-- Note: dialing 177 will cause a dialback to simulate an incoming call, and hangup after 5 seconds -->
@@ -30,7 +30,7 @@
     <set name="SQ" value="99,99"/>
 
     <!-- Manufacturer -->
-    <set name="GMI" value="TROLLTECH"/>
+    <set name="GMI" value="QT EXTENDED"/>
 
     <!-- Model -->
     <set name="GMM" value="PSEUDO PHONE"/>
@@ -45,7 +45,7 @@
     <set name="IMSI" value="246813579"/>
 
     <!-- Identifier for ATI command -->
-    <set name="ID" value="TROLLTECH PSEUDO PHONE"/>
+    <set name="ID" value="QT EXTENDED PSEUDO PHONE"/>
 
     <!-- Character set -->
     <set name="SCS" value="IRA"/>
@@ -78,7 +78,7 @@
     <set name="OPFORMAT" value="0"/>
 
     <!-- GCF Operator List, format <status(1:available,2:current,3:forbidden)>,"<alphanum.operator name>","<short operator name>","<MCC/MNC num>"-->
-    <set name="OP1" value="Trolltech Comm"/>
+    <set name="OP1" value="Qt Extended Comm"/>
     <set name="OP1PLMN" value="23401"/>
     <set name="OP1STATE" value="2"/>
 

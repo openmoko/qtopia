@@ -2,4 +2,5 @@
 File=QtopiaServices
 Context=Service:Name
 [Service]
-Actions="openURL(QString)"
+Actions="openURL(QString);openSecureURL(QString)"
+Name[]="Web Access"

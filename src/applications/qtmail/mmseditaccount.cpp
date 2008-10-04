@@ -1,26 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "mmseditaccount.h"
-#include "account.h"
+#include <private/accountconfiguration_p.h>
+
 #include <qtopiaapplication.h>
 #include <qtopiaservices.h>
 #include <QWapAccount>
@@ -28,6 +27,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDir>
+#include <QMailAccount>
 
 MmsEditAccount::MmsEditAccount(QWidget *parent)
     : QDialog(parent)
@@ -62,13 +62,13 @@ void MmsEditAccount::populateNetwork()
 
     // Add to combo
     networkCombo->clear();
-    foreach( QString config, configList ) {
-        QWapAccount acc( config );
-        networkCombo->addItem(QIcon(":icon/netsetup/wap"), acc.name(), config);
-        if ( config == defaultWap ) {
+    foreach( const QString &netConfig, configList ) {
+        QWapAccount acc( netConfig );
+        networkCombo->addItem(QIcon(":icon/netsetup/wap"), acc.name(), netConfig);
+        if ( netConfig == defaultWap ) {
             defaultConfig = networkCombo->count()-1;
         }
-        if ( config == account->networkConfig() ) {
+        if ( netConfig == config->networkConfig() ) {
             networkCombo->setCurrentIndex(networkCombo->count()-1);
         }
     }
@@ -82,22 +82,23 @@ void MmsEditAccount::populateNetwork()
     }
 }
 
-void MmsEditAccount::setAccount(QMailAccount *in)
+void MmsEditAccount::setAccount(QMailAccount *in, AccountConfiguration *conf)
 {
     account = in;
+    config = conf;
     populateNetwork();
-    autoRetrieve->setChecked(account->autoDownload());
+    autoRetrieve->setChecked(config->isAutoDownload());
 }
 
 void MmsEditAccount::accept()
 {
     int currItem = networkCombo->currentIndex();
     if (currItem >= 0 && networkCombo->itemData(currItem).isValid()) {
-        account->setNetworkConfig(networkCombo->itemData(currItem).toString());
+        config->setNetworkConfig(networkCombo->itemData(currItem).toString());
     } else {
-        account->setNetworkConfig(QString());
+        config->setNetworkConfig(QString());
     }
-    account->setAutoDownload(autoRetrieve->isChecked());
+    config->setAutoDownload(autoRetrieve->isChecked());
     QDialog::accept();
 }
 

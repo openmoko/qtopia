@@ -1,29 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "configui.h"
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>
-#endif
 #include <qtopiaapplication.h>
 
 AdvancedBTPage::AdvancedBTPage( const QtopiaNetworkProperties& cfg, QWidget* parent,
@@ -38,27 +34,20 @@ AdvancedBTPage::AdvancedBTPage( const QtopiaNetworkProperties& cfg, QWidget* par
 
 void AdvancedBTPage::init()
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this , true );
-#endif
-    connect( ui.timeout_box, SIGNAL(stateChanged(int)),
-            this, SLOT(timeoutSelected(int)) );
 }
 
 void AdvancedBTPage::readConfig( const QtopiaNetworkProperties& prop )
 {
     QVariant v = prop.value( QLatin1String("Serial/Timeout") );
     if (!v.isValid()) {
-        ui.timeout_box->setCheckState(Qt::Checked);
+        ui.timeout->setValue(120);
     } else if (v.toString() == "none") {
-        ui.timeout_box->setCheckState(Qt::Unchecked);
-        ui.timeout->setValue( 120 );
+        ui.timeout->setValue( 0 );
     } else if (v.canConvert(QVariant::Int)) {
-        ui.timeout_box->setCheckState(Qt::Checked);
         ui.timeout->setValue( v.toInt() );
     }
-    timeoutSelected(ui.timeout_box->checkState());
 
     QString speed = prop.value( QLatin1String("Serial/Speed") ).toString();
     ui.speed->setCurrentIndex( 0 ); //auto or none
@@ -73,19 +62,14 @@ void AdvancedBTPage::readConfig( const QtopiaNetworkProperties& prop )
 QtopiaNetworkProperties AdvancedBTPage::properties()
 {
     QtopiaNetworkProperties props;
-    if (ui.timeout_box->checkState() == Qt::Checked) {
-        props.insert("Serial/Timeout", ui.timeout->value());
-    } else {
+    if (ui.timeout->value() == 0)
         props.insert("Serial/Timeout", QString("none"));
-    }
+    else
+        props.insert("Serial/Timeout", ui.timeout->value());
+
     props.insert( "Serial/Speed", ui.speed->currentText() );
 
     return props;
-}
-
-void AdvancedBTPage::timeoutSelected( int state )
-{
-    ui.timeout->setEnabled( state == Qt::Checked );
 }
 
 #include "ui_dialingbtbase.h"
@@ -105,10 +89,8 @@ void DialingBTPage::init()
     QtopiaApplication::setInputMethodHint( ui.dialString, QtopiaApplication::Text );
     QtopiaApplication::setInputMethodHint( ui.extraDialString, QtopiaApplication::Text );
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QSoftMenuBar::menuFor( this );
     QSoftMenuBar::setHelpEnabled( this , true );
-#endif
 }
 
 void DialingBTPage::readConfig( const QtopiaNetworkProperties& prop )

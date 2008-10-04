@@ -1,11 +1,11 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=logging
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+}
 
 HEADERS		= loggingedit.h loggingview.h
 SOURCES		= loggingedit.cpp loggingview.cpp main.cpp
-
-TRANSLATABLES += loggingedit.cpp loggingview.cpp
 
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/logging.desktop
 desktop.path=/apps/Settings

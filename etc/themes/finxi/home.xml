@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="home" base="themes/finxi">
-  <group name="background">
-    <image name="background" rect="0,0,0x0" src="ladybug" scale="yes"/>
-    <plugin name="bgplugin"/>
+  <group name="background-group">
+    <plugin name="background-plugin"/>
+    <plugin name="homescreen-image-plugin"/>
   </group>
   <rect rect="0,13%,0x12pt">
     <text name="location" size="5" bold="yes" rect="0,0,50%x12pt" align="left,vcenter" color="#ffffff" outline="#000000" transient="yes" active="expr:@/UI/HomeScreen/ShowLocation">
@@ -13,7 +13,7 @@
     </text>
     </rect>
     <layout rect="0,20%,0x45pt" align="hcenter">
-	  <rect name="calls" rect="0,0,0x0" color="None" brush="None" transient="yes" active="expr:@/Communications/Calls/MissedCalls > 0" interactive="yes">
+	  <rect name="calls" rect="0,0,0x0" transient="yes" active="expr:@/Communications/Calls/MissedCalls > 0" interactive="yes">
         <layout align="hcenter">
           <rect rect="0,0,24ptx42pt">
             <image rect="0,0,24ptx24pt" src="call.svg" scale="yes"/>
@@ -23,7 +23,7 @@
           <tr><trtext>%1 missed</trtext><trarg>@/Communications/Calls/MissedCalls</trarg></tr>
         </text>
 	  </rect>
-	  <rect name="messages" rect="0,0,0x0" brush="None" transient="yes" active="expr:@/Communications/Messages/NewMessages > 0 || @/Telephony/Status/SMSMemoryFull > 0" interactive="yes">
+	  <rect name="messages" rect="0,0,0x0" transient="yes" active="expr:@/Communications/Messages/NewMessages > 0 || @/Telephony/Status/SMSMemoryFull > 0" interactive="yes">
         <layout align="hcenter">
           <rect rect="0,0,24ptx24pt">
             <image rect="0,0,24ptx24pt" src="message.svg" scale="yes"/>
@@ -39,8 +39,8 @@
 	  </rect>
     </layout>
     <rect name="infobox" rect="10%,48%,80%x15%" color="Text" brush="Background" alpha="150" transient="yes" active="no">
-      <image name="infobox" rect="0,0,40x100%"/>
-      <text name="infobox" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter"/>
+      <image name="infobox-image" rect="0,0,40x100%"/>
+      <text name="infobox-text" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter"/>
     </rect>
     <layout rect="0,72%,100%x15%" orientation="horizontal">
       <rect rect="0,0,0x0">
@@ -54,7 +54,7 @@
         </image>
       </rect>
       <rect rect="0,0,0x0">
-        <image name="speeddial" rect="10%,0,80%x100%" src="button.svg" onclick="src=buttonp.svg" interactive="yes">
+        <image name="favorites" rect="10%,0,80%x100%" src="button.svg" onclick="src=buttonp.svg" interactive="yes">
           <image rect="20%,20%,60%x60%" src=":icon/favorite.svg" scale="yes"/>
         </image>
       </rect>
@@ -69,7 +69,7 @@
 	    <image name="pinbox" rect="0,0,40x138"/>
 	    <text name="pinbox" rect="40,0,0x0" size="7" color="Text" align="hcenter,vcenter"/>
       </rect>
-    <layout name="vertical" rect="0,0,480x376" orientation="vertical" spacing="-1" align="vcenter">
+      <layout name="vertical" rect="0,0,480x376" orientation="vertical" spacing="-1" align="vcenter">
       <layout name="horizontal" rect="0,0,0x94" orientation="horizontal" spacing="-1" align="hcenter">
         <group rect="0,0,160x94" name="one" interactive="yes">
           <image rect="0,0,0,0" name="one_bg" src="button.svg" onclick="src=buttonp.svg" interactive="yes" scale="yes" />

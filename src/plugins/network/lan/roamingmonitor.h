@@ -1,33 +1,31 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef ROAMING_MONITOR
-#define ROAMING_MONITOR
+#ifndef ROAMINGMONITOR_H
+#define ROAMINGMONITOR_H
 
 #include <custom.h>
 
 #ifndef NO_WIRELESS_LAN
 
 //these two Qt includes must be in fornt of the four system includes for wireless.h
-#include <QObject>  
+#include <QObject>
 #include <QString>
 
 //must be defined to be able to include kernel includes
@@ -41,7 +39,7 @@
 
 /* A lot of wireless.h have kernel includes which should be protected by
    #ifdef __KERNEL__. They course include errors due to redefinitions of types.
-   This prevents those kernel headers being included by Qtopia.  
+   This prevents those kernel headers being included by Qtopia.
    */
 #ifndef _LINUX_IF_H
 #define _LINUX_IF_H
@@ -91,4 +89,4 @@ private:
 };
 
 #endif // NO_WIRELESS_LAN
-#endif //ROAMING_MONITOR
+#endif

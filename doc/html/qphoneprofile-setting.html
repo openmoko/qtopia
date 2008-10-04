@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Setting Class Reference<br /><span class="small-subtitle">(QPhoneProfile::Setting)<br /></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Setting Class Reference<br /><span class="small-subtitle">(QPhoneProfile::Setting)<br />[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
 </h1>
 <p>The Setting class provides applications with a mechanism to add their own settings to a profile. <a href="#details">More...</a></p>
 <ul>
@@ -40,8 +40,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The Setting class provides applications with a mechanism to add their own settings to a profile.</p>
-<p>Applications may integrate with the Qtopia profiles by adding their own settings. Optionally, when the profile changes the application will be notified and instructed to apply the new settings.</p>
-<p>Most profile editing applications (such as Ring Profiles in Qtopia Phone) will use the Settings service to interactively acquire settings from applications to add in this way, but it is not necessary to do so.</p>
+<p>Applications may integrate with the Qt Extended profiles by adding their own settings. Optionally, when the profile changes the application will be notified and instructed to apply the new settings.</p>
+<p>Most profile editing applications (such as Ring Profiles in Qt Extended Phone) will use the Settings service to interactively acquire settings from applications to add in this way, but it is not necessary to do so.</p>
 <p>Application settings are added to a profile through the <a href="qphoneprofile.html#setApplicationSettings">QPhoneProfile::setApplicationSettings</a>() or <a href="qphoneprofile.html#setApplicationSetting">QPhoneProfile::setApplicationSetting</a>() methods and read via the <a href="qphoneprofile.html#applicationSetting">QPhoneProfile::applicationSetting</a>() call.</p>
 <p>See also <a href="qphoneprofile.html">QPhoneProfile</a>.</p>
 <hr />
@@ -67,7 +67,7 @@
 <p>Returns true if the application will be notified when the profile changes; otherwise returns false.</p>
 <p>Applications will be notified with a <tt>Settings::activateSettings(QString)</tt> message via <tt>QPE/Application/appname</tt> when they are to apply settings. <tt>appname</tt> is <a href="qphoneprofile-setting.html#applicationName">applicationName</a>() and the parameter is <a href="qphoneprofile-setting.html#data">data</a>() portion of the setting.</p>
 <p>If the profile changes to one where the application has not added a custom setting from one where the application has added a custom setting, a <tt>Settings::activateDefault()</tt> message will be sent.</p>
-<p>Therefore applications should be listening to the Qtopia application channels to handle these requests. For example, in the application:</p>
+<p>Therefore applications should be listening to the Qt Extended application channels to handle these requests. For example, in the application:</p>
 <pre>    SomeApplication::SomeApplication()
     {
         connect( qApp, SIGNAL(appMessage(QString,QByteArray)),
@@ -105,8 +105,8 @@
 <p>Returns true if setting <i>other</i> is equal to this setting; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

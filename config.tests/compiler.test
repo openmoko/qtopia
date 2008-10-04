@@ -1,11 +1,20 @@
 #!/bin/sh
 
 mkdir -p $QPEDIR/config.tests/compiler
-binary=$QPEDIR/config.tests/compiler/compiler
+cd $QPEDIR/config.tests/compiler || exit 1
 hide='>/dev/null 2>&1'
-[ "$VERBOSE" = 1 ] && hide=
-[ "$VERBOSE" = 1 ] && echo "INFO: PATH=$PATH"
-[ "$VERBOSE" = 1 ] && { echo "LOCATE: which $CXX"; perl -e '
+UNAME=`uname -s`
+case $UNAME in
+CYGWIN*)
+    binary=$QPEDIR/config.tests/compiler/compiler.exe
+    ;;
+*)
+    binary=$QPEDIR/config.tests/compiler/compiler
+    ;;
+esac
+
+# For informing the user about the contents of PATH
+perlwhich='
     $showall = 1;
     $prog = shift(@ARGV) or usage;
     $found = 0;
@@ -28,9 +37,42 @@ hide='>/dev/null 2>&1'
     }
 
     exit 0;
-' $CXX; }
-[ "$VERBOSE" = 1 ] && echo "COMPILE: $CXX $CXXFLAGS $LFLAGS -o $binary $QTOPIA_DEPOT_PATH/config.tests/compiler/main.cpp"
-eval '$CXX $CXXFLAGS $LFLAGS -o $binary $QTOPIA_DEPOT_PATH/config.tests/compiler/main.cpp' $hide || exit 1
+'
+
+[ "$VERBOSE" = 1 ] && hide=
+[ "$VERBOSE" = 1 ] && echo "INFO: PATH=$PATH"
+
+# Compile from .c to .o
+[ "$VERBOSE" = 1 ] && { echo "LOCATE: which $CC"; perl -e "$perlwhich" $CC; }
+[ "$VERBOSE" = 1 ] && echo "COMPILE: $CC $CFLAGS -c -o main.o $QTOPIA_DEPOT_PATH/config.tests/compiler/main.c"
+eval '$CC $CFLAGS -c -o main.o $QTOPIA_DEPOT_PATH/config.tests/compiler/main.c' $hide || exit 1
+
+# Link from .o to binary
+[ "$VERBOSE" = 1 ] && { echo "LOCATE: which $LINK"; perl -e "$perlwhich" $LINK; }
+[ "$VERBOSE" = 1 ] && echo "LINK: $LINK $CFLAGS $LFLAGS -o $binary main.o"
+eval '$LINK $CXXFLAGS $LFLAGS -o $binary main.o' $hide || exit 1
+
+# Test the binary
+if [ -f $binary ]; then
+    if [ "$HOST" = "host" ]; then
+        [ "$VERBOSE" = 1 ] && echo "RUN: $binary"
+        eval '$binary' $hide || { echo CANNOT RUN BINARIES; exit 1; }
+    fi
+else
+    exit 1
+fi
+
+# Compile from .cpp to .o
+[ "$VERBOSE" = 1 ] && { echo "LOCATE: which $CXX"; perl -e "$perlwhich" $CXX; }
+[ "$VERBOSE" = 1 ] && echo "COMPILE: $CXX $CXXFLAGS -c -o main.o $QTOPIA_DEPOT_PATH/config.tests/compiler/main.cpp"
+eval '$CXX $CXXFLAGS -c -o main.o $QTOPIA_DEPOT_PATH/config.tests/compiler/main.cpp' $hide || exit 1
+
+# Link from .o to binary
+[ "$VERBOSE" = 1 ] && { echo "LOCATE: which $LINK"; perl -e "$perlwhich" $LINK; }
+[ "$VERBOSE" = 1 ] && echo "LINK: $LINK $CXXFLAGS $LFLAGS -o $binary main.o"
+eval '$LINK $CXXFLAGS $LFLAGS -o $binary main.o' $hide || exit 1
+
+# Test the binary
 if [ -f $binary ]; then
     [ "$VERBOSE" = 1 ] && echo "CHECK: strings $binary | grep -e 'GCC VERSION 4' -e 'SignificantByteFirst'"
     strings $binary | grep -e 'GCC VERSION 4' -e 'SignificantByteFirst'
@@ -40,6 +82,17 @@ if [ -f $binary ]; then
     fi
 else
     exit 1
+fi
+
+# Write out a script so that the device gcc wrappers can be built without
+# having knowledge of the host toolchain
+if [ "$HOST" = "host" -a -n "$DEVICE_BIN" ]; then
+    mkdir -p $DEVICE_BIN
+    cat >$DEVICE_BIN/compile.host <<END
+#!/bin/sh
+exec $CC $CFLAGS $LFLAGS "\$@"
+END
+    chmod 755 $DEVICE_BIN/compile.host
 fi
 
 exit 0

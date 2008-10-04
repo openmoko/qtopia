@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -31,29 +29,23 @@
 
 #include <stdlib.h>
 
-#include <hxcom.h>
-#include <hxcore.h>
-#include <ihxmedpltfm.h>
-
-#include "helixutil.h"
 #include "helixengine.h"
 #include "helixsession.h"
 #include "qmediahelixsettingsserver.h"
 #include "reporterror.h"
+#include "helixutil.h"
+
+#include <hxcom.h>
+#include <hxcore.h>
+#include <ihxmedpltfm.h>
 
 
-#ifdef Q_QDOC
 /*!
-    \class qtopia_helix
-    \internal
+   \namespace qtopia_helix
+   \internal
 */
-class qtopia_helix
-{
-public:
-#else
 namespace qtopia_helix
 {
-#endif
 
 // typedef
 typedef HX_RESULT (HXEXPORT_PTR FPRMSETDLLACCESSPATH) (const char*);
@@ -115,7 +107,6 @@ class HelixEnginePrivate
 {
 public:
     int                     timerId;
-    int                     sessionCount;
     HelixLibrary            symbols;
     IHXClientEngine*        engine;
     HelixInformation*       info;
@@ -135,7 +126,6 @@ HelixEngine::HelixEngine():
 {
     // init
     d->timerId = -1;
-    d->sessionCount = 0;
     d->engine = 0;
     d->info = new HelixInformation(this);
 
@@ -184,7 +174,7 @@ void HelixEngine::initialize()
             // Initialize engine and preload plugins
             IHXClientEngineSetup*   enginesetup = 0;
 
-            if (d->engine->QueryInterface(IID_IHXClientEngineSetup, (void**)&enginesetup) == HXR_OK)
+            if (queryInterface(d->engine, IID_IHXClientEngineSetup, enginesetup) == HXR_OK)
             {
                 GenericContext context;
 
@@ -215,15 +205,22 @@ void HelixEngine::stop()
 
 void HelixEngine::suspend()
 {
-    killTimer(d->timerId);  // Shut down timer straight away
-    d->timerId = -1;
+    if (d->timerId != -1) {
+        killTimer(d->timerId);  // Shut down timer straight away
+        foreach( HelixSession *s, sessions )
+            s->suspend();
+    }
 }
 
 void HelixEngine::resume()
 {
     // Start helix event timer
-    if (d->timerId == -1)
+    if ( d->timerId == -1 && !sessions.isEmpty() ) {
+        foreach( HelixSession *s, sessions )
+            s->resume();
+
         d->timerId = startTimer(300);
+    }
 }
 
 QMediaEngineInformation const* HelixEngine::engineInformation()
@@ -237,7 +234,9 @@ void HelixEngine::timerEvent(QTimerEvent* timerEvent)
     if (timerEvent->timerId() == d->timerId)
     {
         // Pump helix event loop
-        d->engine->EventOccurred((_HXxEvent*)0);
+        if(d && d->engine) {
+            d->engine->EventOccurred((_HXxEvent*)0);
+        }
     }
 }
 // }}}
@@ -260,12 +259,14 @@ QMediaServerSession* HelixEngine::createSession(QMediaSessionRequest sessionRequ
 
     sessionRequest >> url;
 
-    if (url.isValid())
-    {
+    if (url.isValid()) {
         mediaSession = new HelixSession(d->engine, sessionRequest.id(), url.toString());
 
-        if (d->sessionCount++ == 0)   // Startup event loop
+        if (sessions.isEmpty())   // Startup event loop
             d->timerId = startTimer(300);
+
+        HelixSession *s = static_cast<HelixSession*>(mediaSession);
+        sessions.append(s);
     }
 
     return mediaSession;
@@ -273,10 +274,11 @@ QMediaServerSession* HelixEngine::createSession(QMediaSessionRequest sessionRequ
 
 void HelixEngine::destroySession(QMediaServerSession* serverSession)
 {
+    HelixSession *s = static_cast<HelixSession*>(serverSession);
+    sessions.removeAll(s);
     delete serverSession;
 
-    if (--d->sessionCount == 0)
-    {
+    if (sessions.isEmpty()) {
         killTimer(d->timerId);  // Shut down timer straight away
         d->timerId = -1;
     }

@@ -1,7 +1,10 @@
+!qbuild{
 qtopia_project(qtopia plugin)
-
 TARGET=cruxus
 CONFIG+=no_tr
+depends(libraries/qtopiamedia)
+depends(libraries/qtopiaaudio)
+}
 
 HEADERS	= \
         contentdevice.h \
@@ -11,7 +14,7 @@ HEADERS	= \
         cruxussimplesession.h \
         cruxusurihandlers.h \
         cruxusoutputdevices.h \
-        cruxusoutputthread.h
+        cruxusoutputthread.h 
 
 SOURCES	= \
         contentdevice.cpp \
@@ -21,12 +24,10 @@ SOURCES	= \
         cruxussimplesession.cpp \
         cruxusurihandlers.cpp \
         cruxusoutputdevices.cpp \
-        cruxusoutputthread.cpp
+        cruxusoutputthread.cpp 
 
 equals(QTOPIA_SOUND_SYSTEM,oss) {
     DEFINES+=HAVE_OSS
 }
 
-depends(libraries/qtopiamedia)
-depends(libraries/qtopiaaudio)
 

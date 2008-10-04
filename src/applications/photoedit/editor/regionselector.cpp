@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -49,12 +47,12 @@ RegionSelector::RegionSelector( ImageUI* iui, Qt::WFlags f )
 
 QRect RegionSelector::region() const
 {
-    if( !_region.isNull() &&
-        _region.left() != _region.right() &&
-        _region.top() != _region.bottom() &&
-        !image_ui->region().intersect( _region ).isEmpty() )
-        return _region;
-    return QRect();
+        if( !_region.isNull() &&
+            _region.left() != _region.right() &&
+            _region.top() != _region.bottom() &&
+            !image_ui->viewport().intersect( _region ).isEmpty() )
+            return _region;
+        return QRect();
 }
 
 void RegionSelector::setEnabled( bool b )
@@ -92,7 +90,7 @@ void RegionSelector::reset()
     } else {
         // Set default region
         _region = QRect( 0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT );
-        _region.moveCenter( rect().center() );
+        _region.moveCenter( rect().center() + image_ui->viewport().topLeft() );
         // Set current state to move
         current_state = MOVE;
         // If enabled toggle state label
@@ -124,12 +122,18 @@ static const QPixmap crosshair( ":image/photoedit/crosshair" );
     // Otherwise, draw image ui onto widget
     if( enabled ) {
         // painter.setRasterOp( Qt::XorROP );
+        QRect viewport = image_ui->viewport();
+
+        if (viewport.width()  < width() ) viewport.moveLeft((width() - viewport.width() ) / 2);
+        if (viewport.height() < height()) viewport.moveTop((height() - viewport.height()) / 2);
+
+        QRect translatedRegion = _region.translated(-viewport.topLeft());
 
         // Draw box around current selection region
-        painter.drawRect( _region.adjusted( 0, 0, -PEN_WIDTH, -PEN_WIDTH ) );
+        painter.drawRect( translatedRegion.adjusted( 0, 0, -PEN_WIDTH, -PEN_WIDTH ) );
 
         if( !Qtopia::mousePreferred() ) {
-            QPoint center( _region.center() );
+            QPoint center( translatedRegion.center() );
             switch( current_state ) {
             // If current state is move, draw crosshair in center of region
             case MOVE:
@@ -137,10 +141,10 @@ static const QPixmap crosshair( ":image/photoedit/crosshair" );
                 break;
             // If current state is size, draw corners around inner edge of region
             case SIZE:
-                painter.drawPixmap( _region.left() + INSET, _region.top() + INSET, top_left );
-                painter.drawPixmap( _region.right() - CORNER_WIDTH, _region.top() + INSET, top_right );
-                painter.drawPixmap( _region.left() + INSET, _region.bottom() - CORNER_HEIGHT, bottom_left );
-                painter.drawPixmap( _region.right() - CORNER_WIDTH, _region.bottom() - CORNER_HEIGHT, bottom_right );
+                painter.drawPixmap( translatedRegion.left() + INSET, translatedRegion.top() + INSET, top_left );
+                painter.drawPixmap( translatedRegion.right() - CORNER_WIDTH, translatedRegion.top() + INSET, top_right );
+                painter.drawPixmap( translatedRegion.left() + INSET, translatedRegion.bottom() - CORNER_HEIGHT, bottom_left );
+                painter.drawPixmap( translatedRegion.right() - CORNER_WIDTH, translatedRegion.bottom() - CORNER_HEIGHT, bottom_right );
                 break;
             default:
                 // Ignore
@@ -148,7 +152,7 @@ static const QPixmap crosshair( ":image/photoedit/crosshair" );
             }
         }
 
-        QRegion region = image_ui->region().subtract( _region );
+        QRegion region = image_ui->region().subtract( translatedRegion );
         if( !region.isEmpty() ) {
             painter.setClipRegion( region );
             painter.setClipping( true );
@@ -303,8 +307,13 @@ void RegionSelector::mouseMoveEvent( QMouseEvent* e )
             if( y < rect().top() ) y = rect().top();
             if( y > rect().bottom() ) y = rect().bottom();
 
+            QRect viewport = image_ui->viewport();
+
+            if (viewport.width()  < width() ) viewport.moveLeft((width()  - viewport.width() ) / 2);
+            if (viewport.height() < height()) viewport.moveTop ((height() - viewport.height()) / 2);
+
             // Update region end with current stylus position
-            _region = QRect( region_start, QPoint( x, y ) ).normalized();
+            _region = QRect(region_start, QPoint( x, y )).normalized().translated(viewport.topLeft());
             // Update display
             update();
         } else if ( !lag_area.contains( e->pos() ) ) {
@@ -331,17 +340,16 @@ void RegionSelector::setStateLabel()
 
 void RegionSelector::moveBy( int dx, int dy )
 {
-    // Contain region within widget
-    if( _region.left() + dx < rect().left() )
-        dx = rect().left() - _region.left();
-    if( _region.right() + dx > rect().right() )
-        dx = rect().right() - _region.right();
-    if( _region.top() + dy < rect().top() )
-        dy = rect().top() - _region.top();
-    if( _region.bottom() + dy > rect().bottom() )
-        dy = rect().bottom() - _region.bottom();
+    QRect viewport(QPoint(0, 0), size());
+    viewport.moveCenter(image_ui->viewport().center());
 
-    _region.translate( dx, dy );
+    // Contain region within widget
+    if (_region.left()   + dx < viewport.left()  ) dx = viewport.left()   - _region.left();
+    if (_region.right()  + dx > viewport.right() ) dx = viewport.right()  - _region.right();
+    if (_region.top()    + dy < viewport.top()   ) dy = viewport.top()    - _region.top();
+    if (_region.bottom() + dy > viewport.bottom()) dy = viewport.bottom() - _region.bottom();
+
+    _region.translate(dx, dy);
 }
 
 void RegionSelector::sizeBy( int dw, int dh )
@@ -364,14 +372,10 @@ void RegionSelector::sizeBy( int dw, int dh )
         _region.setBottom( _region.bottom() - dh );
     }
 
+    QRect viewport(QPoint(0, 0), size());
+    viewport.moveCenter(image_ui->viewport().center());
+
     // Contain region within widget
-    if( _region.left() < rect().left() )
-        _region.setLeft( rect().left() );
-    if( _region.right() > rect().right() )
-        _region.setRight( rect().right() );
-    if( _region.top() < rect().top() )
-        _region.setTop( rect().top() );
-    if( _region.bottom() > rect().bottom() )
-        _region.setBottom( rect().bottom() );
+    _region = _region.intersected(viewport);
 }
 

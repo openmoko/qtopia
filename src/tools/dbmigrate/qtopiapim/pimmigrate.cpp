@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -28,6 +26,7 @@
 #include <QDebug>
 #include <QTextCodec>
 #include <QFile>
+#include <QSettings>
 #include <QSqlError>
 
 #include "quniqueid.h"
@@ -38,7 +37,7 @@
 #include <QSqlDriver>
 #include <netinet/in.h>
 
-// migratoin tables
+// migration tables
 const QStringList &PimMigrate::tables() const
 {
     static QStringList tables;
@@ -52,26 +51,69 @@ const QStringList &PimMigrate::tables() const
         tables << "appointmentcategories";
         tables << "appointmentcustom";
         tables << "appointmentexceptions";
+
         tables << "contacts";
         tables << "contactaddresses";
         tables << "contactcategories";
         tables << "contactcustom";
         tables << "contactphonenumbers";
+        tables << "contactpresence";
         tables << "emailaddresses";
+
         tables << "tasks";
         tables << "taskcategories";
         tables << "taskcustom";
 
         tables << "simcardidmap";
+        tables << "currentsimcard";
 
         tables << "googleid";
 
         tables << "pimdependencies";
+        tables << "simlabelidmap";
+
     }
 
     return tables;
 }
 
+static QMap<QString, int> expectedVersions()
+{
+    static QMap<QString, int> versions;
+    if (versions.count() == 0) {
+        versions.insert("changelog", 110);
+        versions.insert("sqlsources", 110);
+
+        versions.insert("appointments", 110);
+        versions.insert("appointmentcategories", 110);
+        versions.insert("appointmentcustom", 110);
+        versions.insert("appointmentexceptions", 110);
+
+        versions.insert("contacts", 111); // 111 adds the label field
+        versions.insert("contactaddresses", 110);
+        versions.insert("contactcategories", 110);
+        versions.insert("contactcustom", 111); // 111 adds some indices
+        versions.insert("contactphonenumbers", 111); // 111 adds some indices
+        versions.insert("emailaddresses", 110);
+        versions.insert("contactpresence", 112); // 111 is new, 112 adds avatar
+
+        versions.insert("tasks", 110);
+        versions.insert("taskcategories", 110);
+        versions.insert("taskcustom", 110);
+
+        versions.insert("simcardidmap", 110);
+        versions.insert("currentsimcard", 110);
+
+        versions.insert("googleid", 110);
+
+        versions.insert("pimdependencies", 110);
+        versions.insert("simlabelidmap", 110);
+
+        versions.insert("syncservers", 111);
+
+    }
+    return versions;
+}
 
 void convertRecIdFunc(sqlite3_context *context, int, sqlite3_value**values)
 {
@@ -104,10 +146,8 @@ bool PimMigrate::migrate()
 {
     // 4.2.0 brings in the changelog table
     // 4.2.2 brings in a change to rec id's.
-    // but because migrate only handles from 4.1.x,
-    // the only relavant table version number is 110, the
-    // number that maps to 4.2.2
-
+    // 4.4 adds the label field to contacts (version 111)
+    // and the 'contactpresence' table in a temporary db
     // first ensure changelog exists.
     CHECK(mi->ensureSchema("changelog"));
     CHECK(mi->setTableVersion("changelog", 110));
@@ -124,6 +164,7 @@ bool PimMigrate::migrate()
         CHECK(result == SQLITE_OK);
     }
 
+    // These are the tables to backup
     QStringList oldTables;
     oldTables << "taskcustom";
     oldTables << "taskcategories";
@@ -143,7 +184,8 @@ bool PimMigrate::migrate()
     QStringList existingTables = db.tables();
     foreach(QString table, oldTables) {
         int v = mi->tableVersion(table);
-        if (existingTables.contains(table) && v < 110) {
+        int expectedVersion = expectedVersions().value(table);
+        if (existingTables.contains(table) && v < expectedVersion) {
             // back it up and drop.
             CHECK(mi->copyTable(table, table+"_old"));
             QSqlQuery query(db);
@@ -155,7 +197,7 @@ bool PimMigrate::migrate()
         CHECK(migrate(db, table, mi->tableVersion(table)));
     }
 
-    // only one version so far.. change this line if version changes
+    // only one version so far.. change this line if version of 'syncServers' changes
     if (!existingTables.contains("syncServers")) {
         // sync server identification
         QSqlQuery q(db);
@@ -168,11 +210,11 @@ bool PimMigrate::migrate()
 
 bool PimMigrate::migrate(const QSqlDatabase &db, const QString &table, int version)
 {
-    if (version >= 110)
+    if (version >= expectedVersions().value(table))
         return true;
     else {
         CHECK(mi->ensureSchema(table));
-        CHECK(mi->setTableVersion(table, 110));
+        CHECK(mi->setTableVersion(table, expectedVersions().value(table)));
 
         QStringList existingTables = db.tables();
 
@@ -182,12 +224,20 @@ bool PimMigrate::migrate(const QSqlDatabase &db, const QString &table, int versi
             CHECK(query.prepare(queryText("copy", table)));
             CHECK(query.exec());
 
-            if (table == "tasks" || table == "contacts" || table == "appointments") {
-                QSqlQuery changelog(db);
-                CHECK(changelog.prepare("INSERT INTO changelog (recid, created, modified, removed) SELECT recid, :dt1, :dt2, NULL FROM " + table + ";"));
-                changelog.bindValue("dt1", syncTime);
-                changelog.bindValue("dt2", syncTime);
-                CHECK(changelog.exec());
+            // If the version was prior to changelogs, insert a fake entry
+            if (version < 110) {
+                if (table == "tasks" || table == "contacts" || table == "appointments") {
+                    QSqlQuery changelog(db);
+                    CHECK(changelog.prepare("INSERT INTO changelog (recid, created, modified, removed) SELECT recid, :dt1, :dt2, NULL FROM " + table + ";"));
+                    changelog.bindValue("dt1", syncTime);
+                    changelog.bindValue("dt2", syncTime);
+                    CHECK(changelog.exec());
+                }
+            }
+
+            // For contacts version 111, we have to generate the label
+            if (table == "contacts" && version < 111) {
+                CHECK(generateContactLabels(db));
             }
 
             //mi->dropTable(table+"_old");
@@ -271,5 +321,113 @@ bool PimMigrate::createTodoEvents(const QSqlDatabase &db)
     CHECK(createTaskEventsDeps.exec());
 
     return ret;
+}
+
+/* Parse helper structure */
+typedef struct {
+    QString field;
+    QString text;
+} labelComponent;
+
+/*
+    looong function for generating the SQL to create a label in
+    the same way as ContactSqlIO (a combination of initFormat, setFormat, and sqlLabel)
+*/
+static QString sqlLabel()
+{
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "formatting" );
+    int curfmtn = config.value( "NameFormat" ).toInt();
+    QString value = config.value( "NameFormatFormat"+QString::number(curfmtn) ).toString();
+    config.endGroup();
+
+    QList< QList<labelComponent> > newFormat;
+
+    QStringList validTokens; // Also doubles as the SQL column name
+    validTokens << "title" << "firstname" << "middlename" << "lastname" << "suffix" << "company" << "department" << "jobtitle" << "office";
+
+    QStringList tokens = value.split(' ', QString::SkipEmptyParts);
+    QList<labelComponent> last;
+    bool lastvalid = false;
+
+    while(tokens.count() > 0) {
+        QString token = tokens.takeFirst();
+        if (validTokens.contains(token)) {
+            lastvalid = true;
+            labelComponent c;
+            c.field = token;
+            last.append(c);
+        } else if (token == "|") {
+            if (lastvalid)
+                newFormat.append(last);
+            lastvalid = false;
+            last.clear();
+        } else {
+            token.replace("_", " ");
+            labelComponent c;
+            c.text = token;
+            last.append(c);
+        }
+    }
+    if (lastvalid)
+        newFormat.append(last);
+
+    int fc = newFormat.count();
+    QString expression = "(CASE ";
+    for (int i = 0; i < fc; i++) {
+        QList<labelComponent> f = newFormat[i];
+        expression += "WHEN ";
+        bool firstkey = true;
+        QListIterator<labelComponent> it(f);
+
+        /* First create the condition */
+        while(it.hasNext()) {
+            labelComponent v = it.next();
+            if (v.field.isEmpty())
+                continue;
+            if (!firstkey)
+                expression += "AND ";
+            firstkey = false;
+            expression += v.field + " IS NOT NULL ";
+        }
+        expression += "THEN ";
+
+        /* Now the result */
+        QListIterator<labelComponent> fit(f);
+        while(fit.hasNext()) {
+            labelComponent v = fit.next();
+            if (!v.field.isEmpty()) {
+                expression += v.field + " ";
+            } else {
+                expression += "\"" + v.text + "\" ";
+            }
+            if (fit.hasNext())
+                expression += "|| ";
+        }
+    }
+    expression += "ELSE NULL END)";
+
+    return expression;
+}
+
+
+bool PimMigrate::generateContactLabels(const QSqlDatabase &db)
+{
+    /* Duplicate some code from libqtopiapim */
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "formatting" );
+
+    QString currentSql = sqlLabel();
+    QSqlQuery q(db);
+    CHECK(q.prepare("DROP INDEX contactslabelindex"));
+    CHECK(q.exec());
+    CHECK(q.prepare("UPDATE contacts SET label=" + currentSql));
+    CHECK(q.exec());
+    CHECK(q.prepare("CREATE INDEX contactslabelindex ON contacts(label)"));
+    CHECK(q.exec());
+
+    config.setValue("NameFormatSql", currentSql);
+
+    return true;
 }
 

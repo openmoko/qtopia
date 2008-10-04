@@ -34,6 +34,7 @@ application/vnd.oma.drm.roap-pdu+xml oru
 application/vnd.oma.drm.roap-trigger+xml ort
 application/vnd.oma.drm.ro+xml  oro
 application/vnd.pwg-xhtml-print+xml xhtml
+application/vnd.ms-asf  asf
 application/wita
 application/wordperfect5.1	wp5
 application/x-123		wk
@@ -84,6 +85,7 @@ audio/mpeg			mp3 mpga mp2
 audio/3gpp			3gp
 audio/mp4			m4a aac
 audio/x-aiff			aif aifc aiff
+audio/x-ms-wma      wma
 audio/x-pn-realaudio		ra ram
 audio/x-pn-realaudio-plugin
 audio/x-realaudio		ra
@@ -93,6 +95,7 @@ audio/mpegurl       m3u
 audio/x-scpls       pls
 audio/ogg           oga
 audio/ogg+vorbis    ogg
+audio/x-broadcom-ept            ept
 chemical/x-pdb			xyz
 image/gif			gif
 image/ief			ief
@@ -143,9 +146,11 @@ video/mpeg			mpeg mp2 mpe mpg
 video/mp4			mp4 m4v
 video/quicktime			mov qt
 video/3gpp			3gp
+video/x-pn-realvideo    rv
 video/x-msvideo			avi
 video/x-sgi-movie		movie
 video/ogg           ogv
+video/x-ms-wmv			wmv
 x-conference/x-cooltalk		ice
 x-world/x-vrml			wrl vrml
 application/qtopia-package qpd

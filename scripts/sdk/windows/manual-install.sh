@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # this script will install the toolchain, qtopia binaries and 
 # scripts onto your host machine. 
 # this is not supported!
@@ -10,7 +10,7 @@ function install_qtopia()
 if [ ! -e /opt/Qtopia ]; then
  sudo mkdir -p /opt/Qtopia
 fi
-	sudo nice -10 sudo tar -xjvf qtopia.bz2 --directory=/opt/Qtopia 
+	sudo nice -10 sudo tar -xjvf qtopia.tar.bz2 --directory=/opt/Qtopia 
 }
 											
 function install_tools()
@@ -18,23 +18,16 @@ function install_tools()
 if [ ! -e $TOOLCHAINDIR ]; then
 		sudo mkdir -p $TOOLCHAINDIR
 fi
-	sudo nice -10 tar -xjvf tools.bz2 --directory=$TOOLCHAINDIR
+	sudo nice -10 tar -xjvf tools.tar.bz2 --directory=$TOOLCHAINDIR
 
 	if [ ! -e /opt/toolchains ]; then
 			mkdir -p /opt/toolchains
 	fi
-
-if [ ! -e /opt/toolchains/arm920t-eabi ]; then
-	sudo ln -s /usr/local/arm920t-eabi /opt/toolchains/arm920t-eabi
-fi
-if [ ! -e /usr/local/arm-linux ]; then
-	sudo ln -s /usr/local/arm920t-eabi /usr/local/arm-linux
-fi
 }
 
 function install_extras()
 {
-	sudo nice -10 tar -xjf extras.bz2 --directory=/
+	sudo nice -10 tar -xjf extras.tar.bz2 --directory=/
 	if [ -e /opt/Qtopia/extras/bin/extras.sh ]; then
 		sudo /opt/Qtopia/extras/bin/extras.sh
 	fi
@@ -51,6 +44,8 @@ do
 done
 shift $(($OPTIND - 1))
 
+install_extras
 install_qtopia
 install_tools
-install_extras
+
+echo "Please add /opt/Qtopia/SDK/scripts into your $PATH"

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -54,8 +52,11 @@
 #include <QtopiaApplication>
 #include <QFileInfo>
 #include <QCommDeviceSession>
+#include <QFileSystem>
 
 #include <QObexFolderListingEntryInfo>
+
+#include <sys/vfs.h>    // statfs
 
 class ObexFtpModel : public QAbstractItemModel
 {
@@ -388,6 +389,11 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 public:
+    enum CdCommandType {
+        CdToRootFolder,
+        CdToSubFolder
+    };
+
     BtFtpPrivate(QMainWindow *parent);
 
     QWidget *m_central;
@@ -423,6 +429,9 @@ public:
     QCommDeviceSession *m_session;
 
     QContent m_fileBeingObtained;
+
+    QHash<int, CdCommandType> m_pendingCdTypes;
+    int m_dirDepth;
 
 private:
     void enableActions();
@@ -489,6 +498,7 @@ BtFtp::BtFtp(QWidget *parent, Qt::WFlags fl) : QMainWindow(parent, fl)
     setCentralWidget(m_data->m_central);
 
     m_data->m_model = new ObexFtpModel(this);
+
     m_data->m_files = new QListView(m_data->m_central);
     m_data->m_files->setItemDelegate(new QtopiaItemDelegate);
     m_data->m_files->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -500,7 +510,7 @@ BtFtp::BtFtp(QWidget *parent, Qt::WFlags fl) : QMainWindow(parent, fl)
 
     connect(m_data->m_files, SIGNAL(activated(QModelIndex)),
             m_data, SLOT(itemActivated(QModelIndex)));
-    connect(m_data->m_files->selectionModel(), SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
+    connect(m_data->m_files->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             m_data, SLOT(updateActions()));
 
     m_data->m_progress = new BtFtpProgressBar(m_data->m_central);
@@ -508,6 +518,8 @@ BtFtp::BtFtp(QWidget *parent, Qt::WFlags fl) : QMainWindow(parent, fl)
     m_data->m_progress->setValue(0);
     m_data->m_progress->setTextVisible(false);
     m_data->m_progress->setFocusPolicy(Qt::NoFocus);
+
+    m_data->m_dirDepth = 0;
 
     QVBoxLayout *widgetLayout = new QVBoxLayout(m_data->m_central);
     widgetLayout->addWidget(m_data->m_files);
@@ -546,7 +558,8 @@ void BtFtpPrivate::itemActivated(const QModelIndex &index)
         m_client->cdUp();
     }
     else if (m_model->info(index.row()).isFolder()) {
-        m_client->cd(m_model->info(index.row()).name());
+        int id = m_client->cd(m_model->info(index.row()).name());
+        m_pendingCdTypes.insert(id, CdToSubFolder);
     }
     else {
         getFile();
@@ -568,7 +581,7 @@ void BtFtpPrivate::browseDevice()
     QBluetoothLocalDevice device;
 
     if (!device.isValid()) {
-        QMessageBox::warning(0, tr("BtFTP"),
+        QMessageBox::warning(0, tr("Bluetooth error"),
                              "<qt>"+tr("There are no Bluetooth devices present!")+"</qt>",
                              QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
         return;
@@ -636,7 +649,7 @@ void BtFtpPrivate::searchCompleted(const QBluetoothSdpQueryResult &result)
     m_sdapCanceled = false;
 
     if (!result.isValid()) {
-        QMessageBox::warning(0, tr("BtFTP"),
+        QMessageBox::warning(0, tr("Connection error"),
                              "<qt>"+tr("Unable to connect.  Please ensure the Bluetooth device is in range and try again.")+"</qt>",
                              QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
         return;
@@ -652,7 +665,7 @@ void BtFtpPrivate::searchCompleted(const QBluetoothSdpQueryResult &result)
 
     if (channel == -1) {
         // This really shouldn't happen, as we just validated.
-        QMessageBox::warning(0, tr("BtFTP"),
+        QMessageBox::warning(0, tr("Connection error"),
                              "<qt>"+tr("The selected device does not support this service!")+"</qt>",
                              QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
         return;
@@ -664,7 +677,7 @@ void BtFtpPrivate::searchCompleted(const QBluetoothSdpQueryResult &result)
     if (m_rfcommSock->connect(QBluetoothAddress::any, m_addr, channel)) {
     }
     else {
-        QMessageBox::warning(0, tr("BtFTP"),
+        QMessageBox::warning(0, tr("Connection error"),
                              "<qt>" + tr("Could not connect to the remote service!") + "</qt>",
                              QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
     }
@@ -672,6 +685,8 @@ void BtFtpPrivate::searchCompleted(const QBluetoothSdpQueryResult &result)
 
 void BtFtpPrivate::rfcommConnected()
 {
+    qLog(Bluetooth) << "BtFtpPrivate: RFCOMM connection opened";
+
     m_waitWidget->hide();
     disconnect(m_rfcommSock, SIGNAL(error(QBluetoothAbstractSocket::SocketError)),
             this, SLOT(rfcommError(QBluetoothAbstractSocket::SocketError)));
@@ -693,7 +708,7 @@ void BtFtpPrivate::rfcommConnected()
     m_model->clear();
 
     m_client->connect();
-    m_client->cd();
+    m_pendingCdTypes.insert(m_client->cd(), CdToRootFolder);
 
     QSoftMenuBar::clearLabel(m_files, Qt::Key_Select);
 }
@@ -786,7 +801,7 @@ void BtFtpPrivate::enableActions()
         m_deleteAction->setVisible(!m_model->info(index.row()).isParent());
 }
 
-void BtFtpPrivate::commandFinished(int, bool error)
+void BtFtpPrivate::commandFinished(int id, bool error)
 {
     QObexFtpClient::Command command = m_client->currentCommand();
 
@@ -805,8 +820,8 @@ void BtFtpPrivate::commandFinished(int, bool error)
             case QObexFtpClient::InvalidRequest:
             case QObexFtpClient::InvalidResponse:
             case QObexFtpClient::UnknownError:
-                QMessageBox::warning(0, tr("BtFTP"),
-                             "<qt>"+tr("Connection has been dropped!")+"</qt>",
+                QMessageBox::warning(0, tr("Connection error"),
+                             "<qt>"+tr("The connection has been lost.")+"</qt>",
                              QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
                 delete m_client;
                 m_client = 0;
@@ -828,6 +843,7 @@ void BtFtpPrivate::commandFinished(int, bool error)
                 break;
             case QObexFtpClient::Cd:
                 message = tr("Could not change the current working folder");
+                m_pendingCdTypes.remove(id);
                 break;
             case QObexFtpClient::CdUp:
                 message = tr("Could not change the current working folder");
@@ -868,7 +884,7 @@ void BtFtpPrivate::commandFinished(int, bool error)
         };
 
         if (!message.isEmpty())
-            QMessageBox::warning(0, tr("BtFTP"),
+            QMessageBox::warning(0, tr("Bluetooth error"),
                                  "<qt>" + message + "</qt>",
                                  QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
 
@@ -910,6 +926,20 @@ void BtFtpPrivate::commandFinished(int, bool error)
             m_client->currentDevice()->close();
             delete m_client->currentDevice();
 
+        case QObexFtpClient::Cd:
+            if (m_pendingCdTypes.contains(id)) {
+                if (m_pendingCdTypes.take(id) == CdToRootFolder)
+                    m_dirDepth = 0;
+                else
+                    m_dirDepth++;
+            }
+            break;
+
+        case QObexFtpClient::CdUp:
+            if (m_dirDepth > 0)
+                m_dirDepth--;
+            break;
+
         default:
             break;
     };
@@ -932,7 +962,8 @@ bool BtFtpPrivate::eventFilter(QObject *obj, QEvent *event)
         QKeyEvent *ke = reinterpret_cast<QKeyEvent *>(event);
         switch ( ke->key() ) {
             case Qt::Key_Left:
-                if (m_model->info(0).isParent()) {
+                //if (m_model->info(0).isParent()) {    // some clients don't send parent-folder
+                if (m_dirDepth > 0) {
                     m_client->cdUp();
                     m_model->clear();
                 }
@@ -1020,7 +1051,7 @@ void BtFtpPrivate::deleteFileOrFolder()
 
         if (DirDeleterDialog::deleteDirectory(info.name(), m_client, m_parent) ==
             DirDeleterDialog::Failed) {
-            QMessageBox::warning(0, tr("BtFTP"),
+            QMessageBox::warning(0, tr("Bluetooth error"),
                             "<qt>"+tr("Removing directory failed.")+"</qt>",
                             QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
         }
@@ -1041,22 +1072,21 @@ void BtFtpPrivate::deleteFileOrFolder()
 
 void BtFtpPrivate::createFolder()
 {
-    QDialog dlg;
-    dlg.setWindowTitle(tr("New Folder"));
-    QLabel label(tr("Name:"));
+    QDialog d;
+    d.setWindowTitle(tr("New Folder"));
+    QLabel label(tr("Enter folder name:"));
     QLineEdit lineEdit;
-    QHBoxLayout layout;
+    QVBoxLayout layout;
     layout.addWidget(&label);
     layout.addWidget(&lineEdit);
-    dlg.setLayout(&layout);
-    connect(&lineEdit, SIGNAL(editingFinished()), &dlg, SLOT(accept()));
-    if (QtopiaApplication::execDialog(&dlg) != QDialog::Accepted
+    d.setLayout(&layout);
+    connect(&lineEdit, SIGNAL(editingFinished()), &d, SLOT(accept()));
+    if (QtopiaApplication::execDialog(&d) != QDialog::Accepted
         || lineEdit.text().trimmed().isEmpty()) {
         return;
     }
 
     QModelIndex index = m_model->mkdir(lineEdit.text());
-
     if (index.isValid()) {
         m_files->setCurrentIndex(index);
         m_client->mkdir(lineEdit.text());
@@ -1073,7 +1103,7 @@ void BtFtpPrivate::putFile()
 
         if (!io) {
             QString message(tr("Document System Error"));
-            QMessageBox::warning(0, tr("BtFTP"),
+            QMessageBox::warning(0, tr("Bluetooth error"),
                                  "<qt>" + message + "</qt>",
                                  QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
             return;
@@ -1091,6 +1121,19 @@ void BtFtpPrivate::getFile()
     m_fileBeingObtained = QContent();
 
     QModelIndex index = m_files->currentIndex();
+
+    struct statfs fs;
+    if (statfs(QFileSystem::documentsFileSystem().documentsPath().toLocal8Bit(), &fs) == 0) {
+        qint64 availableStorage = fs.f_bavail * fs.f_bsize;
+        if (m_model->info(index.row()).size() > availableStorage) {
+            QString message(tr("Not enough free disk space for this file."));
+            QMessageBox::warning(0, tr("Bluetooth error"),
+                                 "<qt>" + message + "</qt>",
+                                 QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
+            return;
+        }
+    }
+
     const QString &name = m_model->info(index.row()).name();
     m_fileBeingObtained.setName(name);
 
@@ -1122,7 +1165,7 @@ void BtFtpPrivate::getFile()
 
     if (!io) {
         QString message(tr("Document System Error"));
-        QMessageBox::warning(0, tr("BtFTP"),
+        QMessageBox::warning(0, tr("Bluetooth error"),
                              "<qt>" + message + "</qt>",
                              QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
         return;

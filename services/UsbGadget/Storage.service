@@ -1,0 +1,7 @@
+[Translation]
+File=QtopiaServices
+Context=UsbGadget/Storage
+[Service]
+Actions="startUsbService(QString)"
+Name[]="USB Storage Service"
+Gadget=QUsbStorageGadget

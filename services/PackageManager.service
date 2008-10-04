@@ -3,5 +3,5 @@ File=QtopiaServices
 Context=PackageManager
 [Service]
 Actions = "installPackage(QDSActionRequest);installPackageConfirm(QString);updatePackage(QString)"
-Icon = email
+Icon=packagemanager/PackageManager
 Name[]="Package Manager"

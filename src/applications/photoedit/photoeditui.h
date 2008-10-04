@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -31,6 +29,7 @@
 #include "slideshow/slideshowdialog.h"
 #include "slideshow/slideshowui.h"
 #include "slideshow/slideshow.h"
+#include "imageviewer.h"
 
 #include <qcategorymanager.h>
 #include <qtopiaabstractservice.h>
@@ -41,9 +40,11 @@ class QResizeEvent;
 class QMenu;
 class QStackedLayout;
 class ThumbnailContentSetModel;
-class ImageViewer;
 class QListView;
 class QContentFilterDialog;
+class EffectDialog;
+class QActionGroup;
+class QScreenInformation;
 class QWaitWidget;
 
 class PhotoEditUI : public QWidget
@@ -62,6 +63,10 @@ public slots:
 
 signals:
     void fullScreenDisabled(bool enabled);
+    void showFullScreenWidgets(bool show);
+
+    void scaleViewer(qreal sx, qreal sy);
+    void setViewerScaleMode(ImageViewer::ScaleMode mode);
 
 private slots:
     // Respond to service request
@@ -131,6 +136,10 @@ private slots:
     // Delete current image
     void deleteImage();
 
+    void setHomeScreenImage();
+    void setContactImage();
+    void setPersonalImage();
+
     // Show selector if image currently being edited is deleted
     void contentChanged( const QContentIdList &id, const QContent::ChangeType type );
 
@@ -144,18 +153,33 @@ private slots:
 
     void viewImage( const QContent &content );
 
+    void setViewerImage(const QContent &content);
+
     void selectType();
 
     void selectCategory();
 
+    void selectEffect();
+
     void zoomViewer();
+    void zoomViewerToActualSize();
     void zoomViewerToScreenSize();
     void setViewerZoom(int zoom);
 
     void viewerImageChanged();
 
+    void viewerTapped();
+
+#ifndef QTOPIA_HOMEUI
     void viewerMenuAboutToShow();
     void selectorMenuAboutToShow();
+#endif
+
+    // TV screen mode changed.
+    void tvScreenChanged();
+
+    // Current item in the stacked widget has changed.
+    void stackItemChanged(int item);
 
 protected:
     // Move to previous state, close application if no previous state exists
@@ -167,6 +191,7 @@ protected:
 private:
 
     QWidget *imageViewer();
+    ImageViewer *tvImageViewer();
     QWidget *selectorWidget();
     ImageUI *imageEditor();
 
@@ -178,13 +203,14 @@ private:
     // Prompt user to save changes to image if image was modified
     void saveChanges();
     bool saveImage(const QImage &image, QContent *content);
+    bool copyImage(const QContent &image, const QString &target);
 
     // Send modified image back in qcop message
     void sendValueSupplied();
 
     bool service_requested;
 
-    bool is_fullscreen, was_fullscreen, edit_canceled;
+    bool is_fullscreen, edit_canceled;
 
     QContent service_lnk;
     QCategoryFilter service_category;
@@ -195,18 +221,23 @@ private:
 
     QContent current_image;
 
-    QAction *separator_action, *properties_action, *beam_action, *print_action;
-    QAction *delete_action, *edit_action, *slide_show_action;
-    QAction *fullscreen_action;
-    QAction *viewer_edit_action;
+    QActionGroup *m_selectorActions;
+#ifndef QTOPIA_HOMEUI
+    QAction *m_selectorEditAction;
+    QAction *m_viewerEditAction;
+#endif
 
+    ImageScaler *m_imageScaler;
     ImageViewer *image_viewer;
+    ImageViewer *tv_image_viewer;
     QListView *selector_view;
     QLabel *type_label;
     QLabel *category_label;
     QWidget *selector_widget;
     QContentSet *image_set;
     ThumbnailContentSetModel *image_model;
+
+    EffectDialog *m_effectDialog;
 
     QSlider *m_viewerZoomSlider;
 
@@ -238,8 +269,15 @@ private:
 
     int list_init_timer_id;
 
+    bool m_fullScreenWidgetsVisible;
+
     QWidget *m_imageWidget;
+#ifdef QTOPIA_HOMEUI
+    QLabel *m_imageCaption;
+#endif
     QWaitWidget *m_viewerWaitWidget;
+
+    QScreenInformation *m_tvScreen;
 };
 
 class PhotoEditService : public QtopiaAbstractService

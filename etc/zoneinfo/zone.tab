@@ -1,4 +1,4 @@
-# @(#)zone.tab	8.11
+# @(#)zone.tab	8.13
 #
 # TZ zone descriptions
 #
@@ -77,6 +77,7 @@ BG	+4241+02319	Europe/Sofia
 BH	+2623+05035	Asia/Bahrain
 BI	-0323+02922	Africa/Bujumbura
 BJ	+0629+00237	Africa/Porto-Novo
+BL	+1753-06251	America/St_Barthelemy
 BM	+3217-06446	Atlantic/Bermuda
 BN	+0456+11455	Asia/Brunei
 BO	-1630-06809	America/La_Paz
@@ -112,6 +113,7 @@ CA	+4901-08816	America/Nipigon	Eastern Time - Ontario & Quebec - places that did
 CA	+4823-08915	America/Thunder_Bay	Eastern Time - Thunder Bay, Ontario
 CA	+6344-06828	America/Iqaluit	Eastern Time - east Nunavut - most locations
 CA	+6608-06544	America/Pangnirtung	Eastern Time - Pangnirtung, Nunavut
+CA	+744144-0944945	America/Resolute	Eastern Time - Resolute, Nunavut
 CA	+484531-0913718	America/Atikokan	Eastern Standard Time - Atikokan, Ontario and Southampton I, Nunavut
 CA	+624900-0920459	America/Rankin_Inlet	Central Time - central Nunavut
 CA	+4953-09709	America/Winnipeg	Central Time - Manitoba & west Ontario
@@ -137,6 +139,7 @@ CK	-2114-15946	Pacific/Rarotonga
 CL	-3327-07040	America/Santiago	most locations
 CL	-2709-10926	Pacific/Easter	Easter Island & Sala y Gomez
 CM	+0403+00942	Africa/Douala
+CN	+3955+11625	Asia/Beijing
 CN	+3114+12128	Asia/Shanghai	east China - Beijing, Guangdong, Shanghai, etc.
 CN	+4545+12641	Asia/Harbin	Heilongjiang (except Mohe), Jilin
 CN	+2934+10635	Asia/Chongqing	central China - Sichuan, Yunnan, Guangxi, Shaanxi, Guizhou, etc.
@@ -249,6 +252,7 @@ MA	+3339-00735	Africa/Casablanca
 MC	+4342+00723	Europe/Monaco
 MD	+4700+02850	Europe/Chisinau
 ME	+4226+01916	Europe/Podgorica
+MF	+1804-06305	America/Marigot
 MG	-1855+04731	Indian/Antananarivo
 MH	+0709+17112	Pacific/Majuro	most locations
 MH	+0905+16720	Pacific/Kwajalein	Kwajalein
@@ -338,8 +342,7 @@ SE	+5920+01803	Europe/Stockholm
 SG	+0117+10351	Asia/Singapore
 SH	-1555-00542	Atlantic/St_Helena
 SI	+4603+01431	Europe/Ljubljana
-SJ	+7800+01600	Arctic/Longyearbyen	Svalbard
-SJ	+7059-00805	Atlantic/Jan_Mayen	Jan Mayen
+SJ	+7800+01600	Arctic/Longyearbyen
 SK	+4809+01707	Europe/Bratislava
 SL	+0830-01315	Africa/Freetown
 SM	+4355+01228	Europe/San_Marino
@@ -385,6 +388,7 @@ US	+410305-0863611	America/Indiana/Winamac	Eastern Time - Indiana - Pulaski Coun
 US	+382232-0862041	America/Indiana/Marengo	Eastern Time - Indiana - Crawford County
 US	+384452-0850402	America/Indiana/Vevay	Eastern Time - Indiana - Switzerland County
 US	+415100-0873900	America/Chicago	Central Time
+US	+375711-0864541	America/Indiana/Tell_City	Central Time - Indiana - Perry County
 US	+382931-0871643	America/Indiana/Petersburg	Central Time - Indiana - Pike County
 US	+450628-0873651	America/Menominee	Central Time - Michigan - Dickinson, Gogebic, Iron & Menominee Counties
 US	+470659-1011757	America/North_Dakota/Center	Central Time - North Dakota - Oliver County

@@ -1,38 +1,41 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qdebug.h>
+#include <QDebug>
 
-#include <qmediacontrol.h>
-#include <qmediavideocontrol.h>
-#include <qmediavideocontrolserver.h>
+#include <QMediaControl>
+#include <QMediaVideoControl>
+#include <QMediaVideoControlServer>
+#include <QVideoSurface>
+#include <qtopiavideo.h>
 
-#include <qmediahandle_p.h>
+#include <private/qmediahandle_p.h>
 
 #include "helixplayer.h"
 #include "qmediahelixsettingsserver.h"
 
 #include "helixsession.h"
 
-
+/*!
+    \class qtopia_helix::HelixSession
+    \internal
+*/
 
 namespace qtopia_helix
 {
@@ -49,7 +52,7 @@ public:
     IHXClientEngine*            engine;
     HelixPlayer*                player;
     QMediaVideoControlServer*   videoControlServer;
-    HelixVideo*                 videoWidget;
+    VideoWidget*                videoWidget;
     bool                        ismute;
     bool                        suspended;
     quint32                     position;
@@ -183,7 +186,11 @@ QString HelixSession::id() const
 
 QString HelixSession::reportData() const
 {
-    return d->url;
+    QStringList sl;
+
+    sl << "engine:Helix" << ("uri:" + d->url);
+
+    return sl.join(",");
 }
 
 // {{{ Observer
@@ -239,9 +246,20 @@ void HelixSession::update(Subject* subject)
         if (videoRender->hasVideo())
         {
             d->videoWidget = videoRender->createVideoWidget();
+            connect( d->videoWidget->videoSurface(), SIGNAL(formatsChanged()),
+                     d->player, SLOT(updateVideoSurfaceFormats()) );
+            connect( d->videoWidget->videoSurface(), SIGNAL(updateRequested()),
+                     this, SLOT(repaintLastFrame()) );
 
-            d->videoControlServer = new QMediaVideoControlServer(QMediaHandle(d->id));
+            d->videoControlServer = new QMediaVideoControlServer( QMediaHandle(d->id) );
             d->videoControlServer->setRenderTarget(d->videoWidget->winId());
+            QVideoSurface *surface = d->videoWidget->videoSurface();
+            surface->setRotation(d->videoControlServer->videoRotation());
+            surface->setScaleMode(d->videoControlServer->videoScaleMode());
+            connect(d->videoControlServer, SIGNAL(rotationChanged(QtopiaVideo::VideoRotation)),
+                    surface, SLOT(setRotation(QtopiaVideo::VideoRotation)));
+            connect(d->videoControlServer, SIGNAL(scaleModeChanged(QtopiaVideo::VideoScaleMode)),
+                    surface, SLOT(setScaleMode(QtopiaVideo::VideoScaleMode)));
 
             d->interfaces.append(QMediaVideoControl::name());
 
@@ -271,7 +289,7 @@ void HelixSession::delaySeek()
 {
     static int count = 0;
 
-    if (d->suspended && count++ > 2)
+    if (d->suspended && count++ > 3)
     {
         d->suspended = false;
         seek(d->oldposition);
@@ -279,7 +297,13 @@ void HelixSession::delaySeek()
         count = 0;
     }
     else
-        QTimer::singleShot(200, this, SLOT(delaySeek()));
+        QTimer::singleShot(250, this, SLOT(delaySeek()));
+}
+
+void HelixSession::repaintLastFrame()
+{
+    if (  playerState() != QtopiaMedia::Playing && d->videoWidget )
+        d->videoWidget->repaintLastFrame();
 }
 
 void HelixSession::startupPlayer()

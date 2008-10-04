@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -56,7 +54,7 @@ void ImageUI::reset()
 QRegion ImageUI::region() const
 {
     QRect region( preview.rect() );
-    region.translate( preview_position.x(), preview_position.y() );
+    region.moveCenter(rect().center());
     return region;
 }
 
@@ -107,20 +105,13 @@ void ImageUI::paintEvent( QPaintEvent* )
         preview = image_processor->preview( _viewport );
         if ( !(preview.isNull()) ) {
             // Update image position
-            preview_position.setX( ( width() - preview.width() ) / 2 );
-            preview_position.setY( ( height() - preview.height() ) / 2 );
             // Draw preview on widget buffer
-            painter.drawPixmap( preview_position, preview );
+            QRect previewRect(QPoint(0, 0), preview.size());
+            previewRect.moveCenter(rect().center());
+
+            painter.drawPixmap(previewRect, preview);
         }
     }
-
-    // REMOVED THIS - the things that are responding to it are being redrawn
-    // anyway, due to the parent-child hierarchy, so if you emit this signal as well you get
-    // (infinite) recursion.
-    // TODO - it would be better to emit this signal and break the connections that shouldn't
-    // be there (Navigator and RegionSelector, I think from memory) -- not being done now due to
-    // lack of time.
-    //emit updated();
 }
 
 void ImageUI::resizeEvent( QResizeEvent* )

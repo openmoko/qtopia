@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -69,6 +67,11 @@ RadioPlayer::RadioPlayer( QWidget *parent, Qt::WFlags f )
     muteAction->setWhatsThis( tr( "Mute or unmute radio sound" ) );
     menu->addAction( muteAction );
 
+    speakerAction = new QAction( tr( "Speaker" ), this );
+    connect( speakerAction, SIGNAL(triggered()), this, SLOT(toggleSpeaker()) );
+    speakerAction->setWhatsThis( tr( "Transfer audio to and from the speaker" ) );
+    menu->addAction( speakerAction );
+
     addToPresetsAction = new QAction( tr( "Add to Saved Stations ..." ), this );
     connect( addToPresetsAction, SIGNAL(triggered()),
              this, SLOT(addToPresets()) );
@@ -120,25 +123,56 @@ RadioPlayer::~RadioPlayer()
 
 void RadioPlayer::keyPressEvent( QKeyEvent *e )
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     if ( e->key() == Qt::Key_Left ) {
         // Step left on current band.
+        radio->stopScan();
         radio->stepBackward();
         updateStationDetails();
         e->accept();
         return;
+    } else if ( e->key() == Qt::Key_MediaPrevious ) {
+        if ( radio->signalDetectable() ) {
+            // Scan backward for the previous station.
+            radio->scanBackward();
+        } else {
+            // Step left on current band.
+            radio->stepBackward();
+            updateStationDetails();
+        }
+        e->accept();
+        return;
     } else if ( e->key() == Qt::Key_Right ) {
         // Step right on current band.
+        radio->stopScan();
         radio->stepForward();
         updateStationDetails();
         e->accept();
         return;
-    } else if ( e->key() == Qt::Key_Up ) {
+    } else if ( e->key() == Qt::Key_MediaNext ) {
+        if ( radio->signalDetectable() ) {
+            // Scan forward for the next station.
+            radio->scanForward();
+        } else {
+            // Step right on current band.
+            radio->stepForward();
+            updateStationDetails();
+        }
+        e->accept();
+        return;
+    } else if ( (e->key() == Qt::Key_MediaPlay || e->key() == Qt::Key_MediaStop ||
+                 e->key() == Qt::Key_Select) &&
+                radio->scanning() ) {
+        // These keys halt scanning if it is currently active.
+        radio->stopScan();
+        e->accept();
+        return;
+    } else if ( e->key() == Qt::Key_Up || e->key() == Qt::Key_VolumeUp ) {
         adjustVolume( 5 );
-    } else if ( e->key() == Qt::Key_Down ) {
+    } else if ( e->key() == Qt::Key_Down || e->key() == Qt::Key_VolumeDown ) {
         adjustVolume( -5 );
+    } else if ( e->key() == Qt::Key_VolumeMute ) {
+        muteOrUnmute();
     }
-#endif
 
     QMainWindow::keyPressEvent(e);
 }
@@ -158,6 +192,7 @@ void RadioPlayer::setStation
                         .arg( band ) );
     }
     updateStationDetails();
+    updateSpeaker();
 }
 
 void RadioPlayer::setDocument( const QString& doc )
@@ -178,6 +213,12 @@ void RadioPlayer::muteOrUnmute()
     updateMute();
 }
 
+void RadioPlayer::toggleSpeaker()
+{
+    radio->setSpeakerActive( !radio->speakerActive() );
+    updateSpeaker();
+}
+
 void RadioPlayer::removeVolumeDisplay()
 {
     ui->volume->hide();
@@ -192,6 +233,7 @@ void RadioPlayer::changeBand()
             if ( index != radio->band() ) {
                 radio->setBand( index );
                 updateStationDetails();
+                updateSpeaker();
             }
             break;
         }
@@ -225,6 +267,7 @@ void RadioPlayer::presets()
             setStation( dialog.band(), dialog.frequency() );
     }
     updateStationDetails();
+    updateSpeaker();
 }
 
 void RadioPlayer::addToPresets()
@@ -286,6 +329,7 @@ void RadioPlayer::initUi()
 
     updateStationDetails();
     updateMute();
+    updateSpeaker();
     updateScanActions();
 }
 
@@ -333,6 +377,22 @@ void RadioPlayer::updateMute()
         muteAction->setText( tr("Unmute") );
     else
         muteAction->setText( tr("Mute") );
+}
+
+void RadioPlayer::updateSpeaker()
+{
+    if ( !radio->speakerPresent() ) {
+        speakerAction->setEnabled( false );
+        speakerAction->setVisible( false );
+    } else if ( radio->speakerActive() ) {
+        speakerAction->setEnabled( true );
+        speakerAction->setVisible( true );
+        speakerAction->setText( tr("Headset") );
+    } else {
+        speakerAction->setEnabled( true );
+        speakerAction->setVisible( true );
+        speakerAction->setText( tr("Speaker") );
+    }
 }
 
 void RadioPlayer::adjustVolume( int diff )

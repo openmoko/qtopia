@@ -10,5 +10,5 @@ Icon=aeroplane
 Name[]="Set Plane Mode"
 Requires=@/Telephony/Status/PlaneModeAvailable=Yes
 [showProfiles()]
-Icon=Note
+Icon=profileedit/Note
 Name[]="Profiles"

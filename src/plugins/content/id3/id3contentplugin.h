@@ -1,36 +1,34 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _ID3CONTENTPLUGIN_H
-#define _ID3CONTENTPLUGIN_H
+#ifndef ID3CONTENTPLUGIN_H
+#define ID3CONTENTPLUGIN_H
 
 #include <qcontentplugin.h>
 #include <qtopiaglobal.h>
 
 class Id3Tag;
 
-class QTOPIA_PLUGIN_EXPORT Id3ContentPlugin : public QObject, public QContentPlugin
+class QTOPIA_PLUGIN_EXPORT Id3ContentPlugin : public QObject, public QContentPlugin, public QContentPropertiesPlugin
 {
     Q_OBJECT
-    Q_INTERFACES(QContentPlugin)
+    Q_INTERFACES(QContentPlugin QContentPropertiesPlugin)
 public:
     Id3ContentPlugin();
     ~Id3ContentPlugin();
@@ -39,12 +37,10 @@ public:
     virtual bool installContent( const QString &filePath, QContent *content );
     virtual bool updateContent( QContent *content );
 
-private:
-    QString name( const QString &filePath, Id3Tag &tag ) const;
-
-    QString string( Id3Tag &tag, qint64 framePosition ) const;
-    QString genre( Id3Tag &tag, qint64 framePosition ) const;
-
+    virtual QStringList mimeTypes() const;
+    virtual QImage thumbnail( const QContent &content, const QSize &size, Qt::AspectRatioMode mode );
+    virtual QContentPropertiesEngine *createPropertiesEngine( const QContent &content );
 };
+
 
 #endif

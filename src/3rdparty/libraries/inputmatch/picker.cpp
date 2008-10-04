@@ -1,21 +1,21 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** WARNING: Use of this file may require additional third party patent licensing.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "picker.h"
@@ -137,7 +137,7 @@ bool Picker::filterKey(int, int keycode, int,
 {
     if (Qt::Key_Hangup == keycode)
         return false;
-        
+
     if (isPress) {
 	havePress = TRUE;
     } else if (havePress) {
@@ -145,23 +145,12 @@ bool Picker::filterKey(int, int keycode, int,
 	int oldSelRow = selRow;
 	int oldSelCol = selCol;
 	switch (keycode) {
-#ifdef QTOPIA_PHONE
 	    case Qt::Key_Back:
 		return FALSE;
 	    case Qt::Key_Select:
 		hide();
 		emit cellClicked(selRow, selCol);
 		return TRUE;
-#else 
-	    case Qt::Key_Backspace:
-	    case Qt::Key_Delete:
-	    case Qt::Key_Escape:
-		return FALSE;
-	    case Qt::Key_Space:
-		hide();
-		emit cellClicked(selRow, selCol);
-		return TRUE;
-#endif
 	    case Qt::Key_Up:
 		selRow--;
 		if (selRow < 0)

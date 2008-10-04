@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QObexClientSession Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QObexClientSession Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QObexClientSession class provides an implementation of the client side of the OBEX protocol. <a href="#details">More...</a></p>
 <pre>    #include &lt;QObexClientSession&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -92,7 +93,6 @@
 <p>QObexClientSession performs OBEX requests asynchronously and depends on the presence of a running event loop.</p>
 <ul><li><a href="#executing-obex-client-requests">Executing OBEX client requests</a></li>
 <li><a href="#multiplexing-and-connection-ids">Multiplexing and Connection IDs</a></li>
-<li><a href="#handling-socket-disconnections">Handling socket disconnections</a></li>
 </ul>
 <a name="executing-obex-client-requests"></a>
 <h3>Executing OBEX client requests</h3>
@@ -146,16 +146,7 @@
 <h3>Multiplexing and Connection IDs</h3>
 <p>The <tt>Connection Id</tt> header is used when multiplexing OBEX connections over a single transport connection. If an OBEX server includes a <tt>Connection Id</tt> header in a response to a <tt>Connect</tt> request, the ID will be retained and the client will automatically include it in the OBEX headers for all future requests. You do not need to track and send the Connection Id yourself. The ID can be retrieved using <a href="qobexclientsession.html#connectionId">connectionId</a>().</p>
 <p>Note that the Connection Id will not be automatically added if a request already contains a <tt>Target</tt> header, as a request cannot have both of these headers at the same time. (If it did, the server would be unsure as to whether the client was establishing a new directed connection or using an existing connection.)</p>
-<a name="handling-socket-disconnections"></a>
-<h3>Handling socket disconnections</h3>
-<p>You should ensure that the <a href="qiodevice.html">QIODevice</a> provided in the constructor emits <a href="qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() or <a href="qobject.html#destroyed">QObject::destroyed</a>() when the associated transport connection is disconnected. If one of these signals are emitted while a request is in progress, QObexClientSession will know the transport connection has been lost, and will emit <a href="qobexclientsession.html#requestFinished">requestFinished</a>() with <tt>error</tt> set to <tt>true</tt>, and <a href="qobexclientsession.html#error">error</a>() will return <a href="qobexclientsession.html#Error-enum">ConnectionError</a>.</p>
-<p>This is particularly an issue for socket classes such as <a href="qtcpsocket.html">QTcpSocket</a> that do not emit <a href="qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when a <tt>disconnected()</tt> signal is emitted. In these cases, QObexClientSession will not know that the transport has been disconnected. To avoid this, you can make the socket emit <a href="qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when it is disconnected:</p>
-<pre><span class="comment">    // make the socket emit aboutToClose() when disconnected() is emitted</span>
-    QObject::connect(socket, SIGNAL(disconnected()), socket, SIGNAL(aboutToClose()));</pre>
-<p>Or, if the socket can be discarded as soon as it is disconnected:</p>
-<pre><span class="comment">    // delete the socket when the transport is disconnected</span>
-    QObject::connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));</pre>
-<p>See also <a href="qobexserversession.html">QObexServerSession</a>.</p>
+<p>See also <a href="qobexserversession.html">QObexServerSession</a> and <a href="obex-simpleobexdemo.html">Simple OBEX Demo</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Error-enum"></a>enum QObexClientSession::Error</h3>
@@ -303,8 +294,8 @@
 <p>See also <a href="qobexclientsession.html#done">done</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

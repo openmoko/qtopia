@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QContentFilter Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QContentFilter Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QContentFilter class defines criteria for defining a sub-set of all available content. <a href="#details">More...</a></p>
 <pre>    #include &lt;QContentFilter&gt;</pre><ul>
 <li><a href="qcontentfilter-members.html">List of all members, including inherited members</a></li>
@@ -111,10 +112,10 @@
 <a name="properties"></a>
 <h3>Properties</h3>
 <p><a href="qcontentfilter.html#FilterType-enum">Synthetic</a> filters filter content based on their <a href="qcontent.html#property">properties</a>. The argument for a synthetic filter is composed of the property group and key concatenated with the expected value in the form <tt>[group]/[key]/[value]</tt>, if the property does not belong to a group the argument should be of the form <tt>none/[key]/[value]</tt>. If the property belongs to the <a href="qcontent.html#Property-enum">QContent::Property</a> enumeration the filter may be constructed from that enumeration and the expected value.</p>
-<p>Filter for content with the author Trolltech:</p>
-<pre>    QContentFilter author( QContentFilter::Synthetic, &quot;none/Author/Trolltech&quot; );</pre>
+<p>Filter for content with the author &quot;SomeAuthor&quot;:</p>
+<pre>    QContentFilter author( QContentFilter::Synthetic, &quot;none/Author/SomeAuthor&quot; );</pre>
 <p>The same filter using the <a href="qcontent.html#Property-enum">QContent::Property</a> enumeration:</p>
-<pre>    QContentFilter author( QContent::Author, &quot;Trolltech&quot; );</pre>
+<pre>    QContentFilter author( QContent::Author, &quot;SomeAuthor&quot; );</pre>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="FilterType-enum"></a>enum QContentFilter::FilterType</h3>
@@ -227,8 +228,8 @@
 <p>See also <a href="qcontentfilter.html#negated">negated</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,6 +2,8 @@
 
 case $1 in
 start)
+    mkdir -p /var/lib/dbus
+    dbus-uuidgen --ensure=/var/lib/dbus/machine-id
     dbus-daemon --system
     ;;
 stop)

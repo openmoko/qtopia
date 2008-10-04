@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaApplications
+Context=Network
+[Desktop Entry]
+Comment[]=Start USB storage
+Exec=usbnet-stop.sh
+Icon=devtools/devtools
+Type=ConsoleApplication
+Name[]=Start USB storage

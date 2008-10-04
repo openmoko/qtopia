@@ -3,7 +3,8 @@ File=QtopiaServices
 Context=qpe
 [Service]
 Actions = "multitask();showRunningTasks()"
-Name[]=System
+Name[]=Task Manager
+Icon=home
 [multitask()]
 Icon=home
 Name[]="Multitask"

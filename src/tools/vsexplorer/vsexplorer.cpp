@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -92,6 +90,8 @@ public:
     void printError();
     void printHelp();
     void ls();
+    void dump();
+    void pwdCmd();
     void ls(const QByteArray &abs, bool);
     void subscribe();
     void unsubscribe();
@@ -219,8 +219,8 @@ void VSExplorer::printHelp()
 {
     fprintf(stdout, "help/?: Print this message\n");
     fprintf(stdout, "quit: Exit VSExplorer\n");
-    fprintf(stdout, "pwd: Print current working directory\n");
     fprintf(stdout, "ls: List contents of path\n");
+    fprintf(stdout, "pwd: Print current working directory\n");
     fprintf(stdout, "subscribe: Subscribe to path\n");
     fprintf(stdout, "unsubscribe: Unsubscribe from path\n");
     fprintf(stdout, "suppress: Toggle suppression of publish messages\n");
@@ -429,6 +429,10 @@ void VSExplorer::processLine(const QString &line)
     const QString & cmd = cmds.at(0);
     if(cmd == "ls" && 1 == cmds.count()) {
         ls();
+    } else if(cmd == "dump") {
+        dump();
+    } else if(cmd == "pwd") {
+        pwdCmd();
     } else if(cmd == "ls" && 2 <= cmds.count()) {
         QStringList newCmds = cmds;
         newCmds.removeFirst();
@@ -775,6 +779,19 @@ void dodump(QValueSpaceItem * item)
             item->itemName().toAscii().constData(),
             variantToString(var).toAscii().constData(),
             var.typeName());
+}
+
+void VSExplorer::dump()
+{
+    QValueSpaceItem item(pwd);
+    dodump(&item);
+    fflush(stdout);
+}
+
+void VSExplorer::pwdCmd()
+{
+    fprintf(stdout, "Working directory: %s\n", pwd.itemName().toLatin1().constData());
+    fflush(stdout);
 }
 
 

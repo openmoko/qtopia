@@ -1,5 +1,5 @@
 /**********************************************************************
-** Author: Trolltech
+** Author: Qt Extended
 **
 ** Licensees holding a valid license agreement for the use of the
 ** Helix DNA code base may use this file in accordance with that license.
@@ -7,7 +7,7 @@
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
+** Contact info@qtextended.org if any conditions of this licensing are
 ** not clear to you.
 **
 **/
@@ -46,7 +46,7 @@ HXCreateInstance(IUnknown** ppExFileSystemObj)
 }
 
 /****************************************************************************
- *  QtopiaFileSystem static variables                    
+ *  QtopiaFileSystem static variables
  *
  *  These variables are passed to the Helix core to provide information about
  *  this plug-in. They are required to be static in order to remain valid
@@ -59,7 +59,7 @@ const char* QtopiaFileSystem::zm_pShortName   = "pn-qtopia";
 const char* QtopiaFileSystem::zm_pProtocol    = "qtopia";
 
 /****************************************************************************
- *  QtopiaFileSystem::QtopiaFileSystem               
+ *  QtopiaFileSystem::QtopiaFileSystem
  *
  *  Constructor
  */
@@ -71,7 +71,7 @@ QtopiaFileSystem::QtopiaFileSystem(void)
 }
 
 /****************************************************************************
- *  QtopiaFileSystem::~QtopiaFileSystem              
+ *  QtopiaFileSystem::~QtopiaFileSystem
  *
  *  Destructor. Be sure to release all outstanding references to objects.
  */
@@ -83,7 +83,7 @@ QtopiaFileSystem::~QtopiaFileSystem(void)
 // IHXFileSystemObject Interface Methods
 
 /****************************************************************************
- *  IHXFileSystemObject::GetFileSystemInfo                  
+ *  IHXFileSystemObject::GetFileSystemInfo
  *
  *  This routine returns crucial information required to associate this
  *  plug-in with a given protocol. This information tells the core which
@@ -105,14 +105,14 @@ QtopiaFileSystem::GetFileSystemInfo
 }
 
 /****************************************************************************
- *  IHXFileSystemObject::InitFileSystem                     
+ *  IHXFileSystemObject::InitFileSystem
  *
  *  This routine performs any additional initialization steps required for
  *  the file system.  It is called prior to the CreatFile() request. Any
  *  options provided usually refer to mounting options related to the server,
- *  such as base path or authentication preferences. 
+ *  such as base path or authentication preferences.
  */
-STDMETHODIMP 
+STDMETHODIMP
 QtopiaFileSystem::InitFileSystem(IHXValues*  options )
 {
 	// Retrieve the platform's base path, if specified
@@ -128,12 +128,12 @@ QtopiaFileSystem::InitFileSystem(IHXValues*  options )
 			pPathBuffer->Release();
 		}
 	}
-	
+
 	return HXR_OK;
 }
 
 /****************************************************************************
- *  IHXFileSystemObject::CreateFile                        
+ *  IHXFileSystemObject::CreateFile
  *
  *  This routine creates a new File Object which handles all of the file I/O
  *  functionality of this class. This File Object is eventually handed off
@@ -169,7 +169,7 @@ QtopiaFileSystem::CreateFile(IUnknown** ppFileObject)
 }
 
 /****************************************************************************
- *  IHXFileSystemObject::CreateDir                          
+ *  IHXFileSystemObject::CreateDir
  *
  *  This routine is analagous to CreatFile, except directories instead of
  *  files are of concern. It is not implemented in this example.
@@ -212,7 +212,7 @@ QtopiaFileSystem::GetPluginInfo
  *  IHXPlugin::InitPlugin                                   ref:  hxplugn.h
  *
  *  This routine performs initialization steps such as determining if
- *  required interfaces are available. It is called when the Helix core 
+ *  required interfaces are available. It is called when the Helix core
  *  application is launched, and whenever an URL with a protocol associated
  *  with this plug-in is opened.
  */
@@ -221,16 +221,16 @@ QtopiaFileSystem::InitPlugin(IUnknown* pHXCore)
 {
 	/*
 	 * Store a reference to the IHXCommonClassFactory interface which is
-	 * used to create commonly used Helix objects such as IHXPacket, 
+	 * used to create commonly used Helix objects such as IHXPacket,
 	 * IHXValues, and IHXBuffers.
 	 */
-	if (pHXCore->QueryInterface(IID_IHXCommonClassFactory, 
+	if (pHXCore->QueryInterface(IID_IHXCommonClassFactory,
                                            (void**)&m_pClassFactory) != HXR_OK)
 	{
 		return HXR_NOINTERFACE;
 	}
 
-	/* 
+	/*
 	 * Note that QueryInterface() takes care of adding a reference to the
 	 * interface for us. You are however responsible for releasing the
 	 * reference to the interface when you are done using it by calling

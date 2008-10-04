@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">List of All Members for QTaskModel</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">List of All Members for QTaskModel</h1>
 <p>This is the complete list of members for <a href="qtaskmodel.html">QTaskModel</a>, including inherited members.</p>
 <p><table width="100%" border="0" cellpadding="0" cellspacing="0">
 <tr><td width="45%" valign="top"><ul>
@@ -19,6 +19,7 @@
 <li><div class="fn"/><a href="qtaskmodel.html#QTaskModel">QTaskModel</a> ( QObject * )</li>
 <li><div class="fn"/><a href="qtaskmodel.html#dtor.QTaskModel">~QTaskModel</a> ()</li>
 <li><div class="fn"/><a href="qpimmodel.html#abortSyncTransaction">abortSyncTransaction</a> () : bool</li>
+<li><div class="fn"/><a href="qpimmodel.html#abortTransaction">abortTransaction</a> () : bool</li>
 <li><div class="fn"/><a href="qtaskmodel.html#addRecord">addRecord</a> ( const QByteArray &amp;, const QPimSource &amp;, const QString &amp; ) : QUniqueId</li>
 <li><div class="fn"/><a href="qtaskmodel.html#addTask">addTask</a> ( const QTask &amp;, const QPimSource &amp; ) : QUniqueId</li>
 <li><div class="fn"/><a href="qpimmodel.html#added">added</a> ( const QDateTime &amp; ) const : QList&lt;QUniqueId&gt;</li>
@@ -41,6 +42,7 @@
 <li><div class="fn"/><a href="qabstractitemmodel.html#columnsInserted">columnsInserted</a> ( const QModelIndex &amp;, int, int )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#columnsRemoved">columnsRemoved</a> ( const QModelIndex &amp;, int, int )</li>
 <li><div class="fn"/><a href="qpimmodel.html#commitSyncTransaction">commitSyncTransaction</a> () : bool</li>
+<li><div class="fn"/><a href="qpimmodel.html#commitTransaction">commitTransaction</a> () : bool</li>
 <li><div class="fn"/><a href="qobject.html#connect">connect</a> ( const QObject *, const char *, const QObject *, const char *, Qt::ConnectionType )</li>
 <li><div class="fn"/><a href="qobject.html#connect-2">connect</a> ( const QObject *, const char *, const char *, Qt::ConnectionType ) const</li>
 <li><div class="fn"/><a href="qobject.html#connectNotify">connectNotify</a> ( const char * )</li>
@@ -94,8 +96,8 @@
 <li><div class="fn"/><a href="qpimmodel.html#id-2">id</a> ( int ) const : QUniqueId</li>
 <li><div class="fn"/><a href="qtaskmodel.html#identifierField">identifierField</a> ( const QString &amp; ) : Field</li>
 <li><div class="fn"/><a href="qpimmodel.html#index">index</a> ( const QUniqueId &amp; ) const : QModelIndex</li>
-<li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const</li>
 </ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#insertColumn">insertColumn</a> ( int, const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#insertColumns">insertColumns</a> ( int, int, const QModelIndex &amp; )</li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#insertRow">insertRow</a> ( int, const QModelIndex &amp; )</li>
@@ -158,6 +160,7 @@
 <li><div class="fn"/><a href="qabstractitemmodel.html#span">span</a> ( const QModelIndex &amp; ) const</li>
 <li><div class="fn"/><a href="qpimmodel.html#startSyncTransaction">startSyncTransaction</a> ( const QDateTime &amp; ) : bool</li>
 <li><div class="fn"/><a href="qobject.html#startTimer">startTimer</a> ( int )</li>
+<li><div class="fn"/><a href="qpimmodel.html#startTransaction">startTransaction</a> () : bool</li>
 <li><div class="fn"/><a href="qobject.html#staticMetaObject-var">staticMetaObject</a> : </li>
 <li><div class="fn"/><a href="qobject.html#staticQtMetaObject-var">staticQtMetaObject</a> : </li>
 <li><div class="fn"/><a href="qabstractitemmodel.html#submit">submit</a> ()</li>
@@ -180,8 +183,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -10,6 +10,8 @@ lidsconf -A -s ${BIN} -o /proc -j READONLY
 lidsconf -A -s ${BIN} -o /proc/lids -j DENY
 lidsconf -A -s ${BIN} -o /etc/ld.so.cache -j READONLY
 
+lidsconf -A -s ${BIN} -o /dev/fb -j READONLY
+
 lidsconf -A -s ${BIN} -o /tmp -j READONLY
 
 touch ${QCOP_FILE}

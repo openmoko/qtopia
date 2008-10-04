@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "helppreprocessor.h"
@@ -23,12 +21,16 @@
 #include <QFile>
 #include <QSettings>
 #include <QTextCodec>
+#include <QContentSet>
 #include <QTextStream>
 #include <QStyle>
 
 #include <qdesktopwidget.h>
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
+
+#include <QValueSpaceItem>
+#include <QExpressionEvaluator>
 
 #include <QDebug>
 
@@ -66,9 +68,7 @@ HelpPreProcessor::HelpPreProcessor( const QString &file, int maxrecurs )
     replace["VPN"]="1";
 #endif
 
-    if (QApplication::style()->inherits("QThumbStyle"))
-        replace["FINGER"]="1";
-    else if ( Qtopia::mousePreferred() )
+    if ( Qtopia::mousePreferred() )
         replace["TOUCH"]="1";
     else
         replace["KEYPAD"]="1";
@@ -113,8 +113,10 @@ QString HelpPreProcessor::parse(const QString& filename)
     QRegExp tagElse( "<!--#else\\s*-->" );
     QRegExp tagEndif( "<!--#endif\\s*-->" );
     QRegExp tagSet( "<!--#set\\s+var=\"([^\"]*)\"\\s*value=\"([^\"]*)\"\\s*-->" );
+    QRegExp tagSetVS( "<!--#set\\s+var=\"([^\"]*)\"\\s*valuespace=\"([^\"]*)\"\\s*value=\"([^\"]*)\"\\s*-->" );
     QRegExp tagEcho( "<!--#echo\\s+var=\"([^\"]*)\"\\s*-->" );
     QRegExp tagInclude( "<!--#include\\s+file=\"([^\"]*)\"\\s*-->" );
+    QRegExp tagExec( "<!--#exec\\s+cmd=\"([^\"]*)\"\\s*-->" );
 
     bool skip = false;
     int lnum=0;
@@ -131,9 +133,9 @@ QString HelpPreProcessor::parse(const QString& filename)
 
             while ( (offset = tagIf.indexIn( line, offset + matchLen )) != -1 ) {
                 matchLen = tagIf.matchedLength();
-                tests.push(tagIf.capturedTexts().at(1).split(QRegExp("\\s*\\|\\|\\s*\\$")));
+                tests.push(tagIf.cap(1).split(QRegExp("\\s*\\|\\|\\s*\\$")));
                 inverts.push(false);
-                QStringList t = tagIf.capturedTexts().at(1).split(QRegExp("\\s*\\|\\|\\s*\\$"));
+                QStringList t = tagIf.cap(1).split(QRegExp("\\s*\\|\\|\\s*\\$"));
                 //text+="TEST("+t.join(" or ")+")";
             }
 
@@ -172,22 +174,65 @@ QString HelpPreProcessor::parse(const QString& filename)
             if ( !skip ) {
                 offset = 0;
                 matchLen = 0;
+                while ( (offset = tagSetVS.indexIn( line, offset + matchLen )) != -1 ) {
+                    matchLen = tagSetVS.matchedLength();
+                    QString key = tagSetVS.cap(1);
+                    QString valuespace = tagSetVS.cap(2);
+                    QString value = tagSetVS.cap(3);
 
+                    QRegExp exists("exists\\(@([^\\)]*)\\)");
+                    if (exists.indexIn(valuespace) != -1) {
+                        QByteArray vsKey = exists.cap(1).toUtf8();
+                        int lastSlash = vsKey.lastIndexOf('/');
+                        if (lastSlash >= 1) {
+                            const QByteArray base = vsKey.mid(1, lastSlash - 1);
+                            const QByteArray item = vsKey.mid(lastSlash + 1);
+
+                            QValueSpaceItem vs(base);
+                            if (vs.subPaths().contains(item))
+                                replace[key] = "1";
+                            else
+                                replace[key] = "";
+                        }
+                    } else {
+                        QExpressionEvaluator expression;
+                        expression.setExpression(valuespace.toUtf8());
+                        if (expression.isValid()) {
+                            if (expression.evaluate()) {
+                                replace[key] = expression.result().toString();
+                            } else {
+                                qWarning("%s:%d:Run-time error when evaluating expression",
+                                            filename.toLatin1().data(), lnum);
+                            }
+                        } else {
+                            qWarning("%s:%d:Syntax or semantic error in expression",
+                                        filename.toLatin1().data(), lnum);
+                        }
+                    }
+                }
+
+                offset = 0;
+                matchLen = 0;
                 while ( (offset = tagSet.indexIn( line, offset + matchLen )) != -1 ) {
                     matchLen = tagSet.matchedLength();
-                    QString key = tagSet.capturedTexts().at(1);
-                    QString value = tagSet.capturedTexts().at(2);
+                    QString key = tagSet.cap(1);
+                    QString value = tagSet.cap(2);
                     replace[key] = value;
                 }
 
                 while ( (offset = tagEcho.indexIn( line )) != -1 ) {
-                    QString key = tagEcho.capturedTexts().at(1);
+                    QString key = tagEcho.cap(1);
                     line.replace( offset, tagEcho.matchedLength(), replace[key] );
+                }
+
+                while ( (offset = tagExec.indexIn( line )) != -1 ) {
+                    QString cmd = tagExec.cap(1);
+                    line.replace( offset, tagExec.matchedLength(), exec(cmd) );
                 }
 
                 if ( levels ) {
                     while ( (offset = tagInclude.indexIn( line )) != -1 ) {
-                        QString file = tagInclude.capturedTexts().at(1);
+                        QString file = tagInclude.cap(1);
                         // Recurse.
                         levels--;
                         line.replace( offset, tagInclude.matchedLength(), parse(file) );
@@ -200,5 +245,93 @@ QString HelpPreProcessor::parse(const QString& filename)
             text += line + "\n";
     } while (!ts.atEnd());
     return text;
+}
+
+QString HelpPreProcessor::exec(const QString& cmd)
+{
+    // For security reasons, we do NOT execute arbitrary commands.
+    QStringList arg = cmd.split(" ");
+    if ( arg[0] == "qpe-list-content" ) {
+        QString ctype = arg[1];
+        ctype[0] = ctype[0].toUpper();
+        return listContent(ctype);
+    } else if ( arg[0] == "qpe-list-help-pages" ) {
+        QString r;
+        QString filter = arg[1];
+        filter.remove(".."); filter.remove("/"); // security
+        QRegExp title("<title>(.*)</title>");
+        foreach (QString path, Qtopia::helpPaths()) {
+            QDir dir(path,filter);
+            for (int i=0; i<(int)dir.count(); ++i) {
+                QString file = dir[i];
+                QFile f(path+"/"+file);
+                if (f.open(QIODevice::ReadOnly)) {
+                    QString head;
+                    while (!f.atEnd()) {
+                        QString l = f.readLine();
+                        head += l;
+                        if ( l.indexOf("</title>") >= 0 )
+                            break;
+                        if ( l.indexOf("</head>") >= 0 )
+                            break;
+                    }
+                    if (title.indexIn(head) >= 0)
+                        r += "<li><a href=\""+file+"\">"+title.cap(1)+"</a>\n";
+                }
+            }
+        }
+        return r;
+    }
+    return "";
+}
+
+QString HelpPreProcessor::listContent( const QString& name )
+{
+    QString s;
+    int size = QApplication::style()->pixelMetric(QStyle::PM_ListViewIconSize);
+    QContentSet lnkset( QContentFilter::Category, name );
+    typedef QMap<QString,QContent> OrderingMap;
+    OrderingMap ordered;
+    QContentList linkList = lnkset.items();
+    foreach (const QContent &lnk, linkList) {
+        ordered[Qtopia::dehyphenate( lnk.name() )] = lnk;
+    }
+    for( OrderingMap::ConstIterator mit=ordered.begin(); mit!=ordered.end(); ++mit ) {
+        QString name = mit.key();
+        const QContent &lnk = *mit;
+        QString icon = ":image/" + lnk.iconName();
+        QString helpFile = lnk.property("File","Help");
+        if (helpFile.isEmpty())
+            helpFile = lnk.executableName() + ".html";
+        QStringList helpPath = Qtopia::helpPaths();
+        QStringList::ConstIterator it;
+        const char* prefix[]={"","qpe-",0};
+        int pref=0;
+        for (; prefix[pref]; ++pref) {
+            for (it = helpPath.begin(); it != helpPath.end() && !QFile::exists( *it + "/" + prefix[pref] + helpFile ); ++it)
+                ;
+            if (it != helpPath.end())
+                break;
+        }
+        if (it != helpPath.end()) {
+            // SVG/PIC images are forced to load at a particular size (see above)
+            // Force all app icons to be this size (to prevent them from being
+            // different sizes, not all app icons are SVG/PIC).
+            s += QString("<br><a href=%1%2><img src=%3 width=%4 height=%5> %6</a>\n")
+                .arg( prefix[pref] )
+                .arg( helpFile )
+                .arg( icon )
+                .arg( size )
+                .arg( size )
+                .arg( name );
+#ifdef DEBUG
+        } else {
+            s += QString("<br>No <tt>%1</tt> for %2\n")
+                .arg( helpFile )
+                .arg( name );
+#endif
+        }
+    }
+    return s;
 }
 

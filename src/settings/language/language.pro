@@ -1,6 +1,8 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=language
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+}
 
 FORMS	= languagesettingsbase.ui
 HEADERS		= languagesettings.h langmodel.h

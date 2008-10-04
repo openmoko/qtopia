@@ -1,6 +1,8 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=serverwidgets
 CONFIG+=qtopia_main
+}
 
 HEADERS		= serverwidgets.h
 SOURCES		= serverwidgets.cpp main.cpp

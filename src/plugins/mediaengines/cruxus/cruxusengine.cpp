@@ -1,36 +1,33 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qmap.h>
-#include <qstringlist.h>
+#include <QMap>
+#include <QStringList>
 
-#include <qpluginmanager.h>
-#include <qmediacodecplugin.h>
-#include <qmediaengineinformation.h>
+#include <QPluginManager>
+#include <QMediaCodecPlugin>
+#include <QMediaEngineInformation>
 
 #include "cruxusurisessionbuilder.h"
 #include "cruxussimplesession.h"
 
 #include "cruxusengine.h"
-
 
 namespace cruxus
 {
@@ -87,10 +84,9 @@ class CruxusEnginePrivate
 {
 public:
     QPluginManager*             pluginManager;
-    MediaCodecPluginMap         pluginCodecs;
-    MediaCodecPluginMap         pluginExtensionMapping;
     EngineInformation*          engineInfo;
     QMediaSessionBuilderList    sessionBuilders;
+    QList<SimpleSession*>       sessions;
 };
 // }}}
 
@@ -104,46 +100,35 @@ public:
 Engine::Engine():
     d(new CruxusEnginePrivate)
 {
+    d->pluginManager = new QPluginManager("codecs", this);
 }
 
 Engine::~Engine()
 {
-    delete d->pluginManager;
     delete d->engineInfo;
     delete d;
 }
 
 void Engine::initialize()
 {
-    QStringList         mimeTypes;
-
-    d->pluginManager = new QPluginManager("codecs", this);
+    MediaCodecPluginMap mimeTypeMapping;
 
     // Find plugins
-    foreach (QString const& pluginName, d->pluginManager->list())
-    {
+    foreach (QString const& pluginName, d->pluginManager->list()) {
         QMediaCodecPlugin*  plugin;
         QObject*            instance = d->pluginManager->instance(pluginName);
 
-        if ((plugin = qobject_cast<QMediaCodecPlugin*>(instance)) != 0)
-        {
-            // Mime types
-            mimeTypes += plugin->mimeTypes();
+        if ((plugin = qobject_cast<QMediaCodecPlugin*>(instance)) != 0) {
 
-            // Extensions
-            foreach (QString const& extension, plugin->fileExtensions())
-            {
-                d->pluginExtensionMapping.insert(extension, plugin);
-            }
+            foreach (QString const& mimeType, plugin->mimeTypes())
+                mimeTypeMapping.insert(mimeType, plugin);
         }
         else
             delete instance;    // unload unwanted
     }
 
-    // Register Builders
-    d->sessionBuilders.push_back(new UriSessionBuilder(this,
-                                                       mimeTypes,
-                                                       d->pluginExtensionMapping));
+    // Add the builder
+    d->sessionBuilders.push_back(new UriSessionBuilder(this, mimeTypeMapping));
 
     // Create our info object
     d->engineInfo = new EngineInformation(d->sessionBuilders);
@@ -160,16 +145,14 @@ void Engine::stop()
 
 void Engine::suspend()
 {
-    for(int i = 0; i < s.size(); ++i) {
-        s.at(i)->suspend();
-    }
+    for (int i = 0; i < d->sessions.size(); ++i)
+        d->sessions.at(i)->suspend();
 }
 
 void Engine::resume()
 {
-    for(int i = 0; i < s.size(); ++i) {
-        s.at(i)->resume();
-    }
+    for (int i = 0; i < d->sessions.size(); ++i)
+        d->sessions.at(i)->resume();
 }
 
 QMediaEngineInformation const* Engine::engineInformation()
@@ -179,15 +162,14 @@ QMediaEngineInformation const* Engine::engineInformation()
 
 void Engine::registerSession(QMediaServerSession* session)
 {
-    s.append(static_cast<SimpleSession*>(session));
+    d->sessions.append(static_cast<SimpleSession*>(session));
 }
 
 void Engine::unregisterSession(QMediaServerSession* session)
 {
-    for(int i = 0; i < s.size(); ++i) {
-        if(s.at(i) == (static_cast<SimpleSession*>(session))) {
-            s.removeAt(i);
-        }
+    for (int i = 0; i < d->sessions.size(); ++i) {
+        if (d->sessions.at(i) == static_cast<SimpleSession*>(session))
+            d->sessions.removeAt(i);
     }
 }
 // }}}

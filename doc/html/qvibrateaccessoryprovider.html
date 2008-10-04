@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QVibrateAccessoryProvider Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QVibrateAccessoryProvider Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QVibrateAccessoryProvider class provides an interface for vibrate devices to integrate into Qtopia. <a href="#details">More...</a></p>
 <pre>    #include &lt;QVibrateAccessoryProvider&gt;</pre><p>Inherits <a href="qvibrateaccessory.html">QVibrateAccessory</a>.</p>
 <p>Inherited by <a href="qmodemvibrateaccessory.html">QModemVibrateAccessory</a>.</p>
@@ -72,19 +73,19 @@
 <h3 class="fn"><a name="dtor.QVibrateAccessoryProvider"></a>QVibrateAccessoryProvider::~QVibrateAccessoryProvider ()</h3>
 <p>Destroys the vibrate device provider.</p>
 <h3 class="fn"><a name="setSupportsVibrateNow"></a>void QVibrateAccessoryProvider::setSupportsVibrateNow ( bool <i>value</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
-<p>Indicate whether this vibrate accessory supports <a href="qvibrateaccessory.html#vibrateNow">vibrateNow</a>() with <i>value</i>. This is typically called from the constructor of subclass implementations.</p>
+<p>Indicate whether this vibrate provider supports <a href="qvibrateaccessory.html#vibrateNow">vibrateNow</a>() with <i>value</i>. This is typically called from the constructor of subclass implementations.</p>
 <h3 class="fn"><a name="setSupportsVibrateOnRing"></a>void QVibrateAccessoryProvider::setSupportsVibrateOnRing ( bool <i>value</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Indicate whether this vibrate accessory supports <a href="qvibrateaccessory.html#vibrateOnRing">vibrateOnRing</a>() with <i>value</i>. This is typically called from the constructor of subclass implementations.</p>
 <h3 class="fn"><a name="setVibrateNow"></a>void QVibrateAccessoryProvider::setVibrateNow ( const bool <i>value</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
-<p>Turns on the vibration device if <i>value</i> is true; otherwise it is turned off. The default implementation updates the vibrateNow state as seen by <a href="qvibrateaccessory.html#vibrateNow">vibrateNow</a>() on the client. Vibrate accessory implementations should override this function to provide device-specific functionality and then call this implementation to update the client's view of the vibrateNow state.</p>
+<p>Turns on the vibration device if <i>value</i> is true; otherwise it is turned off. The default implementation updates the vibrateNow state as seen by <a href="qvibrateaccessory.html#vibrateNow">vibrateNow</a>() on the client. Vibrate provider implementations should override this function to provide device-specific functionality and then call this implementation to update the client's view of the vibrateNow state.</p>
 <p>Reimplemented from <a href="qvibrateaccessory.html#setVibrateNow">QVibrateAccessory</a>.</p>
 <h3 class="fn"><a name="setVibrateOnRing"></a>void QVibrateAccessoryProvider::setVibrateOnRing ( const bool <i>value</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
-<p>Sets the vibrateOnRing attribute to <i>value</i>. The default implementation updates the vibrateOnRing attribute as seen by <a href="qvibrateaccessory.html#vibrateOnRing">vibrateOnRing</a>() on the client. Vibrate accessory implementations should override this function to provide device-specific functionality and then call this implementation to update the client's view of the vibrateOnRing value.</p>
+<p>Sets the vibrateOnRing attribute to <i>value</i>. The default implementation updates the vibrateOnRing attribute as seen by <a href="qvibrateaccessory.html#vibrateOnRing">vibrateOnRing</a>() on the client. Vibrate provider implementations should override this function to provide device-specific functionality and then call this implementation to update the client's view of the vibrateOnRing value.</p>
 <p>Reimplemented from <a href="qvibrateaccessory.html#setVibrateOnRing">QVibrateAccessory</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -42,9 +40,7 @@
 #include <QCheckBox>
 #include <QtopiaServiceRequest>
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <QSoftMenuBar>
-#endif
 
 class BSciRightsModelPrivate
 {
@@ -73,6 +69,7 @@ public:
 
 /*!
     \class BSciRightsModel
+    \inpublicgroup QtDrmModule
     \brief The BSciRightsModel class provides a model for a representing a list of rights objects.
 
     The OMA DRM rights model is QAbstractItemModel wrapper around a flat list of rights objects.  Rights objects
@@ -556,6 +553,7 @@ void BSciRightsModel::remove( qint32 index )
 
 /*!
     \class BSciRightsView
+    \inpublicgroup QtDrmModule
     \brief The BSciRightsView class provides an item view for navigating a QBSciRightsModel.
 
     The OMA DRM rights view is an item view specialized for browsing an OMA DRM rights model.  In it's default display
@@ -573,7 +571,6 @@ void BSciRightsModel::remove( qint32 index )
 BSciRightsView::BSciRightsView( QWidget *parent )
     : QTreeView( parent )
 {
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QMenu *menu = QSoftMenuBar::menuFor( this );
 
     viewAction   = menu->addAction( QIcon( ":icon/view" ), tr( "View license" )   );
@@ -584,7 +581,6 @@ BSciRightsView::BSciRightsView( QWidget *parent )
 
     connect( viewAction  , SIGNAL(triggered()), this, SLOT(selectCurrent()) );
     connect( deleteAction, SIGNAL(triggered()), this, SLOT(deleteCurrent()) );
-#endif
 
     connect( this, SIGNAL(activated(QModelIndex)), this, SLOT(licenseSelected(QModelIndex)) );
 
@@ -627,7 +623,6 @@ void BSciRightsView::currentChanged( const QModelIndex &current, const QModelInd
 {
     QTreeView::currentChanged( current, previous );
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     bool visible = canSelect( current );
 
     if( viewAction->isVisible() && !visible || !viewAction->isVisible() && visible )
@@ -638,12 +633,8 @@ void BSciRightsView::currentChanged( const QModelIndex &current, const QModelInd
     if( deleteAction->isVisible() && !visible || !deleteAction->isVisible() && visible )
         deleteAction->setVisible( visible );
 
-#endif
-
-
 }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 /*!
     \reimp
 */
@@ -727,8 +718,6 @@ void BSciRightsView::deleteCurrent()
             static_cast< BSciRightsModel * >( model() )->remove( currentIndex() );
     }
 }
-
-#endif
 
 /*!
     Indicates whether an index can be selected to view it's children.

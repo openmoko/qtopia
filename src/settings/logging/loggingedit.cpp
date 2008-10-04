@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2006-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "loggingedit.h"
@@ -24,12 +22,78 @@
 #include <qsoftmenubar.h>
 #include <qtranslatablesettings.h>
 #include <QTreeWidget>
+#include <QItemDelegate>
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QWhatsThis>
 #include <QHelpEvent>
 #include <QMenu>
+#include <QtopiaIpcEnvelope>
 
+class AllCheckDelegate : public QItemDelegate {
+public:
+    AllCheckDelegate(QObject *parent) : QItemDelegate(parent) {}
+    bool editorEvent(QEvent *event,
+                    QAbstractItemModel *model,
+                    const QStyleOptionViewItem &option,
+                    const QModelIndex &index)
+    {
+        // Avoid the requirement to check the checkbox - whole area works.
+        // XXX should this be a style option supported by Qt?
+        Qt::ItemFlags flags = model->flags(index);
+        if (!(flags & Qt::ItemIsUserCheckable) || !(option.state & QStyle::State_Enabled)
+            || !(flags & Qt::ItemIsEnabled))
+            return false;
+        QVariant value = index.data(Qt::CheckStateRole);
+        if (!value.isValid())
+            return false;
+        if (event->type() == QEvent::MouseButtonRelease) {
+            Qt::CheckState state = (static_cast<Qt::CheckState>(value.toInt()) == Qt::Checked
+                            ? Qt::Unchecked : Qt::Checked);
+            return model->setData(index, state, Qt::CheckStateRole);
+        }
+        return QItemDelegate::editorEvent(event,model,option,index);
+    }
+};
+
+
+QWhatThisInMenu::QWhatThisInMenu(QWidget* parent)
+{
+    QMenu* menu = QSoftMenuBar::menuFor( parent );
+    action = QWhatsThis::createAction(parent);
+    action->setShortcut(QKeySequence()); // XXX shortcut not appropriate for Qtopia
+    connect( action, SIGNAL(triggered()), this, SLOT(showWhatsThis()) );
+    connect( menu, SIGNAL(aboutToShow()), this, SLOT(findWhatsThis()) );
+    menu->addAction( action );
+}
+
+void QWhatThisInMenu::findWhatsThis()
+{
+    action->setVisible(sendWhatsThisEvent(true));
+}
+
+void QWhatThisInMenu::showWhatsThis()
+{
+    sendWhatsThisEvent(false);
+}
+
+bool QWhatThisInMenu::sendWhatsThisEvent(bool query) // internal
+{
+    QWidget* whatswhat = QApplication::focusWidget();
+    if ( whatswhat ) {
+        QPoint p = whatswhat->inputMethodQuery(Qt::ImMicroFocus).toRect().center();
+        QPoint gp = whatswhat->mapToGlobal(p);
+        QWidget *whatsreallywhat = QApplication::widgetAt(gp);
+        if ( whatsreallywhat ) {
+            whatswhat = whatsreallywhat;
+            p = whatsreallywhat->mapFromGlobal(gp);
+        }
+        QHelpEvent e(query ? QEvent::QueryWhatsThis : QEvent::WhatsThis, p, gp);
+        if (QApplication::sendEvent(whatswhat, &e))
+            return e.isAccepted();
+    }
+    return false;
+}
 
 LoggingEdit::LoggingEdit( QWidget* parent, Qt::WFlags fl )
 :   QDialog( parent, fl )
@@ -40,26 +104,12 @@ LoggingEdit::LoggingEdit( QWidget* parent, Qt::WFlags fl )
     vbLayout->setMargin(0);
     vbLayout->setSpacing(0);
 
-    QMenu* menu = QSoftMenuBar::menuFor( this );
-
-    // This implementation is a generic mechanism for adding a What's This?
-    // menu item to the softmenubar menu.
-    //
-    // This is a prototype for a mechanism to be put into a Qtopia library,
-    // potentially Qtopia Core or Qt proper.
-    //
-    // See also LoggingEdit::showWhatsThis below.
-    //
-    QAction *aWhatsThis = QWhatsThis::createAction(this);
-    QAction *qtopiaWhatsThis = new QAction(aWhatsThis->icon(),aWhatsThis->text(),this);
-    connect( qtopiaWhatsThis, SIGNAL(triggered()), this, SLOT(showWhatsThis()) );
-    menu->addAction( qtopiaWhatsThis );
-    delete aWhatsThis;
+    new QWhatThisInMenu(this);
 
     // Using a tree since when the number of log streams gets large, we
     // should put them in an hierarchy.
     list = new QTreeWidget;
-    connect( list, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(itemClicked(QTreeWidgetItem*)) );
+    list->setItemDelegate(new AllCheckDelegate(list));
 
     list->setRootIsDecorated(false);
     list->setColumnCount(1);
@@ -99,7 +149,9 @@ LoggingEdit::LoggingEdit( QWidget* parent, Qt::WFlags fl )
             if (!qtopiaLogOptional(group.toLatin1())) {
                 i->setFlags(i->flags() & ~Qt::ItemIsEnabled);
             }
-            i->setWhatsThis(0,settings.value("Help").toString());
+            QString helptext = settings.value("Help").toString();
+            if (!helptext.isEmpty())
+                i->setWhatsThis(0,helptext);
             item.insert(group,i);
         }
         settings.endGroup();
@@ -112,31 +164,6 @@ LoggingEdit::LoggingEdit( QWidget* parent, Qt::WFlags fl )
 
 LoggingEdit::~LoggingEdit()
 {
-}
-
-void LoggingEdit::showWhatsThis()
-{
-    // This implementation is a generic mechanism for finding the widget
-    // and the point of interest within that widget for which a QHelpEvent
-    // can be sent (and send it).
-    //
-    // This is a prototype for a mechanism to be put into a Qtopia library,
-    // potentially Qtopia Core or Qt proper.
-    //
-    // See also qtopiaWhatsThis above.
-    //
-    QWidget* whatswhat = QApplication::focusWidget();
-    if ( whatswhat ) {
-        QPoint p = whatswhat->inputMethodQuery(Qt::ImMicroFocus).toRect().center();
-        QPoint gp = whatswhat->mapToGlobal(p);
-        QWidget *whatsreallywhat = QApplication::widgetAt(gp);
-        if ( whatsreallywhat ) {
-            whatswhat = whatsreallywhat;
-            p = whatsreallywhat->mapFromGlobal(gp);
-        }
-        QHelpEvent e(QEvent::WhatsThis, p, gp);
-        QApplication::sendEvent(whatswhat, &e);
-    }
 }
 
 void LoggingEdit::accept()
@@ -152,12 +179,9 @@ void LoggingEdit::accept()
         }
     }
 
+    // Write out Log.conf
+    settings.sync();
+    // Tell all apps to reload Log.conf (has an immediate effect on qLog() calls)
+    {QtopiaIpcEnvelope e("QPE/System", "LogConfChanged()");}
     QDialog::accept();
 }
-
-void LoggingEdit::itemClicked( QTreeWidgetItem *clickedItem )
-{
-    if ( clickedItem->flags() & Qt::ItemIsEnabled )
-        clickedItem->setCheckState( 0, (clickedItem->checkState(0) == Qt::Checked ? Qt::Unchecked : Qt::Checked) );
-}
-

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -51,8 +49,6 @@ AtGsmCellCommands::AtGsmCellCommands( AtCommands * parent ) : QObject( parent )
     requestingBarringStatusType = QCallBarring::OutgoingAll;
     settingBarringPassword = false;
     callSettings = new QCallSettings();
-    requestingCallWaiting = false;
-    settingCallWaiting = false;
     requestingConnectedIdPresentation = false;
     callForwarding = new QCallForwarding( "modem" ); // no tr
     settingCallForwardingReason = -1;
@@ -84,12 +80,12 @@ AtGsmCellCommands::AtGsmCellCommands( AtCommands * parent ) : QObject( parent )
 
     // ---------------------------------------
 
-    connect( supplementaryServices, 
+    connect( supplementaryServices,
              SIGNAL(incomingNotification(QSupplementaryServices::IncomingNotification,
                      int, const QString &)),
-             this, 
+             this,
              SLOT(incomingSupplementaryServicesNotification(QSupplementaryServices::IncomingNotification,
-                     int, const QString &)) ); 
+                     int, const QString &)) );
     connect( supplementaryServices,
              SIGNAL(outgoingNotification
                      (QSupplementaryServices::OutgoingNotification, int)),
@@ -100,22 +96,22 @@ AtGsmCellCommands::AtGsmCellCommands( AtCommands * parent ) : QObject( parent )
              SIGNAL(unstructuredNotification(
                      QSupplementaryServices::UnstructuredAction, const QString &)),
              this,
-             SLOT(unstructuredSupplementaryServicesNotification(QSupplementaryServices::UnstructuredAction, 
+             SLOT(unstructuredSupplementaryServicesNotification(QSupplementaryServices::UnstructuredAction,
                      const QString &)) );
     connect( supplementaryServices, SIGNAL(unstructuredResult(QTelephony::Result)),
              this, SLOT(unstructuredSupplementaryServicesResult(QTelephony::Result)) );
 
-    connect( pinManager, SIGNAL(setLockStatusResult(const QString &, bool)),
-             this, SLOT(setPinLockStatusResult(const QString &, bool)) );
-    connect( pinManager, SIGNAL(lockStatus(const QString &, bool)),
-             this, SLOT(pinLockStatus(const QString &, bool)) );
-    connect( pinManager, SIGNAL(changePinResult(const QString &, bool)),
-             this, SLOT(changePinResult(const QString &, bool)) );
+    connect( pinManager, SIGNAL(setLockStatusResult(QString,bool)),
+             this, SLOT(setPinLockStatusResult(QString,bool)) );
+    connect( pinManager, SIGNAL(lockStatus(QString,bool)),
+             this, SLOT(pinLockStatus(QString,bool)) );
+    connect( pinManager, SIGNAL(changePinResult(QString,bool)),
+             this, SLOT(changePinResult(QString,bool)) );
 
     connect( callBarring, SIGNAL(setBarringStatusResult(QTelephony::Result)),
              this, SLOT(setBarringStatusResult(QTelephony::Result)) );
-    connect( callBarring, SIGNAL(barringStatus(QCallBarring::BarringType, QTelephony::CallClass)),
-             this, SLOT(barringStatus(QCallBarring::BarringType, QTelephony::CallClass)) );
+    connect( callBarring, SIGNAL(barringStatus(QCallBarring::BarringType,QTelephony::CallClass)),
+             this, SLOT(barringStatus(QCallBarring::BarringType,QTelephony::CallClass)) );
     connect( callBarring, SIGNAL(changeBarringPasswordResult(QTelephony::Result)),
              this, SLOT(changeBarringPasswordResult(QTelephony::Result)) );
 
@@ -127,11 +123,9 @@ AtGsmCellCommands::AtGsmCellCommands( AtCommands * parent ) : QObject( parent )
              this, SLOT(setCallerIdRestrictionResult(QTelephony::Result)) );
     connect( callSettings, SIGNAL(connectedIdPresentation(QCallSettings::PresentationStatus)),
              this, SLOT(connectedIdPresentation(QCallSettings::PresentationStatus)) );
-    connect( callSettings, SIGNAL(callWaiting(QTelephony::CallClass)),
-             this, SLOT(callWaitingState(QTelephony::CallClass)) );
 
-    connect( adviceOfCharge, SIGNAL(currentCallMeter(int, bool)),
-             this, SLOT(currentCallMeter(int, bool)) );
+    connect( adviceOfCharge, SIGNAL(currentCallMeter(int,bool)),
+             this, SLOT(currentCallMeter(int,bool)) );
     connect( adviceOfCharge, SIGNAL(accumulatedCallMeter(int)),
              this, SLOT(accumulatedCallMeter(int)) );
     connect( adviceOfCharge, SIGNAL(accumulatedCallMeterMaximum(int)),
@@ -140,8 +134,8 @@ AtGsmCellCommands::AtGsmCellCommands( AtCommands * parent ) : QObject( parent )
              this, SLOT(resetAccumulatedCallMeterResult(QTelephony::Result)) );
     connect( adviceOfCharge, SIGNAL(setAccumulatedCallMeterMaximumResult(QTelephony::Result)),
              this, SLOT(setAccumulatedCallMeterMaximumResult(QTelephony::Result)) );
-    connect( adviceOfCharge, SIGNAL(pricePerUnit(const QString&, const QString&)),
-             this, SLOT(pricePerUnit(const QString&, const QString&)) );
+    connect( adviceOfCharge, SIGNAL(pricePerUnit(QString,QString)),
+             this, SLOT(pricePerUnit(QString,QString)) );
     connect( adviceOfCharge, SIGNAL(setPricePerUnitResult(QTelephony::Result)),
              this, SLOT(setPricePerUnitResult(QTelephony::Result)) );
     connect( adviceOfCharge, SIGNAL(callMeterMaximumWarning()),
@@ -158,15 +152,15 @@ AtGsmCellCommands::AtGsmCellCommands( AtCommands * parent ) : QObject( parent )
     connect( prefNetOps, SIGNAL(writePreferredOperatorResult(QTelephony::Result)),
              this, SLOT(writePreferredOperatorResult(QTelephony::Result)) );
 
-    connect( callForwarding, SIGNAL(setForwardingResult(QCallForwarding::Reason, QTelephony::Result)),
-             this, SLOT(setForwardingResult(QCallForwarding::Reason, QTelephony::Result)) );
-    connect( callForwarding, SIGNAL(forwardingStatus(QCallForwarding::Reason, const QList<QCallForwarding::Status>&)),
-             this, SLOT(forwardingStatus(QCallForwarding::Reason, const QList<QCallForwarding::Status>&)) );
+    connect( callForwarding, SIGNAL(setForwardingResult(QCallForwarding::Reason,QTelephony::Result)),
+             this, SLOT(setForwardingResult(QCallForwarding::Reason,QTelephony::Result)) );
+    connect( callForwarding, SIGNAL(forwardingStatus(QCallForwarding::Reason,QList<QCallForwarding::Status>)),
+             this, SLOT(forwardingStatus(QCallForwarding::Reason,QList<QCallForwarding::Status>)) );
 
     connect( sga,
-             SIGNAL(response(const QString &, QTelephony::Result, const QByteArray &)),
+             SIGNAL(response(QString,QTelephony::Result,QByteArray)),
              this,
-             SLOT(simGenericAccessResponse(const QString &, QTelephony::Result, const QByteArray &)) );
+             SLOT(simGenericAccessResponse(QString,QTelephony::Result,QByteArray)) );
 
     connect( phonerf,
              SIGNAL(setLevelResult(QTelephony::Result)),
@@ -185,7 +179,6 @@ AtGsmCellCommands::AtGsmCellCommands( AtCommands * parent ) : QObject( parent )
     atc->add( "+CAMM", this, SLOT(atcamm(QString)) );
     atc->add( "+CAOC", this, SLOT(atcaoc(QString)) );
     atc->add( "+CCFC", this, SLOT(atccfc(QString)) );
-    atc->add( "+CCWA", this, SLOT(atccwa(QString)) );
     atc->add( "+CCWE", this, SLOT(atccwe(QString)) );
     atc->add( "+CLCK", this, SLOT(atclck(QString)) );
     atc->add( "+CLIR", this, SLOT(atclir(QString)) );
@@ -234,7 +227,7 @@ AtGsmCellCommands::~AtGsmCellCommands()
     \table
     \header \o Command \o Possible Responses
     \row \o \c{AT+CACM=[<passwd>]} \o \c{+CME ERROR: <err>}
-    \row \o \c{AT+CACM?} \o \list 
+    \row \o \c{AT+CACM?} \o \list
                               \o \c{+CACM: <acm>}
                               \o \c{+CME ERROR: <err>}
                             \endlist
@@ -382,7 +375,7 @@ void AtGsmCellCommands::atcamm( const QString& params )
                                       \o \c{[+CAOC: <ccm>]}
                                       \o \c{+CME ERROR: <err>}
                                     \endlist
-    \row \o \c{AT+CAOC?} \o \c \c{+CAOC: <mode>}
+    \row \o \c{AT+CAOC?} \o  \c{+CAOC: <mode>}
     \row \o \c{AT+CAOC=?} \o \c{[+CAOC: }(list of supported \c{<mode>}s)
     \endtable
 
@@ -432,7 +425,7 @@ void AtGsmCellCommands::atcaoc( const QString& params )
                     atc->done();
                 }
             } else {
-                // mode is not an optional parameter. 
+                // mode is not an optional parameter.
                 atc->done( QAtResult::OperationNotAllowed );
             }
         }
@@ -505,11 +498,11 @@ void AtGsmCellCommands::atcaoc( const QString& params )
     \row \o \c{<subaddr>} \o string type subaddress of the format specified by \c{<satype>}
     \row \o \c{<satype>} \o type of subaddress octet in integer format (see TS 24.008 [8]);
                             default 128
-    \row \o \c{<class\e{x}>} \o sum of integers representing a class of information (default 7):
+    \row \o \c{<class>} \o sum of integers representing a class of information (default 7):
                             \list
                               \o 1   voice (telephony)
                               \o 2   data (refers to all bearer services)
-                              \o 4   fax (facsimile services)
+                              \o 4   reserved for future use: fax (facsimile services)
                               \o 8   short message service
                               \o 16  data circuit sync
                               \o 32  data circuit async
@@ -650,7 +643,7 @@ void AtGsmCellCommands::atccfc( const QString& params )
     \table
     \header \o Command \o Possible Responses
     \row \o \c{AT+CLCK=<fac>,<mode>[,<passwd>[,<class>]]}
-         \o \list 
+         \o \list
               \o \c{+CME ERROR: <err>}
               \o \bold{when mode = 2 and command is successful:}
                  \c{+CLCK: <status>[,<class1>}
@@ -698,7 +691,7 @@ void AtGsmCellCommands::atccfc( const QString& params )
     \table
     \row \o 1 \o voice (telephony)
     \row \o 2 \o data (refers to all bearer services)
-    \row \o 4 \o fax (facsimile services)
+    \row \o 4 \o reserved for future use: fax (facsimile services)
     \row \o 8 \o sms (short message service)
     \row \o 16 \o data circuit sync
     \row \o 32 \o data circuit async
@@ -1307,7 +1300,7 @@ void AtGsmCellCommands::atclck( const QString& params )
                                 atc->done( QAtResult::OperationNotSupported );
                                 return;
                             }
-                            break; 
+                            break;
                         }
                     } else if ( fac == "PP" ) {
                         switch ( mode ) {
@@ -1403,203 +1396,6 @@ void AtGsmCellCommands::atclck( const QString& params )
 }
 
 /*!
-    \ingroup ModemEmulator::SupplementaryServices
-    \bold{AT+CCWA Call Waiting}
-    \compat
-
-    The \c{AT+CCWA} command allows control of the Call Waiting supplementary
-    service according to 3GPP TS 22.083.
-
-    \table
-    \header \o Command \o Possible Responses
-    \row \o \c{AT+CCWA=[<n>[,<mode>[,<class>]]]}
-         \o when \c{<mode>}=2 and command successful:
-            \code
-            +CCWA: <status>,<class1>
-            +CCWA: <status>,<class2>
-            ...
-            \endcode
-    \row \o \c{AT+CCWA?} \o \c{+CCWA: <n>}
-    \row \o \c{AT+CCWA=?} \o \c{+CCWA: (0,1)}
-    \endtable
-
-    Activation, deactivation, and status query are supported.
-    When querying the status of a network service (\c{<mode>}=2) the
-    response line for the "not active" case (\c{<status>}=0) should be
-    returned only if the service is not active for any \c{<class>}.
-
-    Parameter \c{<n>} is used to disable/enable the presentation
-    of an unsolicited result code \c{+CCWA: <number>,<type>,<class>,[<alpha>][,<CLI validity>[,<subaddr>,<satype>[,<priority>]]]} to the TE when the call
-    waiting service is enabled.
-
-    Test command returns the supported unsolicited presentation values.
-
-    \table
-    \row \o \c{<n>}
-         \o Unsolicited presentation status value.
-            \list
-                \o 0 Disable
-                \o 1 Enable
-            \endlist
-    \row \o \c{<mode>}
-         \o Mode of call waiting operation to perform.
-            \list
-                \o 0 Disable call waiting
-                \o 1 Enable call waiting
-                \o 2 Query status
-            \endlist
-    \row \o \c{<class>}
-         \o Sum of integers representing a class of information (default 7).
-            \list
-                \o 1 voice (telephony)
-                \o 2 data (refers to all bearer services)
-                \o 4 fax
-                \o 8 short message service
-                \o 16 data circuit sync
-                \o 32 data circuit async
-                \o 64 dedicated packet access
-                \o 128 dedicated PAD access
-            \endlist
-    \row \o \c{<status>}
-         \o \list
-                \o 0 not active
-                \o 1 active
-            \endlist
-    \row \o \c{<number>}
-         \o String type phone number of calling address in format
-            specified by \c{<type>}.
-    \row \o \c{<type>}
-         \o Type of address octet in integer format (refer 3GPP TS 24.008).
-    \row \o \c{<alpha>}
-         \o String indicating the name of a phonebook entry
-            corresponding to \c{<number>}.  Usually this is empty.
-    \row \o \c{<CLI validity>}
-         \o \list
-                \o 0 CLI valid
-                \o 1 CLI has been withheld by the originator
-                \o 2 CLI is not available due to interworking problems or
-                     limitations of originating network.
-            \endlist
-    \row \o \c{<subaddr>}
-         \o String type subaddress of format specified by \c{<satype>}.
-    \row \o \c{<satype>}
-         \o Type of subaddress octet in integer format (refer 3GPP TS 24.008).
-    \row \o \c{<priority>}
-         \o Digit indicating eMLPP priority level of incoming call
-            (refer 3GPP TS 22.067).
-    \endtable
-
-    Conforms with: 3GPP TS 27.007.
-*/
-
-void AtGsmCellCommands::atccwa( const QString& params )
-{
-    switch ( AtParseUtils::mode( params ) ) {
-
-        case AtParseUtils::Get:
-        {
-            atc->send( atc->frontEnd()->options()->ccwa ? "+CCWA: 1" : "+CCWA: 0" );
-            atc->done();
-        }
-        break;
-
-        case AtParseUtils::Support:
-        {
-            atc->send( "+CCWA: (0,1)" );
-            atc->done();
-        }
-        break;
-
-        case AtParseUtils::Set:
-        {
-            uint posn = 1;
-            uint n = QAtUtils::parseNumber( params, posn );
-            if ( n == 0 ) {
-                atc->options()->ccwa = false;
-            } else if ( n == 1 ) {
-                atc->options()->ccwa = true;
-            } else {
-                // Invalid value for "n".
-                atc->done( QAtResult::OperationNotAllowed );
-                return;
-            }
-            if ( posn < (uint)(params.length()) ) {
-                uint mode = QAtUtils::parseNumber( params, posn );
-                uint classx = 7;
-                if ( posn < (uint)(params.length()) ) {
-                    classx = QAtUtils::parseNumber( params, posn );
-                }
-                switch ( mode ) {
-                   case 0:
-                    {
-                        // Disable call waiting for the specified call classes.
-                        if ( callSettings->available() ) {
-                            settingCallWaiting = true;
-                            callSettings->setCallWaiting
-                                ( false, (QTelephony::CallClass)classx );
-                        } else {
-                            // We don't have call settings support on this
-                            // system at all, so report not supported.
-                            atc->done( QAtResult::OperationNotSupported );
-                        }
-                        return;
-                    }
-                    // Not reached.
-
-                    case 1:
-                    {
-                        // Enable call waiting for the specified call classes.
-                        if ( callSettings->available() ) {
-                            settingCallWaiting = true;
-                            callSettings->setCallWaiting
-                                ( true, (QTelephony::CallClass)classx );
-                        } else {
-                            // We don't have call settings support on this
-                            // system at all, so report not supported.
-                            atc->done( QAtResult::OperationNotSupported );
-                        }
-                        return;
-                    }
-                    // Not reached.
-
-                    case 2:
-                    {
-                        // Query the current call waiting classes.
-                        if ( callSettings->available() ) {
-                            requestingCallWaiting = true;
-                            callSettings->requestCallWaiting();
-                            return;
-                        } else {
-                            // We don't have call settings support on this
-                            // system at all, so report no classes enabled.
-                            atc->send( "+CCWA: 0" );
-                        }
-                    }
-                    break;
-
-                    default:
-                    {
-                        // Invalid mode parameter.
-                        atc->done( QAtResult::OperationNotAllowed );
-                        return;
-                    }
-                    // Not reached.
-                }
-            }
-            atc->done();
-        }
-        break;
-
-        default:
-        {
-            atc->done( QAtResult::OperationNotAllowed );
-        }
-        break;
-
-    }
-}
-
-/*!
     \ingroup ModemEmulator::ControlAndStatus
     \bold{AT+CCWE Call Meter Maximum Event}
     \compat
@@ -1620,7 +1416,7 @@ void AtGsmCellCommands::atccwa( const QString& params )
                               \o \c{+CCWE: <mode>}
                               \o \c{+CME ERROR: <err>}
                             \endlist
-    \row \o \c{AT+CCWE=?} \o \list 
+    \row \o \c{AT+CCWE=?} \o \list
                                \o \c{+CCWE: }(list of supported \c{<mode>}s)
                                \o \c{+CME ERROR: <err>}
                              \endlist
@@ -1954,12 +1750,12 @@ void AtGsmCellCommands::atcpls( const QString& params )
     \header \o Command \o Possible Responses
     \row \o \c{+CPOL=[<index>][,<format>[,<oper>[,<GSM_AcT>,
          <GSM_Compact_AcT>,<UTRAN_AcT>]]]} \o \c{+CME ERROR: <err>}
-    \row \o \c{+CPOL?} \o 
+    \row \o \c{+CPOL?} \o
          \list \o \c{+CPOL: <index1>,<format>,<oper1>[,<GSM_AcT1>,<GSM_Compact_AcT1>,<UTRAN_AcT1>]}
                   \c{[<CR><LF>+CPOL: <index2>,<format>,<oper2>[,<GSM_AcT2>,<GSM_Compact_AcT2>,<UTRAN_AcT2>]}
                \o \c{+CME ERROR: <err>}
          \endlist
-    \row \o \c{+CPOL=?} \o 
+    \row \o \c{+CPOL=?} \o
          \list \o \c{+CPOL: }(list of supported \c{<index>}s),list of supported \c{<format>}s)
                \o \c{+CME ERROR: <err>}
          \endlist
@@ -1989,7 +1785,7 @@ void AtGsmCellCommands::atcpol( const QString& params )
                     }
                 } else {
                     newOper.index = 0;
-                } 
+                }
             } else {
                 // empty set.  not allowed.
                 atc->done( QAtResult::OperationNotAllowed );
@@ -2076,7 +1872,7 @@ void AtGsmCellCommands::atcpol( const QString& params )
 
                     // add the oper to the list.
                     settingPreferredOperator = true;
-                    prefNetOps->writePreferredOperator( 
+                    prefNetOps->writePreferredOperator(
                             (QPreferredNetworkOperators::List)(atc->frontEnd()->options()->cpls + 1), newOper );
                 } else {
                     if ( newOper.format <= 2 ) {
@@ -2086,8 +1882,8 @@ void AtGsmCellCommands::atcpol( const QString& params )
                             newOper.name = "";
                             newOper.format = 0;
                             newOper.id = 0;
-                            prefNetOps->writePreferredOperator( 
-                                    (QPreferredNetworkOperators::List)(atc->frontEnd()->options()->cpls + 1), newOper ); 
+                            prefNetOps->writePreferredOperator(
+                                    (QPreferredNetworkOperators::List)(atc->frontEnd()->options()->cpls + 1), newOper );
                         } else {
                             // the format of the <oper> in the read command is changed:
                             atc->frontEnd()->options()->cpolFormat = newOper.format;
@@ -2103,8 +1899,8 @@ void AtGsmCellCommands::atcpol( const QString& params )
                 newOper.name = "";
                 newOper.format = 0;
                 newOper.id = 0;
-                prefNetOps->writePreferredOperator( 
-                        (QPreferredNetworkOperators::List)(atc->frontEnd()->options()->cpls + 1), newOper ); 
+                prefNetOps->writePreferredOperator(
+                        (QPreferredNetworkOperators::List)(atc->frontEnd()->options()->cpls + 1), newOper );
             }
         }
         break;
@@ -2787,7 +2583,7 @@ void AtGsmCellCommands::atcpwd( const QString& params )
         {
             uint posn = 1;
             if ( posn < (uint)params.length() ) {
-                QString fac = QAtUtils::nextString( params, posn ); 
+                QString fac = QAtUtils::nextString( params, posn );
                 if ( posn < (uint)params.length() ) {
                     QString oldpwd = QAtUtils::nextString( params, posn );
                     if ( posn < (uint)params.length() ) {
@@ -3207,7 +3003,7 @@ void AtGsmCellCommands::atcusd( const QString& params )
 // notifications set to `on', we send the +CSSU unsolicited
 // result code notification.
 void AtGsmCellCommands::incomingSupplementaryServicesNotification
-        ( QSupplementaryServices::IncomingNotification type, 
+        ( QSupplementaryServices::IncomingNotification type,
           int groupIndex, const QString & number )
 {
     if ( atc->options()->cssu ) {
@@ -3253,7 +3049,7 @@ void AtGsmCellCommands::unstructuredSupplementaryServicesNotification
         status += QString::number( (uint)action );
         if ( data.length() > 0 ) {
             // assume default <dcs> of 0
-            status += "," + data + ",0"; 
+            status += "," + data + ",0";
         }
 
         atc->send( status );
@@ -3453,43 +3249,6 @@ void AtGsmCellCommands::setCallerIdRestrictionResult( QTelephony::Result result 
 {
     if ( settingCallerIdRestriction ) {
         settingCallerIdRestriction = false;
-        atc->done( (QAtResult::ResultCode)result );
-    }
-}
-
-// This slot is called when the QCallWaiting instance emits
-// the call waiting state.  If we requested the call waiting
-// state, we send the solicited result code notification 
-// and return.
-void AtGsmCellCommands::callWaitingState( QTelephony::CallClass cls )
-{
-    if ( requestingCallWaiting ) {
-        requestingCallWaiting = false;
-        if ( cls == QTelephony::CallClassNone ) {
-            // The only time we report status=0 is for no call classes enabled.
-            atc->send( "+CCWA: 0,7" );
-        } else {
-            // Break the class mask up into individual bits and report them.
-            int bit = 1;
-            while ( bit <= 65536 ) {
-                if ( (((int)cls) & bit) != 0 ) {
-                    atc->send( "+CCWA: 1," + QString::number(bit) );
-                }
-                bit <<= 1;
-            }
-        }
-        atc->done();
-    }
-}
-
-// This slot is called when the QCallWaiting instance emits
-// the result of the an attempt to set call waiting.
-// If we attempted to set call waiting, we return this
-// result code.
-void AtGsmCellCommands::setCallWaitingResult( QTelephony::Result result )
-{
-    if ( settingCallWaiting ) {
-        settingCallWaiting = false;
         atc->done( (QAtResult::ResultCode)result );
     }
 }
@@ -3802,7 +3561,7 @@ void AtGsmCellCommands::connectedIdPresentation( QCallSettings::PresentationStat
 
 // This slot is called when the QSimGenericAccess instance emits
 // a response to an attempt to access the SIM.
-// If the associated requestID identifies an attempt that we 
+// If the associated requestID identifies an attempt that we
 // have initiated, we send any unsolicited result code notifications
 // and return the result code.
 void AtGsmCellCommands::simGenericAccessResponse( const QString & reqid, QTelephony::Result result, const QByteArray & data )
@@ -4003,7 +3762,7 @@ void AtGsmCellCommands::initializeMemoryPhoneBook()
     QUniqueId id;
     for ( int i = 0; i<contactModel->rowCount(); i++ ) {
         id = contactModel->id( i );
-        if ( !contactModel->isSIMCardContact( id ) ) {
+        if ( !contactModel->isSimCardContact( id ) ) {
             QContact c = contactModel->contact( id );
             QMap<QContact::PhoneType,QString> numbers = c.phoneNumbers();
             QList<QContact::PhoneType> types = numbers.keys();

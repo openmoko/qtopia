@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -48,7 +46,7 @@
 
 
 //some wlan driver return "<hidden>" when the essid is hidden other drivers
-//just return an empty string. Qtopia assumes that a hidden essid is called "<hidden>"
+//just return an empty string. Qt Extended assumes that a hidden essid is called "<hidden>"
 //change this function if there is yet another way of indicating the essid is hidden.
 static QString convertToHidden( const QString& essid )
 {
@@ -57,8 +55,8 @@ static QString convertToHidden( const QString& essid )
     return essid;
 }
 
-WirelessScan::WirelessScan( const QString& ifaceName, QObject* parent )
-    : QObject( parent ), iface( ifaceName ), sockfd( -1 )
+WirelessScan::WirelessScan( const QString& ifaceName, bool whileDown, QObject* parent )
+    : QObject( parent ), iface( ifaceName ), sockfd( -1 ), scanWhileDown(whileDown), ifaceDown(false)
 {
 }
 
@@ -99,11 +97,18 @@ void WirelessScan::rangeInfo(iw_range* range, int* weVersion) const
     wrq.u.data.pointer = buffer;
     strncpy( wrq.ifr_name, iface.toLatin1().constData(), IFNAMSIZ );
 
+    bool broughtUp = prepareInterface();
+
     if ( ioctl( socket, SIOCGIWRANGE, &wrq ) < 0 ) {
         //no Wireless Extension
+        if (broughtUp)
+            restoreInterfaceState();
         ::close( socket );
         return;
     }
+
+    if (broughtUp)
+        restoreInterfaceState();
 
     memcpy( range, buffer, sizeof(struct iw_range) );
 
@@ -218,12 +223,12 @@ QString WirelessScan::currentESSID() const
     ::close( fd );
     
     //some wlan driver return "<hidden>" when the essid is hidden other drivers
-    //just return an empty string. Qtopia assumes that a hidden essid is called "<hidden>"
+    //just return an empty string. Qt Extended assumes that a hidden essid is called "<hidden>"
     result = convertToHidden( result );
     return result;
 }
 
-void WirelessScan::ensureScanESSID()
+void WirelessScan::ensureScanESSID() const
 {
     QString currEssid = currentESSID();
     if ( currEssid.isEmpty() )
@@ -258,6 +263,57 @@ void WirelessScan::ensureScanESSID()
     }
 }
 
+bool WirelessScan::prepareInterface() const
+{
+    bool bringUp = false;
+
+    if (!scanWhileDown) {
+        //TODO support for IPv4 only (PF_INET6)
+        int inetfd = socket( PF_INET, SOCK_DGRAM, 0 );
+        if ( inetfd == -1 )
+            return false;
+
+        struct ifreq ifreqst;
+        ::strcpy( ifreqst.ifr_name, iface.toLatin1().constData() );
+        int ret = ioctl( inetfd, SIOCGIFFLAGS, &ifreqst );
+        if ( ret == -1 ) {
+            ::close( inetfd );
+            return false;
+        }
+
+        bringUp = !(ifreqst.ifr_flags & IFF_UP);
+        if (bringUp) {
+            ifreqst.ifr_flags |= IFF_UP;
+            ret = ioctl(inetfd, SIOCSIFFLAGS, &ifreqst);
+        }
+
+        ::close( inetfd );
+    }
+
+    return bringUp;
+}
+
+void WirelessScan::restoreInterfaceState() const
+{
+    //TODO support for IPv4 only (PF_INET6)
+    int inetfd = socket( PF_INET, SOCK_DGRAM, 0 );
+    if ( inetfd == -1 )
+        return;
+
+    struct ifreq ifreqst;
+    ::strcpy( ifreqst.ifr_name, iface.toLatin1().constData() );
+    int ret = ioctl( inetfd, SIOCGIFFLAGS, &ifreqst );
+    if ( ret == -1 ) {
+        ::close( inetfd );
+        return;
+    }
+
+    ifreqst.ifr_flags &= ~IFF_UP;
+    ret = ioctl(inetfd, SIOCSIFFLAGS, &ifreqst);
+
+    ::close( inetfd );
+}
+
 const QList<WirelessNetwork> WirelessScan::results() const
 {
     return entries;
@@ -288,9 +344,11 @@ bool WirelessScan::startScanning()
 
     qLog(Network) << "Scanning for wireless networks...";
 
+    ifaceDown = prepareInterface();
+
     //some wlan drivers require an initial set essid before they work
     ensureScanESSID();
-    
+
     //open socket
     sockfd = socket( AF_INET, SOCK_DGRAM, 0 );
     if ( sockfd < 0 )
@@ -328,6 +386,9 @@ void WirelessScan::checkResults()
     rangeInfo( &range, &weVersion );
     if ( weVersion < 14 )
         return; //no scan support if WE version <14
+
+    if (range.max_qual.qual == 0)
+        range.max_qual.qual = 255;
 
 #if WIRELESS_EXT > 13
     int blength = IW_SCAN_MAX_DATA;
@@ -378,6 +439,8 @@ void WirelessScan::checkResults()
     free( buffer );
     ::close( sockfd );
     sockfd = -1;
+    if (ifaceDown)
+        restoreInterfaceState();
     emit scanningFinished();
 #else
     Q_UNUSED(buffer);
@@ -445,6 +508,9 @@ int WirelessScan::currentSignalStrength() const
     struct iw_range range;
     int weVersion;
     rangeInfo( &range, &weVersion );
+
+    if (range.max_qual.qual == 0)
+        range.max_qual.qual = 255;
 
     if ( !(iwstats.qual.updated & IW_QUAL_QUAL_INVALID) ) {
         return (int) (iwstats.qual.qual*100/range.max_qual.qual);
@@ -575,7 +641,7 @@ void WirelessScan::readData( unsigned char* data, int length, int weVersion, iw_
                             essid[iwevent.u.essid.length] = '\0';
                             ssid = QString(essid);
                             //some wlan driver return "<hidden>" when the essid is hidden other drivers
-                            //just return an empty string. Qtopia assumes that a hidden essid is called "<hidden>"
+                            //just return an empty string. Qt Extended assumes that a hidden essid is called "<hidden>"
                             ssid = convertToHidden( ssid );
                             //qLog(Network) << "Discovered network on" << iface << ": " << ssid;
                         } else {
@@ -1203,7 +1269,11 @@ void WSearchPage::attachToInterface( const QString& ifaceName )
 {
     if ( !scanEngine ) {
         qLog(Network) << "Using network scanner on interface" << ifaceName;
-        scanEngine = new WirelessScan( ifaceName, this );
+
+        // some interfaces need to be up
+        QSettings cfg(config, QSettings::IniFormat);
+        const bool scanWhileDown = cfg.value("Properties/ScanWhileDown", true).toBool();
+        scanEngine = new WirelessScan( ifaceName, scanWhileDown, this );
         connect( scanEngine, SIGNAL(scanningFinished()), this, SLOT(updateConnectivity()) );
         connect( scanAction, SIGNAL(triggered()), scanEngine, SLOT(startScanning()) );
 

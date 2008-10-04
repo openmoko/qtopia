@@ -1,2 +1,0 @@
-contains(QT,svg):requires(svg_missing)
-load(default_post)

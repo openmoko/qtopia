@@ -1,49 +1,51 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "mediabrowser.h"
 
-#include "playlist.h"
 #include "statewidget.h"
 #include "elidedlabel.h"
 #include "keyfilter.h"
 #include "browser.h"
 #include "servicerequest.h"
 #include "playerwidget.h"
+#include "mediaplayer.h"
 
 #include <qmediacontrol.h>
 #include <qmediatools.h>
 #include <qmediawidgets.h>
+#include <QMediaPlaylist>
 
 #include <qtopialog.h>
 #include <qtopiaapplication.h>
 #include <qcontentset.h>
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
 #include <qsoftmenubar.h>
 #include <custom.h>
-#endif
 
 #ifdef Q_WS_QWS
 #include <QScreen>
+#endif
+
+#ifdef USE_PICTUREFLOW
+#include <pictureflowview.h>
+#include <QMarqueeLabel>
 #endif
 
 static const int PLAYLIST_ITEM_FLAG = Qt::UserRole + 0x10;
@@ -94,7 +96,7 @@ ServiceRequest* CustomPropertyBrowser::action( const QModelIndex& index, ActionC
             urls.append( content.fileName() );
         }
 
-        return new CuePlaylistRequest( QExplicitlySharedDataPointer<Playlist>(new BasicPlaylist( urls )) );
+        return new CuePlaylistRequest( QMediaPlaylist( urls ) );
         }
     case LongHold:
         {
@@ -109,7 +111,7 @@ ServiceRequest* CustomPropertyBrowser::action( const QModelIndex& index, ActionC
             urls.append( content.fileName() );
         }
 
-        return new PlayNowRequest( QExplicitlySharedDataPointer<Playlist>(new BasicPlaylist( urls )) );
+        return new PlayNowRequest( QMediaPlaylist( urls ) );
         }
     default:
         // Ignore
@@ -149,22 +151,20 @@ ServiceRequest* SongBrowser::action( const QModelIndex& index, ActionContext con
 {
     switch( context )
     {
-    case Select:
-        {
+    case Select: {
         QStringList urls;
         for( int i = 0; i < rowCount(); ++i ) {
             urls.append( content( SongBrowser::index( i ) ).fileName() );
         }
 
-        QExplicitlySharedDataPointer<Playlist> playlist(new BasicPlaylist( urls ));
-        playlist->setPlaying( playlist->index( index.row() ) );
-
-        return new OpenPlaylistRequest( playlist );
+        QMediaPlaylist playlist( urls );
+        playlist.setPlaying(playlist.index(index.row(), 0));
+        return new PlayNowRequest( playlist );
         }
     case Hold:
-        return new CuePlaylistRequest( QExplicitlySharedDataPointer<Playlist>( new BasicPlaylist( QStringList( content( index ).fileName() ) ) ) );
+        return new CuePlaylistRequest( QMediaPlaylist( QStringList( content( index ).fileName() ) ) );
     case LongHold:
-        return new PlayNowRequest( QExplicitlySharedDataPointer<Playlist>( new BasicPlaylist( QStringList( content( index ).fileName() ) ) ) );
+        return new PlayNowRequest( QMediaPlaylist( QStringList( content( index ).fileName() ) ) );
     default:
         // Ignore
         break;
@@ -195,21 +195,19 @@ class PlaylistMenuModel : public MenuModel,
     Q_OBJECT
     Q_INTERFACES(PlaylistModel)
 public:
-    PlaylistMenuModel( QObject* parent = 0 )
-        : MenuModel( parent ), m_ismyshuffle( false )
-    { }
+    PlaylistMenuModel( QObject* parent = 0 );
 
-    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
+    void setPlaylist( const QMediaPlaylist &playlist );
     void setPlaylist( const QString& filename );
 
     // PlaylistModel
-    QExplicitlySharedDataPointer<Playlist> playlist() const { return m_playlist; }
+    const QMediaPlaylist &playlist() const { return m_playlist; }
 
     // MenuModel
     ServiceRequest* action( const QModelIndex& index, ActionContext context = Select ) const;
 
     // AbstractListModel
-    int rowCount( const QModelIndex& = QModelIndex() ) const { return m_playlist->rowCount(); }
+    int rowCount( const QModelIndex& = QModelIndex() ) const { return m_playlist.rowCount(); }
     QVariant data( const QModelIndex& index, int role ) const;
 
 public slots:
@@ -222,44 +220,39 @@ private slots:
     void doEndRemoveRows();
 
 private:
-    QExplicitlySharedDataPointer< Playlist > m_playlist;
+    QMediaPlaylist m_playlist;
     QString m_playlistfile;
     bool m_ismyshuffle;
 };
 
-void PlaylistMenuModel::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
+PlaylistMenuModel::PlaylistMenuModel( QObject* parent )
+    : MenuModel( parent ), m_ismyshuffle( false )
 {
-    // Disconnect from old playlist
-    if( m_playlist.data() != NULL ) {
-        m_playlist->disconnect( this );
-    }
+    // Connect to new playlist
+    connect( &m_playlist, SIGNAL(playingChanged(QModelIndex)),
+        this, SLOT(emitDataChanged()) );
+    connect( &m_playlist, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)),
+        this, SLOT(doBeginInsertRows(QModelIndex,int,int)) );
+    connect( &m_playlist, SIGNAL(rowsInserted(QModelIndex,int,int)),
+        this, SLOT(doEndInsertRows()) );
+    connect( &m_playlist, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
+        this, SLOT(doBeginRemoveRows(QModelIndex,int,int)) );
+    connect( &m_playlist, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+        this, SLOT(doEndRemoveRows()) );
+}
 
+void PlaylistMenuModel::setPlaylist( const QMediaPlaylist &playlist )
+{
     m_playlist = playlist;
 
-    if ( m_playlist == NULL )
-        return;
-
-    // Connect to new playlist
-    connect( m_playlist, SIGNAL(playingChanged(QModelIndex)),
-        this, SLOT(emitDataChanged()) );
-    connect( m_playlist, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)),
-        this, SLOT(doBeginInsertRows(QModelIndex,int,int)) );
-    connect( m_playlist, SIGNAL(rowsInserted(QModelIndex,int,int)),
-        this, SLOT(doEndInsertRows()) );
-    connect( m_playlist, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)),
-        this, SLOT(doBeginRemoveRows(QModelIndex,int,int)) );
-    connect( m_playlist, SIGNAL(rowsRemoved(QModelIndex,int,int)),
-        this, SLOT(doEndRemoveRows()) );
-
-    // Determine if playlist is a My Shuffle playlist
-    m_ismyshuffle = qobject_cast<PlaylistMyShuffle*>( playlist.data() ) != NULL;
+    m_ismyshuffle = playlist.isShuffle();
 
     m_playlistfile = QString();
 }
 
 void PlaylistMenuModel::setPlaylist( const QString& filename )
 {
-    setPlaylist( Playlist::construct_playlist( filename ) );
+    setPlaylist( QMediaPlaylist( filename ) );
     m_playlistfile = filename;
 }
 
@@ -269,14 +262,14 @@ ServiceRequest* PlaylistMenuModel::action( const QModelIndex& index, ActionConte
     {
     case Select:
         {
-        QExplicitlySharedDataPointer<Playlist> playlist = m_playlistfile.isNull() ? m_playlist : Playlist::construct_playlist( m_playlistfile );
-        playlist->setPlaying( playlist->index( index.row() ) );
-        return new OpenPlaylistRequest( playlist );
+        QMediaPlaylist playlist = m_playlistfile.isNull() ? m_playlist : QMediaPlaylist( m_playlistfile );
+        playlist.setPlaying(index);
+        return new PlayNowRequest( playlist );
         }
     case Hold:
-        return new CuePlaylistRequest( QExplicitlySharedDataPointer<Playlist>( new BasicPlaylist( QStringList( m_playlist->data( m_playlist->index( index.row() ), Playlist::Url ).toString() ) ) ) );
+        return new CuePlaylistRequest( QMediaPlaylist( QStringList( m_playlist.data( m_playlist.index( index.row() ), QMediaPlaylist::Url ).toString() ) ) );
     case LongHold:
-        return new PlayNowRequest( QExplicitlySharedDataPointer<Playlist>( new BasicPlaylist( QStringList( m_playlist->data( m_playlist->index( index.row() ), Playlist::Url ).toString() ) ) ) );
+        return new PlayNowRequest( QMediaPlaylist( QStringList( m_playlist.data( m_playlist.index( index.row() ), QMediaPlaylist::Url ).toString() ) ) );
     }
 
     return 0;
@@ -287,9 +280,9 @@ QVariant PlaylistMenuModel::data( const QModelIndex& index, int role ) const
     switch( role )
     {
     case Qt::DisplayRole:
-        return m_playlist->data( m_playlist->index( index.row() ), Playlist::Title );
+        return m_playlist.data( m_playlist.index( index.row() ), QMediaPlaylist::Title );
     case Qt::DecorationRole:
-        if( m_playlist->index( index.row() ) == m_playlist->playing() ) {
+        if( m_playlist.index( index.row() ) == m_playlist.playing() ) {
             return QIcon( ":icon/mediaplayer/black/nowplaying" );
         }
         break;
@@ -382,9 +375,9 @@ ServiceRequest* PlaylistBrowser::action( const QModelIndex& index, ActionContext
         return new CompoundRequest( QList<ServiceRequest*>() << &pushmenu << &pushtitle );
         }
     case Hold:
-        return new CuePlaylistRequest( Playlist::construct_playlist( file ) );
+        return new CuePlaylistRequest( QMediaPlaylist( file ) );
     case LongHold:
-        return new PlayNowRequest( Playlist::construct_playlist( file ) );
+        return new PlayNowRequest( QMediaPlaylist( file ) );
     }
 
     return 0;
@@ -403,24 +396,15 @@ QVariant PlaylistBrowser::data( const QModelIndex& index, int role ) const
     return ContentBrowser::data( index, role );
 }
 
-class IconCache
+const QPixmap cachedPixmap( const QString& filename, const QSize& size )
 {
-public:
-    const QPixmap& pixmap( int iconid, const QString& filename, const QSize& size ) const;
-
-private:
-    mutable QHash<int,QPixmap> m_cache;
-};
-
-const QPixmap& IconCache::pixmap( int iconid, const QString& filename, const QSize& size ) const
-{
-    QPixmap &pixmap = m_cache[iconid];
-
-    if( pixmap.isNull() || pixmap.size() != size ) {
-        pixmap = QIcon( filename ).pixmap( size );
+    QPixmap pm;
+    if (!QPixmapCache::find(filename, pm)) {
+        pm = QIcon( filename ).pixmap( size );
+        QPixmapCache::insert(filename, pm);
     }
 
-    return pixmap;
+    return pm;
 }
 
 class TitleBar : public QWidget
@@ -443,8 +427,13 @@ private slots:
 
     void setMute( bool mute );
 
+#ifdef QTOPIA_HOMEUI
+    void backClicked();
+#endif
+
 protected:
     void paintEvent( QPaintEvent* e );
+    void resizeEvent( QResizeEvent* e );
 
 private:
     ElidedLabel *m_titlelabel;
@@ -457,8 +446,9 @@ private:
 
     QMediaVolumeLabel *m_muteicon;
     bool m_ismute;
-
-    IconCache m_iconcache;
+#ifdef QTOPIA_HOMEUI
+    QPushButton *m_backButton;
+#endif
 };
 
 void TitleBar::push( const QString& title )
@@ -479,7 +469,7 @@ TitleBar::TitleBar( PlayerControl* control, QWidget* parent )
     static const int STRETCH_MAX = 1;
 
     QHBoxLayout *layout = new QHBoxLayout;
-    layout->setMargin( 6 );
+    layout->setMargin( 2 );
 
     // Use custom palette
     QPalette pal = palette();
@@ -497,6 +487,15 @@ TitleBar::TitleBar( PlayerControl* control, QWidget* parent )
     m_titlelabel->setAlignment( Qt::AlignRight );
     m_titlelabel->setPalette( pal );
     layout->addWidget( m_titlelabel, STRETCH_MAX );
+
+#ifdef QTOPIA_HOMEUI
+    m_backButton = new QPushButton;
+    m_backButton->setText("Back");
+    m_backButton->setFlat(true);
+    m_backButton->setFixedHeight(fontMetrics().boundingRect("X").height());
+    layout->addWidget( m_backButton, 0, Qt::AlignRight );
+    connect(m_backButton, SIGNAL(clicked(bool)), this, SLOT(backClicked()));
+#endif
 
     QFont titlefont = font();
     titlefont.setItalic( true );
@@ -547,13 +546,26 @@ void TitleBar::setMute( bool mute )
 
 void TitleBar::paintEvent( QPaintEvent* )
 {
-    static const int TITLEBAR_ICON_ID = 1;
-
     // Paint background
     QPainter painter( this );
-    painter.drawPixmap( QPoint( 0, 0 ), m_iconcache.pixmap( TITLEBAR_ICON_ID,
-        ":icon/mediaplayer/black/titlebar", size() ) );
+    painter.drawPixmap( QPoint( 0, 0 ), cachedPixmap( ":icon/mediaplayer/black/titlebar", size() ) );
 }
+
+void TitleBar::resizeEvent( QResizeEvent* e )
+{
+    QPixmapCache::remove( ":icon/mediaplayer/black/titlebar" );
+    QWidget::resizeEvent( e );
+}
+
+#ifdef QTOPIA_HOMEUI
+void TitleBar::backClicked()
+{
+    QKeyEvent backpress(QEvent::KeyPress, Qt::Key_Back, Qt::NoModifier);
+    QKeyEvent backrelease( QEvent::KeyRelease, Qt::Key_Back, Qt::NoModifier);
+    QApplication::sendEvent(MediaPlayer::instance(), &backpress);
+    QApplication::sendEvent(MediaPlayer::instance(), &backrelease);
+}
+#endif
 
 class ActionContext
 {
@@ -603,9 +615,7 @@ bool PlaylistRemoveContext::isVisible() const
 {
     PlaylistModel *playlistmodel = qobject_cast<PlaylistModel*>(m_model);
     if( playlistmodel ) {
-        QExplicitlySharedDataPointer<Playlist> playlist = playlistmodel->playlist();
-        PlaylistRemove *remove = qobject_cast<PlaylistRemove*>(playlist.data());
-        if( remove && playlist->rowCount() > 0 ) {
+        if( playlistmodel->playlist().rowCount() > 0 ) {
             return true;
         }
     }
@@ -631,9 +641,7 @@ bool PlaylistSaveContext::isVisible() const
 {
     PlaylistModel *playlistmodel = qobject_cast<PlaylistModel*>(m_model);
     if( playlistmodel ) {
-        QExplicitlySharedDataPointer<Playlist> playlist = playlistmodel->playlist();
-        PlaylistSave *save = qobject_cast<PlaylistSave*>(playlist.data());
-        if( save && playlist->rowCount() > 0 ) {
+        if( playlistmodel->playlist().rowCount() > 0 ) {
             return true;
         }
     }
@@ -659,9 +667,7 @@ bool PlaylistResetContext::isVisible() const
 {
     PlaylistModel *playlistmodel = qobject_cast<PlaylistModel*>(m_model);
     if( playlistmodel ) {
-        QExplicitlySharedDataPointer<Playlist> playlist = playlistmodel->playlist();
-        PlaylistMyShuffle *myshuffle = qobject_cast<PlaylistMyShuffle*>(playlist.data());
-        if( myshuffle ) {
+        if( playlistmodel->playlist().isShuffle() ) {
             return true;
         }
     }
@@ -778,11 +784,9 @@ void MenuServiceRequestHandler::execute( ServiceRequest* request )
             m_context.view->setCurrentIndex( model->index( 0 ) );
         }
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         m_context.removegroup->setContext( PlaylistRemoveContext( model ) );
         m_context.savegroup->setContext( PlaylistSaveContext( model ) );
         m_context.resetgroup->setContext( PlaylistResetContext( model ) );
-#endif
 
         delete request;
         }
@@ -1074,7 +1078,6 @@ private:
     int m_spacing;
     int m_fixedwidth;
     CustomPalette m_palette;
-    IconCache m_iconcache;
 };
 
 static const int DECORATION_MARGIN = 3;
@@ -1082,12 +1085,6 @@ static const int DECORATION_MARGIN = 3;
 void ItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
     static const int GHOST_TEXT_OPACITY = 128;
-    static const int HIGHLIGHT_ICON_ID = 1;
-    static const int DIVIDER_ICON_ID = 2;
-    static const int NODE_ICON_ID = 3;
-    static const int LEAF_ICON_ID = 4;
-    static const int ADD_ICON_ID = 5;
-    static const int PLAYNOW_ICON_ID = 6;
 
     painter->save();
 
@@ -1097,21 +1094,18 @@ void ItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option,
 
     // Draw background
     if( selected ) {
-        painter->drawPixmap( rect, m_iconcache.pixmap( HIGHLIGHT_ICON_ID,
-            ":icon/mediaplayer/black/highlight", QSize( m_fixedwidth, rect.height() ) ) );
+        painter->drawPixmap( rect, cachedPixmap( ":icon/mediaplayer/black/highlight", QSize( m_fixedwidth, rect.height() ) ) );
     }
 
     // Draw divider
     QVariant visualhint = index.sibling( index.row() + 1, index.column() ).data( VISUAL_HINT_ROLE );
     if( visualhint.isValid() && visualhint.toInt() & ITEM_DIVIDER ) {
-        painter->drawPixmap( rect.adjusted( 0, rect.height()/2, 0, rect.height()/2 ), m_iconcache.pixmap( DIVIDER_ICON_ID,
-            ":icon/mediaplayer/black/divider", QSize( m_fixedwidth, rect.height() ) ) );
+        painter->drawPixmap( rect.adjusted( 0, rect.height()/2, 0, rect.height()/2 ), cachedPixmap( ":icon/mediaplayer/black/divider", QSize( m_fixedwidth, rect.height() ) ) );
     }
 
     visualhint = index.data( VISUAL_HINT_ROLE );
     if( visualhint.isValid() && visualhint.toInt() & ITEM_DIVIDER ) {
-        painter->drawPixmap( rect.adjusted( 0, -rect.height()/2, 0, -rect.height()/2 ), m_iconcache.pixmap( DIVIDER_ICON_ID,
-            ":icon/mediaplayer/black/divider", QSize( m_fixedwidth, rect.height() ) ) );
+        painter->drawPixmap( rect.adjusted( 0, -rect.height()/2, 0, -rect.height()/2 ), cachedPixmap( ":icon/mediaplayer/black/divider", QSize( m_fixedwidth, rect.height() ) ) );
     }
 
     // Subtract left and right spacing
@@ -1188,16 +1182,13 @@ void ItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option,
             {
             case NodeHint:
                 if ( option.direction == Qt::LeftToRight ) {
-                    painter->drawPixmap( topleft, m_iconcache.pixmap( NODE_ICON_ID,
-                        ":icon/mediaplayer/black/node", QSize( iconwidth, iconwidth ) ) );
+                    painter->drawPixmap( topleft, cachedPixmap( ":icon/mediaplayer/black/node", QSize( iconwidth, iconwidth ) ) );
                 } else {
-                    painter->drawPixmap( topleft, m_iconcache.pixmap( NODE_ICON_ID,
-                        ":icon/mediaplayer/black/node_mirrored", QSize( iconwidth, iconwidth ) ) );
+                    painter->drawPixmap( topleft, cachedPixmap( ":icon/mediaplayer/black/node_mirrored", QSize( iconwidth, iconwidth ) ) );
                 }
                 break;
             case LeafHint:
-                painter->drawPixmap( topleft, m_iconcache.pixmap( LEAF_ICON_ID,
-                    ":icon/mediaplayer/black/leaf", QSize( iconwidth, iconwidth ) ) );
+                painter->drawPixmap( topleft, cachedPixmap( ":icon/mediaplayer/black/leaf", QSize( iconwidth, iconwidth ) ) );
                 break;
             }
         }
@@ -1209,12 +1200,10 @@ void ItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option,
             switch( m_helpicon )
             {
             case Cue:
-                painter->drawPixmap( topleft, m_iconcache.pixmap( ADD_ICON_ID, 
-                    ":icon/mediaplayer/black/add", QSize( iconwidth, iconwidth ) ) );
+                painter->drawPixmap( topleft, cachedPixmap( ":icon/mediaplayer/black/add", QSize( iconwidth, iconwidth ) ) );
                 break;
             case PlayNow:
-                painter->drawPixmap( topleft, m_iconcache.pixmap( PLAYNOW_ICON_ID,
-                    ":icon/mediaplayer/black/playnow", QSize( iconwidth, iconwidth ) ) );
+                painter->drawPixmap( topleft, cachedPixmap( ":icon/mediaplayer/black/playnow", QSize( iconwidth, iconwidth ) ) );
                 break;
             default:
                 // Ignore
@@ -1444,7 +1433,6 @@ private:
     QTimer *m_holdtimer, *m_longholdtimer;
 
     QFont m_smallfont;
-    IconCache m_iconcache;
 };
 
 CustomView::CustomView( QWidget* parent )
@@ -1544,9 +1532,7 @@ void CustomView::mouseReleaseEvent( QMouseEvent* e )
 
 void CustomView::paintEvent( QPaintEvent* e )
 {
-    static const QColor TROLLTECH_YELLOW = QColor( 242, 234, 54 );
-    static const int TIP_UP_ICON_ID = 1;
-    static const int TIP_DOWN_ICON_ID = 2;
+    static const QColor MEDIABROWSER_YELLOW = QColor( 242, 234, 54 );
 
     MenuView::paintEvent( e );
 
@@ -1554,7 +1540,7 @@ void CustomView::paintEvent( QPaintEvent* e )
         QPainter painter( viewport() );
         painter.setOpacity( m_helpopacity );
         painter.setPen( Qt::NoPen );
-        painter.setBrush( TROLLTECH_YELLOW );
+        painter.setBrush( MEDIABROWSER_YELLOW );
 
         painter.setFont( m_smallfont );
 
@@ -1574,10 +1560,10 @@ void CustomView::paintEvent( QPaintEvent* e )
 
         if( vrect.bottom() < height()/2 ) {
             painter.drawPixmap( QPoint( rect.right() - iconwidth - 8 - scrollbar, rect.top() - iconwidth ),
-                m_iconcache.pixmap( TIP_UP_ICON_ID, ":icon/mediaplayer/black/tip-up", QSize( iconwidth, iconwidth ) ) );
+                cachedPixmap( ":icon/mediaplayer/black/tip-up", QSize( iconwidth, iconwidth ) ) );
         } else {
             painter.drawPixmap( QPoint( rect.right() - iconwidth - 8 - scrollbar, rect.bottom() + 1 ),
-                m_iconcache.pixmap( TIP_DOWN_ICON_ID, ":icon/mediaplayer/black/tip-down", QSize( iconwidth, iconwidth ) ) );
+                cachedPixmap( ":icon/mediaplayer/black/tip-down", QSize( iconwidth, iconwidth ) ) );
         }
 
         painter.setPen( Qt::black );
@@ -1999,8 +1985,8 @@ void HelpDirector::transition( State end )
     }
 }
 
-static const QColor TROLLTECH_BLACK = QColor::fromCmykF( 0, 0, 0, 0.9 );
-static const QColor TROLLTECH_BLACK_LIGHT = QColor::fromCmykF( 0, 0, 0, 0.7 );
+static const QColor MEDIABROWSER_BLACK = QColor::fromCmykF( 0, 0, 0, 0.9 );
+static const QColor MEDIABROWSER_BLACK_LIGHT = QColor::fromCmykF( 0, 0, 0, 0.7 );
 
 MediaBrowser::MediaBrowser( PlayerControl* control, RequestHandler* handler, QWidget* parent )
     : QWidget( parent ),
@@ -2011,6 +1997,11 @@ MediaBrowser::MediaBrowser( PlayerControl* control, RequestHandler* handler, QWi
       m_resetgroup( NULL ),
       m_hasnowplaying( false ),
       m_focused( false )
+#ifdef USE_PICTUREFLOW
+      , m_coverArt(NULL)
+      , m_coverArtContentSet(NULL)
+      , m_coverArtContentSetModel(NULL)
+#endif
 {
     static const int BROWSER_IDLE_THRESHOLD = 12000;
 
@@ -2058,10 +2049,10 @@ MediaBrowser::MediaBrowser( PlayerControl* control, RequestHandler* handler, QWi
 
     // Initialize delegate palette
     CustomPalette black;
-    black.setColor( CustomPalette::Text, palette().windowText().color() );
+    black.setColor( CustomPalette::Text, palette().text().color() );
     black.setColor( CustomPalette::HighlightText, Qt::white );
-    black.setColor( CustomPalette::HighlightBegin, TROLLTECH_BLACK );
-    black.setColor( CustomPalette::HighlightEnd, TROLLTECH_BLACK_LIGHT );
+    black.setColor( CustomPalette::HighlightBegin, MEDIABROWSER_BLACK );
+    black.setColor( CustomPalette::HighlightEnd, MEDIABROWSER_BLACK_LIGHT );
 
     m_delegate->setCustomPalette( black );
 
@@ -2074,22 +2065,9 @@ MediaBrowser::MediaBrowser( PlayerControl* control, RequestHandler* handler, QWi
     // Construct menu
     m_mainmenu = new SimpleMenuModel( this );
 
-    QStringList musicMimeTypes = QMediaContent::supportedMimeTypes().filter( QRegExp( QLatin1String( "audio/\\S+" ) ) );
+    QStringList musicMimeTypes = generateMusicMimeTypeList();
 
-    if( !musicMimeTypes.isEmpty() )
-    {
-        if( musicMimeTypes.contains( QLatin1String( "audio/mpeg" ) ) )
-        {
-            if( !musicMimeTypes.contains( QLatin1String( "audio/mpeg3" ) ) )
-                musicMimeTypes.append( QLatin1String( "audio/mpeg3" ) );
-            if( !musicMimeTypes.contains( QLatin1String( "audio/mp3" ) ) )
-                musicMimeTypes.append( QLatin1String( "audio/mp3" ) );
-            if( !musicMimeTypes.contains( QLatin1String( "audio/x-mp3" ) ) )
-                musicMimeTypes.append( QLatin1String( "audio/x-mp3" ) );
-        }
-        musicMimeTypes.removeAll( QLatin1String( "audio/mpegurl" ) );
-        musicMimeTypes.removeAll( QLatin1String( "audio/x-mpegurl" ) );
-        musicMimeTypes.removeAll( QLatin1String( "audio/x-scpls" ) );
+    if( !musicMimeTypes.isEmpty() ) {
 
         // Construct music menu
         QContentFilter musicfilter;
@@ -2127,6 +2105,11 @@ MediaBrowser::MediaBrowser( PlayerControl* control, RequestHandler* handler, QWi
         browser = new CustomPropertyBrowser(
             PropertyBrowser::Genre, musicfilter, this );
         musicmenu->addItem( tr( "Genres" ), browser );
+
+#ifdef USE_PICTUREFLOW
+        musicmenu->addItem( tr( "Covers" ),
+            QIcon(), LeafHint, ShowCoverArtRequest() );
+#endif
 
         next = new CustomPropertyBrowser(
             PropertyBrowser::Artist, musicfilter, this );
@@ -2191,7 +2174,40 @@ MediaBrowser::MediaBrowser( PlayerControl* control, RequestHandler* handler, QWi
     layout->setSpacing( 0 );
 
     layout->addWidget( m_titlebar );
-    layout->addWidget( m_view );
+    stackedLayout = new QStackedLayout;
+    stackedLayout->setMargin( 0 );
+    layout->addLayout(stackedLayout, 1);
+    stackedLayout->addWidget( m_view );
+#ifdef USE_PICTUREFLOW
+    QWidget *pictureFlowParent=new QWidget;
+    QVBoxLayout *pictureFlowParentLayout=new QVBoxLayout;
+    pictureFlowParentLayout->setMargin( 0 );
+    pictureFlowParentLayout->setSpacing( 0 );
+    m_coverArt = new PictureFlowView;
+    m_coverArt->setReflectionEffect(PictureFlow::NoReflection);
+    m_coverArt->setModelRole(QContentSetModel::ThumbnailRole);
+    QPalette labelPalette=palette();
+    labelPalette.setColor(QPalette::Window, m_coverArt->backgroundColor());
+    labelPalette.setColor(QPalette::Text, QColor(255-m_coverArt->backgroundColor().red(), 255-m_coverArt->backgroundColor().green(), 255-m_coverArt->backgroundColor().blue(), m_coverArt->backgroundColor().alpha()));
+    pictureFlowParent->setPalette(labelPalette);
+    pictureFlowParent->setBackgroundRole(QPalette::Window);
+    pictureFlowParent->setAutoFillBackground(true);
+    m_AlbumLabel = new QMarqueeLabel;
+    m_AlbumLabel->setText("X");
+    m_AlbumLabel->setPalette(labelPalette);
+    connect( m_AlbumLabel, SIGNAL(rotateFinished()), this, SLOT(rotateFinished()) );
+    m_ArtistLabel = new QMarqueeLabel;
+    m_ArtistLabel->setText("X");
+    m_ArtistLabel->setPalette(labelPalette);
+    connect( m_ArtistLabel, SIGNAL(rotateFinished()), this, SLOT(rotateFinished()) );
+    connect(m_coverArt, SIGNAL(clicked(int)), this, SLOT(coverClicked(int)));
+    connect(m_coverArt, SIGNAL(centerIndexChanged(int)), this, SLOT(coverChanged(int)));
+    pictureFlowParentLayout->addWidget(m_AlbumLabel);
+    pictureFlowParentLayout->addWidget(m_ArtistLabel);
+    pictureFlowParentLayout->addWidget(m_coverArt, 1);
+    pictureFlowParent->setLayout(pictureFlowParentLayout);
+    stackedLayout->addWidget(pictureFlowParent);
+#endif
     setLayout( layout );
 
     QTimer::singleShot(1, this, SLOT(delayMenuCreation()));
@@ -2204,6 +2220,10 @@ MediaBrowser::MediaBrowser( PlayerControl* control, RequestHandler* handler, QWi
     filter->addKey( Qt::Key_Back );
 
     setFocusProxy( m_view );
+
+    connect( &m_playlist, SIGNAL(playingChanged(QModelIndex)),
+        this, SLOT(enableNowPlaying()) );
+
 }
 
 MediaBrowser::~MediaBrowser()
@@ -2219,23 +2239,11 @@ MediaBrowser::~MediaBrowser()
     delete m_director;
 }
 
-void MediaBrowser::setCurrentPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
+void MediaBrowser::setCurrentPlaylist( const QMediaPlaylist &playlist )
 {
-    if( m_playlist != playlist ) {
-
-        if( m_playlist.data() != NULL ) {
-            m_playlist->disconnect( this );
-        }
-
+    if( m_playlist != playlist )
         m_playlist = playlist;
 
-        if ( m_playlist == NULL)
-            return;
-
-        // Connect to new playlist
-        connect( m_playlist, SIGNAL(playingChanged(QModelIndex)),
-            this, SLOT(enableNowPlaying()) );
-    }
     m_currentplaylistmenu->setPlaylist( playlist );
 
     enableNowPlaying();
@@ -2243,11 +2251,22 @@ void MediaBrowser::setCurrentPlaylist( QExplicitlySharedDataPointer<Playlist> pl
 
 bool MediaBrowser::hasBack() const
 {
-    return m_stack->top() != m_mainmenu;
+    return
+#ifdef USE_PICTUREFLOW
+            isCoverArtVisible() ||
+#endif
+            m_stack->top() != m_mainmenu;
 }
 
 void MediaBrowser::goBack()
 {
+#ifdef USE_PICTUREFLOW
+    if(isCoverArtVisible())
+    {
+        setCoverArtVisible(false);
+        return;
+    }
+#endif
     m_history->setIndex( m_view->currentIndex().row() ); 
 
     m_stack->pop();
@@ -2256,10 +2275,8 @@ void MediaBrowser::goBack()
 
     m_view->setCurrentIndex( top->index( m_history->back() ) );
 
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     m_removegroup->setContext( PlaylistRemoveContext( top ) );
     m_savegroup->setContext( PlaylistSaveContext( top ) );
-#endif
 
     m_titlebar->pop();
 
@@ -2330,16 +2347,10 @@ void MediaBrowser::removePlaylistItem()
 {
     PlaylistModel *model = qobject_cast<PlaylistModel*>(m_view->model());
     if( model ) {
-        QExplicitlySharedDataPointer<Playlist> playlist = model->playlist();
-        PlaylistRemove *remove = qobject_cast<PlaylistRemove*>(playlist.data());
-        if( remove ) {
-            remove->remove( playlist->index( m_view->currentIndex().row() ) );
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-            MenuModel *top = m_stack->top();
-            m_removegroup->setContext( PlaylistRemoveContext( top ) );
-            m_savegroup->setContext( PlaylistSaveContext( top ) );
-#endif
-        }
+        const_cast<QMediaPlaylist&>(model->playlist()).remove( model->playlist().index( m_view->currentIndex().row() ) );
+        MenuModel *top = m_stack->top();
+        m_removegroup->setContext( PlaylistRemoveContext( top ) );
+        m_savegroup->setContext( PlaylistSaveContext( top ) );
     }
 }
 
@@ -2347,18 +2358,13 @@ void MediaBrowser::clearPlaylist()
 {
     PlaylistModel *model = qobject_cast<PlaylistModel*>(m_view->model());
     if( model ) {
-        PlaylistRemove *remove = qobject_cast<PlaylistRemove*>(model->playlist().data());
-        if( remove ) {
-            if( QMessageBox::question( this, tr( "Clear Playlist" ),
-                tr( "Are you sure you want to clear the playlist?" ),
-                QMessageBox::Ok, QMessageBox::Cancel ) == QMessageBox::Ok ) {
-                remove->clear();
-#ifdef QTOPIA_KEYPAD_NAVIGATION
-                MenuModel *top = m_stack->top();
-                m_removegroup->setContext( PlaylistRemoveContext( top ) );
-                m_savegroup->setContext( PlaylistSaveContext( top ) );
-#endif
-            }
+        if( QMessageBox::question( this, tr( "Clear Playlist" ),
+            tr( "Are you sure you want to clear the playlist?" ),
+            QMessageBox::Ok, QMessageBox::Cancel ) == QMessageBox::Ok ) {
+            const_cast<QMediaPlaylist&>(model->playlist()).clear();
+            MenuModel *top = m_stack->top();
+            m_removegroup->setContext( PlaylistRemoveContext( top ) );
+            m_savegroup->setContext( PlaylistSaveContext( top ) );
         }
     }
 }
@@ -2367,13 +2373,10 @@ void MediaBrowser::savePlaylist()
 {
     PlaylistModel *model = qobject_cast<PlaylistModel*>(m_view->model());
     if( model ) {
-        PlaylistSave *save = qobject_cast<PlaylistSave*>(model->playlist().data());
-        if( save ) {
-            SavePlaylistDialog dialog( this );
-            dialog.setText( save->suggestedName() );
-            if( QtopiaApplication::execDialog( &dialog, false ) ) {
-                save->save( dialog.text() );
-            }
+        SavePlaylistDialog dialog( this );
+        dialog.setText( model->playlist().suggestedName() );
+        if( QtopiaApplication::execDialog( &dialog, false ) ) {
+            model->playlist().save( dialog.text() );
         }
     }
 }
@@ -2381,14 +2384,21 @@ void MediaBrowser::savePlaylist()
 void MediaBrowser::generateMyShuffle()
 {
     // If current playlist isn't already, generate My Shuffle playlist
-    if( !qobject_cast<PlaylistMyShuffle*>(m_currentplaylistmenu->playlist().data()) ) {
-        if ( !m_myshufflemenu->playlist() ) {
-            QContentFilter musicfilter = QContentFilter( QContent::Document ) &
-                (QContentFilter( QContentFilter::MimeType, "audio/mpeg" ) |
-                QContentFilter::mimeType( "audio/mpeg3" ) |
-                QContentFilter::mimeType( "audio/mp3" ) );
+    if( !m_currentplaylistmenu->playlist().isShuffle() ) {
+        if ( m_myshufflemenu->playlist().rowCount() == 0 ) {
+            QStringList musicMimeTypes = generateMusicMimeTypeList();
 
-            m_myshufflemenu->setPlaylist( QExplicitlySharedDataPointer<Playlist>( new MyShufflePlaylist( musicfilter ) ) );
+            if( !musicMimeTypes.isEmpty() ) {
+                QContentFilter musicfilter;
+
+                foreach( const QString &mimeType, musicMimeTypes )
+                    musicfilter |= QContentFilter::mimeType( mimeType );
+
+                musicfilter &= QContentFilter( QContent::Document );
+
+                m_myshufflemenu->setPlaylist( QMediaPlaylist( musicfilter ) );
+                const_cast<QMediaPlaylist&>(m_myshufflemenu->playlist()).setShuffle( true );
+            }
         }
         m_requesthandler->execute( new PushMenuRequest( m_myshufflemenu ) );
     } else {
@@ -2401,13 +2411,12 @@ void MediaBrowser::resetMyShuffle()
 {
     PlaylistModel *model = qobject_cast<PlaylistModel*>(m_view->model());
     if( model ) {
-        PlaylistMyShuffle *myshuffle = qobject_cast<PlaylistMyShuffle*>(model->playlist().data());
-        if( myshuffle ) {
+        if( model->playlist().isShuffle() ) {
             if( QMessageBox::question( this, tr( "My Shuffle Reset" ),
                 tr( "Are you sure you want to reset all track ratings for My Shuffle?" ),
                 QMessageBox::Ok, QMessageBox::Cancel ) == QMessageBox::Ok ) {
                 // Reset track ratings
-                myshuffle->reset();
+                const_cast<QMediaPlaylist&>(model->playlist()).resetProbabilities();
                 m_myshufflemenu->setPlaylist( 0 );
                 // Generate new shuffle
                 goBack();
@@ -2419,7 +2428,7 @@ void MediaBrowser::resetMyShuffle()
 
 void MediaBrowser::enableNowPlaying()
 {
-    if( m_playlist->playing().isValid() ) {
+    if( m_playlist.playing().isValid() ) {
         if( !m_hasnowplaying ) {
             m_mainmenu->addItem( tr( "Now Playing" ),
                 QIcon( ":icon/mediaplayer/black/nowplaying" ), LeafHint, ShowPlayerRequest() );
@@ -2464,7 +2473,11 @@ void MediaBrowser::directSelectRelease()
 void MediaBrowser::executeShowPlayerRequest()
 {
     // If browser has focus and player active, show player
-    if( m_focused && m_playlist->playing().isValid() ) {
+    if((m_focused
+#ifdef USE_PICTUREFLOW
+                || m_coverArt->hasFocus()
+#endif
+            ) && m_playlist.playing().isValid()) {
         m_requesthandler->execute( new ShowPlayerRequest() );
     }
 }
@@ -2475,7 +2488,6 @@ void MediaBrowser::delayMenuCreation()
     QAction *removeaction, *separator, *clearaction;
     QAction *saveaction;
     QAction *reset;
-#ifdef QTOPIA_KEYPAD_NAVIGATION
     QMenu *menu = QSoftMenuBar::menuFor( this );
 
     removeaction = new QAction( tr( "Remove Item" ), this );
@@ -2502,8 +2514,6 @@ void MediaBrowser::delayMenuCreation()
     menu->addAction( settingsAction );
 #endif
 
-#endif
-
     m_removegroup = new ActionGroup( QList<QAction*>() << removeaction << separator << clearaction );
     m_savegroup = new ActionGroup( QList<QAction*>() << saveaction );
     m_resetgroup = new ActionGroup( QList<QAction*>() << reset );
@@ -2524,6 +2534,191 @@ void MediaBrowser::execSettings()
     MediaPlayerSettingsDialog settingsdialog( this );
     QtopiaApplication::execDialog( &settingsdialog );
 #endif
+}
+
+#ifdef USE_PICTUREFLOW
+
+class PictureFlowContentSetModel : public QContentSetModel
+{
+    Q_OBJECT
+public:
+    PictureFlowContentSetModel( const QContentSet * cls, QObject * parent = 0 ) : QContentSetModel(cls, parent) {}
+    virtual QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const
+    {
+        if(role == QContentSetModel::ThumbnailRole)
+        {
+            QImage result=content(index).thumbnail();
+            if(result.isNull())
+            {
+                if(noImage.isNull())
+                {
+                    noImage=QImage(QSize(200, 200), QImage::Format_RGB32);
+                    int sw = noImage.width();
+                    int sh = noImage.height();
+
+                    QPainter painter(&noImage);
+                    painter.setRenderHint(QPainter::Antialiasing);
+                    QPoint p1(sw*4/10, 0);
+                    QPoint p2(sw*6/10, sh);
+                    QLinearGradient linearGrad(p1, p2);
+                    linearGrad.setColorAt(0, Qt::darkGray);
+                    linearGrad.setColorAt(1, Qt::white);
+                    painter.setBrush(linearGrad);
+                    painter.fillRect(0, 0, sw, sh, QBrush(linearGrad));
+
+                    painter.setPen(QPen(QColor(64,64,64), 4));
+                    painter.setBrush(QBrush());
+                    painter.drawRect(2, 2, sw-3, sh-3);
+                    painter.setBrush(Qt::black);
+                    painter.drawText(noImage.rect(), Qt::AlignCenter, tr("No\nCover"));
+                    painter.end();
+                }
+                return noImage;
+            }
+            else
+                return result;
+        }
+        else
+            return QContentSetModel::data(index, role);
+    }
+    static QImage noImage;
+};
+
+QImage PictureFlowContentSetModel::noImage;
+
+void MediaBrowser::setCoverArtVisible(bool enabled)
+{
+    if(enabled)
+    {
+        generateCoverArtData();
+        stackedLayout->setCurrentIndex(1);
+        m_coverArt->setFocus();
+        coverChanged(m_coverArt->centerIndex());
+    }
+    else
+    {
+        stackedLayout->setCurrentIndex(0);
+        m_view->setFocus();
+    }
+    layout()->update();
+}
+
+bool MediaBrowser::isCoverArtVisible() const
+{
+    return stackedLayout->currentIndex() == 1;
+}
+
+void MediaBrowser::generateCoverArtData()
+{
+    m_coverArt->setModel(NULL);
+    if(m_coverArtContentSet == NULL)
+    {
+        m_coverArtContentSet=new QContentSet;
+        m_coverArtContentSet->setSortCriteria(QContentSortCriteria(QContentSortCriteria::Property, "none/Album"));
+        m_coverArtContentSetModel = new PictureFlowContentSetModel(m_coverArtContentSet);
+    }
+    m_coverArtContentSet->clear();
+
+    QStringList musicMimeTypes = generateMusicMimeTypeList();
+
+    if( !musicMimeTypes.isEmpty() ) {
+        QContentFilter musicfilter;
+
+        foreach( const QString &mimeType, musicMimeTypes )
+            musicfilter |= QContentFilter::mimeType( mimeType );
+
+        musicfilter &= QContentFilter( QContent::Document );
+
+        CustomPropertyBrowser *browser = new CustomPropertyBrowser(
+            PropertyBrowser::Album, musicfilter, this );
+
+        for(int i=0; i< browser->rowCount(); i++)
+        {
+            QContentFilter albumfilter(QContent::Album, browser->data(browser->index(i,0), Qt::DisplayRole).toString());
+            QContentSet contentset(musicfilter & albumfilter);
+            if(contentset.count() > 0)
+                m_coverArtContentSet->add(contentset.content(0));
+        }
+        m_coverArt->setModel(m_coverArtContentSetModel);
+    }
+}
+
+void MediaBrowser::coverClicked(int index)
+{
+    QContent content(m_coverArtContentSetModel->content(index));
+
+    QStringList musicMimeTypes = generateMusicMimeTypeList();
+
+    if(!musicMimeTypes.isEmpty()) {
+
+        // Construct music menu
+        QContentFilter musicfilter;
+
+        foreach(const QString &mimeType, musicMimeTypes)
+            musicfilter |= QContentFilter::mimeType(mimeType);
+
+        musicfilter &= QContentFilter(QContent::Document);
+
+        QContentSet set(musicfilter & QContentFilter(QContentFilter::Synthetic, "none/Artist/"+content.property(QContent::Artist)) & QContentFilter(QContentFilter::Synthetic, "none/Album/"+content.property(QContent::Album)));
+        set.setSortOrder(QStringList()
+            << "synthetic/none/Artist"
+            << "synthetic/none/Album"
+            << "synthetic/none/Track");
+
+        QStringList urls;
+        foreach(QContent content, set.items()) {
+            urls.append(content.fileName());
+        }
+
+        m_requesthandler->execute(new CuePlaylistRequest(QMediaPlaylist(urls)));
+    }
+}
+
+void MediaBrowser::coverChanged(int index)
+{
+    m_ArtistLabel->stopRotate();
+    m_AlbumLabel->stopRotate();
+    QContent content(m_coverArtContentSetModel->content(index));
+    m_ArtistLabel->setText(content.property(QContent::Artist));
+    m_AlbumLabel->setText(content.property(QContent::Album));
+    if(m_ArtistLabel->canRotate())
+        QTimer::singleShot(2000, m_ArtistLabel, SLOT(startRotate()));
+    else if(m_AlbumLabel->canRotate())
+        QTimer::singleShot(2000, m_AlbumLabel, SLOT(startRotate()));
+}
+
+void MediaBrowser::resizeEvent(QResizeEvent * event)
+{
+    QWidget::resizeEvent(event);
+    qreal newsize=qMin(QSizeF(event->size()).width(), QSizeF(event->size()).height()) * 0.65;
+    m_coverArt->setSlideSize(QSize(qRound(newsize), qRound(newsize)));
+}
+
+void MediaBrowser::rotateFinished()
+{
+    if(sender()==NULL || sender() == m_AlbumLabel)
+        QMarqueeLabel::startRotating(m_ArtistLabel, m_AlbumLabel);
+    else if(sender()==NULL || sender() == m_ArtistLabel)
+        QMarqueeLabel::startRotating(m_AlbumLabel, m_ArtistLabel);
+}
+
+#endif
+
+QStringList MediaBrowser::generateMusicMimeTypeList()
+{
+    QStringList musicMimeTypes = QMediaContent::supportedMimeTypes().filter( QRegExp( QLatin1String( "audio/\\S+" ) ) );
+    if( musicMimeTypes.contains( QLatin1String( "audio/mpeg" ) ) ) {
+        if( !musicMimeTypes.contains( QLatin1String( "audio/mpeg3" ) ) )
+            musicMimeTypes.append( QLatin1String( "audio/mpeg3" ) );
+        if( !musicMimeTypes.contains( QLatin1String( "audio/mp3" ) ) )
+            musicMimeTypes.append( QLatin1String( "audio/mp3" ) );
+        if( !musicMimeTypes.contains( QLatin1String( "audio/x-mp3" ) ) )
+            musicMimeTypes.append( QLatin1String( "audio/x-mp3" ) );
+    }
+    musicMimeTypes.removeAll( QLatin1String( "audio/mpegurl" ) );
+    musicMimeTypes.removeAll( QLatin1String( "audio/x-mpegurl" ) );
+    musicMimeTypes.removeAll( QLatin1String( "audio/x-scpls" ) );
+    return musicMimeTypes;
 }
 
 #include "mediabrowser.moc"

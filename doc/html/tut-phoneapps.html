@@ -3,15 +3,15 @@
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>Tutorial: Writing Qtopia Phone Applications</title>
+  <title>Tutorial: Writing Qt Extended Phone Applications</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Tutorial: Writing Qtopia Phone Applications<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Tutorial: Writing Qt Extended Phone Applications<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#user-interface-changes">User Interface Changes</a></li>
@@ -22,7 +22,7 @@
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>Qtopia Phone Edition is tuned for use on a mobile phone. All Qt and Qtopia widgets have been modified for use with a small set of keys as follows:</p>
+<p>Qt Extended is tuned for use on a mobile phone. All Qt and Qt Extended widgets have been modified for use with a small set of keys as follows:</p>
 <ul>
 <li>context key - used to display a context menu, or perform a specific task based on the current context.</li>
 <li>select key - used to select a widget for editing or an item from a list, etc.</li>
@@ -58,7 +58,7 @@
 <p>In practice, it is usually unnecessary to manually set edit focus.</p>
 <a name="the-soft-menu-bar"></a>
 <h2>The Soft Menu Bar</h2>
-<p>Some phones have soft keys with different meanings in different contexts. On these phones the Qtopia phone edition server displays a Soft Menu Bar at the bottom of the screen. This bar displays the actions that the corresponding button on the phone will perform. The label to be displayed in the context bar is set using the <a href="qsoftmenubar.html">QSoftMenuBar</a> class.</p>
+<p>Some phones have soft keys with different meanings in different contexts. On these phones the Qt Extended server displays a Soft Menu Bar at the bottom of the screen. This bar displays the actions that the corresponding button on the phone will perform. The label to be displayed in the context bar is set using the <a href="qsoftmenubar.html">QSoftMenuBar</a> class.</p>
 <p>For example, to set the <tt>Qt::Key_Select</tt> label of a widget to the standard EndEdit label when it is in edit focus state:</p>
 <pre>    QSoftMenuBar::setLabel(widget, Qt::Key_Select, QSoftMenuBar::EndEdit, QSoftMenuBar::EditFocus);</pre>
 <p>It is also possible to set custom labels using:</p>
@@ -91,8 +91,8 @@
 <p>See also <a href="inputmethods-description.html">Input Methods Documentation</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

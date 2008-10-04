@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">SXE - Application Level Policy<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">SXE - Application Level Policy<br /><span class="subtitle"></span>
 </h1>
 <ul><li><a href="#service-access-control">Service Access Control</a></li>
 <li><a href="#request-authentication-and-authorization-procedure">Request Authentication and Authorization Procedure</a></li>
@@ -19,9 +19,9 @@
 </ul>
 <a name="service-request"></a><a name="service-access-control"></a>
 <h2>Service Access Control</h2>
-<p>In general programs may access services, which in the context of the SXE, can mean low level graphical display services provided by QWS to high level <a href="services.html">Application Services</a>. Service access is achieved by sending IPC calls to the Qtopia system, for example via <tt>QCop</tt> messages. Application level policy refers to policy which dictates what services a program may and may not access.</p>
-<p>In the current implementation of Qtopiacore the IPC calls are in the form of streamed data sent through a Unix Domain Socket (UDS). Currently the entire graphics subsystem is implemented via a system of <tt>QWSCommands</tt> over this socket, combined with reads/writes to a piece of shared memory.</p>
-<p>Because a program requires access to the well known path to the Unix Domain Socket for the <tt>QCop</tt> system in order to send low-level requests to the Qtopia windowing system, it is not practical to use MAC file system rules to control access to services.</p>
+<p>In general programs may access services, which in the context of the SXE, can mean low level graphical display services provided by QWS to high level <a href="services.html">Application Services</a>. Service access is achieved by sending IPC calls to the Qt Extended system, for example via <tt>QCop</tt> messages. Application level policy refers to policy which dictates what services a program may and may not access.</p>
+<p>In the current implementation of Qt Embedded the IPC calls are in the form of streamed data sent through a Unix Domain Socket (UDS). Currently the entire graphics subsystem is implemented via a system of <tt>QWSCommands</tt> over this socket, combined with reads/writes to a piece of shared memory.</p>
+<p>Because a program requires access to the well known path to the Unix Domain Socket for the <tt>QCop</tt> system in order to send low-level requests to the Qt Extended windowing system, it is not practical to use MAC file system rules to control access to services.</p>
 <p>Control of access to services involves two important steps:</p>
 <ol type="1">
 <li><b>authentication</b> : identify profile of the program which sent the request</li>
@@ -32,7 +32,7 @@
 <p>That application may however be made up of a number of binaries, and other files. In some cases a single binary may make up the totality of the package but sometimes the picture is more complex than that.</p>
 <p>For example, a game may have a level editor, the main game binary, and a daemon process. While the game itself and the level editor may also be thought of separate applications, both are considered to be part of the same program.</p>
 <p>The SXE system applies policy rules to each <b>program</b> component by associating a <tt>progId</tt> with all the components of that application. The <tt>progId</tt> has a one to one relationship with the domain the application operates under, therefore all untrusted applications have the same <tt>progId</tt> while all trusted applications have another.</p>
-<p>When a program wants to access functionality available via Qtopia in general it must use the <tt>QWSCommand</tt> system, or send a <tt>QCop</tt> message or otherwise ask for an application service. Generally these accesses can be expressed as a string for example in the case of a <tt>QCop</tt> message requesting a wait indicator to be displayed: <tt>QPE/System/notBusy()</tt></p>
+<p>When a program wants to access functionality available via Qt Extended in general it must use the <tt>QWSCommand</tt> system, or send a <tt>QCop</tt> message or otherwise ask for an application service. Generally these accesses can be expressed as a string for example in the case of a <tt>QCop</tt> message requesting a wait indicator to be displayed: <tt>QPE/System/notBusy()</tt></p>
 <p>Such an access for a service, and the string representing it, is referred to as a <b>request</b>.</p>
 <a name="request-authentication-and-authorization-procedure"></a>
 <h2>Request Authentication and Authorization Procedure</h2>
@@ -72,7 +72,7 @@
 <a name="program-identification"></a>
 <h2>Program Identification</h2>
 <p>In the authorization procedure described above it states that the authentication may be done simply if the message transport is trusted.</p>
-<p>If the <i>message transport is trusted</i> <b>four</b> assumptions must be fulfilled. The table below lists these assumptions and how, or if, they hold in the Qtopia platform.</p>
+<p>If the <i>message transport is trusted</i> <b>four</b> assumptions must be fulfilled. The table below lists these assumptions and how, or if, they hold in the <a href="qtbasemodule.html">Qt Extended Base module</a>.</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Assumption</th><th>Comments</th></tr></thead>
 <tr valign="top" class="odd"><td>The transport cannot be intercepted for example, as in a <i>man-in-the-middle</i> attack or <i>traffic-sniffing</i> scenario.</td><td>Unix domain socket traffic cannot be sniffed or rewritten on a standard Linux kernel. However, the following can be sniffed/intercepted:<ul>
@@ -99,15 +99,15 @@
 </ul>
 </td></tr>
 </table></p>
-<p><b>Note:</b> Current <tt>QCop</tt> messaging (which is used for almost all service requests in Qtopia) uses Unix Domain Sockets.</p>
+<p><b>Note:</b> Current <tt>QCop</tt> messaging (which is used for almost all service requests in Qt Extended) uses Unix Domain Sockets.</p>
 <p><b>Summarizing the above table</b></p>
 <p>If the assumptions hold - the kernel and MAC controls can be relied upon to prevent a range of security risks - a simple password-based mechanism can be used at connection setup time to authenticate the connection, or Unix Domain Socket ancillary data can be used.</p>
 <p>The second option is more complex than the password method, and carries a portability warning. However if the Unix Domain Sockets rights methods are required for passing file handles that method can be used.</p>
 <p>In several scenarios where one or two of these assumptions are not valid the password based mechanism can be simply expanded to HMAC-MD5 message authentication.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

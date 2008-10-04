@@ -11,6 +11,6 @@ depends(libraries/qtopiaphone)
 pkg.name=caller
 pkg.desc=Caller Demo Application
 pkg.version=1.0.0-1
-pkg.maintainer=Trolltech (www.trolltech.com)
+pkg.maintainer=Qt Extended <info@qtextended.org>
 pkg.license=Commercial
 pkg.domain=trusted

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -42,7 +40,7 @@ class UriSessionBuilderPrivate
 public:
     Engine*                             engine;
     QMediaSessionBuilder::Attributes    attributes;
-    MediaCodecPluginMap                 pluginExtensionMapping;
+    MediaCodecPluginMap                 mimeTypeMapping;
 };
 // }}}
 
@@ -56,20 +54,19 @@ public:
 UriSessionBuilder::UriSessionBuilder
 (
  Engine*            engine,
- QStringList const& mimeTypes,
- MediaCodecPluginMap const& pluginExtensionMapping
+ MediaCodecPluginMap const& mimeTypeMapping
 ):
     QObject(engine),
     d(new UriSessionBuilderPrivate)
 {
     d->engine = engine;
-    d->pluginExtensionMapping = pluginExtensionMapping;
+    d->mimeTypeMapping = mimeTypeMapping;
 
     // Supported URI Schems
     d->attributes.insert("uriSchemes", UriHandlers::supportedUris());
 
     // Supported mime types
-    d->attributes.insert("mimeTypes", mimeTypes);
+    d->attributes.insert("mimeTypes", QStringList(mimeTypeMapping.keys()));
 }
 
 UriSessionBuilder::~UriSessionBuilder()
@@ -94,23 +91,19 @@ QMediaServerSession* UriSessionBuilder::createSession(QMediaSessionRequest sessi
 
     sessionRequest >> url;
 
-    if (url.isValid())
-    {
+    if (url.isValid()) {
         QString     path = url.path();
-        QString     extension = path.mid(path.lastIndexOf('.') + 1).toLower();
+        QMimeType   mimeType(path);
 
-        if (!extension.isEmpty())
-        {
-            MediaCodecPluginMap::iterator it = d->pluginExtensionMapping.find(extension);
+        if (!mimeType.isNull()) {
+            MediaCodecPluginMap::iterator it = d->mimeTypeMapping.find(mimeType.id());
 
             // Check for a plugin
-            if (it != d->pluginExtensionMapping.end())
-            {
+            if (it != d->mimeTypeMapping.end()) {
                 QMediaDevice*   inputDevice  = UriHandlers::createInputDevice(url.scheme(), path);
                 QMediaDevice*   outputDevice = OutputDevices::createOutputDevice();
 
                 if (inputDevice != 0 && outputDevice != 0) {
-                    QMimeType           mimeType(path);
                     QMediaCodecPlugin*  plugin = it.value();
                     QMediaDecoder*      coder = plugin->decoder(mimeType.id());
 

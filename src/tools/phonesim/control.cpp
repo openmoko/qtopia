@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -52,6 +50,7 @@ public:
 private slots:
     void sendSQ();
     void sendBC();
+    void chargingChanged(int state);
     void sendOPS();
     void sendREG();
     void sendCBM();
@@ -95,6 +94,7 @@ ControlWidget::ControlWidget(const QString &ruleFile, Control *parent)
 
     connect(ui->hsSignalQuality, SIGNAL(valueChanged(int)), this, SLOT(sendSQ()));
     connect(ui->hsBatteryCharge, SIGNAL(valueChanged(int)), this, SLOT(sendBC()));
+    connect(ui->hsBatteryCharging, SIGNAL(stateChanged(int)), this, SLOT(chargingChanged(int)));
     connect(ui->pbSelectOperator, SIGNAL(clicked()), this, SLOT(sendOPS()));
     connect(ui->pbRegistration, SIGNAL(clicked()), this, SLOT(sendREG()));
     connect(ui->pbSendCellBroadcast, SIGNAL(clicked()), this, SLOT(sendCBM()));
@@ -153,8 +153,17 @@ void ControlWidget::sendSQ()
 
 void ControlWidget::sendBC()
 {
-    emit variableChanged("BC","1,"+QString::number(ui->hsSignalQuality->value()));
-    emit unsolicitedCommand("+CBC: 0,"+QString::number(ui->hsBatteryCharge->value()));
+    bool charging = ui->hsBatteryCharging->checkState() == Qt::Checked;
+    emit variableChanged("BC",QString::number(charging)+","+QString::number(ui->hsBatteryCharge->value()));
+    emit unsolicitedCommand("+CBC: "+QString::number(charging)+","+QString::number(ui->hsBatteryCharge->value()));
+}
+
+void ControlWidget::chargingChanged(int state)
+{
+    bool charging = state  == Qt::Checked;
+    ui->hsBatteryCharge->setEnabled(!charging);
+    emit variableChanged("BC",QString::number(charging)+","+QString::number(ui->hsBatteryCharge->value()));
+    emit unsolicitedCommand("+CBC: "+QString::number(charging)+","+QString::number(ui->hsBatteryCharge->value()));
 }
 
 void ControlWidget::sendOPS()
@@ -202,12 +211,19 @@ void ControlWidget::sendCBM()
 
 void ControlWidget::sendSMSMessage()
 {
-    int originalCount = p->getSMSList().count();
-    p->constructSMSMessage(ui->leMessageSender->text(), ui->leSMSServiceCenter->text(), ui->teSMSText->toPlainText());
+    if (ui->leSMSClass->text().isEmpty()) {
+        p->warning(tr("Invalid Sender"),
+                tr("Sender must not be empty"));
+        return;
+    }
 
-    int count = p->getSMSList().count();
-    if ( count > originalCount )
-        emit unsolicitedCommand("+CMTI: \"SM\","+QString::number( p->getSMSList().count()));
+    if (ui->leSMSServiceCenter->text().isEmpty() || ui->leSMSServiceCenter->text().contains(QRegExp("\\D"))) {
+        p->warning(tr("Invalid Service Center"),
+                tr("Service Center must not be empty and contain "
+                   "only digits"));
+        return;
+    }
+    p->constructSMSMessage(ui->leSMSClass->text().toInt(), ui->leMessageSender->text(), ui->leSMSServiceCenter->text(), ui->teSMSText->toPlainText());
 }
 
 void ControlWidget::sendMGD()
@@ -222,7 +238,6 @@ void ControlWidget::selectFile()
 
 void ControlWidget::sendSMSDatagram()
 {
-
     QString portStr = ui->lePort->text();
     if ( portStr.contains(QRegExp("\\D")) ) {
         p->warning(tr("Invalid Port"), tr("Port number can contain only digits" ));
@@ -258,13 +273,7 @@ void ControlWidget::sendSMSDatagram()
     }
 
     //construct and place SMS datagram in SMSList
-    int originalCount = p->getSMSList().count();
     p->constructSMSDatagram(port, sender, data, contentType);
-
-    //if datagram successfully placed in SMSList emit CMTI
-    int count = p->getSMSList().count();
-    if ( count > originalCount )
-        emit unsolicitedCommand("+CMTI: \"SM\","+QString::number( p->getSMSList().count()));
 }
 
 void ControlWidget::sendCall()

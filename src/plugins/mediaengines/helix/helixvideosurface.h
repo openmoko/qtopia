@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -32,6 +30,9 @@
 #include <hxvsurf.h>
 #include <hxcolor.h>
 
+#include <qvideoframe.h>
+
+class QVideoSurface;
 
 typedef LPHXCOLORCONVERTER (HXEXPORT_PTR FPGETCOLORCONVERTER) (INT32 cidIn, INT32 cidOut);
 typedef void (HXEXPORT_PTR FPINITCOLORCONVERTER) (void);
@@ -47,8 +48,12 @@ class PaintObserver
 {
 public:
     virtual ~PaintObserver() {}
-    virtual void setVideoSize(QSize const& size) = 0;
-    virtual void paint(QImage const& frame) = 0;
+    virtual void paint( QVideoFrame const& frame) = 0;
+
+    virtual QVideoFormatList preferredFormats() const = 0;
+    virtual QVideoFormatList supportedFormats() const = 0;
+
+    virtual QVideoSurface *videoSurface() = 0;
 };
 
 
@@ -57,7 +62,7 @@ class GenericVideoSurface : public IHXVideoSurface
 public:
     GenericVideoSurface();
     virtual  ~GenericVideoSurface() {}
-    QImage const& buffer() const { return m_buffer; }
+    //QImage const& buffer() const { return m_buffer; }
 
     // IHXVideoSurface
     STDMETHOD(BeginOptimizedBlt) (THIS_ HXBitmapInfoHeader *pBitmapInfo);
@@ -83,14 +88,23 @@ public:
 
     void setPaintObserver(PaintObserver* paintObserver);
 
+    void updateColorConverter();
+    void repaintLastFrame();
 private:
+
     INT32 m_refCount;
 
     HelixColorLibrary m_library;
 
     QSize               m_videoSize;
-    QImage              m_buffer;
+    double m_aspectRatio;
+    bool m_aspectRatioDefined;
+    QVideoFrame m_outputFrame;
+
+    //QImage              m_buffer;
     LPHXCOLORCONVERTER  Converter;
+    QVideoFrame::PixelFormat m_inputFormat;
+    QVideoFrame::PixelFormat m_outputFormat;
     int                 m_bufferPitch;
     int                 m_inPitch;
     int                 m_bufferWidth;
@@ -98,5 +112,4 @@ private:
     PaintObserver*      m_paintObserver;
 };
 
-
-#endif // HELIXVIDEOSURFACE_H
+#endif

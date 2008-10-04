@@ -1,27 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "words.h"
 
-#include <qtopia/inputmatch/pkimmatcher.h>
+#include <pkimmatcher.h>
 #include <qtopianamespace.h>
 #include <qsoftmenubar.h>
 #include <qtopiaapplication.h>
@@ -296,7 +294,7 @@ void Words::updateActions()
     a_del->setText(
             a_allpref->isChecked() ? tr("Unprefer")
             : a_alldel->isChecked() ? tr("Undelete")
-            : tr("Delete"));
+            : tr("Delete Word"));
 
     bool preferEnabled =
             a_pkim->isChecked()
@@ -390,9 +388,6 @@ void Words::lookup(const QString &in)
         }
         if ( pattern.length() <= 3 && box->count() == 0 ) {
             tooltip->setText(tr("Type letters to match."));
-            tooltip->resize(tooltip->maximumWidth(), tooltip->heightForWidth(tooltip->maximumWidth()));
-            tooltip->raise();
-            tooltip->show();
             dummy = true;
         }
     } else if ( a_pkim->isChecked() ) {
@@ -403,11 +398,16 @@ void Words::lookup(const QString &in)
             search(pattern);
             tooltip->hide();
         }
-        if ( pattern.length() <= 1 && box->count() == 0 ) {
-            tooltip->setText(tr("Type numbers to match."));
-            tooltip->resize(tooltip->maximumWidth(), tooltip->heightForWidth(tooltip->maximumWidth()));
-            tooltip->raise();
-            tooltip->show();
+        if (box->count() == 0) {
+            QString msg;
+            if ( pattern.length() <= 1) {
+                msg = tr("Type numbers to match.");
+            } else if (pattern.length() < 4) {
+                msg = tr("No exact match.");
+            } else {
+                msg = tr("No matches.");
+            }
+            tooltip->setText(msg);
             dummy = true;
         }
     } else {
@@ -425,6 +425,19 @@ void Words::lookup(const QString &in)
                 break;
             }
         }
+        if ( box->count() > 0 && cur == -1 ) {
+            tooltip->setText(tr("No match."));
+            dummy = true;
+        }
+    }
+    if ( !dummy && box->count() == 0 ) {
+        tooltip->setText(tr("No matching words."));
+        dummy = true;
+    }
+    if (dummy) {
+        tooltip->resize(tooltip->maximumWidth(), tooltip->heightForWidth(tooltip->maximumWidth()));
+        tooltip->raise();
+        tooltip->show();
     }
     if ( !dummy && box->count() && cur>= 0) {
         QListWidgetItem *curItem = box->item(cur);
@@ -510,8 +523,9 @@ void Words::preferWord()
     lookup();
 }
 
-void Words::showDict(const char* name)
+void Words::showDict(const char* dname)
 {
+    QString name = dname;
     box->clear();
     dummy = false;
     tooltip->hide();
@@ -520,6 +534,19 @@ void Words::showDict(const char* name)
         box->setCurrentItem(box->item(0));
         QModelIndex mIndex = box->currentIndex();
         box->selectionModel()->select(mIndex, QItemSelectionModel::ClearAndSelect);
+    } else {
+        if (name=="local")
+            tooltip->setText(tr("You have added no words."));
+        else if (name=="preferred")
+            tooltip->setText(tr("You have made no preferences."));
+        else if (name=="deleted")
+            tooltip->setText(tr("You have deleted no standard words."));
+        else
+            tooltip->setText(tr("No matching words."));
+        tooltip->resize(tooltip->maximumWidth(), tooltip->heightForWidth(tooltip->maximumWidth()));
+        tooltip->raise();
+        tooltip->show();
+        dummy = true;
     }
     updateActions();
 }

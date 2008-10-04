@@ -10,16 +10,16 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Tutorial: Create an Input method Plug-in that Modifies Keyboard Input<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Tutorial: Create an Input method Plug-in that Modifies Keyboard Input<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#creating-a-text-input-filter">Creating a Text Input Filter</a></li>
 <li><a href="#creating-the-containing-plug-in">Creating the Containing Plug-in</a></li>
 </ul>
 <a name="creating-a-text-input-filter"></a>
 <h2>Creating a Text Input Filter</h2>
-<p>This is a very simple example of how to write a composing input method, the code described can be found in <tt>&lt;qtopia-root-dir&gt;/examples/inputmethods/composing</tt>.</p>
-<p>Qtopia Core provides the <a href="qwsinputmethod.html">QWSInputMethod</a> class to allow modification of keyboard or pointer input to generate text. At a minimum you will need to provide an implementation for one of the two <tt>filter</tt> functions available depending on whether you intend to filter mouse or keyboard input. You will also need to provide an implementation for the <tt>reset</tt> function.</p>
+<p>This is a very simple example of how to write a composing input method, the code described can be found in <tt>&lt;qt-extended-root-dir&gt;/examples/inputmethods/composing</tt>.</p>
+<p>Qt for Embedded Linux provides the <a href="qwsinputmethod.html">QWSInputMethod</a> class to allow modification of keyboard or pointer input to generate text. At a minimum you will need to provide an implementation for one of the two <tt>filter</tt> functions available depending on whether you intend to filter mouse or keyboard input. You will also need to provide an implementation for the <tt>reset</tt> function.</p>
 <p>In our example we filter keyboard so that pressing the <tt>shift</tt> key will change the case of the most recently typed letter.</p>
 <pre>    #include &lt;Qt/qwindowsystem_qws.h&gt;
     #include &lt;qtopia/inputmethodinterface.h&gt;
@@ -105,10 +105,10 @@
         }
         isActive = b;
     }</pre>
-<p>The remaining functions merely manage the state of the input method. It is possible to use this class in a stand-alone Qtopia Core application by constructing it and passing it to <a href="qwsserver.html#setCurrentInputMethod">QWSServer::setCurrentInputMethod</a>(). We will now show how to integrate the class into a Qtopia Platform Input Method plug-in.</p>
+<p>The remaining functions merely manage the state of the input method. It is possible to use this class in a stand-alone Qt for Embedded Linux application by constructing it and passing it to <a href="qwsserver.html#setCurrentInputMethod">QWSServer::setCurrentInputMethod</a>(). We will now show how to integrate the class into a Qt Extended Input Method plug-in.</p>
 <a name="creating-the-containing-plug-in"></a>
 <h2>Creating the Containing Plug-in</h2>
-<p>Qtopia platform allows for input methods to be loaded via plug-ins. This means you can extend the input capabilities of Qtopia Platform after it has been installed. However since Qtopia Platform provides for a range of different methods to provide text input, the plug-in also needs to describe the capabilities and requirements of the input method.</p>
+<p>Qt Extended allows for input methods to be loaded via plug-ins. This means you can extend the input capabilities of Qt Extended after it has been installed. However since Qt Extended provides for a range of different methods to provide text input, the plug-in also needs to describe the capabilities and requirements of the input method.</p>
 <pre>    #include &lt;qtopia/inputmethodinterface.h&gt;
     class ComposeIM;
 
@@ -156,7 +156,7 @@
 <tr valign="top" class="odd"><td><tt>reset</tt></td><td>called when the plug-in is unloaded or needs to be returned to its initial state by the server. It resets the plug-in to its state at construction.</td></tr>
 <tr valign="top" class="even"><td><tt>inputModifier</tt></td><td>Returns the <a href="qwsinputmethod.html">QWSInputMethod</a> object if the plug-in modifes keyboard or mouse input to generate text for a text input widget.</td></tr>
 </table></p>
-<p><b>Note:</b> While <tt>setHint</tt> does not have to be re-implemented it is highly recommended. Qtopia platform calls this function with a:</p>
+<p><b>Note:</b> While <tt>setHint</tt> does not have to be re-implemented it is highly recommended. Qt Extended calls this function with a:</p>
 <ul>
 <li>null <tt>QString</tt> when there is no widget to receive text input</li>
 <li>string describing the input when a text input widget has focus.</li>
@@ -169,8 +169,8 @@
 <li><i>phone</i>: for phone numbers</li>
 </ul>
 <p>However, applications can also define custom hints such as <i>email</i> so the input method should be able to handle hints it does not recognize and have some fall back mode if it is going to attempt to do more than simply activate on a non-null hint. In this example we will activate the input method only for the <i>text</i> and <i>words</i> hints.</p>
-<p>Apart from the <i>input</i> and <i>icon</i> properties specific to this example, an <tt>unsigned long</tt> <i>ref</i> property is required for all Qtopia plug-ins. It is used to keep a reference of where the input method is used and when it can be safely unloaded.</p>
-<p>For a complete list of the composing input method plug-in implementation, see <tt>&lt;qtopia-root-dir&gt;/examples/inputmethods/composing/composeimpl.cpp</tt>. This is a listing of the more critical code that needs to be included.</p>
+<p>Apart from the <i>input</i> and <i>icon</i> properties specific to this example, an <tt>unsigned long</tt> <i>ref</i> property is required for all Qt Extended plug-ins. It is used to keep a reference of where the input method is used and when it can be safely unloaded.</p>
+<p>For a complete list of the composing input method plug-in implementation, see <tt>&lt;qt-extended-root-dir&gt;/examples/inputmethods/composing/composeimpl.cpp</tt>. This is a listing of the more critical code that needs to be included.</p>
 <pre>    ComposeImpl::ComposeImpl(QObject *parent)
         : QtopiaInputMethod(parent), input(0), ref(0)
         {
@@ -212,8 +212,8 @@
 <p>This macro is required to provide the code required to implement the functions allowing the plug-in to be queried and loaded.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

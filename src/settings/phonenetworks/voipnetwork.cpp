@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,7 +23,10 @@
 #include <qtopiaipcenvelope.h>
 #include <qsoftmenubar.h>
 #include <QtopiaItemDelegate>
+#include <qnetworkregistration.h>
+#include <qtelephonyconfiguration.h>
 
+#include <QtopiaServiceRequest>
 #include <QVBoxLayout>
 #include <QDebug>
 
@@ -38,8 +39,6 @@ VoipNetworkRegister::VoipNetworkRegister( QWidget *parent )
             this, SLOT(operationSelected(QListWidgetItem*)) );
     connect( m_client, SIGNAL(registrationStateChanged()),
             this, SLOT(registrationStateChanged()) );
-    connect( m_presence, SIGNAL(localPresenceChanged()),
-            this, SLOT(localPresenceChanged()) );
 }
 
 VoipNetworkRegister::~VoipNetworkRegister()
@@ -52,7 +51,6 @@ void VoipNetworkRegister::init()
     setFrameStyle( QFrame::NoFrame );
 
     m_client = new QNetworkRegistration( "voip", this );
-    m_presence = new QPresence( "voip", this );
     m_config = new QTelephonyConfiguration( "voip", this );
 
     setObjectName( "voip" );
@@ -62,10 +60,15 @@ void VoipNetworkRegister::init()
     QString menuText = registered() ? tr( "Unregister" ) : tr( "Register" );
     m_regItem = new QListWidgetItem( menuText, this );
 
-    menuText = visible() ? tr( "Make Unavailable" ) : tr( "Make Available" );
+    menuText = tr( "Set Presence Status" );
     m_presenceItem = new QListWidgetItem( menuText, this );
 
     setCurrentRow( 0 );
+}
+
+bool VoipNetworkRegister::registered() const
+{
+    return m_client->registrationState() == QTelephony::RegistrationHome;
 }
 
 void VoipNetworkRegister::showEvent( QShowEvent *e )
@@ -97,12 +100,8 @@ void VoipNetworkRegister::updateRegistrationState()
 
 void VoipNetworkRegister::updatePresenceState()
 {
-    if ( QMessageBox::information( this, tr( "VoIP" ),
-                visible() ? tr( "<qt>Do not allow people to see you?</qt>" ) : tr( "<qt>Allow people to see you?</qt>" ),
-                QMessageBox::Yes, QMessageBox::No ) == QMessageBox::No )
-        return;
-
-    m_presence->setLocalPresence( visible() ? QPresence::Unavailable : QPresence::Available );
+    QtopiaServiceRequest e( "Presence", "editPresence()" );
+    e.send();
 }
 
 void VoipNetworkRegister::registrationStateChanged()
@@ -111,13 +110,7 @@ void VoipNetworkRegister::registrationStateChanged()
     m_presenceItem->setHidden( !registered() );
 }
 
-void VoipNetworkRegister::localPresenceChanged()
-{
-    m_presenceItem->setText( visible() ? tr( "Make Unavailable" ) : tr( "Make Available" ) );
-}
-
 void VoipNetworkRegister::configureVoIP()
 {
     QtopiaIpcEnvelope e( "QPE/Application/sipsettings", "VoIP::configure()" );
 }
-

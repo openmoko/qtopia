@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QFileSystem Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QFileSystem Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QFileSystem class describes a single mount point. <a href="#details">More...</a></p>
 <pre>    #include &lt;QFileSystem&gt;</pre><ul>
 <li><a href="qfilesystem-members.html">List of all members, including inherited members</a></li>
@@ -26,19 +27,26 @@
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#applicationsPath">applicationsPath</a></b> () const</li>
 <li><div class="fn"/>long <b><a href="qfilesystem.html#availBlocks">availBlocks</a></b> () const</li>
 <li><div class="fn"/>long <b><a href="qfilesystem.html#blockSize">blockSize</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qfilesystem.html#connect">connect</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#contentDatabase">contentDatabase</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qfilesystem.html#disconnect">disconnect</a></b> () const</li>
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#disk">disk</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#documents">documents</a></b> () const</li>
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#documentsPath">documentsPath</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#isConnected">isConnected</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#isMounted">isMounted</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#isNull">isNull</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#isRemovable">isRemovable</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qfilesystem.html#isWritable">isWritable</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#mount">mount</a></b> () const</li>
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#name">name</a></b> () const</li>
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#options">options</a></b> () const</li>
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#path">path</a></b> () const</li>
 <li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#prevPath">prevPath</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#storesType">storesType</a></b> ( const QString &amp; <i>type</i> ) const</li>
 <li><div class="fn"/>long <b><a href="qfilesystem.html#totalBlocks">totalBlocks</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qfilesystem.html#typePath">typePath</a></b> ( const QString &amp; <i>type</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#unmount">unmount</a></b> () const</li>
 <li><div class="fn"/>QFileSystem &amp; <b><a href="qfilesystem.html#operator-eq">operator=</a></b> ( const QFileSystem &amp; <i>other</i> )</li>
 </ul>
 <a name="static-public-members"></a>
@@ -47,6 +55,7 @@
 <li><div class="fn"/>QFileSystem <b><a href="qfilesystem.html#applicationsFileSystem">applicationsFileSystem</a></b> ()</li>
 <li><div class="fn"/>QFileSystem <b><a href="qfilesystem.html#documentsFileSystem">documentsFileSystem</a></b> ()</li>
 <li><div class="fn"/>QFileSystem <b><a href="qfilesystem.html#fromFileName">fromFileName</a></b> ( const QString &amp; <i>fileName</i>, bool <i>connectedOnly</i> = true )</li>
+<li><div class="fn"/>QFileSystem <b><a href="qfilesystem.html#typeFileSystem">typeFileSystem</a></b> ( const QString &amp; <i>type</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -73,8 +82,16 @@
 <p>Returns the number of available blocks on the file system</p>
 <h3 class="fn"><a name="blockSize"></a>long QFileSystem::blockSize () const</h3>
 <p>Returns the size of each block on the file system.</p>
+<h3 class="fn"><a name="connect"></a>void QFileSystem::connect () const</h3>
+<p>Connects the filesystem to the content system by sending the QCop message QPE/QStorage::mounting(<a href="qstring.html">QString</a>).</p>
+<p><b>Note:</b> This call is asynchronous. <a href="qstoragemetainfo.html">QStorageMetaInfo</a> will emit the disksChanged() signal once the filesystem has been connected.</p>
+<p>See also <a href="qfilesystem.html#isConnected">isConnected</a>() and <a href="qstoragemetainfo.html#disksChanged">QStorageMetaInfo::disksChanged</a>().</p>
 <h3 class="fn"><a name="contentDatabase"></a>bool QFileSystem::contentDatabase () const</h3>
 <p>Returns flag indicating if the file system has it's own content database stored.</p>
+<h3 class="fn"><a name="disconnect"></a>void QFileSystem::disconnect () const</h3>
+<p>Disconnects the filesystem from the content system by sending the QCop message QPE/QStorage::unmounting(<a href="qstring.html">QString</a>).</p>
+<p><b>Note:</b> This call is asynchronous. <a href="qstoragemetainfo.html">QStorageMetaInfo</a> will emit the disksChanged() signal once the filesystem has been disconnected.</p>
+<p>See also <a href="qfilesystem.html#isConnected">isConnected</a>() and <a href="qstoragemetainfo.html#disksChanged">QStorageMetaInfo::disksChanged</a>().</p>
 <h3 class="fn"><a name="disk"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::disk () const</h3>
 <p>Returns the file system name, eg. /dev/hda3</p>
 <h3 class="fn"><a name="documents"></a>bool QFileSystem::documents () const</h3>
@@ -90,12 +107,21 @@
 <p>If <i>connectedOnly</i> is true the <a href="qfilesystem.html">QFileSystem</a> will only be returned if it is currently connected.</p>
 <h3 class="fn"><a name="isConnected"></a>bool QFileSystem::isConnected () const</h3>
 <p>Returns flag indicating if the file system is currently connected.</p>
+<p>See also <a href="qfilesystem.html#connect">connect</a>() and <a href="qfilesystem.html#disconnect">disconnect</a>().</p>
+<h3 class="fn"><a name="isMounted"></a>bool QFileSystem::isMounted () const</h3>
+<p>Returns true if the filesystem is mounted.</p>
+<p>See also <a href="qfilesystem.html#mount">mount</a>() and <a href="qfilesystem.html#unmount">unmount</a>().</p>
 <h3 class="fn"><a name="isNull"></a>bool QFileSystem::isNull () const</h3>
 <p>Returns true if the <a href="qfilesystem.html">QFileSystem</a> is unitialised.</p>
 <h3 class="fn"><a name="isRemovable"></a>bool QFileSystem::isRemovable () const</h3>
 <p>Returns flag indicating if the file system can be removed. For example, a CF card would be removable, but the internal memory would not.</p>
 <h3 class="fn"><a name="isWritable"></a>bool QFileSystem::isWritable () const</h3>
 <p>Returns flag indicating if the file system is mounted as writable or read-only. Returns false if read-only, true if read and write.</p>
+<h3 class="fn"><a name="mount"></a>bool QFileSystem::mount () const</h3>
+<p>Mounts the filesystem. Returns true on success, false otherwise. Returns false if the filesystem is already mounted.</p>
+<p>The filesystem must have a corresponding entry in the <tt>/etc/fstab</tt> file. The mount point directory must exist.</p>
+<p>After the filesystem is sucessfully mounted it should be connected to the content system by calling <a href="qfilesystem.html#connect">connect</a>().</p>
+<p>See also <a href="qfilesystem.html#unmount">unmount</a>() and <a href="qfilesystem.html#connect">connect</a>().</p>
 <h3 class="fn"><a name="name"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::name () const</h3>
 <p>Returns the translated, human readable name for the mount directory.</p>
 <h3 class="fn"><a name="options"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::options () const</h3>
@@ -104,14 +130,27 @@
 <p>Returns the mount path, eg. /home</p>
 <h3 class="fn"><a name="prevPath"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::prevPath () const</h3>
 <p>Returns the previous mount path, eg. /home This is useful when a filesystem has been unmounted.</p>
+<h3 class="fn"><a name="storesType"></a>bool QFileSystem::storesType ( const <a href="qstring.html">QString</a> &amp; <i>type</i> ) const</h3>
+<p>Returns true if the file system can store files of <i>type</i>.</p>
+<p>The path of these files is given by <a href="qfilesystem.html#typePath">typePath</a>().</p>
 <h3 class="fn"><a name="totalBlocks"></a>long QFileSystem::totalBlocks () const</h3>
 <p>Returns the total number of blocks on the file system</p>
+<h3 class="fn"><a name="typeFileSystem"></a>QFileSystem QFileSystem::typeFileSystem ( const <a href="qstring.html">QString</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the <a href="qfilesystem.html">QFileSystem</a> that is the default storage location for files of <i>type</i>.</p>
+<h3 class="fn"><a name="typePath"></a><a href="qstring.html">QString</a> QFileSystem::typePath ( const <a href="qstring.html">QString</a> &amp; <i>type</i> ) const</h3>
+<p>Returns the path for files of <i>type</i> stored on a filesystem.</p>
+<p>If no path is defined this returns the root path of the filesystem.</p>
+<p>The return value of this is only valid if <a href="qfilesystem.html#storesType">storesType</a>() returns true.</p>
+<h3 class="fn"><a name="unmount"></a>bool QFileSystem::unmount () const</h3>
+<p>Unmounts the filesystem from the system. Returns true on success, false otherwise. Returns false if the filesystem is already unmounted.</p>
+<p>The filesystem must have previously been disconnected from the content system with <a href="qfilesystem.html#disconnect">disconnect</a>().</p>
+<p>See also <a href="qfilesystem.html#mount">mount</a>() and <a href="qfilesystem.html#disconnect">disconnect</a>().</p>
 <h3 class="fn"><a name="operator-eq"></a>QFileSystem &amp; QFileSystem::operator= ( const QFileSystem &amp; <i>other</i> )</h3>
 <p>Assign the contents of <i>other</i> to this object.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

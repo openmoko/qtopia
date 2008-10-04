@@ -10,10 +10,12 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QObexPushService Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QObexPushService Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QObexPushService class provides an OBEX Push service. <a href="#details">More...</a></p>
 <pre>    #include &lt;QObexPushService&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<p>Inherited by <a href="defaultobexpushservice.html">DefaultObexPushService</a>.</p>
 <ul>
 <li><a href="qobexpushservice-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -127,7 +129,7 @@
 <p>Called when a client makes a <tt>Put</tt> request to send a file to this service. The <i>name</i>, <i>type</i>, <i>size</i> and <i>description</i> parameters respectively hold the name, MIME type, size and description of the file, as sent by the client. The <i>size</i> will be 0 if the client did not send any information about the size of the file.</p>
 <p>This function can be overridden to intercept the request and determine whether the request should be allowed to continue (for example, by asking the end user, or by checking some file threshold) and where the file data should be saved. To allow the request, return a <a href="qiodevice.html">QIODevice</a> pointer, and the received file data will be written to this <a href="qiodevice.html">QIODevice</a>. To refuse the request, return 0.</p>
 <p>If the request is allowed to continue, the <a href="qobexpushservice.html#putRequested">putRequested</a>() signal is emitted, and the <a href="qobexpushservice.html#requestFinished">requestFinished</a>() signal will be emitted when the the request has finished. The returned <a href="qiodevice.html">QIODevice</a> pointer is accessible from <a href="qobexpushservice.html#currentDevice">currentDevice</a>().</p>
-<p>The default implementation attempts to save the incoming file into <a href="qdir.html#homePath">QDir::homePath</a>(), using <i>name</i> as the name of the file. (If <i>name</i> contains a path, only the filename at the end of the path will be used, and if <i>name</i> is an empty string, the file will be saved as &quot;unnamed&quot;.) If the file is successfully created, the <tt>Put</tt> request will be accepted; otherwise, the request will be refused.</p>
+<p>The default implementation attempts to save the incoming file into <a href="qdir.html#homePath">QDir::homePath</a>(), using <i>name</i> as the name of the file. (If <i>name</i> contains a path, only the filename at the end of the path will be used, and if <i>name</i> is an empty string, the file will be saved as &quot;received_file&quot;.) If the file is successfully created, the <tt>Put</tt> request will be accepted; otherwise, the request will be refused.</p>
 <p>See also <a href="qobexpushservice.html#putRequested">putRequested</a>(), <a href="qobexpushservice.html#currentDevice">currentDevice</a>(), <a href="qobexpushservice.html#dataTransferProgress">dataTransferProgress</a>(), and <a href="qobexpushservice.html#requestFinished">requestFinished</a>().</p>
 <h3 class="fn"><a name="businessCard"></a><a href="qbytearray.html">QByteArray</a> QObexPushService::businessCard () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the business card that will be sent to OBEX clients who request it, as per the Business Card exchange feature of the Bluetooth Object Push Profile.</p>
@@ -165,8 +167,8 @@
 <p>This signal is emitted when the state of the service changes. The <i>state</i> is the new state of the client.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,0 +1,264 @@
+<ui version="4.0" stdsetdef="1" >
+  <author></author>
+  <comment></comment>
+  <exportmacro></exportmacro>
+  <class>NewGameBase</class>
+  <widget class="QWidget" name="Form1" >
+    <property name="geometry" >
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>225</width>
+        <height>222</height>
+      </rect>
+    </property>
+    <property name="windowTitle" >
+      <string>New Game</string>
+    </property>
+    <layout class="QGridLayout" >
+      <property name="margin" >
+        <number>4</number>
+      </property>
+      <property name="spacing" >
+        <number>6</number>
+      </property>
+      <item rowspan="1" row="0" column="0" colspan="3" >
+        <widget class="Q3GroupBox" name="playersbox" >
+          <property name="title" >
+            <string>Players</string>
+          </property>
+          <widget class="QComboBox" name="player0" >
+            <property name="geometry" >
+              <rect>
+                <x>10</x>
+                <y>20</y>
+                <width>80</width>
+                <height>22</height>
+              </rect>
+            </property>
+            <property name="editable" >
+              <bool>true</bool>
+            </property>
+            <item>
+              <property name="text" >
+                <string/>
+              </property>
+            </item>
+            <item>
+              <property name="text" >
+                <string>AI3: Smart AI player</string>
+              </property>
+            </item>
+          </widget>
+          <widget class="QComboBox" name="player1" >
+            <property name="geometry" >
+              <rect>
+                <x>20</x>
+                <y>30</y>
+                <width>100</width>
+                <height>22</height>
+              </rect>
+            </property>
+            <property name="editable" >
+              <bool>true</bool>
+            </property>
+            <item>
+              <property name="text" >
+                <string/>
+              </property>
+            </item>
+            <item>
+              <property name="text" >
+                <string>AI3: Smart AI player</string>
+              </property>
+            </item>
+          </widget>
+          <widget class="QComboBox" name="player2" >
+            <property name="geometry" >
+              <rect>
+                <x>30</x>
+                <y>40</y>
+                <width>90</width>
+                <height>20</height>
+              </rect>
+            </property>
+            <property name="editable" >
+              <bool>true</bool>
+            </property>
+            <item>
+              <property name="text" >
+                <string/>
+              </property>
+            </item>
+            <item>
+              <property name="text" >
+                <string>AI3: Smart AI player</string>
+              </property>
+            </item>
+          </widget>
+          <widget class="QComboBox" name="player3" >
+            <property name="geometry" >
+              <rect>
+                <x>40</x>
+                <y>50</y>
+                <width>100</width>
+                <height>22</height>
+              </rect>
+            </property>
+            <property name="editable" >
+              <bool>true</bool>
+            </property>
+            <item>
+              <property name="text" >
+                <string/>
+              </property>
+            </item>
+            <item>
+              <property name="text" >
+                <string>AI3: Smart AI player</string>
+              </property>
+            </item>
+          </widget>
+          <widget class="QComboBox" name="player4" >
+            <property name="geometry" >
+              <rect>
+                <x>50</x>
+                <y>60</y>
+                <width>120</width>
+                <height>22</height>
+              </rect>
+            </property>
+            <property name="editable" >
+              <bool>true</bool>
+            </property>
+            <item>
+              <property name="text" >
+                <string/>
+              </property>
+            </item>
+            <item>
+              <property name="text" >
+                <string>AI3: Smart AI player</string>
+              </property>
+            </item>
+          </widget>
+          <widget class="QComboBox" name="player5" >
+            <property name="geometry" >
+              <rect>
+                <x>60</x>
+                <y>70</y>
+                <width>110</width>
+                <height>22</height>
+              </rect>
+            </property>
+            <property name="editable" >
+              <bool>true</bool>
+            </property>
+            <item>
+              <property name="text" >
+                <string/>
+              </property>
+            </item>
+            <item>
+              <property name="text" >
+                <string>AI3: Smart AI player</string>
+              </property>
+            </item>
+          </widget>
+        </widget>
+      </item>
+      <item row="3" column="2" >
+        <widget class="QPushButton" name="buttonOk" >
+          <property name="text" >
+            <string>&amp;Start</string>
+          </property>
+          <property name="autoDefault" >
+            <bool>true</bool>
+          </property>
+          <property name="default" >
+            <bool>true</bool>
+          </property>
+        </widget>
+      </item>
+      <item rowspan="1" row="3" column="0" colspan="2" >
+        <spacer name="Spacer4" >
+          <property name="sizeHint" >
+            <size>
+              <width>20</width>
+              <height>20</height>
+            </size>
+          </property>
+          <property name="sizeType" >
+            <enum>Expanding</enum>
+          </property>
+          <property name="orientation" >
+            <enum>Horizontal</enum>
+          </property>
+        </spacer>
+      </item>
+      <item row="1" column="2" >
+        <widget class="QComboBox" name="rules" >
+          <property name="sizePolicy" >
+            <sizepolicy>
+              <hsizetype>3</hsizetype>
+              <vsizetype>0</vsizetype>
+            </sizepolicy>
+          </property>
+        </widget>
+      </item>
+      <item row="1" column="1" >
+        <widget class="QLabel" name="TextLabel1" >
+          <property name="text" >
+            <string>Rules:</string>
+          </property>
+          <property name="wordWrap" >
+            <bool>false</bool>
+          </property>
+        </widget>
+      </item>
+      <item row="2" column="1" >
+        <spacer name="Spacer6" >
+          <property name="sizeHint" >
+            <size>
+              <width>20</width>
+              <height>20</height>
+            </size>
+          </property>
+          <property name="sizeType" >
+            <enum>Expanding</enum>
+          </property>
+          <property name="orientation" >
+            <enum>Vertical</enum>
+          </property>
+        </spacer>
+      </item>
+      <item row="1" column="0" >
+        <spacer name="Spacer5" >
+          <property name="sizeHint" >
+            <size>
+              <width>20</width>
+              <height>20</height>
+            </size>
+          </property>
+          <property name="sizeType" >
+            <enum>Expanding</enum>
+          </property>
+          <property name="orientation" >
+            <enum>Horizontal</enum>
+          </property>
+        </spacer>
+      </item>
+    </layout>
+  </widget>
+  <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+  <tabstops>
+    <tabstop>player0</tabstop>
+    <tabstop>player1</tabstop>
+    <tabstop>player2</tabstop>
+    <tabstop>player3</tabstop>
+    <tabstop>player4</tabstop>
+    <tabstop>player5</tabstop>
+    <tabstop>rules</tabstop>
+    <tabstop>buttonOk</tabstop>
+  </tabstops>
+</ui>

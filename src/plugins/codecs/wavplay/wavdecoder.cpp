@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -28,6 +26,13 @@
 
 #include "wavdecoder.h"
 
+#ifdef WAVGSM_SUPPORTED
+extern "C" {
+#include "gsm.h"
+};
+
+#define WAV_DECODER_BUFFER 4096
+#endif
 
 // {{{ Wave Info
 namespace
@@ -35,7 +40,6 @@ namespace
 static const char* riffId = "RIFF";
 static const char* waveId = "WAVE";
 static const char* fmtId = "fmt ";
-static const char* dataId = "data";
 
 struct chunk
 {
@@ -58,8 +62,10 @@ struct WAVEHeader
     quint32     byteRate;
     quint16     blockAlign;
     quint16     bitsPerSample;
-//    quint16 extraParamSize  // if !PCM, so not supported
-//    uchar extraParams     
+    quint32     xFreq1;
+    chunk       fact;
+    quint32     xfact;
+    chunk       data;
 };
 
 struct DATAHeader
@@ -91,6 +97,16 @@ public:
     QtopiaMedia::State  state;
     CombinedHeader      header;
     QMediaDevice::Info  outputInfo;
+
+#ifdef WAVGSM_SUPPORTED
+    char             *input_data, *input_pos;
+    int              input_length;
+    char             *output_data, *output_pos;
+    int              output_length;
+
+    struct gsm_state *gsmhandle;
+    gsm_signal       gsmsamples[320]; //signed short 16bit
+#endif
 };
 // }}}
 
@@ -112,7 +128,7 @@ WavDecoder::WavDecoder():
     // init
     d->initialized = false;
     d->muted = false;
-    d->volume = 50;
+    d->volume = 100;
     d->length = 0;
     d->position = 0;
     d->rawDataRead = 0;
@@ -127,6 +143,10 @@ WavDecoder::WavDecoder():
 
 WavDecoder::~WavDecoder()
 {
+#ifdef WAVGSM_SUPPORTED
+    if(d->header.wave.audioFormat == 49)
+        gsm_destroy( d->gsmhandle );
+#endif
     delete d;
 }
 
@@ -180,16 +200,17 @@ void WavDecoder::start()
         {
             if (d->inputDevice->read((char*)&d->header, sizeof(CombinedHeader)) == sizeof(CombinedHeader))
             {
-                if (strncmp(d->header.riff.descriptor.id, riffId, 4) == 0 &&
-                    strncmp(d->header.riff.type, waveId, 4) == 0 &&
-                    strncmp(d->header.wave.descriptor.id, fmtId, 4) == 0) {
+                if (memcmp(&d->header.riff.descriptor.id, riffId, 4) == 0 &&
+                    memcmp(&d->header.riff.type, waveId, 4) == 0 &&
+                    memcmp(&d->header.wave.descriptor.id, fmtId, 4) == 0)
+                {
                     if (d->header.wave.audioFormat == 1)
                     {
                         d->outputInfo.type = QMediaDevice::Info::PCM;
                         d->outputInfo.frequency = qFromLittleEndian<quint32>(d->header.wave.sampleRate);
                         d->outputInfo.bitsPerSample = qFromLittleEndian<quint16>(d->header.wave.bitsPerSample);
                         d->outputInfo.channels = qFromLittleEndian<quint16>(d->header.wave.numChannels);
-                        d->outputInfo.volume = d->volume;
+                        d->outputInfo.volume = d->muted ? 0 : d->volume;
 
                         d->length = quint32((double(d->header.riff.descriptor.size) /
                                         d->outputInfo.frequency /
@@ -205,6 +226,36 @@ void WavDecoder::start()
                         emit lengthChanged(d->length);
 
                         d->initialized = true;
+#ifdef WAVGSM_SUPPORTED
+                    } else if(d->header.wave.audioFormat == 49) {
+                        d->inputDevice->seek(60);
+                        d->input_data = (char *)malloc(WAV_DECODER_BUFFER);
+                        d->input_pos = d->input_data;
+                        d->input_length = 0;
+                        d->output_data = (char *)malloc(WAV_DECODER_BUFFER*6);
+                        d->output_pos = d->output_data;
+                        d->output_length = 0;
+                        d->gsmhandle = gsm_create();
+                        int value = 1;
+                        gsm_option( d->gsmhandle, GSM_OPT_WAV49, &value );
+
+                        d->outputInfo.type = QMediaDevice::Info::PCM;
+                        d->outputInfo.frequency = qFromLittleEndian<quint32>(d->header.wave.sampleRate);
+                        d->outputInfo.bitsPerSample = 16;
+                        d->outputInfo.channels = qFromLittleEndian<quint16>(d->header.wave.numChannels);
+                        d->outputInfo.volume = d->volume;
+                        d->length = d->inputDevice->dataType().dataSize*1000/d->header.wave.sampleRate*64/13;
+                        qLog(Media) << "WavDecoder::start(); Info" <<
+                                    d->outputInfo.frequency <<
+                                    d->outputInfo.bitsPerSample <<
+                                    d->outputInfo.channels <<
+                                    "length:" << d->length;
+
+                        emit lengthChanged(d->length);
+                        d->initialized = true;
+#endif
+                    } else {
+                        qWarning("WAV file is in %d audio format, not supported!",d->header.wave.audioFormat);
                     }
                 }
             }
@@ -259,6 +310,28 @@ quint64 WavDecoder::length()
 bool WavDecoder::seek(qint64 ms)
 {
     ms /= 1000;
+
+#ifdef WAVGSM_SUPPORTED
+    if(d->header.wave.audioFormat == 49) {
+        // no seek support for wav49 format
+        if((int)ms == 0) {
+            d->input_length=0;
+            d->output_length=0;
+            d->rawDataRead = 0;
+            d->inputDevice->seek(60);
+            d->position = 0;
+            emit positionChanged(0);
+            return true;
+        } else {
+            d->rawDataRead = 60 + (ms*d->header.wave.sampleRate/64*13)/65*65;
+            d->inputDevice->seek(d->rawDataRead);
+            d->input_length=0;
+            d->output_length=0;
+            emit positionChanged(d->position = ms * 1000);
+            return true;
+        }
+    }
+#endif
 
     int     rawPos = sizeof(CombinedHeader) +
                          (ms * d->outputInfo.frequency *
@@ -328,35 +401,108 @@ bool WavDecoder::isMuted()
 qint64 WavDecoder::readData(char *data, qint64 maxlen)
 {
     qint64      rc = 0;
-
     if (maxlen > 0)
     {
-        if (d->state == QtopiaMedia::Playing)
-        {
-            quint32 position = quint32((double(d->rawDataRead) /
-                                    (double(d->outputInfo.frequency) *
-                                     d->outputInfo.channels *
-                                     (d->outputInfo.bitsPerSample / 8))) * 1000);
-
-            if (d->position != position)
+        if(d->header.wave.audioFormat == 1) {
+            if (d->state == QtopiaMedia::Playing)
             {
-                d->position = position;
-                emit positionChanged(d->position);
+                quint32 position = quint32((double(d->rawDataRead) /
+                            (double(d->outputInfo.frequency) *
+                             d->outputInfo.channels *
+                             (d->outputInfo.bitsPerSample / 8))) * 1000);
+
+                if (d->position != position)
+                {
+                    d->position = position;
+                    emit positionChanged(d->position);
+                }
+
+                rc = d->inputDevice->read(data, maxlen);
+
+                if (rc == 0)
+                    emit playerStateChanged(d->state = QtopiaMedia::Stopped);
+                else
+                    d->rawDataRead += rc;
             }
-
-            rc = d->inputDevice->read(data, maxlen);
-
-            if (rc == 0)
-                emit playerStateChanged(d->state = QtopiaMedia::Stopped);
-            else
-                d->rawDataRead += rc;
         }
-    }
+#ifdef WAVGSM_SUPPORTED
+        else if(d->header.wave.audioFormat == 49) {
+            if (d->state == QtopiaMedia::Playing)
+            {
+                quint32 position = d->rawDataRead*1000/d->header.wave.sampleRate*64/13;
+                if((int)position > 0)
+                    if (d->position != position)
+                    {
+                        d->position = position;
+                        emit positionChanged(d->position);
+                    }
 
+                if(d->output_length > (int)maxlen) {
+                    memcpy(data,d->output_data,(int)maxlen);
+                    memmove(d->output_data,d->output_data+(int)maxlen,
+                            d->output_length-(int)maxlen);
+                    d->output_length -= (int)maxlen;
+                    return maxlen;
+                }
+
+                //First top up input buffer with data
+                rc = d->inputDevice->read(d->input_data+d->input_length,
+                        WAV_DECODER_BUFFER-d->input_length);
+                d->input_length +=rc;
+                d->input_pos=d->input_data;
+                rc=0;
+
+                // decode and fill output buffer with data
+                d->output_pos=d->output_data+d->output_length;
+                int pos = 0;
+                while (((pos + 65) <= d->input_length) && (d->output_length + 640 < WAV_DECODER_BUFFER*5)) {
+                    // decode first half of 65 byte GSM frame
+                    gsm_decode( d->gsmhandle, (gsm_byte*)(d->input_pos), d->gsmsamples );
+                    // decode second half of 65 byte GSM frame
+                    gsm_decode( d->gsmhandle, (gsm_byte*)(d->input_pos+33),d->gsmsamples + 160 );
+                    pos += 65;
+                    d->input_pos += 65;
+                    d->rawDataRead += 65;
+
+                    for(int i=0;i<320;i++) {
+                        unsigned char *c = (unsigned char *)&d->gsmsamples[i];
+                        *d->output_pos++ = *c;
+                        *d->output_pos++ = *(c+1);
+                        d->output_length+=2;
+                        if(d->outputInfo.channels==2) {
+                            *d->output_pos++ = *c;
+                            *d->output_pos++ = *(c+1);
+                            d->output_length+=2;
+                        }
+                    }
+                }
+
+                // Move the unprocessed input data to the start point
+                memmove(d->input_data, d->input_data + pos, d->input_length - pos);
+                d->input_length -= pos;
+
+                // Copy output data out
+                if(d->output_length > (int)maxlen) {
+                    memcpy(data,d->output_data,(int)maxlen);
+                    memmove(d->output_data,d->output_data+(int)maxlen,
+                            d->output_length-(int)maxlen);
+                    d->output_length -= (int)maxlen;
+                    rc = (int)maxlen;
+                } else {
+                    rc = d->output_length;
+                    memcpy(data,d->output_data,d->output_length);
+                    d->output_length = 0;
+                }
+                if (rc == 0)
+                    emit playerStateChanged(d->state = QtopiaMedia::Stopped);
+            }
+        }
+#endif
+    }
     return rc;
 }
 
-/*!
+    /*!
     \internal
 */
 

@@ -1,6 +1,8 @@
+!qbuild{
 qtopia_project(external app)
 TARGET=phonebounce
 CONFIG-=enable_singleexec
+}
 
 SOURCES		= \
     phonebounce.cpp

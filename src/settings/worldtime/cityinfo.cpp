@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -33,18 +31,11 @@ CityInfo::CityInfo(QWidget *parent, Qt::WFlags f)
     : QFrame(parent,f)
 {
     mUtc = QTimeZone::utcDateTime();
-//    QFontInfo *fontInfo;
-//    fontInfo = new QFontInfo(font());
-//    qLog(Time)<<"font size"<< fontInfo->pointSize();
-//    QFont font = font();
-//    font.setPointSize(fontInfo->pointSize()-2);
-//    setFont(font);
 }
 
 void CityInfo::setZone(const QString &zone)
 {
     mZone = zone;
-//    qLog(Time) << "CityInfo()::setZone() " <<
         mZone.toLocal8Bit().constData();
     repaint();
 }
@@ -64,16 +55,10 @@ QString CityInfo::text() const
         QTimeZone curZone( mZone.toLocal8Bit().constData() );
         if ( curZone.isValid() )
             cityTime = curZone.fromUtc(mUtc);
-//        else
-        //          qLog(Time) << "CityInfo()::text() curZone Not valid!";
         line = QTimeString::localHMDayOfWeek(cityTime).simplified();
-        
-//         qLog(Time) << "CityInfo()::text() cityTime=" << cityTime.toString("hh:mm");
-//         qLog(Time) << "CityInfo()::text() timestring=" << line.toLocal8Bit().constData();
         return line;
     }
     else {
-//        qLog(Time) << "CityInfo()::text() - mZone is NULL!";
         return QString();
     }
 }
@@ -88,7 +73,7 @@ void CityInfo::paintEvent( QPaintEvent * )
     opt.state |= QStyle::State_Horizontal;
 
     QRect cr = contentsRect();
-    style()->drawItemText( &p, cr, Qt::AlignRight, opt.palette,
+    style()->drawItemText( &p, cr, Qt::AlignHCenter, opt.palette,
             opt.state, text(), QPalette::ButtonText);
 
     drawFrame(&p);
@@ -101,6 +86,5 @@ QSize CityInfo::sizeHint() const
     QFontMetrics fm( font() );
     res.setWidth(fm.width(text()) + 2 );
     res.setHeight(fm.height() );
-//    qLog(Time) << "CityInfo(QFrame)::sizeHint(w=" << res.width() << ", h=" << res.height();
     return res;
 }

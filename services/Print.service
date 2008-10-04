@@ -1,6 +1,7 @@
 [Translation]
 File=QtopiaServices
-Context=QtopiaPrinting
+Context=QtExtendedPrinting
 [Service]
 Actions="print(QString);print(QString,QString);printHtml(QString)"
-Name[]=Qtopia Printing Service
+Name[]=Qt Extended Printing Service
+Icon=print

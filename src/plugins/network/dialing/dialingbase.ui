@@ -12,30 +12,33 @@
   <property name="windowTitle" >
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" >
-   <property name="margin" >
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <property name="spacing" >
     <number>5</number>
    </property>
-   <property name="spacing" >
+   <property name="margin" >
     <number>4</number>
    </property>
    <item>
     <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
      <property name="spacing" >
       <number>6</number>
      </property>
+     <property name="margin" >
+      <number>0</number>
+     </property>
      <item>
-      <widget class="QCheckBox" name="timeout_box" >
+      <widget class="QLabel" name="label" >
        <property name="text" >
-        <string>Timeout</string>
+        <string>Timeout:</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QSpinBox" name="timeout" >
+       <property name="specialValueText" >
+        <string comment="No timeout" >None</string>
+       </property>
        <property name="suffix" >
         <string comment="short for seconds" >s</string>
        </property>
@@ -65,11 +68,11 @@
       <string/>
      </property>
      <layout class="QVBoxLayout" >
-      <property name="margin" >
-       <number>8</number>
-      </property>
       <property name="spacing" >
        <number>6</number>
+      </property>
+      <property name="margin" >
+       <number>8</number>
       </property>
       <item>
        <widget class="QLabel" name="dns1_label" >
@@ -105,7 +108,7 @@
      <property name="orientation" >
       <enum>Qt::Vertical</enum>
      </property>
-     <property name="sizeHint" >
+     <property name="sizeHint" stdset="0" >
       <size>
        <width>4</width>
        <height>201</height>

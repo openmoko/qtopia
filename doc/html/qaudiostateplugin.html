@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QAudioStatePlugin Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QAudioStatePlugin Class Reference<br /><span class="small-subtitle">[<a href="qtbluetoothmodule.html">QtBluetoothModule</a>, <a href="qtmediamodule.html">QtMediaModule</a>, <a href="qtpimmodule.html">QtPimModule</a>, <a href="qttelephonymodule.html">QtTelephonyModule</a>]</span>
+</h1>
 <p>The QAudioStatePlugin class provides a way of managing the underlying audio system. <a href="#details">More...</a></p>
 <pre>    #include &lt;QAudioStatePlugin&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -43,7 +44,7 @@
 <p>The QAudioStatePlugin class provides a way of managing the underlying audio system.</p>
 <p>This class needs to be implemented as part of the device profile (devices/devicename/src/plugins/audiohardware/devicename)</p>
 <p>In the implementation multiple <a href="qaudiostate.html">QAudioState</a>'s are created to handle each different audio state required on the device.</p>
-<p>The list of <a href="qaudiostate.html">QAudioState</a>'s available are returned to the manager by <a href="qaudiostateplugin.html#statesProvided">QAudioStatePlugin::statesProvided</a>(). Each of these <a href="qaudiostate.html">QAudioState</a> implementations are interogated using <a href="qaudiostate.html#isAvailable">QAudioState::isAvailable</a>() <a href="qaudiostate.html#capabilities">QAudioState::capabilities</a>() and <a href="qaudiostate.html#info">QAudioState::info</a>() by the manager to determine what should be the current state.</p>
+<p>The list of <a href="qaudiostate.html">QAudioState</a>'s available are returned to the manager by <a href="qaudiostateplugin.html#statesProvided">QAudioStatePlugin::statesProvided</a>(). Each of these <a href="qaudiostate.html">QAudioState</a> implementations are interagated using <a href="qaudiostate.html#isAvailable">QAudioState::isAvailable</a>() <a href="qaudiostate.html#capabilities">QAudioState::capabilities</a>() and <a href="qaudiostate.html#info">QAudioState::info</a>() by the manager to determine what should be the current state.</p>
 <p>When a state is no longer available or has become available QAudioState::availabilityChanged( bool available) should be emitted by the <a href="qaudiostate.html">QAudioState</a> implementation to let the manager know it needs to find a new state and change into it.</p>
 <p>Example <a href="qaudiostate.html">QAudioState</a> implementations:</p>
 <p>- Headset (domain=&quot;Phone&quot;, priority=50)</p>
@@ -53,7 +54,7 @@
 <p>- Headphones (domain=&quot;Media&quot;, priority=25)</p>
 <p>When you are listening to music on loud speaker and you plugin the headphones, emits available and manager switches into it.</p>
 <p>- Speakerphone (domain=&quot;Phone&quot;, priority=100)</p>
-<p>You are on a call and you press the speaker phone button, the key is handled by setting a QValueSpace object that the <a href="qaudiostate.html">QAudioState</a> implementation is listening on, available is emitted and manager switches into it.</p>
+<p>You are on a call and you press the speaker phone button, the key is handled by setting a <a href="qvaluespace.html">QValueSpace</a> object that the <a href="qaudiostate.html">QAudioState</a> implementation is listening on, available is emitted and manager switches into it.</p>
 <p>Depending on what is available at any moment the highest priority is chosen to suit the required domain and capabilites available.</p>
 <p><a href="qaudiostate.html#capabilities">QAudioState::capabilities</a>() returns <a href="qaudio.html">QAudio</a>, this can be set to be input, output or input and output.</p>
 <hr />
@@ -66,8 +67,8 @@
 <p>Returns a list of all QAudioStates provided by this plugin.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

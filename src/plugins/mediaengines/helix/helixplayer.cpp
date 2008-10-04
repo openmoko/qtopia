@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,10 +21,7 @@
 
 #include <media.h>
 #include <helixvideosurface.h>
-#include "helixgenericvideowidget.h"
-#ifdef Q_WS_QWS
-#include "helixdirectpainterwidget.h"
-#endif
+#include <helixvideowidget.h>
 #include <reporterror.h>
 
 #include <hxclsnk.h>
@@ -41,7 +36,12 @@
 #include <QX11EmbedContainer>
 #endif
 
+#ifdef Q_WS_QWS
+#include <QScreenInformation>
+#endif
 
+
+// {{{ ClientAdviseSink
 class PlayerProgressAdvise : public IHXClientAdviseSink,
     public Subject
 {
@@ -135,7 +135,9 @@ STDMETHODIMP PlayerProgressAdvise::QueryInterface( REFIID riid, void** object )
     *object = NULL;
     return HXR_NOINTERFACE;
 }
+// }}}
 
+// {{{ ClientAdviseSink (2)
 class PlayerStateAdvise : public IHXClientAdviseSink,
     public Subject
 {
@@ -271,7 +273,9 @@ STDMETHODIMP PlayerStateAdvise::QueryInterface( REFIID riid, void** object )
     *object = NULL;
     return HXR_NOINTERFACE;
 }
+// }}}
 
+// {{{ VolumeAdviseSink
 class PlayerVolumeAdvise : public IHXVolumeAdviseSink,
     public Subject
 {
@@ -338,7 +342,9 @@ STDMETHODIMP PlayerVolumeAdvise::QueryInterface( REFIID riid, void** object )
     *object = NULL;
     return HXR_NOINTERFACE;
 }
+// }}}
 
+// {{{ ErrorSink
 class PlayerErrorSink : public IHXErrorSink,
     public Subject
 {
@@ -454,6 +460,7 @@ STDMETHODIMP PlayerErrorSink::QueryInterface( REFIID riid, void** object )
     *object = NULL;
     return HXR_NOINTERFACE;
 }
+/// }}}
 
 HelixPlayer::HelixPlayer(IHXClientEngine* engine):
     m_stopTimerId(0),
@@ -477,7 +484,7 @@ HelixPlayer::HelixPlayer(IHXClientEngine* engine):
         m_player->AddAdviseSink( m_stateadvise );
 
         IHXAudioPlayer *audioplayer;
-        if( m_player->QueryInterface( IID_IHXAudioPlayer, (void**)&audioplayer ) == HXR_OK ) {
+        if (queryInterface(m_player, IID_IHXAudioPlayer, audioplayer) == HXR_OK) {
             m_volume = audioplayer->GetAudioVolume();
             HX_RELEASE( audioplayer );
         } else {
@@ -499,7 +506,7 @@ HelixPlayer::HelixPlayer(IHXClientEngine* engine):
         HX_ADDREF( m_errorsink );
         m_errorsink->attach( this );
 
-        if( m_player->QueryInterface( IID_IHXErrorSinkControl, (void**)&m_errorcontrol ) == HXR_OK ) {
+        if (queryInterface(m_player, IID_IHXErrorSinkControl, m_errorcontrol) == HXR_OK) {
             m_errorcontrol->AddErrorSink( m_errorsink, HXLOG_EMERG, HXLOG_INFO );
         } else {
             REPORT_ERROR( ERR_HELIX );
@@ -626,21 +633,18 @@ bool HelixPlayer::hasVideo() const
     return m_sitesupplier->hasVideo();
 }
 
-HelixVideo* HelixPlayer::createVideoWidget()
+VideoWidget* HelixPlayer::createVideoWidget()
 {
-    if( m_sitesupplier->hasVideo() ) {
-#if defined(Q_WS_QWS)
-        // If supported use direct painter widget
-        if( DirectPainterVideoWidget::isSupported() ) {
-            return new HelixVideo(new DirectPainterVideoWidget( m_sitesupplier->site()->surface() ));
-        }
-        return new HelixVideo(new GenericVideoWidget( m_sitesupplier->site()->surface() ));
-#elif defined(Q_WS_X11)
-    return new HelixVideo(new GenericVideoWidget(m_sitesupplier->site()->surface(), new QX11EmbedContainer));
-#endif
-    }
+    if( m_sitesupplier->hasVideo() )
+        return new VideoWidget( m_sitesupplier->site()->surface() );
 
     return 0;
+}
+
+void HelixPlayer::updateVideoSurfaceFormats()
+{
+    if( m_sitesupplier->hasVideo() )
+        m_sitesupplier->site()->surface()->updateColorConverter();
 }
 
 QString HelixPlayer::errorString() const
@@ -652,7 +656,7 @@ QVariant HelixPlayer::value(QString const& name) const
 {
     IHXPreferences *preferences;
 
-    m_player->QueryInterface( IID_IHXPreferences, (void**)&preferences );
+    queryInterface(m_player, IID_IHXPreferences, preferences);
 
     IHXBuffer *buffer;
     preferences->ReadPref(name.toLatin1().constData(), buffer );
@@ -670,11 +674,11 @@ void HelixPlayer::setValue(QString const& name, QVariant const& value)
     IHXPreferences *preferences;
     IHXCommonClassFactory *factory;
 
-    m_player->QueryInterface( IID_IHXPreferences, (void**)&preferences );
-    m_player->QueryInterface( IID_IHXCommonClassFactory, (void**)&factory );
+    queryInterface(m_player, IID_IHXPreferences, preferences);
+    queryInterface(m_player, IID_IHXCommonClassFactory, factory);
 
     IHXBuffer *buffer;
-    factory->CreateInstance( CLSID_IHXBuffer, (void**)&buffer );
+    createInstance(factory, CLSID_IHXBuffer, buffer);
 
     QString s = value.toString();
     buffer->Set( (const UCHAR*)s.toLatin1().data(), s.length() );

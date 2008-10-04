@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,15 +24,18 @@
 #include <hxccf.h>
 #include <ihxpckts.h>
 
+#include "helixutil.h"
+
+
 HelixSite::HelixSite( IUnknown* unknown )
     : m_unknown( unknown ), m_refCount( 0 ), m_values( NULL ), m_siteUser( NULL )
 {
     HX_ADDREF( m_unknown );
 
     IHXCommonClassFactory *factory;
-    m_unknown->QueryInterface( IID_IHXCommonClassFactory, (void**)&factory ); // ### check!
+    queryInterface(m_unknown, IID_IHXCommonClassFactory, factory); // ### check!
 
-    factory->CreateInstance( CLSID_IHXValues, (void**)&m_values ); // ### check!
+    createInstance(factory, CLSID_IHXValues, m_values); // ### check!
     HX_ADDREF( m_values );
 
     HX_RELEASE( factory );
@@ -302,7 +303,7 @@ HelixSiteSupplier::HelixSiteSupplier( IUnknown *unknown )
     HX_ADDREF( m_unknown );
 
     // Get handle for site manager
-    m_unknown->QueryInterface( IID_IHXSiteManager, (void**)&m_manager );
+    queryInterface(m_unknown, IID_IHXSiteManager, m_manager);
 }
 
 HelixSiteSupplier::~HelixSiteSupplier()
@@ -332,11 +333,11 @@ STDMETHODIMP HelixSiteSupplier::SitesNeeded( UINT32 uRequestID, IHXValues *pRequ
 
     // Add site to site manager
     IHXSite *ihxsite;
-    m_site->QueryInterface( IID_IHXSite, (void**)&ihxsite );
+    queryInterface(m_site, IID_IHXSite, ihxsite);
 
     // Set site properties
     IHXValues *properties;
-    hres = m_site->QueryInterface( IID_IHXValues, (void**)&properties );
+    hres = queryInterface(m_site, IID_IHXValues, properties);
     if( HXR_OK != hres ) {
         REPORT_ERROR( ERR_UNKNOWN );
     }
@@ -379,7 +380,7 @@ STDMETHODIMP HelixSiteSupplier::SitesNotNeeded( UINT32 uRequestID )
 
     // Remove site
     IHXSite *ihxsite;
-    m_site->QueryInterface( IID_IHXSite, (void**)&ihxsite );
+    queryInterface(m_site, IID_IHXSite, ihxsite);
     if( ihxsite ) {
         result = m_manager->RemoveSite( ihxsite );
     } else {

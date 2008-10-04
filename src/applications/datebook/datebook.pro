@@ -1,6 +1,9 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=datebook
 CONFIG+=qtopia_main
+depends(libraries/qtopiapim)
+}
 
 HEADERS		+= dayview.h \
 		  datebook.h \
@@ -34,35 +37,30 @@ SOURCES		+= dayview.cpp \
                   appointmentlist.cpp \
                   main.cpp
 
-
 FORMS	+=         findwidgetbase_p.ui \
 		   exceptiondialogbase.ui
 
-    HEADERS += googleaccount.h \
-               accounteditor.h
-    SOURCES += googleaccount.cpp \
-               accounteditor.cpp
+HEADERS += googleaccount.h \
+           accounteditor.h
+SOURCES += googleaccount.cpp \
+           accounteditor.cpp
 
 #DEFINES += GOOGLE_CALENDAR_CONTEXT
 
-TRANSLATABLES   +=  googleaccount.h \
-                    googleaccount.cpp \
-                    accounteditor.h \
-                    accounteditor.cpp
+dynamic.TYPE=CONDITIONAL_SOURCES
+dynamic.CONDITION=!enable_singleexec
+dynamic.SOURCES=\
+    ../todolist/reminderpicker.cpp \
+    ../todolist/recurrencedetails.cpp\
+    ../todolist/qdelayedscrollarea.cpp\
+    ../todolist/qtopiatabwidget.cpp
+dynamic.HEADERS=\
+    ../todolist/reminderpicker.h \
+    ../todolist/recurrencedetails.h\
+    ../todolist/qdelayedscrollarea.h\
+    ../todolist/qtopiatabwidget.h
+!qbuild:CONDITIONAL_SOURCES(dynamic)
 
-!enable_singleexec {
-    SOURCES += ../todo/reminderpicker.cpp \
-               ../todo/recurrencedetails.cpp\
-               ../todo/qdelayedscrollarea.cpp\
-               ../todo/qtopiatabwidget.cpp
-    HEADERS += ../todo/reminderpicker.h \
-               ../todo/recurrencedetails.h\
-               ../todo/qdelayedscrollarea.h\
-               ../todo/qtopiatabwidget.h
-}
-
-
-depends(libraries/qtopiapim)
 
 desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/datebook.desktop
 desktop.path=/apps/Applications

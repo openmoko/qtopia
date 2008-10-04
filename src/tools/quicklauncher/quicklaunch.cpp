@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -41,7 +39,8 @@
 #include <qtopiaipcenvelope.h>
 
 #ifndef QT_NO_SXE
-#include <private/qtransportauth_qws_p.h>
+// implemented in qtransportauth_qws.cpp
+void *guaranteed_memset(void *v,int c,size_t n);
 #endif
 
 #ifndef SINGLE_EXEC
@@ -55,22 +54,6 @@ QPointer<QWidget> QuickLauncher::mainWindow;
 bool QuickLauncher::validExitLoop = false;
 bool QuickLauncher::needsInit = false;
 QEventLoop *QuickLauncher::eventLoop = 0;
-
-#if defined(QTOPIA_DBUS_IPC)
-// For quicklaunched apps
-class WaitForRaiseTask : public QObject
-{
-public:
-    static const int timeout = 1000;
-
-    WaitForRaiseTask(QObject * parent);
-};
-
-WaitForRaiseTask::WaitForRaiseTask(QObject *parent) : QObject(parent)
-{
-    QTimer::singleShot(timeout, this, SLOT(deleteLater()));
-}
-#endif
 
 #if defined(QTOPIA_SETPROC_PRCTL)
 #include <sys/prctl.h>
@@ -158,25 +141,22 @@ QuickLauncher::QuickLauncher()
 
 void QuickLauncher::exec( int argc, char **argv )
 {
-    QuickLauncher::app->unregisterRunningTask("QuickLaunch");
     QString appName = argv[0];
     int sep = appName.lastIndexOf( '/' );
     if ( sep > 0 )
         appName = appName.mid( sep+1 );
 
-    QPerformanceLog(appName) << QPerformanceLog::Begin << "quicklauncher main";
+    qLog(Quicklauncher) << "begin main" << appName;
+
+    QuickLauncher::app->unregisterRunningTask("QuickLaunch");
 
     if ( needsInit ) {
         needsInit = false;
         app->initApp( argc, argv );
     }
 
-#if defined(QTOPIA_DBUS_IPC)
-    app->registerRunningTask("WaitForDBUSRaise", new WaitForRaiseTask(0));
-#endif
-
 #ifndef SINGLE_EXEC
-    QPerformanceLog(appName) << (QPerformanceLog::Begin|QPerformanceLog::LibraryLoading);
+    qLog(Quicklauncher) << "begin library loading";
 #ifndef QT_NO_SXE
     // loader invokes the constructor - need to clear the key before this
     guaranteed_memset( _key, 0, QSXE_KEY_LEN );
@@ -192,7 +172,7 @@ void QuickLauncher::exec( int argc, char **argv )
         qWarning( "Could not find app for suid: %s", qPrintable( appName ));
 #endif
     appInstance = loader->instance(appName);
-    QPerformanceLog(appName) << (QPerformanceLog::End|QPerformanceLog::LibraryLoading);
+    qLog(Quicklauncher) << "end library loading";
     appIface = qobject_cast<QApplicationFactoryInterface*>(appInstance);
     if ( !appIface ) {
         qWarning("%s: cannot load application: %s", (const char*) QFile::encodeName(appName),
@@ -202,9 +182,9 @@ void QuickLauncher::exec( int argc, char **argv )
 #ifndef QT_NO_SXE
     appIface->setProcessKey( appName );
 #endif
-    QPerformanceLog(appName) << (QPerformanceLog::Begin|QPerformanceLog::MainWindow);
+    qLog(Quicklauncher) << "begin main window create";
     mainWindow = appIface->createMainWindow( appName );
-    QPerformanceLog(appName) << (QPerformanceLog::End|QPerformanceLog::MainWindow);
+    qLog(Quicklauncher) << "end main window create";
 #else
     if ( qpeAppMap()->contains(appName) ) {
         mainWindow = (*qpeAppMap())[appName](0, 0);

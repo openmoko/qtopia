@@ -10,10 +10,10 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">configure Options (Qt)<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qt Extended Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Build System Home</font></a>&nbsp;&middot; <a href="reference.html"><font color="#004faf">Reference</font></a>&nbsp;&middot; <a href="userguide.html"><font color="#004faf">User Guide</font></a>&nbsp;&middot; <a href="internals.html"><font color="#004faf">Internals</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">configure Options (Qt)<br /><span class="subtitle"></span>
 </h1>
-<p>These options can be passed by using <tt>-extra-qt-config</tt>. For other switches that Qtopia supports see <a href="over-configure-options-1.html">configure Options</a>. Note that quoting can get a bit tricky with <tt>-extra-qt-config</tt> so be careful. The <tt>-extra-qt-config</tt> switch can be passed multiple times which can simplify quoting issues in many cases.</p>
+<p>These options can be passed by using <tt>-extra-qt-config</tt>. For other switches that Qt Extended supports see <a href="over-configure-options-1.html">configure Options</a>. Note that quoting can get a bit tricky with <tt>-extra-qt-config</tt> so be careful. The <tt>-extra-qt-config</tt> switch can be passed multiple times which can simplify quoting issues in many cases.</p>
 <p>For example, the following two are equivalent.</p>
 <pre>    configure -extra-qt-config &quot;-arg -arg word -arg 'words and stuff'&quot;
     configure -extra-qt-config -arg\
@@ -21,7 +21,7 @@
               -extra-qt-config &quot;-arg 'words and stuff'&quot;</pre>
 <a name="qtopiacore-qt-configure-help"></a>
 <h3>qtopiacore/qt/configure -help</h3>
-<pre>    This is the Qtopia Core Open Source Edition.
+<pre>    This is the Qt for Embedded Linux Open Source Edition.
 
     Usage:  configure [-prefix &lt;dir&gt;] [-prefix-install] [-bindir &lt;dir&gt;] [-libdir &lt;dir&gt;]
             [-docdir &lt;dir&gt;] [-headerdir &lt;dir&gt;] [-plugindir &lt;dir&gt; ] [-datadir &lt;dir&gt;]
@@ -31,15 +31,18 @@
             [-largefile] [-no-exceptions] [-exceptions] [-no-accessibility]
             [-accessibility] [-no-stl] [-stl] [-no-sql-&lt;driver&gt;] [-sql-&lt;driver&gt;]
             [-plugin-sql-&lt;driver&gt;] [-system-sqlite] [-no-qt3support] [-qt3support]
-            [-platform] [-D &lt;string&gt;] [-I &lt;string&gt;] [-L &lt;string&gt;] [-help] [-no-zlib]
+            [-platform] [-D &lt;string&gt;] [-I &lt;string&gt;] [-L &lt;string&gt;] [-help]
             [-qt-zlib] [-system-zlib] [-no-gif] [-qt-gif] [-no-libtiff] [-system-libtiff]
             [-no-libpng] [-qt-libpng] [-system-libpng] [-no-libmng] [-qt-libmng]
             [-system-libmng] [-no-libjpeg] [-qt-libjpeg] [-system-libjpeg] [-make &lt;part&gt;]
             [-no-make &lt;part&gt;] [-R &lt;string&gt;]  [-l &lt;string&gt;] [-no-rpath]  [-rpath] [-continue]
             [-verbose] [-v] [-silent] [-no-nis] [-nis] [-no-cups] [-cups] [-no-iconv]
-            [-iconv] [-no-pch] [-pch] [-no-qdbus] [-qdbus] [-no-separate-debug-info]
-            [-no-mmx] [-no-3dnow] [-no-sse] [-no-sse2]
-            [-separate-debug-info] [-armfpa] [-no-optimized-qmake] [-optimized-qmake]
+            [-iconv] [-no-pch] [-pch] [-no-dbus] [-dbus] [-dbus-linked]
+            [-no-separate-debug-info] [-no-mmx] [-no-3dnow] [-no-sse] [-no-sse2]
+            [-qtnamespace &lt;namespace&gt;] [-separate-debug-info] [-armfpa]
+            [-no-optimized-qmake] [-optimized-qmake] [-no-xmlpatterns] [-xmlpatterns]
+            [-no-phonon] [-phonon-backend] [-no-phonon-backend] [-phonon-backend] [-no-svg]
+            [-svg] [-no-webkit] [-webkit] [-no-assistant-webkit] [-assistant-webkit]
 
             [additional platform specific options (see below)]
 
@@ -48,7 +51,7 @@
      These are optional, but you may specify install directories.
 
         -prefix &lt;dir&gt; ...... This will install everything relative to &lt;dir&gt;
-                             (default /usr/local/Trolltech/QtopiaCore-4.3.5-i386)
+                             (default /usr/local/Trolltech/QtEmbedded-4.4.3)
 
         -hostprefix [dir] .. Tools and libraries needed when developing
                              applications are installed in [dir]. If [dir] is
@@ -56,7 +59,7 @@
 
       * -prefix-install .... Force a sandboxed &quot;local&quot; installation of
                              Qt. This will install into
-                             /usr/local/Trolltech/QtopiaCore-4.3.5-i386, if this option is
+                             /usr/local/Trolltech/QtEmbedded-4.4.3, if this option is
                              disabled then some platforms will attempt a
                              &quot;system&quot; install by placing default values to
                              be placed in a system location other than
@@ -76,7 +79,7 @@
                                 (default PREFIX/plugins)
         -datadir &lt;dir&gt; ........ Data used by Qt programs will be installed to &lt;dir&gt;
                                 (default PREFIX)
-        -translationdir &lt;dir&gt;.. Translations of Qt programs will be installed to &lt;dir&gt;
+        -translationdir &lt;dir&gt; . Translations of Qt programs will be installed to &lt;dir&gt;
                                 (default PREFIX/translations)
         -sysconfdir &lt;dir&gt; ..... Settings used by Qt programs will be looked for in &lt;dir&gt;
                                 (default PREFIX/etc/settings)
@@ -100,7 +103,7 @@
      *  -release ........... Compile and link Qt with debugging turned off.
         -debug ............. Compile and link Qt with debugging turned on.
         -debug-and-release . Compile and link two versions of Qt, with and without
-                             debugging turned on. [Mac only]
+                             debugging turned on (Mac only).
 
      *  -shared ............ Create and use shared Qt libraries.
         -static ............ Create and use static Qt libraries.
@@ -111,8 +114,8 @@
                              library and subdirectory targets.  All other Makefiles
                              are created as wrappers, which will in turn run qmake.
 
-        -no-largefile....... Disables large file support.
-     +  -largefile.......... Enables Qt to access files larger than 4 GB.
+        -no-largefile ...... Disables large file support.
+     +  -largefile ......... Enables Qt to access files larger than 4 GB.
 
      *  -no-exceptions ..... Disable exceptions on compilers that support it.
         -exceptions ........ Enable exceptions on compilers that support it.
@@ -137,8 +140,31 @@
         -no-qt3support ..... Disables the Qt 3 support functionality.
      *  -qt3support ........ Enables the Qt 3 support functionality.
 
+        -no-xmlpatterns..... Do not build the QtXmlPatterns module.
+     +  -xmlpatterns........ Build the QtXmlPatterns module.
+                             QtXmlPatterns is built if a decent C++ compiler
+                             is used and exceptions are enabled.
+
+        -no-phonon ......... Do not build the Phonon module.
+     +  -phonon ............ Build the Phonon module.
+                             Phonon is built if a decent C++ compiler is used.
+        -no-phonon-backend.. Do not build the platform phonon plugin.
+     +  -phonon-backend..... Build the platform phonon plugin.
+
+        -no-svg ............ Do not build the SVG module.
+     +  -svg ............... Build the SVG module.
+
+        -no-webkit ......... Do not build the WebKit module.
+     +  -webkit ............ Build the WebKit module.
+                             WebKit is built if a decent C++ compiler is used.
+
+     *  -no-assistant-webkit Do not use WebKit as the html rendering engine in
+                             Assistant.
+        -assistant-webkit    Use WebKit as html rendering engine in Assistant.
+                             This is only available if the WebKit module is built.
+
         -platform target ... The operating system and compiler you are building
-                             on (linux-g++).
+                             on (qws/linux-x86-g++).
 
                              See the README file for a list of supported
                              operating systems and compilers.
@@ -148,6 +174,9 @@
         -no-sse ............ Do not compile with use of SSE instructions.
         -no-sse2 ........... Do not compile with use of SSE2 instructions.
 
+        -qtnamespace &lt;name&gt;  Wraps all Qt library code in 'namespace &lt;name&gt; {...}'.
+        -qtlibinfix &lt;infix&gt;  Renames all libQt*.so to libQt*&lt;infix&gt;.so.
+
         -D &lt;string&gt; ........ Add an explicit define to the preprocessor.
         -I &lt;string&gt; ........ Add an explicit include path.
         -L &lt;string&gt; ........ Add an explicit library path.
@@ -156,7 +185,6 @@
 
     Third Party Libraries:
 
-        -no-zlib ........... Do not compile in ZLIB support. Implies -no-libpng.
         -qt-zlib ........... Use the zlib bundled with Qt.
      +  -system-zlib ....... Use zlib from the operating system.
                              See http://www.gzip.org/zlib
@@ -186,12 +214,13 @@
                              See http://www.ijg.org
 
         -no-openssl ........ Do not compile support for OpenSSL.
-     +  -openssl ........... Use OpenSSL from the operating system.
+     +  -openssl ........... Enable run-time OpenSSL support.
+        -openssl-linked .... Enabled linked OpenSSL support.
 
     Additional options:
 
         -make &lt;part&gt; ....... Add part to the list of parts to be built at make time.
-                             (libs tools examples demos)
+                             (libs tools examples demos docs translations)
         -nomake &lt;part&gt; ..... Exclude part from the list of parts to be built.
 
         -R &lt;string&gt; ........ Add an explicit runtime library path to the Qt
@@ -204,7 +233,7 @@
                              install path as a runtime library path. Equivalent
                              to -R install_libpath
 
-        -continue........... Continue as far as possible if an error occurs.
+        -continue .......... Continue as far as possible if an error occurs.
 
         -verbose, -v ....... Print verbose information about each step of the
                              configure process.
@@ -218,23 +247,27 @@
         -no-nis ............ Do not compile NIS support.
      *  -nis ............... Compile NIS support.
 
-        -no-cups............ Do not compile CUPS support.
+        -no-cups ........... Do not compile CUPS support.
      *  -cups .............. Compile CUPS support.
 
-        -no-iconv........... Do not compile support for iconv(3).
-     *  -iconv.............. Compile support for iconv(3).
+        -no-iconv .......... Do not compile support for iconv(3).
+     *  -iconv ............. Compile support for iconv(3).
 
         -no-pch ............ Do not use precompiled header support.
      *  -pch ............... Use precompiled header support.
 
-        -no-qdbus........... Do not compile the QtDBus module.
-     +  -qdbus.............. Compile the QtDBus module.
+        -no-dbus ........... Do not compile the QtDBus module.
+     +  -dbus .............. Compile the QtDBus module and dynamically load libdbus-1.
+        -dbus-linked........ Compile the QtDBus module and link to libdbus-1.
 
-        -reduce-relocations ... Reduce relocations in the libraries through extra linker
-                                optimizations (Qt/X11 / Qtopia/Core only;
-                                experimental; needs GNU ld &gt;= 2.18)
+        -reduce-relocations ..... Reduce relocations in the libraries through extra
+                                  linker optimizations (Qt/X11 and Qt for Embedded Linux only;
+                                  experimental; needs GNU ld &gt;= 2.18).
 
-    Qtopia Core only:
+        -no-separate-debug-info . Do not store debug information in a separate file.
+     *  -separate-debug-info .... Strip debug information into a separate .debug file.
+
+    Qt for Embedded Linux only:
 
         -xplatform target ... The target platform when cross-compiling.
 
@@ -242,7 +275,7 @@
         -feature-&lt;feature&gt; .. Compile in &lt;feature&gt;. The available features
                               are described in src/corelib/global/qfeatures.txt
 
-        -embedded &lt;arch&gt;..... This will enable the embedded build, you must have a
+        -embedded &lt;arch&gt; .... This will enable the embedded build, you must have a
                               proper license for this switch to work.
                               Example values for &lt;arch&gt;: arm mips x86 generic
 
@@ -254,6 +287,9 @@
 
         -little-endian ...... Target platform is little endian (LSB first).
         -big-endian ......... Target platform is big endian (MSB first).
+
+        -host-little-endian . Host platform is little endian (LSB first).
+        -host-big-endian .... Host platform is big endian (MSB first).
 
                               You only need to specify the endianness when
                               cross-compiling, otherwise the host
@@ -268,14 +304,14 @@
                               default (full).
 
         -depths &lt;list&gt; ...... Comma-separated list of supported bit-per-pixel
-                              depths, from: 1, 4, 8, 16, 18, 24, and 32.
+                              depths, from: 1, 4, 8, 12, 15, 16, 18, 24, 32 and 'all'.
 
         -qt-decoration-&lt;style&gt; ....Enable a decoration &lt;style&gt; in the QtGui library,
                                    by default all available decorations are on.
                                    Possible values for &lt;style&gt;: [ styled windows default ]
         -plugin-decoration-&lt;style&gt; Enable decoration &lt;style&gt; as a plugin to be
                                    linked to at run time.
-                                   Possible values for &lt;style&gt;: [  default windows ]
+                                   Possible values for &lt;style&gt;: [  default styled windows ]
         -no-decoration-&lt;style&gt; ....Disable decoration &lt;style&gt; entirely.
                                    Possible values for &lt;style&gt;: [ styled windows default ]
 
@@ -283,32 +319,37 @@
                              Possible values for &lt;driver&gt;: [ linuxfb transformed qvfb vnc multiscreen ]
         -plugin-gfx-&lt;driver&gt; Enable graphics &lt;driver&gt; as a plugin to be
                              linked to at run time.
-                             Possible values for &lt;driver&gt;: [  hybrid qvfb transformed vnc ]
+                             Possible values for &lt;driver&gt;: [  ahi directfb hybrid linuxfb qvfb svgalib transformed vnc ]
         -no-gfx-&lt;driver&gt; ... Disable graphics &lt;driver&gt; entirely.
                              Possible values for &lt;driver&gt;: [ linuxfb transformed qvfb vnc multiscreen ]
 
         -qt-kbd-&lt;driver&gt; ... Enable a keyboard &lt;driver&gt; in the QtGui library.
-        -no-kbd-&lt;driver&gt; ... Disable keyboard &lt;driver&gt; entirely.
+                             Possible values for &lt;driver&gt;: [ tty usb sl5000 yopy vr41xx qvfb ]
 
+        -plugin-kbd-&lt;driver&gt; Enable keyboard &lt;driver&gt; as a plugin to be linked to
+                             at runtime.
+                             Possible values for &lt;driver&gt;: [  sl5000 usb vr41xx yopy ]
+
+        -no-kbd-&lt;driver&gt; ... Disable keyboard &lt;driver&gt; entirely.
                              Possible values for &lt;driver&gt;: [ tty usb sl5000 yopy vr41xx qvfb ]
 
         -qt-mouse-&lt;driver&gt; ... Enable a mouse &lt;driver&gt; in the QtGui library.
                                Possible values for &lt;driver&gt;: [ pc bus linuxtp yopy vr41xx tslib qvfb ]
-        -plugin-mouse-&lt;driver&gt; Enable mouse &lt;driver&gt; as a plugin to be
-                               linked to at runtime.
-                               Possible values for &lt;driver&gt;: [  tslib ]
+        -plugin-mouse-&lt;driver&gt; Enable mouse &lt;driver&gt; as a plugin to be linked to
+                               at runtime.
+                               Possible values for &lt;driver&gt;: [  bus linuxtp pc tslib vr41xx yopy ]
         -no-mouse-&lt;driver&gt; ... Disable mouse &lt;driver&gt; entirely.
                                Possible values for &lt;driver&gt;: [ pc bus linuxtp yopy vr41xx tslib qvfb ]
 
-        -iwmmxt............. Compile using the iWMMXt instruction set
+        -iwmmxt ............ Compile using the iWMMXt instruction set
                              (available on some XScale CPUs).
 
-     +  -no-glib............ Do not compile Glib support.
-        -glib............... Compile Glib support.</pre>
+        -no-glib ........... Do not compile Glib support.
+     +  -glib .............. Compile Glib support.</pre>
 <p>See also <a href="overviews.html">Overviews</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 Trolltech</td>
-<td align="right">Qtopia Build System Documentation</td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
+<td align="right"><div align="right">Qt Extended  - Build System Documentation</div></td>
 </tr></table></div></address></body>
 </html>

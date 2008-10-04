@@ -1,11 +1,17 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=addressbook
 CONFIG+=qtopia_main
+enable_telephony:depends(libraries/qtopiaphone)
+depends(libraries/qtopiapim)
+depends(libraries/qtopiamail)
+depends(libraries/qtopiacollective)
+equals(QTOPIA_UI,home):depends(libraries/homeui)
+}
 
 HEADERS+=\
     abeditor.h\
     contactdetails.h\
-    contactsource.h\
     contactdocument.h\
     contactbrowser.h\
     contactmessagehistorylist.h\
@@ -13,13 +19,13 @@ HEADERS+=\
     contactlistpane.h\
     addressbook.h\
     groupview.h\
+    fieldlist.h\
     emaildialogphone.h
 
 SOURCES+=\
     abeditor.cpp\
     contactdetails.cpp\
     addressbook.cpp\
-    contactsource.cpp\
     groupview.cpp\
     contactdocument.cpp\
     contactmessagehistorylist.cpp\
@@ -27,34 +33,41 @@ SOURCES+=\
     contactoverview.cpp\
     contactlistpane.cpp\
     emaildialogphone.cpp\
+    fieldlist.cpp\
     main.cpp\
 
 FORMS += actiondialog.ui
 
-depends(libraries/qtopiaphone)
 
-enable_telephony {
-    !enable_singleexec {
-        SOURCES += ../../settings/ringprofile/ringtoneeditor.cpp
-        HEADERS += ../../settings/ringprofile/ringtoneeditor.h
-    }
-    HEADERS += contactcallhistorylist.h
-    SOURCES += contactcallhistorylist.cpp
-}
+TEL.TYPE=CONDITIONAL_SOURCES
+TEL.CONDITION=enable_telephony
+TEL.HEADERS=contactcallhistorylist.h
+TEL.SOURCES=contactcallhistorylist.cpp
+!qbuild:CONDITIONAL_SOURCES(TEL)
 
-!enable_singleexec {
-    SOURCES += ../todo/reminderpicker.cpp ../todo/qdelayedscrollarea.cpp
-    HEADERS += ../todo/reminderpicker.h ../todo/qdelayedscrollarea.h
-}
+HOME.TYPE=CONDITIONAL_SOURCES
+HOME.CONDITION=equals(QTOPIA_UI,home)
+HOME.HEADERS=deskphonedetails.h deskphonewidgets.h deskphoneeditor.h
+HOME.SOURCES=deskphonedetails.cpp deskphonewidgets.cpp deskphoneeditor.cpp
+!qbuild:CONDITIONAL_SOURCES(HOME)
 
-TRANSLATABLES += emaildialogphone.cpp \
-                    emaildialogphone.h \
-                    actiondialog.ui \
-                    ../../settings/ringprofile/ringtoneeditor.cpp \
-                    ../../settings/ringprofile/ringtoneeditor.h 
+dynamic.TYPE=CONDITIONAL_SOURCES
+dynamic.CONDITION=!enable_singleexec
+dynamic.HEADERS=\
+    ../todolist/reminderpicker.h\
+    ../todolist/qdelayedscrollarea.h
+dynamic.SOURCES=\
+    ../todolist/reminderpicker.cpp\
+    ../todolist/qdelayedscrollarea.cpp
+!qbuild:CONDITIONAL_SOURCES(dynamic)
 
-depends(libraries/qtopiapim)
-depends(libraries/qtopiamail)
+dynamic_cell.TYPE=CONDITIONAL_SOURCES
+dynamic_cell.CONDITION=!enable_singleexec:enable_telephony
+dynamic_cell.HEADERS=\
+    ../../settings/profileedit/ringtoneeditor.h
+dynamic_cell.SOURCES=\
+    ../../settings/profileedit/ringtoneeditor.cpp
+!qbuild:CONDITIONAL_SOURCES(dynamic_cell)
 
 service.files=$$QTOPIA_DEPOT_PATH/services/Contacts/addressbook
 service.path=/services/Contacts
@@ -94,6 +107,13 @@ enable_cell {
     qdsphoneservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/ContactsPhone
     qdsphoneservice.path=/etc/qds
     INSTALLS+=qdsphoneservice
+}
+
+ribbonconf.files=$$device_overrides(/etc/default/Trolltech/AlphabetRibbonLayout.conf)
+
+!isEmpty(ribbonconf.files) {
+    ribbonconf.path=/etc/default/Trolltech
+    INSTALLS+=ribbonconf
 }
 
 pkg.desc=Contacts for Qtopia.

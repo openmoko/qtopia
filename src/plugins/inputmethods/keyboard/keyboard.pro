@@ -1,6 +1,8 @@
+!qbuild{
 qtopia_project(qtopia plugin)
 TARGET=qkeyboard
 CONFIG+=no_singleexec
+}
 
 HEADERS		= keyboard.h \
 		    pickboardcfg.h \

@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QNetworkConnection Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QNetworkConnection Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QNetworkConnection class provides monitoring of network connections. <a href="#details">More...</a></p>
 <pre>    #include &lt;QNetworkConnection&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -76,20 +77,20 @@
 <p>Destroys a <a href="qnetworkconnection.html">QNetworkConnection</a> instance.</p>
 <h3 class="fn"><a name="connectivityChanged"></a>void QNetworkConnection::connectivityChanged ( bool <i>isConnected</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the connection changes from offline to online and vice versa.</p>
-<p><i>isConnected</i> is <tt>TRUE</tt> when the associated network device's state is equal to <a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Up</a>. If it is required to keep track of the precise device state <a href="qnetworkdevice.html">QNetworkDevice</a> should be used.</p>
+<p><i>isConnected</i> is <tt>true</tt> when the associated network device's state is equal to <a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Up</a>. If it is required to keep track of the precise device state <a href="qnetworkdevice.html">QNetworkDevice</a> should be used.</p>
 <h3 class="fn"><a name="identity"></a><a href="qnetworkconnection-identity.html">Identity</a> QNetworkConnection::identity () const</h3>
 <p>Returns the idenity object associated to this network connection. The identity object provides further details about this network connection object.</p>
 <h3 class="fn"><a name="isConnected"></a>bool QNetworkConnection::isConnected () const</h3>
 <p>This function returns true if the connection is established. A connection is considered to be established if the underlying device state is equal to <a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Up</a>.</p>
 <p>If it is necessary to distinguish the various types of connectivity <a href="qnetworkdevice.html#state">QNetworkDevice::state</a>() should be used.</p>
 <h3 class="fn"><a name="isValid"></a>bool QNetworkConnection::isValid () const</h3>
-<p>Returns <tt>TRUE</tt> if this network connection is valid; otherwise <tt>FALSE</tt>.</p>
+<p>Returns <tt>true</tt> if this network connection is valid; otherwise <tt>false</tt>.</p>
 <p>An invalid <a href="qnetworkconnection.html">QNetworkConnection</a> has an invalid identity. This may happen when initialising this object with an invalid identity or when the underlying network configuration has been deleted (e.g&#x2e; the user removed the configuration for WLAN with ESSID &quot;xyz&quot;).</p>
 <p>A transition from a valid to an invalid state can be noticed by connecting to the <a href="qnetworkconnectionmanager.html#connectionRemoved">QNetworkConnectionManager::connectionRemoved</a>() signal.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

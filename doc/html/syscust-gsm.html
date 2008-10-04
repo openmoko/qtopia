@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">GSM Modem Integration<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">GSM Modem Integration<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#gsm-modem-integration">GSM Modem Integration</a></li>
 <li><a href="#outline-of-a-modem-vendor-plugin">Outline of a Modem Vendor Plugin</a></li>
@@ -21,9 +21,9 @@
 <a name="gsm-modem-integration"></a><a name="gsm-modem-integration"></a>
 <h2>GSM Modem Integration</h2>
 <p>The implementation of the 3GPP AT command specifications (3GPP TS 27.007 and 3GPP TS 27.005) varies between modems, with most modems supporting proprietary AT commands for special features.</p>
-<p>Qtopia Phone supports vendor-specific modem commands through the use of plug-ins to the <a href="telephony-modem.html">Qtopia Phone Modem Library</a>. The vendor-specific code is placed in the device-specific directory <tt>devices/DEVNAME/src/plugins/phonevendors/DEVNAME</tt>, where <tt>DEVNAME</tt> is the manufacturer's name for the device.</p>
-<p>Qtopia Phone will load every vendor plug-in that is installed and query each one to see which is capable of handling the modem. The <tt>QTOPIA_PHONE_VENDOR</tt> macro in <tt>custom.h</tt> can be used to force Qtopia Phone to load only that plug-in, ignoring any others that may be present in the system. For example, setting <tt>QTOPIA_PHONE_VENDOR</tt> to <tt>wavecom</tt> will instruct Qtopia Phone to load <tt>libwavecomvendor.so</tt> to provide vendor-specific AT commands. The <tt>QTOPIA_PHONE_VENDOR</tt> value can also be set as an environment variable.</p>
-<p>3GPP TS 07.10 multiplexing can also be a source of problems when supporting a new modem. During initial testing it can be disabled by setting the <tt>QTOPIA_PHONE_MUX</tt> environment variable to <tt>no</tt>. Qtopia Phone will still function, but you will be unable to make GPRS calls without multiplexing support.</p>
+<p>Qt Extended supports vendor-specific modem commands through the use of plug-ins to the <a href="telephony-modem.html">Qt Extended Phone Modem Library</a>. The vendor-specific code is placed in the device-specific directory <tt>devices/DEVNAME/src/plugins/phonevendors/DEVNAME</tt>, where <tt>DEVNAME</tt> is the manufacturer's name for the device.</p>
+<p>Qt Extended will load every vendor plug-in that is installed and query each one to see which is capable of handling the modem. The <tt>QTOPIA_PHONE_VENDOR</tt> macro in <tt>custom.h</tt> can be used to force Qt Extended to load only that plug-in, ignoring any others that may be present in the system. For example, setting <tt>QTOPIA_PHONE_VENDOR</tt> to <tt>wavecom</tt> will instruct Qt Extended to load <tt>libwavecomvendor.so</tt> to provide vendor-specific AT commands. The <tt>QTOPIA_PHONE_VENDOR</tt> value can also be set as an environment variable.</p>
+<p>3GPP TS 07.10 multiplexing can also be a source of problems when supporting a new modem. During initial testing it can be disabled by setting the <tt>QTOPIA_PHONE_MUX</tt> environment variable to <tt>no</tt>. Qt Extended will still function, but you will be unable to make GPRS calls without multiplexing support.</p>
 <p>If your modem does not support 3GPP TS 07.10 multiplexing, or you need to modify the 3GPP TS 07.10 parameters, it will be necessary to write a multiplexer plug-in. See <a href="tut-multiplexing.html">Writing a Multiplexer Plug-in</a> for more information on how to do this.</p>
 <a name="outline-of-a-modem-vendor-plugin"></a>
 <h2>Outline of a Modem Vendor Plugin</h2>
@@ -110,7 +110,7 @@
         <span class="comment">// Call QModemService to create other interfaces that we didn't override.</span>
         QModemService::initialize();
     }</pre>
-<p>Modem services within Qtopia are split up into several handlers, one for each functionality area (phone calls, network registration, SMS, SIM toolkit, phone books, etc).</p>
+<p>Modem services within Qt Extended are split up into several handlers, one for each functionality area (phone calls, network registration, SMS, SIM toolkit, phone books, etc).</p>
 <p>The <a href="qmodemservice.html">QModemService</a> class creates default implementations based on the 3GPP TS 27.007 and 3GPP TS 27.005 specifications. The modem vendor plug-in overrides those handlers that are different from the standard, and only those that are different. When <a href="qabstractipcinterfacegroup.html#initialize">QModemService::initialize</a>() is called, the missing handlers will be created automatically.</p>
 <p>The handlers mentioned above inherit from the following standard classes:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -126,15 +126,15 @@
 <h2>Modem Porting Sequence</h2>
 <p>To support a modem the following sequence may be used as a guide:</p>
 <ol type="1">
-<li>Check the <a href="atcommands.html">AT Commands</a> that Qtopia requires and determine which ones your modem supports.</li>
+<li>Check the <a href="atcommands.html">AT Commands</a> that Qt Extended requires and determine which ones your modem supports.</li>
 <li>Determine the appropriate alternative AT commands suited to your modem and write the vendor-specific plug-in to issue these commands.</li>
-<li>Run Qtopia with the <tt>QTOPIA_PHONE_MUX</tt> environment variable set to <tt>no</tt> and with the <tt>AtChat</tt> and <tt>Modem</tt> <a href="debug-qtopia.html#qlog-categorized-logging">logging categories</a> enabled.</li>
+<li>Run Qt Extended with the <tt>QTOPIA_PHONE_MUX</tt> environment variable set to <tt>no</tt> and with the <tt>AtChat</tt> and <tt>Modem</tt> <a href="debug-qtextended.html#qlog-categorized-logging">logging categories</a> enabled.</li>
 <li>Check the error/message log for commands that are reported as being in error.</li>
 <li>Using the error log, modify the plug-in and/or the phone library so that the modem-supported AT command parameters are used.</li>
 <li>Repeat from the second step until phone calls are possible and SIM details are being read.</li>
 <li>Write a multiplexer plug-in if your modem does not support 3GPP TS 07.10, or the 07.10 parameters need to be adjusted.</li>
 <li>Enable multiplexing by setting the <tt>QTOPIA_PHONE_MUX</tt> environment variable to <tt>yes</tt>.</li>
-<li>Re-test Qtopia, especially the GPRS features, until the multiplexer is functioning correctly. Verbose multiplexer debugging can be enabled with the <tt>Mux</tt> logging category.</li>
+<li>Re-test Qt Extended, especially the GPRS features, until the multiplexer is functioning correctly. Verbose multiplexer debugging can be enabled with the <tt>Mux</tt> logging category.</li>
 </ol>
 <a name="modem-emulator"></a><a name="modem-emulator"></a>
 <h2>Modem Emulator</h2>
@@ -146,8 +146,8 @@
 <p>If this option is configured, the modem emulator will be launched automatically once the phone server has been initialized. If this option is not configured, then the modem emulator will only be launched when other components in the system request it (for example, Bluetooth hands-free kits).</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

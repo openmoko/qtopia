@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef CONTACTLISTPANE_H
@@ -23,29 +21,25 @@
 
 #include <QWidget>
 #include "qcontact.h"
+#include "qcontactmodel.h"
 #include "qpimsource.h"
 #include "quniqueid.h"
 #include "qcategorymanager.h"
 
-#ifdef GREENPHONE_EFFECTS
-#include <private/qsmoothlist_p.h>
-#endif
-
-class QContactListView;
 class QTextEntryProxy;
 class QLabel;
 class QContactModel;
 class QVBoxLayout;
 class QModelIndex;
 class QAbstractItemDelegate;
+class QSmoothContactListView;
+class ContactsAlphabetRibbon;
 
 class ContactListPane : public QWidget
 {
     Q_OBJECT
     public:
         ContactListPane(QWidget *w, QContactModel* model);
-
-        QList<QUniqueId> selectedContactIds();
 
         QContact currentContact() const;
         void setCurrentContact(const QContact& contact);
@@ -54,9 +48,10 @@ class ContactListPane : public QWidget
 
         QContactModel* contactModel() const { return mModel; }
 
+        void setJumpField(QContactModel::Field f) {mJumpField = f; mJumpIndices.clear();}
     signals:
         void contactActivated( QContact c );
-        void backClicked();
+        void closeView();
         void currentChanged(const QModelIndex &, const QModelIndex &);
 
     public slots:
@@ -74,12 +69,10 @@ class ContactListPane : public QWidget
         void updateIcons();
         void search( const QString &k );
         void contactActivated(const QModelIndex &);
+        void jump(int idx);
 
     protected:
-        QContactListView *mListView;
-#ifdef GREENPHONE_EFFECTS
-        QSmoothList *mSmoothListView;
-#endif
+        QSmoothContactListView *mListView;
         QTextEntryProxy *mTextProxy;
 #ifdef QTOPIA_CELL
         QLabel *mLoadingLabel;
@@ -89,7 +82,10 @@ class ContactListPane : public QWidget
         QVBoxLayout *mLayout;
         QAbstractItemDelegate *mDelegate;
         QLabel *mFindIcon;
+        ContactsAlphabetRibbon *mRibbon;
+        QContactModel::Field mJumpField;
+        QStringList mJumpTexts;
+        QMap<QString, QModelIndex> mJumpIndices;
 };
 
-#endif // CONTACTLISTPANE_H
-
+#endif

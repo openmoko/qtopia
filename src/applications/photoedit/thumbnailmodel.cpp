@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -66,51 +64,7 @@ protected:
 
 void ThumbnailContentSetModelLoader::loadThumbnail( const QContent &content, const QSize &size, Qt::AspectRatioMode mode )
 {
-    QImage image;
-
-    QDrmRights::Permission permission = QDrmRights::Display;
-
-    if( !(content.permissions() & permission) )
-        permission = QDrmRights::Preview;
-
-    QDrmContent drmContent( permission, QDrmContent::NoLicenseOptions );
-
-    if( drmContent.requestLicense( content ) )
-    {
-        QIODevice *device = content.open();
-
-        if( device )
-        {
-            QImageReader reader( device );
-
-            if( reader.supportsOption( QImageIOHandler::Size ) )
-            {
-                QSize imageSize = reader.size();
-
-                if( imageSize.width() <= size.width() && imageSize.height() <= size.height() )
-                {
-                    reader.read( &image );
-                }
-                else if( reader.supportsOption( QImageIOHandler::ScaledSize ) )
-                {
-                    imageSize.scale( size, mode );
-
-                    reader.setScaledSize( imageSize );
-                    reader.read( &image );
-                }
-                else if( imageSize.width() * imageSize.height() <= 2096000 )
-                {
-                    reader.read( &image );
-
-                    image = image.scaled( size, mode );
-                }
-            }
-
-            device->close();
-
-            delete device;
-        }
-    }
+    QImage image = content.thumbnail( size, mode );
 
     emit thumbnailLoaded( image );
 }
@@ -416,5 +370,11 @@ void ContentThumbnailView::rowsInserted( const QModelIndex &parent, int start, i
         vScroll->setValue( scrollValue );
 }
 
+
+void ContentThumbnailView::resizeEvent( QResizeEvent*e )
+{
+    QListView::resizeEvent( e );
+    scrollTo( currentIndex() );
+}
 
 #include "thumbnailmodel.moc"

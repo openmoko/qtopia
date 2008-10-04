@@ -1,10 +1,11 @@
+!qbuild{
 qtopia_project(theme)
+}
 
 smartconf.files=$$QTOPIA_DEPOT_PATH/etc/themes/smart.conf
 smartconf.path=/etc/themes
-smartconf.trtarget=Smart
+smartconf.trtarget=Theme-Smart
 smartconf.hint=themecfg
-smartconf.outdir=$$PWD
 INSTALLS+=smartconf
 smartdata.files=$$QTOPIA_DEPOT_PATH/etc/themes/smart/*.xml $$QTOPIA_DEPOT_PATH/etc/themes/smart/*rc
 smartdata.path=/etc/themes/smart

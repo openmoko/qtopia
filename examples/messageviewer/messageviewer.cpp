@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,7 +24,7 @@
 #include <QContactListView>
 #include <QKeyEvent>
 #include <QLabel>
-#include <QMailId>
+#include <QMailMessageId>
 #include <QSoftMenuBar>
 #include <QStandardItemModel>
 #include <QtopiaServiceRequest>
@@ -85,11 +83,8 @@ public:
 
         listView->setModel(&model);
         listView->setItemDelegate(&delegate);
-        listView->setResizeMode(QListView::Adjust);
-        listView->setLayoutMode(QListView::Batched);
         listView->setSelectionMode(QAbstractItemView::SingleSelection);
         listView->installEventFilter(this);
-        listView->setFrameStyle(QFrame::NoFrame);
 
         connect(listView, SIGNAL(activated(QModelIndex)), this, SLOT(activated(QModelIndex)));
 
@@ -101,12 +96,15 @@ public:
         int vertical = style()->pixelMetric(QStyle::PM_LayoutTopMargin);
         label->setContentsMargins(horizontal, vertical, horizontal, 0);
         layout->setContentsMargins(0, 0, 0, 0);
+        listView->setResizeMode(QListView::Adjust);
+        listView->setLayoutMode(QListView::Batched);
+        listView->setFrameStyle(QFrame::NoFrame);
         // end-Adjust
     }
 
 signals:
     void listPrepared();
-    void messageSelected(const QMailId& id);
+    void messageSelected(const QMailMessageId& id);
     void done();
 
 public slots:
@@ -129,12 +127,9 @@ void MessageSelector::listMessages(const QContact& contact)
 {
     model.setContact(contact); 
 
-    if (model.rowCount() == 0)
-    {
+    if (model.isEmpty()) {
         label->setText(tr("No messages exchanged with %1").arg(contact.label()));
-    }
-    else
-    {
+    } else {
         listView->selectionModel()->select(model.index(0, 0), QItemSelectionModel::Select);
         listView->scrollToTop();
         label->setText(tr("Select a message to view the content:"));
@@ -147,12 +142,9 @@ void MessageSelector::listMessages(const QContact& contact)
 bool MessageSelector::eventFilter(QObject* obj, QEvent* event)
 {
     // We need to capture the back key, so it doesn't close our window
-    if ((obj == listView) && (event->type() == QEvent::KeyPress))
-    {
-        if (QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event))
-        {
-            if (keyEvent->key() == Qt::Key_Back)
-            {
+    if ((obj == listView) && (event->type() == QEvent::KeyPress)) {
+        if (QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event)) {
+            if (keyEvent->key() == Qt::Key_Back) {
                 emit done();
                 return true;
             }
@@ -170,22 +162,24 @@ MessageViewer::MessageViewer(QWidget *parent, Qt::WFlags f)
 {
     setupUi(this);
 
-    // Necessary to create the menu (which contains our help entry):
-    (void)QSoftMenuBar::menuFor(this);
-
     // Connect our components
     connect(contactSelector, SIGNAL(contactSelected(QContact)), messageSelector, SLOT(listMessages(QContact)));
     connect(messageSelector, SIGNAL(listPrepared()), this, SLOT(showMessageList()));
-    connect(messageSelector, SIGNAL(messageSelected(QMailId)), this, SLOT(viewMessage(QMailId)));
+    connect(messageSelector, SIGNAL(messageSelected(QMailMessageId)), this, SLOT(viewMessage(QMailMessageId)));
     connect(messageSelector, SIGNAL(done()), this, SLOT(showContactList()));
 
     widgetStack->addWidget(contactSelector);
     widgetStack->addWidget(messageSelector);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(widgetStack);
 
+    // Adjust MessageViewer
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    // Necessary to create the menu (which contains our help entry):
+    (void)QSoftMenuBar::menuFor(this);
+    // end-Adjust
     showContactList();
 }
 
@@ -198,10 +192,10 @@ void MessageViewer::showMessageList()
     widgetStack->setCurrentWidget(messageSelector);
 }
 
-void MessageViewer::viewMessage(const QMailId& id)
+void MessageViewer::viewMessage(const QMailMessageId& id)
 {
     // Request that some application display the selected message
-    QtopiaServiceRequest req( "Messages", "viewMessage(QMailId)" );
+    QtopiaServiceRequest req( "Messages", "viewMessage(QMailMessageId)" );
     req << id;
     req.send();
 }

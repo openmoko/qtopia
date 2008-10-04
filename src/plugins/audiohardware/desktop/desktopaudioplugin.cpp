@@ -1,32 +1,32 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "desktopaudioplugin.h"
 
 #include <QAudioState>
+#include <QCommServiceManager>
 #include <qaudionamespace.h>
 #include <QDebug>
 #include <qplugin.h>
 #include <QAudioStateInfo>
 #include <qtopialog.h>
+
 
 typedef bool (*callback_t)();
 
@@ -146,6 +146,8 @@ private slots:
     void bluetoothAudioStateChanged();
     void headsetDisconnected();
     void headsetConnected();
+    void serviceAdded(const QString &service);
+    void serviceRemoved(const QString &service);
 
 private:
     bool resetCurrAudioGateway();
@@ -166,23 +168,11 @@ BluetoothAudioState::BluetoothAudioState(bool isPhone, QObject *parent)
     m_isPhone = isPhone;
     m_currAudioGateway = 0;
 
-    QBluetoothAudioGateway *hf = new QBluetoothAudioGateway("BluetoothHandsfree");
-    m_audioGateways.append(hf);
-    qLog(AudioState) << "Handsfree audio gateway: " << hf;
-
-    QBluetoothAudioGateway *hs = new QBluetoothAudioGateway("BluetoothHeadset");
-    m_audioGateways.append(hs);
-    qLog(AudioState) << "Headset audio gateway: " << hs;
-
-    for (int i=0; i<m_audioGateways.size(); i++) {
-        QBluetoothAudioGateway *gateway = m_audioGateways.at(i);
-        connect(gateway, SIGNAL(audioStateChanged()), SLOT(bluetoothAudioStateChanged()));
-        connect(gateway, SIGNAL(headsetDisconnected()), SLOT(headsetDisconnected()));
-        connect(gateway, SIGNAL(connectResult(bool,QString)),
-                SLOT(headsetConnected()));
-        connect(gateway, SIGNAL(newConnection(QBluetoothAddress)),
-                SLOT(headsetConnected()));
-    }
+    QCommServiceManager *serviceManager = new QCommServiceManager(this);
+    connect(serviceManager, SIGNAL(serviceAdded(QString)),
+            SLOT(serviceAdded(QString)));
+    connect(serviceManager, SIGNAL(serviceRemoved(QString)),
+            SLOT(serviceRemoved(QString)));
 
     if (isPhone) {
         m_info.setDomain("Phone");
@@ -203,11 +193,38 @@ BluetoothAudioState::BluetoothAudioState(bool isPhone, QObject *parent)
         m_isAvail = true;
 }
 
+void BluetoothAudioState::serviceAdded(const QString &service)
+{
+    if (service == "BluetoothHandsfree" || service == "BluetoothHeadset") {
+        qLog(AudioState) << "BluetoothAudioState: service added:" << service;
+
+        QBluetoothAudioGateway *gateway = new QBluetoothAudioGateway(service);
+        m_audioGateways.append(gateway);
+        connect(gateway, SIGNAL(audioStateChanged()), SLOT(bluetoothAudioStateChanged()));
+        connect(gateway, SIGNAL(headsetDisconnected()), SLOT(headsetDisconnected()));
+        connect(gateway, SIGNAL(connectResult(bool,QString)),
+                SLOT(headsetConnected()));
+        connect(gateway, SIGNAL(newConnection(QBluetoothAddress)),
+                SLOT(headsetConnected()));
+    }
+}
+
+void BluetoothAudioState::serviceRemoved(const QString &service)
+{
+    for (int i=0; i<m_audioGateways.size(); i++) {
+        QBluetoothAudioGateway *gateway = m_audioGateways.at(i);
+        if (gateway->service() == service) {
+            qLog(AudioState) << "BluetoothAudioState: service removed:" << service;
+            m_audioGateways.removeAt(i);
+            return;
+        }
+    }
+}
+
 BluetoothAudioState::~BluetoothAudioState()
 {
-    for (int i = 0; i < m_audioGateways.size(); i++) {
+    for (int i = 0; i < m_audioGateways.size(); i++)
         delete m_audioGateways.at(i);
-    }
 }
 
 bool BluetoothAudioState::resetCurrAudioGateway()

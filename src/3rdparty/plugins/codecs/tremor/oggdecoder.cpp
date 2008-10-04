@@ -172,7 +172,7 @@ void OggDecoder::start()
                 d->outputInfo.frequency = (int)vi->rate;
                 d->outputInfo.bitsPerSample = 16;
                 d->outputInfo.channels = (int)vi->channels;
-                d->outputInfo.volume = d->volume;
+                d->outputInfo.volume = d->muted ? 0 : d->volume;
 
                 //qWarning("ov_raw_total() %ld",(long)ov_raw_total(&d->vf,-1));
                 //qWarning("ov_pcm_total() %ld",(long)ov_pcm_total(&d->vf,-1));
@@ -274,7 +274,6 @@ qint64 OggDecoder::readData(char *data, qint64 maxlen)
             d->position = current;
             emit positionChanged(d->position);
         }
-
         //If we have enough decoded data just output it and return
         if(output_length >= (int)maxlen) {
             memcpy(data,output_pos,(int)maxlen);
@@ -293,9 +292,16 @@ qint64 OggDecoder::readData(char *data, qint64 maxlen)
 
         qint64 len=0;
         int    current_section;
-        len=(qint64)ov_read(&d->vf,output_data,OGG_BUFFER_SIZE,&current_section);
-        //qWarning("oggdec: write out %d bytes",(int)len);
-        output_length=output_length+len;
+        while(output_length <(int)maxlen) {
+            len=(qint64)ov_read(&d->vf,output_data+output_length,
+                    OGG_BUFFER_SIZE,&current_section);
+            if(len == 0) {
+                d->state = QtopiaMedia::Stopped;
+                emit playerStateChanged(d->state);
+                break;
+            }
+            output_length=output_length+len;
+        }
 
         if(output_length >= (int)maxlen) {
             output_pos = output_data+(int)maxlen;

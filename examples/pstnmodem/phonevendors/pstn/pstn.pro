@@ -1,5 +1,5 @@
 qtopia_project(qtopia plugin)
-requires(enable_modem)
+requires(enable_cell)
 TARGET=pstnvendor
 
 CONFIG+=no_tr

@@ -54,7 +54,7 @@ fi
 ln -sf $LIDSTOOLS lidstools   || die "ln -s $LIDSTOOLS lidstools"
 cd $TOP/$LIDS/$LIDSTOOLS/src  || die "cd $LIDS/$LIDSTOOLS"
 if [ ! -f .patched ]; then
-    msg "	Applying trolltech lidstools patches"
+    msg "	Applying lidstools patches"
     patch < $SXE/stdin_pw.patch                    || die "applying patch $SXE/stdin_pw.patch"
 #    patch -p2 < $SXE/lidstools_troll.diff          || die "applying patch $SXE/lidstools_troll.diff"
     patch -p3 < $SXE/lids-2.2.1-2.6.13.patch       || die "applying patch lids-2.2.1-2.6.13.patch"

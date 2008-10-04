@@ -2,10 +2,10 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Debug mode */
-/* #undef DEBUG */
+#undef DEBUG
 
 /* Debug chatter */
-/* #undef DEBUG_CHATTER */
+#undef DEBUG_CHATTER
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <page xmlns="http://www.trolltech.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.trolltech.com themedview.xsd" name="home" base="themes/classic">
-  <group name="background">
-    <image name="background" rect="0,0,0x0" src="background" color="Highlight" tile="yes"/>
-    <plugin name="bgplugin"/>
+  <group name="background-group">
+    <plugin name="background-plugin"/>
+    <plugin name="homescreen-image-plugin"/>
   </group>
   <rect rect="0,9.5%,0x12pt">
     <text name="location" rect="0,0,0x0" size="5" bold="yes" color="#000000" align="left,vcenter" outline="#eeeeee" transient="yes" active="expr:@/UI/HomeScreen/ShowLocation">
@@ -13,7 +13,7 @@
     </text>
     </rect>
     <layout rect="0,78,0x45pt" align="hcenter">
-	  <rect name="calls" rect="0,0,0x0" color="None" brush="None" transient="yes" active="expr:@/Communications/Calls/MissedCalls > 0" interactive="yes">
+	  <rect name="calls" rect="0,0,0x0" transient="yes" active="expr:@/Communications/Calls/MissedCalls > 0" interactive="yes">
         <layout align="hcenter">
           <rect rect="0,0,24ptx42pt">
             <image rect="0,0,24ptx24pt" src="call.svg" scale="yes"/>
@@ -23,7 +23,7 @@
           <tr><trtext>%1 missed</trtext><trarg>@/Communications/Calls/MissedCalls</trarg></tr>
         </text>
 	  </rect>
-	  <rect name="messages" rect="0,0,0x0" brush="None" transient="yes" active="expr:@/Communications/Messages/NewMessages > 0 || @/Telephony/Status/SMSMemoryFull > 0" interactive="yes">
+	  <rect name="messages" rect="0,0,0x0" transient="yes" active="expr:@/Communications/Messages/NewMessages > 0 || @/Telephony/Status/SMSMemoryFull > 0" interactive="yes">
         <layout align="hcenter">
           <rect rect="0,0,24ptx24pt">
             <image rect="0,0,24ptx24pt" src="message.svg" scale="yes"/>
@@ -50,8 +50,8 @@
       </text>
     </layout>
     <rect name="infobox" rect="5%,50%,90%x20%" color="Text" brush="Background" alpha="150" transient="yes" active="no">
-      <image name="infobox" rect="0,0,40x100%"/>
-      <text name="infobox" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter"/>
+      <image name="infobox-image" rect="0,0,40x100%"/>
+      <text name="infobox-text" rect="40,0,-3,-1" size="6" bold="yes" color="Text" align="hcenter,vcenter"/>
     </rect>
     <image name="dialer" rect="58,123,-57,-33" src="default/dialerbutton" onclick="src=default/dialerbuttonp;color=Highlight" interactive="yes" keypad="no" scale="yes"/>
     <layout name="pinbox" rect="0,9.5%,0,-10%" orientation="vertical" transient="yes" active="no" keypad="no">

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -35,6 +33,9 @@
 #include <QVBoxLayout>
 #include <QPixmap>
 #include <QtopiaIpcEnvelope>
+#ifdef QTOPIA_HOMEUI
+#include <QSmoothList>
+#endif
 
 // -------------------------------------------------------------
 // ContactCallHistoryItem
@@ -78,7 +79,6 @@ class ContactCallHistoryModel : public QStandardItemModel
 
         QContactModel::Field contactNumberToFieldType(const QString& number) const;
 
-        void setContactModel(QContactModel *model)      {mContactModel = model; refresh();}
     public slots:
         void refresh();
 
@@ -87,11 +87,10 @@ class ContactCallHistoryModel : public QStandardItemModel
 
         QCallList mCallList;
         QContact mContact;
-        QContactModel* mContactModel;
 };
 
 ContactCallHistoryModel::ContactCallHistoryModel( QObject* parent )
-    : QStandardItemModel(parent), mContactModel(0)
+    : QStandardItemModel(parent)
 {
     connect( &mCallList, SIGNAL(updated()), this, SLOT(refresh()) );
 }
@@ -124,6 +123,8 @@ void ContactCallHistoryModel::addRecord(const QCallListItem& cl)
 {
     QIcon icon;
     QString desc;
+    QString subText;
+    QString mainText;
 
     switch( cl.type() )
     {
@@ -150,12 +151,39 @@ void ContactCallHistoryModel::addRecord(const QCallListItem& cl)
             break;
     }
 
-    ContactCallHistoryItem *newItem = new ContactCallHistoryItem(icon, cl.number());
+#ifndef QTOPIA_HOMEUI
+    mainText = cl.number();
+    subText = desc.arg(QTimeString::localMD(cl.start().date())).arg(QTimeString::localHM(cl.start().time(), QTimeString::Medium));
+#else
+    QDate today = QDate::currentDate();
+    if (cl.start().date() == today)
+        desc = tr("Today, %1", "Today, 15:30");
+    else if(cl.start().date().addDays(1) == today)
+        desc = tr("Yesterday, %1", "Yesterday, 15:30");
+    else
+        desc = tr("%1, %2", "<4th July>, <17:42>").arg(QTimeString::localMD(cl.start().date(), QTimeString::Long));
+
+    mainText = desc.arg(QTimeString::localHM(cl.start().time(), QTimeString::Medium));
+    if (cl.type() == QCallListItem::Missed)
+        subText = tr("missed", "missed call");
+    else {
+        int secs = 0;
+        if (cl.end().isValid())
+            secs = cl.start().secsTo(cl.end());
+
+        // Now format this somehow
+        if (secs > 3600)
+            subText = tr("%1:%2 hrs", "1:05 hrs").arg(secs / 3600, 2, 10, QLatin1Char('0')).arg((secs / 60) % 60, 2, 10, QLatin1Char('0'));
+        else
+            subText = tr("%1:%2 min", "4:02 min").arg(secs / 60, 2, 10, QLatin1Char('0')).arg(secs % 60, 2, 10, QLatin1Char('0'));
+    }
+#endif
+
+    ContactCallHistoryItem *newItem = new ContactCallHistoryItem(icon, mainText);
     QIcon subicon = QContactModel::fieldIcon(contactNumberToFieldType(cl.number()));
-    QString subtext = desc.arg(QTimeString::localMD(cl.start().date())).arg(QTimeString::localHM(cl.start().time(), QTimeString::Short));
 
     newItem->setData(subicon, ContactHistoryDelegate::SecondaryDecorationRole);
-    newItem->setData(subtext, ContactHistoryDelegate::SubLabelRole);
+    newItem->setData(subText, ContactHistoryDelegate::SubLabelRole);
     newItem->setData(cl.start(), ContactHistoryDelegate::UserRole);
 
     newItem->clItem = cl;
@@ -183,7 +211,7 @@ void ContactCallHistoryModel::refresh()
 // ContactCallHistoryList
 // -------------------------------------------------------------
 ContactCallHistoryList::ContactCallHistoryList( QWidget *parent )
-    : QWidget( parent ), mInitedGui(false), mModel(0), mCallList(0), mListView(0), mContactModel(0)
+    : QWidget( parent ), mInitedGui(false), mModel(0), mCallList(0), mListView(0)
 {
     setObjectName("chl");
 
@@ -204,35 +232,33 @@ void ContactCallHistoryList::init( const QContact &entry )
     if (!mModel)
         mModel = new ContactCallHistoryModel(this);
     mModel->setContact(ent);
-    mModel->setContactModel(mContactModel);
 
     /* Create our UI, if we haven't */
     if (!mInitedGui) {
         mInitedGui = true;
 
         QVBoxLayout *main = new QVBoxLayout();
+#ifdef QTOPIA_HOMEUI
+        mListView = new QSmoothList();
+        mListView->setEmptyText(tr("No history of calls with this contact"));
+        mListView->setModel(mModel);
+#else
         mListView = new QListView();
-        mListView->setItemDelegate(new ContactHistoryDelegate(mListView));
         mListView->setResizeMode(QListView::Adjust);
         mListView->setLayoutMode(QListView::Batched);
-        mListView->setSelectionMode(QAbstractItemView::SingleSelection);
-        mListView->setModel(mModel);
         mListView->setFrameStyle(QFrame::NoFrame);
+        mListView->setSelectionMode(QAbstractItemView::SingleSelection);
+        mListView->setModel(mModel); // this creates the selectionModel
+        connect(mListView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(updateItemUI(QModelIndex)));
+#endif
+        mListView->setItemDelegate(new ContactHistoryDelegate(mListView));
         mListView->installEventFilter(this);
 
         main->addWidget(mListView);
         main->setMargin(0);
         setLayout(main);
         connect(mListView, SIGNAL(activated(QModelIndex)), this, SLOT(showCall(QModelIndex)));
-        connect(mListView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(updateItemUI(QModelIndex)));
     }
-}
-
-void ContactCallHistoryList::setModel(QContactModel *model)
-{
-    mContactModel = model;
-    if (mModel)
-        mModel->setContactModel(mContactModel);
 }
 
 void ContactCallHistoryList::updateItemUI(const QModelIndex& idx)
@@ -245,8 +271,10 @@ void ContactCallHistoryList::updateItemUI(const QModelIndex& idx)
                                QSoftMenuBar::NoLabel, QSoftMenuBar::AnyFocus);
     }
 
+#ifndef QTOPIA_HOMEUI
     if (idx.isValid())
         mListView->selectionModel()->select(idx, QItemSelectionModel::Select);
+#endif
 }
 
 void ContactCallHistoryList::showCall(const QModelIndex &idx)
@@ -266,7 +294,7 @@ bool ContactCallHistoryList::eventFilter( QObject *o, QEvent *e )
     if(o == mListView && e->type() == QEvent::KeyPress) {
         QKeyEvent *ke = (QKeyEvent *)e;
         if (ke->key() == Qt::Key_Back ) {
-            emit backClicked();
+            emit closeView();
             return true;
         }
     }
@@ -278,7 +306,7 @@ void ContactCallHistoryList::keyPressEvent( QKeyEvent *e )
     switch(e->key())
     {
         case Qt::Key_Back:
-            emit backClicked();
+            emit closeView();
             return;
         case Qt::Key_Call:
         // TODO handleCall();

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,11 +22,6 @@
 #include <QDir>
 
 #include <qtopiasxe.h>
-
-// requires vpath magic from qtopia build system
-#include "qtransportauth_qws.h"
-#include "qtransportauth_qws_p.h"
-
 #include <qpackageregistry.h>
 
 #include <stdlib.h>
@@ -51,21 +44,18 @@ public:
     SafeExecInstaller();
     ~SafeExecInstaller() {}
     int runScan();
-    void setCallName( const QString &s ) { callName = s; }
     void setInstallRoot( const QString &s ) { progInfo.installRoot = s; }
     void setTarget( const QString & );
     void setDomainString( const QString &s ) { progInfo.domain = s; }
-    void setRunDir();
-    void usage( const QString & );
+    void setRunDir( const QString &s ) { progInfo.runRoot = s; }
+    void usage( const QString &s = QString() );
     QString domainString() { return progInfo.domain; }
     QString fileName(){ return progInfo.fileName; }
 private:
     SxeProgramInfo progInfo;
-    QString callName;
 };
 
 SafeExecInstaller::SafeExecInstaller()
-    : callName( "sxe_installer" )
 {
 }
 
@@ -84,54 +74,24 @@ SafeExecInstaller::SafeExecInstaller()
 void SafeExecInstaller::setTarget( const QString &s )
 {
     Q_ASSERT( !progInfo.installRoot.isEmpty() );
-    QFileInfo fi( progInfo.installRoot + s );
+    QString path;
+    QString imagepath;
+    if (s.startsWith(progInfo.installRoot)) {
+        path = s;
+        imagepath = path;
+        imagepath.replace(progInfo.installRoot, "");
+    } else {
+        path = progInfo.installRoot + "/" + s;
+        imagepath = s;
+    }
+    path.replace("//", "/");
+    QFileInfo fi( path );
     progInfo.fileName = fi.fileName();
-    progInfo.relPath = QFileInfo( s ).path();
+    progInfo.relPath = QFileInfo( imagepath ).path();
     while( progInfo.relPath.startsWith( "/" ))
         progInfo.relPath.remove( 0, 1 );
     if ( !fi.exists() )
-    {
-        QFileInfo fi2( progInfo.installRoot + "/" + progInfo.relPath + "/lib" + progInfo.fileName + ".so" );
-        if ( !fi2.exists() )
-            usage( QString( "doesnt exist: target %1 ( %2 neither )" )
-                .arg( fi.filePath() ).arg( fi2.filePath() ));
-    }
-}
-
-/*!
-  \internal
-
-  Set the directory from which Qtopia will be run.  For a device build
-  this is probably not going to be the same directory that the image is
-  created in.
-
-  This information is contained in the config.cache file created in the
-  build directory.
-*/
-void SafeExecInstaller::setRunDir()
-{
-    int binDirPos = callName.lastIndexOf( "/bin/" );
-    QString buildDir = callName.left( binDirPos );
-    QFile configCache( buildDir + "/config.cache" );
-    if ( !configCache.open( QIODevice::ReadOnly ))
-    {
-        qWarning( "\n\n***** sxe_installer could not open config.cache *****\n" );
-        return;
-    }
-    QTextStream ts( &configCache );
-    progInfo.runRoot.clear();
-    while ( !ts.atEnd() && progInfo.runRoot.isEmpty() )
-    {
-        QString line = ts.readLine();
-        if ( !line.startsWith( "opt.prefix.value=" ))
-            continue;
-        QStringList valuePair = line.split( "=" );
-        progInfo.runRoot = valuePair[1];
-    }
-    if ( progInfo.runRoot.isEmpty() )
-    {
-        qWarning( "\n\n******* sxe_installer could not find \"opt.prefix.value=\" in config.cache *********\n" );
-    }
+        usage(QString("ERROR: %1 does not exist").arg(fi.filePath()));
 }
 
 /*!
@@ -144,9 +104,15 @@ void SafeExecInstaller::setRunDir()
 */
 void SafeExecInstaller::usage( const QString &msg )
 {
-    qWarning() << "****** Safe exec install failed ********";
-    qLog(SXE) << progInfo;
-    qFatal( "%s ...exiting", qPrintable( msg ));
+    if ( !msg.isEmpty() )
+        qWarning() << msg.toLocal8Bit().constData() << endl;
+
+    qWarning() << "Usage:  sxe_installer PREFIX IMAGE file domain" << endl << endl
+               << "  - file is an absolute path to a file in the image or a relative path." << endl
+               << "    eg. /path/to/image/bin/qpe, /bin/qpe, bin/qpe are all valid." << endl
+               << "  - domain must be equal to 'trusted'. Untrusted applications can" << endl
+               << "    only be installed by the package manager.";
+    ::exit(1);
 }
 
 int SafeExecInstaller::runScan()
@@ -171,23 +137,21 @@ int main( int argc, char** argv )
         qFatal( "Host tool sxe_installer does not currently support\n"
                 "writing SXE database files on Big Endian architectures\n" );
     SafeExecInstaller se;
-    if ( argc != 4 )
-        se.usage( "wrong number of arguments" );
-    se.setCallName( argv[0] );
-    se.setInstallRoot( argv[1] );
-    se.setTarget( argv[2] );
-    se.setDomainString( argv[3] );
+    if ( argc != 5 )
+        se.usage("ERROR: Wrong number of arguments");
+    se.setRunDir( argv[1] );
+    se.setInstallRoot( argv[2] );
+    se.setTarget( argv[3] );
+    se.setDomainString( argv[4] );
 
-    if  ( se.fileName() != "qpe" && se.domainString() != "trusted" )
+    if ( se.fileName() != "qpe" && se.domainString() != "trusted" ) {
         qFatal( "ERROR: %s does not declare the domain: trusted\n"
                 "All pre-installed programs must declare the trusted domain "
-                "in their project(.pro) file", argv[0] );
-    else if ( se.fileName() == "qpe" && se.domainString() != "qpe" )
+                "in their project(.pro) file", argv[3] );
+    } else if ( se.fileName() == "qpe" && se.domainString() != "qpe" ) {
         qFatal( "ERROR: qpe must declare the domain: qpe\n"
-                "inside it's project(.pro) file" );
-        //Note: qpe is a special case it must declare the qpe domain
-        //all other pre-installed programs must declare trusted domain
+                "inside its project(.pro) file" );
+    }
 
-    se.setRunDir();
     return se.runScan();
 }

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -43,7 +41,7 @@
 ContactOverview::ContactOverview( QWidget *parent )
     : QWidget( parent ), mInitedGui(false),
     mCall(0), mText(0), mEmail(0), mEdit(0),
-    mModel(0), mScrollArea(0), mSetFocus(false)
+    mScrollArea(0), mSetFocus(false)
 {
     setObjectName("contactoverview");
 
@@ -66,16 +64,12 @@ ContactOverview::ContactOverview( QWidget *parent )
 #endif
 
     bEmail = QtopiaService::apps("Email").count() > 0;
+
+    mModel = new QContactModel(this);
 }
 
 ContactOverview::~ContactOverview()
 {
-}
-
-void ContactOverview::setModel(QContactModel *model)
-{
-    mModel = model;
-    updateCommands();
 }
 
 void ContactOverview::updateCommands()
@@ -108,12 +102,7 @@ void ContactOverview::updateCommands()
         else
             mEmail->setText(tr("Email"));
 
-        if (mModel) {
-            bool editable = mModel->editable(ent.uid());
-            mEdit->setVisible(editable);
-        } else {
-            mEdit->hide();
-        }
+        mEdit->setVisible(mModel->editable(ent.uid()));
     }
 }
 
@@ -197,15 +186,7 @@ void ContactOverview::init( const QContact &entry )
         setLayout(main);
     }
 
-    if (mModel) {
-        QIcon i = qvariant_cast<QIcon>(mModel->data(mModel->index(ent.uid()), Qt::DecorationRole));
-        if (!i.isNull())
-            mPortrait->setPixmap(i.pixmap(QContact::portraitSize()));
-        else
-            mPortrait->setPixmap(ent.portrait());
-    } else {
-        mPortrait->setPixmap(ent.portrait());
-    }
+    mPortrait->setPixmap(ent.portrait());
 
     // Until we can get QLabel to do this
     QFontMetrics fm(mNameLabel->font());
@@ -243,7 +224,7 @@ void ContactOverview::keyPressEvent( QKeyEvent *e )
     switch(e->key())
     {
         case Qt::Key_Back:
-            emit backClicked();
+            emit closeView();
             return;
         case Qt::Key_Call:
             emit callContact();

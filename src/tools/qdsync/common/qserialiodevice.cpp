@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef Q_QDOC
@@ -251,6 +249,19 @@ bool QSerialIODevice::isValid() const
 // We would like to use "openpty", but it isn't in libc on some systems.
 static bool createPseudoTty(int& masterFd, int& slaveFd, char *ttyname)
 {
+    // try opening Unix98 pseudo tty
+    if ((masterFd = ::open("/dev/ptmx", O_RDWR | O_NONBLOCK, 0)) >= 0) {
+        if (grantpt(masterFd) == 0) {
+            if (unlockpt(masterFd) == 0) {
+                ptsname_r(masterFd, ttyname, BUFSIZ);
+                if ((slaveFd = ::open(ttyname, O_RDWR | O_NOCTTY, 0)) >= 0)
+                    return true;
+            }
+        }
+        ::close(masterFd);
+    }
+
+    // opening Unix98 pseudo tty failed, fall back to BSD style pseudo tty
     static char const firstChars[]  = "pqrstuvwxyzabcde";
     static char const secondChars[] = "0123456789abcdef";
     const char *first;

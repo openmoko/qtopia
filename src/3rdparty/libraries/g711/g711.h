@@ -1,4 +1,4 @@
-/* Header created by Trolltech to match g711.c from Sun */
+/* Header created to match g711.c from Sun */
 
 #ifndef G711_H
 #define G711_H

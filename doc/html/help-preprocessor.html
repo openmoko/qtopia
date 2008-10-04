@@ -10,15 +10,17 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Help Browser Preprocessor<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Help Browser Preprocessor<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#syntax">Syntax</a></li>
 <ul><li><a href="#flow-control">Flow Control</a></li>
 <li><a href="#variable-substitution">Variable Substitution</a></li>
 <li><a href="#file-inclusion">File Inclusion</a></li>
+<li><a href="#command-execution">Command Execution</a></li>
 <li><a href="#examples">Examples</a></li>
+<li><a href="#valuespace-integration">Valuespace Integration</a></li>
 </ul>
 </ul>
 <a name="introduction"></a>
@@ -35,7 +37,7 @@
     &lt;!--#else--&gt;
     ...
     &lt;!--#endif--&gt;</pre>
-<p>The following variables are pre-defined (or not, depending on configuration) for Qtopia Documentation:</p>
+<p>The following variables are pre-defined (or not, depending on configuration) for Qt Extended Documentation:</p>
 <ul>
 <li>VOIP - Device supports VoIP (determined by build time configuration)</li>
 <li>CELL - Device supports cellular telephony (GSM or other) (determined by build time configuration)</li>
@@ -44,7 +46,6 @@
 <li>BLUETOOTH - Device supports Blueooth beaming (determined by build time configuration)</li>
 <li>TOUCH - Device has a touch screen as the primary input (see <a href="qtopia.html#mousePreferred">Qtopia::mousePreferred</a>())</li>
 <li>KEYPAD - Device has a keypad as the primary input (see <a href="qtopia.html#mousePreferred">Qtopia::mousePreferred</a>())</li>
-<li>FINGER - Device has a touch screen as the primary input, but it is designed for operation via a human finger rather than a stylus.</li>
 <li>FLIP - Device can open/close (if <a href="qt.html#Key-enum">Qt::Key_Flip</a> is available)</li>
 <li>CLIPBOARD - Device supports clipboard functionality (i.e&#x2e; not configured with <tt>-D QT_NO_CLIPBOARD</tt>)</li>
 <li>MULTISCREEN - Device supports more than one screen (e.g&#x2e; primary and secondary displays on a flip phone)</li>
@@ -75,7 +76,21 @@
 <p>The string</p>
 <pre>    &lt;!--#include file=&quot;FILENAME&quot;--&gt;</pre>
 <p>is replaced with the contents of the file FILENAME, which is recursively processed in the manner described here.</p>
-<p>One use for this is device-specific documentation. The Qtopia help attempts to put anything that might vary between devices into a device-specific file. These files all start with &quot;device-&quot; (such as &quot;device-keys.html&quot; and &quot;device-name.html&quot;). By replacing these files, the Qtopia help can document a different device.</p>
+<p>One use for this is device-specific documentation. The Qt Extended help attempts to put anything that might vary between devices into a device-specific file. These files all start with &quot;device-&quot; (such as &quot;device-keys.html&quot; and &quot;device-name.html&quot;). By replacing these files, the Qt Extended help can document a different device.</p>
+<a name="command-execution"></a>
+<h3>Command Execution</h3>
+<p>The string</p>
+<pre>    &lt;!--#exec cmd=&quot;CMD ARGS&quot;--&gt;</pre>
+<p>is replaced with the output of the command CMD.</p>
+<p>For security reasons only a fixed set of built-in commands are permitted:</p>
+<ul>
+<li><pre>     qpe-list-content type</pre>
+<p>- list content of a given type (eg. &quot;Applications&quot;)</p>
+</li>
+<li><pre>     qpe-list-help-pages filter</pre>
+<p>- list and link help pages (eg. &quot;foo-*.html&quot;)</p>
+</li>
+</ul>
 <a name="examples"></a>
 <h3>Examples</h3>
 <pre>    &lt;!--#if expr=&quot;$CELL&quot;--&gt;
@@ -89,10 +104,19 @@
     &lt;!--#endif--&gt;</pre>
 <pre>    &lt;!--#include file=&quot;device-colors.html&quot;--&gt;
     Press the &lt;!--#echo var=&quot;color-offswitch&quot;--&gt; button to turn off the device.</pre>
+<a name="valuespace-integration"></a>
+<h3>Valuespace Integration</h3>
+<p>The preprocessor can set variables to the result of valuespace expressions. The syntax is:</p>
+<pre>    &lt;!--#set var=&quot;MYVAR&quot; valuespace=&quot;1 + 1&quot; value=&quot;some text&quot;--&gt;</pre>
+<p>The valuespace attribute can be any valid <a href="qexpressionevaluator.html">QExpressionEvaluator</a> expression.</p>
+<p>The value attribute is used by SSI implementations that do not support the valuespace attribute and is not used by the help preprocessor.</p>
+<p>The existence of a valuespace keys can be tested for with the syntax:</p>
+<pre>    &lt;!--#set var=&quot;MYVAR&quot; valuespace=&quot;exists(@/ValueSpace/path)&quot; value=&quot;some text&quot;--&gt;</pre>
+<p>To minimized the number of files that use nonstandard SSI features a single file should be used to set variables from valuespace expressions. Other help files can make use of these variables by using <a href="#file-inclusion">File Inclusion</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

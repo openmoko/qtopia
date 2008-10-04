@@ -80,20 +80,33 @@ else
     unset QTOPIA_TEST
 fi
 
+if [ "$SPYGRIND_FLAG" = 1 ]; then
+    SPYGRIND=$UPDATE_DIR/lib/libspygrind.so.1
+    [ -f $SPYGRIND ] || SPYGRIND=$QTOPIA_DIR/lib/libspygrind.so.1
+    if ! [ -f $SPYGRIND ]; then
+        echo "Spygrind was requested, but it is not installed (missing $SPYGRIND)" | logger -p local5.notice -t 'Qtopia'
+        unset SPYGRIND
+    else
+        export SPYGRIND_OUT_PATH=$HOME
+    fi
+fi
+
 # clean up shared memory and semaphores
 # but not for resources created by syslogd
 clearipc $(pidof syslogd)
 
-chvol SYSTEM 100
+#chvol SYSTEM 100
 chvol CALL 60
 
 if [ "$BOOTCHART_FLAG" = 1 ]; then
     { sleep 120; /sbin/bootchartd stop; } &
     /sbin/bootchartd start qpe 2>&1 | logger -p local5.notice -t Qtopia
 else
-    # For accurate perftest results, this MUST be the last line before invoking qpe
+    # For accurate perftest results, this MUST be the last nontrivial line before invoking qpe
     [ "x$QTOPIA_PERFTEST" = "x1" ] && export QTOPIA_PERFTEST_LAUNCH=`date +%T`
+    [ "x$SPYGRIND" != "x" ] && export LD_PRELOAD=$SPYGRIND
     qpe 2>&1 | logger -p local5.notice -t 'Qtopia'
+    unset LD_PRELOAD
 fi
 
 # Make sure that all Qtopia applications quit

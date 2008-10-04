@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -57,19 +55,16 @@ public:
     {
     }
 
-    void findText( const QString &txt, bool caseSensitive )
+    void findText( const QString &txt, QTextDocument::FindFlags flags=0 )
     {
-        QTextDocument::FindFlags flags = 0;
-        if ( caseSensitive )
-            flags |= QTextDocument::FindCaseSensitively;
         Qt::CaseSensitivity s = Qt::CaseInsensitive;
-        if ( caseSensitive )
+        if ( flags & QTextDocument::FindCaseSensitively )
             s = Qt::CaseSensitive ;
 
         const bool findNext = txt == lastTxt;
         if ( !findNext &&
                 (txt.startsWith( lastTxt, s ) || lastTxt.startsWith( txt, s ) ) ){
-            setTextCursor( QTextCursor( document() ) );
+            cursorToStart();
         }
 
         QList<QTextEdit::ExtraSelection> extrasels;
@@ -78,11 +73,17 @@ public:
 
             if ( !found ) {
                 if ( findNext && lastTxtFound) {
-                    emit findWrapped(); // We don't actually wrap, though
-                    setTextCursor( QTextCursor( document() ) ); // make sure we start at the start
-                } else
+                    if (flags & QTextDocument::FindBackward) {
+                        emit findWrapped(true); // We don't actually wrap yet, though
+                        cursorToEnd();
+                    } else {
+                        emit findWrapped(false); // We don't actually wrap, though
+                        cursorToStart();
+                    }
+                } else {
                     emit findNotFound();
-                lastTxtFound = false;
+                    lastTxtFound = false;
+                }
             } else {
                 lastTxtFound = true;
 
@@ -100,6 +101,18 @@ public:
         lastTxt = txt;
     }
 
+    void cursorToStart()
+    {
+        setTextCursor( QTextCursor( document() ) );
+    }
+
+    void cursorToEnd()
+    {
+        QTextCursor c = textCursor();
+        c.movePosition(QTextCursor::End);
+        setTextCursor(c);
+    }
+
     void clearSearchResults()
     {
         setExtraSelections(QList<QTextEdit::ExtraSelection>());
@@ -107,7 +120,7 @@ public:
 
 signals:
     void findNotFound();
-    void findWrapped();
+    void findWrapped(bool);
     void findFound();
 
 private:
@@ -161,11 +174,8 @@ void SimpleToolTip::show(const QString& lbl)
         mLabel->setFrameStyle(QFrame::Panel);
         mLabel->setAutoFillBackground(true);
         mLabel->setMargin(2);
-        QPalette p = mLabel->palette();
-        QColor bg = p.brush(QPalette::Button).color();
-        bg.setAlpha(255);
-        p.setBrush(QPalette::Button, bg);
-        mLabel->setPalette(p);
+        mLabel->setForegroundRole(QPalette::ToolTipText);
+        mLabel->setBackgroundRole(QPalette::ToolTipBase);
     }
     if (!mTimer) {
         mTimer = new QTimer(this);
@@ -174,12 +184,12 @@ void SimpleToolTip::show(const QString& lbl)
     }
     mLabel->setText(lbl);
 
-    // Hide the tooltip in 2.5 seconds
-    mTimer->start(2500);
+    // Hide the tooltip in 2.0 seconds
+    mTimer->start(2000);
 
     // Now set the geometry.
     QSize lblsh = mLabel->sizeHint();
-    mLabel->setGeometry(0, mParent->height() - lblsh.height() - 2, mParent->width(), lblsh.height());
+    mLabel->setGeometry(0, mParent->height() - lblsh.height(), mParent->width(), lblsh.height());
     mLabel->show();
 }
 
@@ -216,7 +226,7 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
     fileSelector->setFocus();
     editorStack->addWidget(fileSelector);
 
-    mToolTip = new SimpleToolTip(editor);
+    mToolTip = 0;
     mFindTextWidget = 0;
     mFindTextEntry = 0;
     mFindIcon = 0;
@@ -309,9 +319,10 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
 
     wrap = cfg.value("Wrap",true).toBool();
 
-    connect( editor, SIGNAL(findWrapped()), this, SLOT(findWrapped()) );
+    fileSelector->setDefaultCategories(cfg.value("Categories").toStringList());
+
+    connect( editor, SIGNAL(findWrapped(bool)), this, SLOT(findWrapped(bool)) );
     connect( editor, SIGNAL(findNotFound()), this, SLOT(findNotFound()) );
-    connect( editor, SIGNAL(findFound()), mToolTip, SLOT(hide()));
 #ifndef QT_NO_CLIPBOARD
     connect( editor, SIGNAL(copyAvailable(bool)), cutAction, SLOT(setVisible(bool)) );
     connect( editor, SIGNAL(copyAvailable(bool)), copyAction, SLOT(setVisible(bool)) );
@@ -343,6 +354,7 @@ TextEdit::~TextEdit()
     cfg.beginGroup("View");
     cfg.setValue("FontSize", defaultFontSize);
     cfg.setValue("Wrap",editor->lineWrapMode() == QTextEdit::WidgetWidth);
+    cfg.setValue("Categories", fileSelector->selectedCategories());
 }
 
 //
@@ -452,38 +464,18 @@ void TextEdit::contentChanged( const QContentIdList& idList, const QContent::Cha
 
 void TextEdit::fileNew()
 {
-    save();
-    newFile();
+    if ( save() )
+        newFile();
 }
 
 void TextEdit::fileOpen()
 {
-
-    if ( !save() ) {
-        QMessageBox box( tr( "Out of space"),
-                        tr( "<qt>Notes was unable to "
-                            "save your changes. "
-                            "Free some space and try again."
-                            "<br>Continue anyway?</qt>" ),
-                        QMessageBox::Critical,
-                        QMessageBox::Yes|QMessageBox::Escape,
-                        QMessageBox::No|QMessageBox::Default,
-                        QMessageBox::NoButton, this);
-        switch(box.exec()){
-            case QMessageBox::Yes:
-                delete doc;
-                doc = 0;
-                break;
-            case QMessageBox::No:
-                return;
-                break;
-        }
+    if ( save() ) {
+        if (mFindTextWidget)
+            mFindTextWidget->hide();
+        editorStack->setCurrentIndex(1);
+        updateCaption();
     }
-
-    if (mFindTextWidget)
-        mFindTextWidget->hide();
-    editorStack->setCurrentIndex(1);
-    updateCaption();
 }
 
 void TextEdit::fileRevert()
@@ -540,6 +532,8 @@ void TextEdit::editFind(bool s)
         mFindIcon->setPixmap(QIcon(":icon/find").pixmap(findHeight-2, findHeight-2));
         mFindIcon->setMargin(2);
         mFindIcon->installEventFilter(this);
+        mToolTip = new SimpleToolTip(mFindTextEntry);
+        connect( editor, SIGNAL(findFound()), mToolTip, SLOT(hide()));
 
         QHBoxLayout *findLayout = new QHBoxLayout;
         findLayout->addWidget(mFindIcon);
@@ -584,30 +578,35 @@ void TextEdit::editFind(bool s)
 
 void TextEdit::search(const QString& text)
 {
-    editor->findText(text, false);
-    if (text.isEmpty())
+    editor->findText(text);
+    if (mToolTip && text.isEmpty())
         mToolTip->hide();
-}
-
-void TextEdit::search()
-{
-    if (mFindTextEntry)
-        editor->findText( mFindTextEntry->text(), false );
 }
 
 void TextEdit::searchNext()
 {
-    search();
+    if (mFindTextEntry)
+        editor->findText(mFindTextEntry->text());
 }
 
-void TextEdit::findWrapped()
+void TextEdit::searchPrevious()
 {
-    mToolTip->show(tr("Find: reached end"));
+    if (mFindTextEntry)
+        editor->findText(mFindTextEntry->text(),QTextDocument::FindBackward);
+}
+
+void TextEdit::findWrapped(bool top)
+{
+    if (mToolTip)
+        mToolTip->show(
+            top ? tr("Find: reached start")
+                : tr("Find: reached end"));
 }
 
 void TextEdit::findNotFound()
 {
-    mToolTip->show(tr("Find: not found"));
+    if (mToolTip)
+        mToolTip->show(tr("Find: not found"));
 }
 
 void TextEdit::newFile()
@@ -625,7 +624,8 @@ void TextEdit::newFile()
 void TextEdit::setDocument(const QString& f)
 {
     qCopActivated = true;
-    save();
+    if ( !save() )
+        return;
     QContent nf(f);
     if (nf.type().isEmpty())
         nf.setType("text/plain");
@@ -774,7 +774,7 @@ void TextEdit::showEditTools()
     updateCaption();
 }
 
-bool TextEdit::save()
+bool TextEdit::save() // also closes the doc
 {
     // case of nothing to save...
     if ( !doc )
@@ -791,8 +791,19 @@ bool TextEdit::save()
     if ( doc->name().isEmpty() )
         doc->setName(calculateName(rt));
 
-    if (!doc->save(rt.toUtf8()))
-        return false;
+    if (!doc->save(rt.toUtf8())) {
+        QMessageBox box( tr( "Error"),
+                        tr( "<qt>Notes was unable to "
+                            "save your changes." ) + "<p>" + doc->errorString() + "<p>" +
+                            "Continue anyway?</qt>",
+                        QMessageBox::Critical,
+                        QMessageBox::Yes|QMessageBox::Escape,
+                        QMessageBox::No|QMessageBox::Default,
+                        QMessageBox::NoButton, this);
+        if (box.exec()==QMessageBox::No)
+            return false;
+    }
+
     delete doc;
     doc = 0;
     editor->document()->setModified( false );
@@ -831,11 +842,9 @@ void TextEdit::fileName()
 
     saved = true;
 
-    QDocumentPropertiesDialog *lp = new QDocumentPropertiesDialog(*doc, this);
-    if (QtopiaApplication::execDialog(lp)) {
+    QDocumentPropertiesDialog lp(*doc, this);
+    if (QtopiaApplication::execDialog(&lp))
         updateCaption(doc->name());
-    }
-    delete lp;
 }
 
 void TextEdit::clear()
@@ -862,7 +871,8 @@ void TextEdit::accept()
 void TextEdit::message(const QString& msg, const QByteArray& data)
 {
     if ( msg == "viewFile(QString)" || msg == "openFile(QString)" ) {
-        save();
+        if ( !save() )
+            return;
         qCopActivated = true;
         QDataStream d(data);
         QString filename;
@@ -902,22 +912,9 @@ void TextEdit::setReadOnly(bool y)
 
 void TextEdit::closeEvent( QCloseEvent* e )
 {
-    if( searchVisible ) {
+    if (searchVisible)
         findAction->setChecked( false );
-    } else {
-        if (editorStack->currentIndex() == 0) {
-            if (qCopActivated) {
-                if (!canceled)
-                    save();
-                e->accept();
-            } else {
-                fileOpen();
-                e->ignore();
-            }
-        } else {
-            e->accept();
-        }
-    }
+    QMainWindow::closeEvent(e);
 }
 
 bool TextEdit::eventFilter(QObject *o, QEvent *e)
@@ -928,17 +925,55 @@ bool TextEdit::eventFilter(QObject *o, QEvent *e)
             if (editor->hasEditFocus()) {
                 if ( doc->name().isEmpty() )
                     fileName();
-                close();
+                if (qCopActivated)
+                    close();
+                else
+                    fileOpen();
                 return true;
-            } else if (mFindTextEntry->hasEditFocus()) {
+            } else if (mFindTextEntry && mFindTextEntry->hasEditFocus()) {
                 searchNext();
                 return true;
             }
         } else if (ke->key() == Qt::Key_Back) {
-            if (mFindTextEntry && mFindTextEntry->hasEditFocus() && mFindTextEntry->text().isEmpty()) {
-                editFind(false);
-                findAction->setChecked(false);
+            if (mFindTextEntry && mFindTextEntry->hasEditFocus()) {
+                if (mFindTextEntry->text().isEmpty()) {
+                    editFind(false);
+                    findAction->setChecked(false);
+                    return true;
+                }
+            } else if (!editor->hasEditFocus()) {
+                if (!editor->document()->isEmpty() && doc->name().isEmpty())
+                    fileName();
+                if (qCopActivated)
+                    close();
+                else
+                    fileOpen();
                 return true;
+            } else if (editor->document()->isEmpty()) {
+                if (qCopActivated)
+                    close();
+                else
+                    fileOpen();
+                return true;
+            }
+        } else if (ke->key() == Qt::Key_Hangup) {
+            clear();
+            ke->ignore();
+        } else if (ke->key() == Qt::Key_Down) {
+            if (mFindTextEntry && mFindTextEntry->hasEditFocus()) {
+                searchNext();
+            } else {
+                QTextCursor c = editor->textCursor();
+                c.movePosition(QTextCursor::Down);
+                if (c == editor->textCursor()) {
+                    // Already at and, line down for convenience
+                    c.movePosition(QTextCursor::End);
+                    c.insertText("\n");
+                }
+            }
+        } else if (ke->key() == Qt::Key_Up) {
+            if (mFindTextEntry && mFindTextEntry->hasEditFocus()) {
+                searchPrevious();
             }
         }
     } else if (e->type() == QEvent::MouseButtonPress) {

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,47 +22,14 @@
 
 #include <QContent>
 #include <QList>
-#include <QTextEdit>
-
-#include <qtopia/mail/qmailcomposer.h>
-#include <qtopia/mail/qmailcomposerplugin.h>
+#include <qmailcomposer.h>
+#include <qmailcomposerplugin.h>
 
 class AddAttDialog;
 class QLabel;
-class QWidget;
-
-class EmailComposer : public QTextEdit
-{
-    Q_OBJECT
-
-public:
-    EmailComposer( QWidget *parent = 0, const char* name = 0 );
-
-    AddAttDialog *addAttDialog();
-
-    using QTextEdit::setPlainText;
-
-    void setPlainText( const QString& text, const QString& signature );
-
-    bool isEmpty() const;
-
-signals:
-    void contentChanged();
-    void attachmentsChanged();
-    void finished();
-
-protected slots:
-    void selectAttachment();
-    void updateLabel();
-    void setCursorPosition();
-
-protected:
-    void keyPressEvent( QKeyEvent *e );
-
-private:
-    AddAttDialog *m_addAttDialog;
-    int m_index;
-};
+class BodyTextEdit;
+class QStackedWidget;
+class DetailsPage;
 
 class EmailComposerInterface : public QMailComposerInterface
 {
@@ -72,29 +37,62 @@ class EmailComposerInterface : public QMailComposerInterface
 
 public:
     EmailComposerInterface( QWidget *parent = 0 );
-    ~EmailComposerInterface();
+    virtual ~EmailComposerInterface();
 
     bool isEmpty() const;
     QMailMessage message() const;
 
-    QWidget *widget() const;
-
-    virtual void addActions(QMenu* menu) const;
+    void setDefaultAccount(const QMailAccountId& id);
+    void setTo(const QString& toAddress);
+    void setFrom(const QString& fromAddress);
+    void setCc(const QString& ccAddress);
+    void setBcc(const QString& bccAddress);
+    void setSubject(const QString& subject);
+    QString from() const;
+    QString to() const;
+    QString cc() const;
+    QString bcc() const;
+    bool isReadyToSend() const;
+    bool isDetailsOnlyMode() const;
+    void setDetailsOnlyMode(bool val);
+    QString contextTitle() const;
+    QMailAccount fromAccount() const;
 
 public slots:
     void setMessage( const QMailMessage &mail );
-    void setText( const QString &txt, const QString &type );
+    void setBody( const QString &txt, const QString &type );
     void clear();
     void attach( const QContent &lnk, QMailMessage::AttachmentsAction = QMailMessage::LinkToAttachments );
     void setSignature( const QString &sig );
-    void attachmentsChanged();
+    void reply(const QMailMessage& source, int action);
+
+protected slots:
+    void selectAttachment();
+    void updateLabel();
+    void setCursorPosition();
+    void updateAttachmentsLabel();
+    void detailsPage();
+    void composePage();
 
 private:
-    EmailComposer *m_composer;
-    QLabel *m_label;
-    QWidget *m_widget;
-    QList<QContent> m_temporaries;
+    void init();
+    void setPlainText( const QString& text, const QString& signature );
+    void setContext(const QString& title);
+
+private:
+    AddAttDialog *m_addAttDialog;
+    int m_cursorIndex;
+    QWidget* m_composerWidget;
+    BodyTextEdit* m_bodyEdit;
+    QLabel* m_attachmentsLabel;
+    QStackedWidget* m_widgetStack;
+    DetailsPage* m_detailsWidget;
+
+    typedef QPair<QContent, QMailMessage::AttachmentsAction> AttachmentDetail;
+    QList<AttachmentDetail> m_attachments;
+
     QString m_signature;
+    QString m_title;
 };
 
 class EmailComposerPlugin : public QMailComposerPlugin
@@ -103,13 +101,6 @@ class EmailComposerPlugin : public QMailComposerPlugin
 
 public:
     EmailComposerPlugin();
-
-    virtual QString key() const;
-    virtual QMailMessage::MessageType messageType() const;
-
-    virtual QString name() const;
-    virtual QString displayName() const;
-    virtual QIcon displayIcon() const;
 
     QMailComposerInterface* create( QWidget* parent );
 };

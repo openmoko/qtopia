@@ -1,10 +1,12 @@
+!qbuild{
 qtopia_project(external lib)
 license(LGPL)
 TARGET=openobex
 CONFIG-=warn_on
+}
 
 DEFINES+=HAVE_CONFIG_H
-phone:enable_bluetooth:DEFINES+=HAVE_BLUETOOTH=1
+enable_bluetooth:DEFINES+=HAVE_BLUETOOTH=1
 
 HEADERS = config.h \
     btobex.h \
@@ -39,7 +41,13 @@ SOURCES = btobex.c \
 
 win32:SOURCES += win32compat.c
 
-# FIXME "make syncqtopia"
-dep(INCLUDEPATH+=$$PWD)
-idep(LIBS+=-l$$TARGET)
+!qbuild{
+headers.files=$$HEADERS
+CONFIG+=syncqtopia
+headers.path=/include/openobex
+headers.hint=sdk non_qt_headers
+INSTALLS+=headers
 
+qt_inc(openobex)
+idep(LIBS+=-l$$TARGET)
+}

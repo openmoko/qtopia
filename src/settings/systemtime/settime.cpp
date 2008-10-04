@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -55,8 +53,9 @@
 
 
 SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
-    : QDialog( parent, f ), tzEditable(true), tzLabel(0)
+    : QDialog( parent, f ), tzEditable(true), externalWarnings(true), tzLabel(0)
 {
+    setModal(true);
     setWindowTitle( tr("Date/Time") );
 
     QWidget *timePage, *formatPage;
@@ -108,9 +107,6 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
 
     connect(date, SIGNAL(dateChanged(QDate)),
             this, SLOT(dateChange(QDate)) );
-
-    connect(atz, SIGNAL(activated(int)),
-            this, SLOT(setAutomatic(int)));
 
     /* on to the format page/layout */
 
@@ -196,10 +192,11 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
     bool confatz = lconfig.value("TimezoneAuto").toBool();
     bool confatzp = lconfig.value("TimezoneAutoPrompt").toBool();
 
-    // If it's automatic, but no good data received, turn automatic off
-    bool autoworks = confatz && QDateTime::currentDateTime() > QDateTime(QDate(2007,11,20),QTime(0,0));
-    atz->setCurrentIndex(autoworks ? confatzp ? 1 : 2 : 0);
-    setAutomatic(autoworks);
+    int automode = confatz ? confatzp ? 1 : 2 : 0;
+    atz->setCurrentIndex(automode);
+    connect(atz, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(setAutomatic(int)));
+    setAutomatic(automode); // avoids telling server or warning
 
     // XXX Location/TimeAuto and Location/TimeAutoPrompt ignored for now - no GUI
 
@@ -213,6 +210,12 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
 void SetDateTime::setAutomatic(int mode)
 {
     if (mode > 0 && sender()) { // ignore during initialization
+        if (externalWarnings) {
+            QValueSpaceItem vs("/System/Time/ExternalTimeSource");
+            if (vs.subPaths().count() == 0)
+                QMessageBox::warning(this, tr("Warning"), tr("No automatic time information is currently available."));
+        }
+
         QtopiaServiceRequest req("TimeUpdate", "updateFromExternalSources(bool,bool,bool,bool)");
         req << true << true;
         req << (mode==1) << (mode==1);
@@ -248,6 +251,11 @@ void SetDateTime::setTimezoneEditable(bool tze)
         tzLabel = new QLabel(translatedTzName, this);
     }
     tze = tzEditable;
+}
+
+void SetDateTime::setExternalTimeSourceWarnings(bool warn)
+{
+    externalWarnings = warn;
 }
 
 void SetDateTime::editTime()
@@ -290,10 +298,8 @@ void SetDateTime::storeSettings()
             Qtopia::setWeekStartsOnMonday(weekStartCombo->currentIndex() );
             monSunChange = true;
         }
-
         QSettings lconfig("Trolltech","locale");
         lconfig.beginGroup( "Location" );
-        lconfig.setValue( "Timezone", tz->currentZone() );
         lconfig.setValue( "TimezoneAuto", atz->currentIndex() > 0 );
         lconfig.setValue( "TimeAuto", atz->currentIndex() > 0 ); // No GUI for this yet, copy as TimezoneAuto
         lconfig.setValue( "TimezoneAutoPrompt", atz->currentIndex() == 1 );
@@ -301,18 +307,18 @@ void SetDateTime::storeSettings()
     }
 
     if ( timeChanged || dateChanged || tzChanged ) {
-        // before we progress further, set our TZ!
-        setenv( "TZ", tz->currentZone().toLocal8Bit().constData(), 1 );
+        QTimeZone timeZone(tz->currentZone().toLocal8Bit().constData());
+        QDateTime thisTime(date->date(), time->time());
+        QDateTime utcTime = timeZone.toUtc(thisTime);
+        utcTime.setTimeSpec(Qt::UTC);
 
-        QDateTime dt( date->date(), time->time() );
-        if ( dt.isValid() ) {
+        if (utcTime.isValid()) {
             QtopiaServiceRequest req("TimeUpdate", "changeSystemTime(uint,QString)");
-            req << (uint)dt.toTime_t() << tz->currentZone();
+            req << (uint)utcTime.toTime_t() << tz->currentZone();
             req.send();
         } else {
             qWarning( "Invalid date/time" );
         }
-
     }
 
     // Notify everyone what day we prefer to start the week on.
@@ -363,7 +369,7 @@ void SetDateTime::reject()
 void SetDateTime::sysTimeZoneChanged()
 {
     if ( !tzChanged || atz->currentIndex() != 0 ) {
-        tz->setCurrentZone(::getenv("TZ"));
+        tz->setCurrentZone(QTimeZone::current().id());
     }
 }
 
@@ -445,7 +451,8 @@ void SetDateTime::updateTimeFormat(int ampm)
 
 /*!
     \service TimeService Time
-    \brief Provides the Qtopia Time service.
+    \inpublicgroup QtEssentialsModule
+    \brief The TimeService class provides the Time service.
 
     The \i Time service enables applications to provide a menu option
     or button that allows the user to edit the current system time
@@ -489,7 +496,8 @@ void TimeService::editTime()
 
 /*!
     \service DateService Date
-    \brief Provides the Qtopia Date service.
+    \inpublicgroup QtEssentialsModule
+    \brief The DateService class provides the Date service.
 
     The \i Date service enables applications to provide a menu option
     or button that allows the user to edit the current system date

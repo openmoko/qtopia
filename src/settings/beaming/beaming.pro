@@ -1,11 +1,13 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=beaming
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+depends(libraries/qtopiacomm/ir)
+}
 
 HEADERS		= ircontroller.h beaming.h
 SOURCES		= ircontroller.cpp beaming.cpp main.cpp
 
-depends(libraries/qtopiacomm)
 
 help.source=$$QTOPIA_DEPOT_PATH/help
 help.files=beaming*
@@ -19,6 +21,10 @@ desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/beaming.desktop
 desktop.path=/apps/Settings
 desktop.hint=desktop
 INSTALLS+=desktop
+
+beam.files=$$QTOPIA_DEPOT_PATH/etc/beam
+beam.path=/etc
+INSTALLS+=beam
 
 pkg.desc=Beaming settings dialog for Qtopia.
 pkg.domain=trusted

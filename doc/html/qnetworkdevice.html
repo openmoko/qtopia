@@ -10,8 +10,9 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QNetworkDevice Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QNetworkDevice Class Reference<br /><span class="small-subtitle">[<a href="qtbasemodule.html">QtBaseModule</a>]</span>
+</h1>
 <p>The QNetworkDevice class provides information about the connectivity state of a network device. <a href="#details">More...</a></p>
 <pre>    #include &lt;QNetworkDevice&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
@@ -54,9 +55,11 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QNetworkDevice class provides information about the connectivity state of a network device.</p>
-<p>Network devices are always associated with a configuration file which serves as an identifier/handle for a particular device. The configuration file is device specific and is saved in <tt>$HOME/Applications/Network/config/</tt>. The user can start start/stop/configure network devices via the Internet application. Network related application can start and stop the device via <a href="qtopianetwork.html#startInterface">QtopiaNetwork::startInterface</a>() and <a href="qtopianetwork.html#stopInterface">QtopiaNetwork::stopInterface</a>() respectively. If the Qtopia device has more than one device online at a time the default gateway can be set via <a href="qtopianetwork.html#setDefaultGateway">QtopiaNetwork::setDefaultGateway</a>().</p>
-<p>The following UML class diagram displays the general interaction of Qtopia's network API.</p>
-<p align="center"><img src="images/NetworkAPI.png" /></p><p>Qtopia keeps track of network devices with the help of a session manager. If an application starts a device the session manager records the identity of the application and will close the device if the application doesn't stop the device before it quits. If several applications requested the same device the device is closed when the last remaining application closes the device. Hence every application should call <a href="qtopianetwork.html#startInterface">QtopiaNetwork::startInterface</a>() no matter whether the device is active already as this call creates a new session for this application. Note that a device which has been configured to use an internal timeout (e.g&#x2e; timeouts of dial-up connections) may still stop when the timeout is triggered.</p>
+<a name="architecture"></a>
+<h3>Architecture</h3>
+<p>Network devices are always associated with a configuration file which serves as an identifier/handle for a particular device. The configuration file is device specific and is saved in <tt>$HOME/Applications/Network/config/</tt>. The user can start start/stop/configure network devices via the Internet application. Network related application can start and stop the device via <a href="qtopianetwork.html#startInterface">QtopiaNetwork::startInterface</a>() and <a href="qtopianetwork.html#stopInterface">QtopiaNetwork::stopInterface</a>() respectively. If the Qt Extended device has more than one device online at a time the default gateway can be set via <a href="qtopianetwork.html#setDefaultGateway">QtopiaNetwork::setDefaultGateway</a>().</p>
+<p>The following UML class diagram displays the general interaction of the Qt Extended network API.</p>
+<p align="center"><img src="images/NetworkAPI.png" /></p><p>Qt Extended keeps track of network devices with the help of a session manager. If an application starts a device the session manager records the identity of the application and will close the device if the application doesn't stop the device before it quits. If several applications requested the same device the device is closed when the last remaining application closes the device. Hence every application should call <a href="qtopianetwork.html#startInterface">QtopiaNetwork::startInterface</a>() no matter whether the device is active already as this call creates a new session for this application. Note that a device which has been configured to use an internal timeout (e.g&#x2e; timeouts of dial-up connections) may still stop when the timeout is triggered.</p>
 <p>Any network related application may stop a particular interface which has been started by another application. This may be necessary in use cases such as when the phone receives a notification about a pending MMS. If the dial-up connection is already running but the APN is not the required one for MMS download the mail application may stop the dial-up connection and start another dial-up interface.</p>
 <p>Since a QNetworkDevice is directly related to hardware it does not support use cases whereby e.g&#x2e; an application wants to know to what WLAN the device is connected to. In order to obtain such information it is required to use <a href="qnetworkconnection.html">QNetworkConnection</a> which allows network identification on a much finer level of granularity.</p>
 <p align="center"><img src="images/netdevice-netconnection.png" /></p><p>See also <a href="qtopianetwork.html">QtopiaNetwork</a>, <a href="qnetworkstate.html">QNetworkState</a>, <a href="qnetworkconnection.html">QNetworkConnection</a>, and <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a>.</p>
@@ -87,8 +90,8 @@
 <p>See also <a href="qnetworkdevice.html#errorString">errorString</a>() and <a href="qnetworkdevice.html#state">state</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

@@ -1,23 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
+#include <sys/resource.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <QtopiaApplication>
 #include <QDrmContentPlugin>
@@ -28,9 +30,14 @@
 #include "qtopiamediaprovider.h"
 #include "qsoundprovider.h"
 #include "mediavolumecontrol.h"
+#include "qaudiointerfaceserver.h"
 
 #ifndef QTOPIA_NO_MEDIAPOWERCONTROL
 #include "mediapowercontrol.h"
+#endif
+
+#ifndef MEDIASERVER_PRIORITY
+#define MEDIASERVER_PRIORITY 0
 #endif
 
 #ifdef SINGLE_EXEC
@@ -46,6 +53,14 @@ using namespace mediaserver;
 QSXE_APP_KEY
 int MAIN_FUNC(int argc, char** argv)
 {
+    int which = PRIO_PROCESS;
+    id_t pid;
+    int ret;
+
+    pid = getpid();
+    ret = getpriority(which, pid);
+    setpriority(which, pid, ret - MEDIASERVER_PRIORITY );
+
     QSXE_SET_APP_KEY(argv[0])
 
     QtopiaApplication   app(argc, argv);
@@ -62,6 +77,7 @@ int MAIN_FUNC(int argc, char** argv)
     QtopiaMediaProvider     qmp(SessionManager::instance());
     QSoundProvider          qsp(SessionManager::instance());
     //MediaVolumeControl      mvc(SessionManager::instance());
+    QAudioInterfaceServer   qas(SessionManager::instance());
 
 #ifndef QTOPIA_NO_MEDIAPOWERCONTROL
     MediaPowerControl       mpc;

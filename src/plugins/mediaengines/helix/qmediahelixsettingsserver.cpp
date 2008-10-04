@@ -1,27 +1,26 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <qstringlist.h>
 
 #include "qmediahelixsettingsserver.h"
+#include "helixutil.h"
 
 #include <config.h>
 #include <hxcom.h>
@@ -53,7 +52,7 @@ QVariant QMediaHelixSettingsServerPrivate::value( QString const& name ) const
     IHXPreferences *preferences = 0;
     IHXBuffer *buffer = 0;
 
-    if( engine->QueryInterface( IID_IHXPreferences, (void**)&preferences ) == HXR_OK ) {
+    if (queryInterface(engine, IID_IHXPreferences, preferences) == HXR_OK) {
         if( preferences->ReadPref(name.toLatin1().constData(), buffer ) == HXR_OK ) {
             s = (const char*)buffer->GetBuffer();
         }
@@ -73,9 +72,9 @@ void QMediaHelixSettingsServerPrivate::setValue( QString const& name, QVariant c
     IHXCommonClassFactory *factory = 0;
     IHXBuffer *buffer = 0;
 
-    if( engine->QueryInterface( IID_IHXPreferences, (void**)&preferences ) == HXR_OK &&
-        engine->QueryInterface( IID_IHXCommonClassFactory, (void**)&factory ) == HXR_OK ) {
-        factory->CreateInstance( CLSID_IHXBuffer, (void**)&buffer );
+    if (queryInterface(engine, IID_IHXPreferences, preferences) == HXR_OK &&
+        queryInterface(engine, IID_IHXCommonClassFactory, factory) == HXR_OK ) {
+        createInstance(factory, CLSID_IHXBuffer, buffer);
         QString s = value.toString();
         buffer->Set( (const UCHAR*)s.toLatin1().data(), s.length() );
 
@@ -88,6 +87,11 @@ void QMediaHelixSettingsServerPrivate::setValue( QString const& name, QVariant c
     HX_RELEASE( factory );
     HX_RELEASE( preferences );
 }
+
+/*!
+    \class qtopia_helix::QMediaHelixSettingsServer
+    \internal
+*/
 
 
 QMediaHelixSettingsServer::QMediaHelixSettingsServer(IHXClientEngine *engine):

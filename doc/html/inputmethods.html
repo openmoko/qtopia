@@ -10,9 +10,10 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">InputMethods Class Reference</h1>
-<p>The InputMethods class provides an implementation of Qtopia server input method handling. <a href="#details">More...</a></p>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">InputMethods Class Reference<br /><span class="small-subtitle">[<a href="qtinputmethodsmodule.html">QtInputMethodsModule</a>]</span>
+</h1>
+<p>The InputMethods class provides an implementation of Qt Extended server input method handling. <a href="#details">More...</a></p>
 <pre>    #include &lt;InputMethods&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
 <ul>
 <li><a href="inputmethods-members.html">List of all members, including inherited members</a></li>
@@ -26,7 +27,7 @@
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
 <ul>
-<li><div class="fn"/><b><a href="inputmethods.html#InputMethods">InputMethods</a></b> ( QWidget * <i>parent</i> = 0, IMType <i>t</i> = Any )</li>
+<li><div class="fn"/><b><a href="inputmethods.html#InputMethods">InputMethods</a></b> ( QWidget * <i>parent</i> = 0, Qt::WFlags <i>flags</i> = 0, IMType <i>t</i> = Any )</li>
 <li><div class="fn"/><b><a href="inputmethods.html#dtor.InputMethods">~InputMethods</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="inputmethods.html#activateMenuItem">activateMenuItem</a></b> ( int <i>v</i> )</li>
 <li><div class="fn"/>QRect <b><a href="inputmethods.html#inputRect">inputRect</a></b> () const</li>
@@ -36,9 +37,9 @@
 <li><div class="fn"/>void <b><a href="inputmethods.html#unloadInputMethods">unloadInputMethods</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>201 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>206 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -68,20 +69,13 @@
 <li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
-<a name="static-public-members"></a>
-<h3>Static Public Members</h3>
-<ul>
-<li><div class="fn"/>InputMethods * <b><a href="inputmethods.html#instance">instance</a></b> ()</li>
-</ul>
-<ul>
-<li><div class="fn"/>4 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
-</ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>57 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
 <li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>38 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
 <li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
@@ -92,10 +86,10 @@
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
-<p>The InputMethods class provides an implementation of Qtopia server input method handling.</p>
-<p>InputMethods is the core class for the Qtopia servers input method handling. It is very closely related to the <a href="inputmethodservice.html">InputMethodService</a> and <a href="inputmethodselector.html">InputMethodSelector</a> classes.</p>
-<p>InputMethods is primarily resposible for loading input method plugins and maintaining the hints set for different widgets. It also acts on the messages from the <a href="inputmethodservice.html">InputMethodService</a>, either taking direct action or passing them on to the <a href="inputmethodselector.html">InputMethodSelector</a>.</p>
-<p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
+<p>The InputMethods class provides an implementation of Qt Extended server input method handling.</p>
+<p>InputMethods is the core class for the Qt Extended servers input method handling. It is very closely related to the <a href="inputmethodservice.html">InputMethod</a> service and <a href="inputmethodselector.html">InputMethodSelector</a> classes.</p>
+<p>InputMethods is primarily resposible for loading input method plugins and maintaining the hints set for different widgets. It also acts on the messages from the <a href="inputmethodservice.html">InputMethod</a> service, either taking direct action or passing them on to the <a href="inputmethodselector.html">InputMethodSelector</a>.</p>
+<p>This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="IMType-enum"></a>enum InputMethods::IMType</h3>
@@ -115,8 +109,8 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="InputMethods"></a>InputMethods::InputMethods ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="inputmethods.html#IMType-enum">IMType</a> <i>t</i> = Any )</h3>
-<p>Create a new <a href="inputmethods.html">InputMethods</a> object with <i>parent</i> that handles input according to <i>t</i>.</p>
+<h3 class="fn"><a name="InputMethods"></a>InputMethods::InputMethods ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="qt.html#WFlags-typedef">Qt::WFlags</a> <i>flags</i> = 0, <a href="inputmethods.html#IMType-enum">IMType</a> <i>t</i> = Any )</h3>
+<p>Create a new <a href="inputmethods.html">InputMethods</a> object with <i>parent</i> and <i>flags</i> that handles input according to <i>t</i>.</p>
 <h3 class="fn"><a name="dtor.InputMethods"></a>InputMethods::~InputMethods ()</h3>
 <p>Unloads all input methods.</p>
 <h3 class="fn"><a name="activateMenuItem"></a>void InputMethods::activateMenuItem ( int <i>v</i> )</h3>
@@ -142,8 +136,6 @@
 <p>Returns the geometry of the current input methods input widget, or an empty <a href="qrect.html">QRect</a> if there is no current input method, or no input widget for the current input method.</p>
 <h3 class="fn"><a name="inputToggled"></a>void InputMethods::inputToggled ( bool <i>on</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Connect to this signal to recieve notifications of changes in the state of input methods. <i>on</i> describes whether the input methods have just turned on (true), or off (false).</p>
-<h3 class="fn"><a name="instance"></a>InputMethods * InputMethods::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the instance of the <a href="inputmethods.html">InputMethods</a> object used by the server.</p>
 <h3 class="fn"><a name="loadInputMethods"></a>void InputMethods::loadInputMethods ()</h3>
 <p>Creates a <a href="qpluginmanager.html">QPluginManager</a> for input methods to load input method plugins out of the <tt>plugins/inputmethods</tt> directory.</p>
 <p>If <a href="inputmethods.html">InputMethods</a> already has a <a href="qpluginmanager.html">QPluginManager</a>, this function does nothing.</p>
@@ -167,8 +159,8 @@
 <p>Connect to this signal to receive notification of changes in the visibility of input methods. This is synonymous with activation, input methods do not need to have an input widget to be visible in this sense. <i>visible</i> is true if the input method is becoming visible/activating, false if it becoming invisible/deactivating.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

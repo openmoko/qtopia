@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "phonesettings.h"
@@ -172,13 +170,15 @@ void FloatingTextList::keyPressEvent( QKeyEvent *e )
 //----------------------------------------------------------------------------
 
 PhoneSettings::PhoneSettings( QWidget *parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+    : QDialog( parent, fl ), selectVoiceMail( false )
 {
     //we are using libqtopiapim and hence need to load the translations
     QtopiaApplication::loadTranslations( "libqtopiapim" );
     init();
 
     connect( optionList, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(itemActivated(QListWidgetItem*)) );
+
+    new VoiceMailService( this );
 }
 
 void PhoneSettings::init()
@@ -232,6 +232,16 @@ void PhoneSettings::init()
     optionList->setCurrentRow( 0 );
 }
 
+void PhoneSettings::activate( int itemId )
+{
+    for ( int index = 0; index < optionList->count(); ++index ) {
+        if ( optionList->item(index)->data( Qt::UserRole ).toInt() == itemId ) {
+            itemActivated( optionList->item(index) );
+            return;
+        }
+    }
+}
+
 void PhoneSettings::itemActivated( QListWidgetItem *item )
 {
     // check is SIM card is ready
@@ -257,9 +267,14 @@ void PhoneSettings::itemActivated( QListWidgetItem *item )
         dlg = new FixedDialing( this );
     else if ( index == Flip )
         dlg = new FlipFunction( this );
-    else if ( index == Service )
-        dlg = new ServiceNumbers( this );
-    else if ( index == Volume )
+    else if ( index == Service ) {
+        ServiceNumbers *sdlg = new ServiceNumbers( this );
+        if ( selectVoiceMail ) {
+            sdlg->selectVoiceMail();
+            selectVoiceMail = false;
+        }
+        dlg = sdlg;
+    } else if ( index == Volume )
         dlg = new CallVolume( this );
 
     if ( dlg ) {
@@ -351,7 +366,7 @@ void CallBarring::init()
 
     QMenu *contextMenu = QSoftMenuBar::menuFor( this );
     unlock = contextMenu->addAction( tr( "Deactivate all" ), this, SLOT(unlockAll()) );
-    pin = contextMenu->addAction( tr( "Change pin" ), this, SLOT(changePin()) );
+    pin = contextMenu->addAction( tr( "Change PIN2" ), this, SLOT(changePin()) );
     updateMenu();
 
     client = new QCallBarring( SERVICE_NAME, this );
@@ -444,10 +459,10 @@ void CallBarring::setBarringStatusResult( QTelephony::Result result )
         tr( "<qt>Unable to bar calls(%1).</qt>", "%1 = condition string e.g. All incoming calls" )
         .arg( barOptions->currentItem()->data( Qt::WhatsThisRole ).toString() ), QMessageBox::Ok );
     } else if ( result == QTelephony::OperationNotAllowed ) {
-        QMessageBox::warning( this, tr( "Failed" ),
-        tr("<qt>The operation is not allowed. Please consult your network operator.</qt>"), QMessageBox::Ok );
+        QMessageBox::warning( this, tr( "Not allowed" ),
+        tr("<qt>Call barring is not allowed. Please contact your operator.</qt>"), QMessageBox::Ok );
     } else if ( result == QTelephony::IncorrectPassword ) {
-        QMessageBox::warning( this, tr( "Failed" ), tr( "<qt>Password is invalid.</qt>" ), QMessageBox::Ok );
+        QMessageBox::warning( this, tr( "Incorrect Password" ), tr( "<qt>Please enter the correct password.</qt>" ), QMessageBox::Ok );
     }
 }
 
@@ -502,13 +517,13 @@ void CallBarring::changePin()
 
     QString pin2_old = QPasswordDialog::getPassword(
             this,
-            tr( "<P>Enter your old PIN2 password(%1)", "%1 = condition string e.g. All incoming calls" )
+            tr( "<P>Enter your old PIN2 password (%1)", "%1 = condition string e.g. All incoming calls" )
             .arg( item->data( Qt::WhatsThisRole ).toString() ), QPasswordDialog::Pin, false );
     if ( pin2_old.isEmpty() )
         return;
     QString pin2_new = QPasswordDialog::getPassword(
             this,
-            tr( "<P>Enter new PIN2 password(%1)", "%1 = condition string e.g. All incoming calls" )
+            tr( "<P>Enter new PIN2 password (%1)", "%1 = condition string e.g. All incoming calls" )
             .arg( item->data( Qt::WhatsThisRole ).toString() ), QPasswordDialog::Pin );
     if ( pin2_new.isEmpty() )
         return;
@@ -1241,10 +1256,8 @@ void FixedDialing::phonebookLimits(const QString& store, const QPhoneBookLimits&
     limit = value.lastIndex();
     if ( limit == 0 ) {
         active->setEnabled( false );
-#ifdef QTOPIA_KEYPAD_NAVIGATION
         actionAdd->setVisible( false );
         actionRemove->setVisible( false );
-#endif
         QMessageBox::critical( this, tr( "Error" ), tr( "<qt>Fixed dialing is not supported.</qt>" ) );
     }
 }
@@ -1409,7 +1422,7 @@ void FlipFunction::writeConfig()
 //----------------------------------------------------------------------------
 
 ServiceNumbers::ServiceNumbers( QWidget *parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+    : QDialog( parent, fl ), focusVoiceMail( false )
 {
     init();
 }
@@ -1470,7 +1483,10 @@ void ServiceNumbers::serviceNumber( QServiceNumbers::NumberId id, const QString&
         init_voicenum = number;
         voiceMail->setText( init_voicenum );
     }
-    serviceCenter->setFocus();
+    if ( focusVoiceMail )
+        voiceMail->setFocus();
+    else
+        serviceCenter->setFocus();
 }
 
 //----------------------------------------------------------------------------
@@ -1579,3 +1595,28 @@ void CallVolume::init()
     vb->addWidget( box2 );
 }
 
+/*!
+    \service VoiceMailService VoiceMail
+    \inpublicgroup QtCellModule
+    \brief Provides the voice mail configuration service.
+
+    The \i VoiceMail service allows to set the voice mail number.
+*/
+/*! \internal */
+VoiceMailService::~VoiceMailService()
+{
+}
+
+/*!
+    Set voice mail number.
+
+    This slot corresponds to the QCop service message
+    \c{VoiceMail::setVoiceMail()}.
+*/
+void VoiceMailService::setVoiceMail()
+{
+    parent->raise();
+    parent->selectVoiceMail = true;
+    parent->activate( PhoneSettings::Service );
+    QtopiaApplication::instance()->showMainWidget();
+}

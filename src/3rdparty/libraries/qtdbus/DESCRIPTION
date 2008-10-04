@@ -1,1 +1,1 @@
-Qt DBUS library built outside Qt so that we can access the symbols from Qtopia.
+Qt DBUS library built outside Qt so that we can access the symbols from Qt Extended.

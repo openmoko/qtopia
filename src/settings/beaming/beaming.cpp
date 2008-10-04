@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "beaming.h"
@@ -30,23 +28,36 @@
 #include <QStringList>
 #include <QLabel>
 #include <qtopianamespace.h>
-#include <qtopia/qsoftmenubar.h>
+#include <qsoftmenubar.h>
 #include <qirlocaldevice.h>
 
-static int AUTO_QUIT_TIME = 0; // or 0 if auto-quitting is confusing.
+static void bold_selected_item(QListWidget *list)
+{
+    QListWidgetItem* item = list->currentItem();
+    if ( !item )
+        return;
+
+    QFont f = item->font();
+    f.setBold( false );
+    for ( int i = list->count()-1; i >= 0; i-- ) {
+        list->item(i)->setFont(f);
+    }
+    f.setBold( true );
+    item->setFont(f);
+}
 
 Beaming::Beaming( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl ), state( -1 ), protocol( -1 )
 {
     setWindowTitle(tr("Beaming"));
 
-    QVBoxLayout *vbl = new QVBoxLayout(this);
-    vbl->setMargin(4);
-    vbl->setSpacing(2);
-
     // Take care of the case where we have no Infrared adapters
     QStringList list = QIrLocalDevice::devices();
     if (list.size() == 0) {
+        QVBoxLayout *vbl = new QVBoxLayout(this);
+        vbl->setMargin(4);
+        vbl->setSpacing(2);
+
         QLabel *label = new QLabel(tr("<P>No infrared devices found"));
         label->setWordWrap(true);
         vbl->addWidget(label);
@@ -55,12 +66,18 @@ Beaming::Beaming( QWidget* parent, Qt::WFlags fl )
         return;
     }
 
+    QTabWidget *tabs = new QTabWidget;
+
+    QWidget *deviceState = new QWidget;    
+
     irc = new IRController(this);
 
-    QButtonGroup* bg = new QButtonGroup(this);
+    QVBoxLayout *vbl = new QVBoxLayout;
+
+    bg = new QButtonGroup;
     QSignalMapper* sm = new QSignalMapper(this);
     for (int i=0; i<=(int)IRController::LastState; i++) {
-        QRadioButton *b = new QRadioButton(this);
+        QRadioButton *b = new QRadioButton;
         vbl->addWidget(b);
         bg->addButton(b);
         b->setText(IRController::stateDescription((IRController::State)i));
@@ -78,57 +95,71 @@ Beaming::Beaming( QWidget* parent, Qt::WFlags fl )
     }
     connect(sm,SIGNAL(mapped(int)),this,SLOT(chooseState(int)));
 
+    deviceState->setLayout(vbl);
+    tabs->addTab(deviceState, tr("Settings"));
+
+    vbl = new QVBoxLayout;
+    QWidget *encoding = new QWidget;
+
     int pc = irc->protocolCount();
     if ( pc ) {
-        lb = new QListWidget(this);
+        lb = new QListWidget;
         vbl->addWidget(lb);
         for (int i=0; i<pc; i++) {
             QString n = irc->protocolName(i);
             QIcon ic = irc->protocolIcon(i);
-            if ( ic.isNull() ) {
-                lb->insertItem(i, n);
-            } else {
-                QListWidgetItem *item = new QListWidgetItem(n);
+            QListWidgetItem *item = new QListWidgetItem(n);
+            if (!ic.isNull())
                 item->setIcon(ic);
-                lb->insertItem(i, item);
-            }
+
+            lb->addItem(item);
+
+            if (i == irc->currentProtocol())
+                lb->setCurrentItem(item);
         }
-        lb->setItemSelected(lb->item(irc->currentProtocol()),true);
+
+        bold_selected_item(lb);
+
         connect(lb,SIGNAL(itemActivated(QListWidgetItem*)),this,SLOT(chooseProtocol(QListWidgetItem*)));
     }
 
+    encoding->setLayout(vbl);
+    tabs->addTab(encoding, tr("Encoding"));
+
+    vbl = new QVBoxLayout;
+    vbl->addWidget(tabs);
+    setLayout(vbl);
+
+    connect(irc, SIGNAL(stateChanged(IRController::State)),
+            this, SLOT(stateChanged(IRController::State)));
+
     // add context menu for help
     QSoftMenuBar::menuFor( this );
-
-    this->setLayout(vbl);
 }
 
 void Beaming::chooseState(int c)
 {
     state = c;
-    if ( AUTO_QUIT_TIME )
-        QTimer::singleShot( AUTO_QUIT_TIME, this, SLOT(accept()) );
+
+    if ( state != -1 )
+        irc->setState( (IRController::State) state );
 }
 
 void Beaming::chooseProtocol(QListWidgetItem *item)
 {
-    protocol = lb->row( item );
-    if( !Qtopia::mousePreferred() )
-        lb->setEditFocus(false);
+    if ( protocol != -1 )
+        irc->setProtocol( protocol );
+
+    protocol = lb->row(item);
+    bold_selected_item(lb);
 }
 
 Beaming::~Beaming()
 {
 }
 
-void Beaming::accept()
+void Beaming::stateChanged(IRController::State s)
 {
-    if ( state != -1 )
-        irc->setState( (IRController::State) state );
-
-    if ( protocol != -1 )
-        irc->setProtocol( protocol );
-
-    QDialog::accept();
+    state = s;
+    bg->buttons()[s]->setChecked(true);
 }
-

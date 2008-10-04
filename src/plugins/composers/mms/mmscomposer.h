@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -29,9 +27,9 @@
 #include <qtextedit.h>
 #include <qpixmap.h>
 #include <qpushbutton.h>
-
-#include <qtopia/mail/qmailcomposer.h>
-#include <qtopia/mail/qmailcomposerplugin.h>
+#include <qmailcomposer.h>
+#include <qmailcomposerplugin.h>
+#include <QQueue>
 
 class QAction;
 class QMenu;
@@ -41,34 +39,45 @@ class QKeyEvent;
 class QPaintEvent;
 class QShowEvent;
 class QMouseEvent;
-
+class QStackedWidget;
 class MMSComposer;
+class MMSComposerInterface;
+class DetailsPage;
 
 class MMSSlideImage : public QLabel
 {
     Q_OBJECT
 public:
-    MMSSlideImage(QWidget *parent);
+    MMSSlideImage(QWidget* parent);
+    ~MMSSlideImage();
 
     QRect contentsRect() const;
+
     QSize sizeHint() const;
 
     void setImage( const QContent &image );
     void setImage( const QPixmap &image );
-
     QPixmap image() const;
 
     bool isEmpty() const;
 
     QContent& document();
 
+    QString mimeType() const;
+
+    quint64 numBytes() const;
+
 signals:
     void clicked();
-    void changed();
     void leftPressed(); // for keypad mode only
     void rightPressed(); // ""
+    void aboutToChange(bool& ok, quint64 sizeDelta);
+    void changed();
 
-protected slots:
+public:
+    static void loadImages(const QSize& maxSize);
+
+public slots:
     void select();
 
 protected:
@@ -77,17 +86,57 @@ protected:
     void mouseReleaseEvent( QMouseEvent *event );
     void keyPressEvent( QKeyEvent *event );
     void paintEvent( QPaintEvent *event );
-    void showEvent( QShowEvent *event );
 
-    QPixmap loadImage() const;
+    void loadImage(const QSize& explicitSize = QSize());
 
     QPixmap scale( const QPixmap &src ) const;
+
+private:
+    static QQueue<MMSSlideImage*>& loadQueue();
 
 private:
     QPixmap m_image;
     QContent m_content;
     QSize m_contentSize;
     bool m_pressed;
+};
+
+class MMSSlideVideo : public QWidget
+{
+    Q_OBJECT
+public:
+    MMSSlideVideo(QWidget* parent = 0);
+    ~MMSSlideVideo();
+
+    bool isEmpty() const;
+
+    QContent document() const;
+
+    void setVideo(const QContent& c);
+    void setVideo( const QByteArray&, const QString& );
+    QByteArray video() const;
+
+    QString mimeType() const;
+
+    quint64 numBytes() const;
+
+public slots:
+    void select();
+
+protected:
+    void keyPressEvent(QKeyEvent* e);
+
+signals:
+    void leftPressed();
+    void rightPressed();
+    void clicked();
+    void aboutToChange(bool& ok,quint64 sizeDelta);
+    void changed();
+
+private:
+    QContent m_videoMedia;
+    QPushButton* m_videoWidget;
+
 };
 
 class MMSSlideText : public QTextEdit
@@ -107,9 +156,13 @@ public:
 
     QRect contentsRect() const;
 
+    quint64 numBytes() const;
+
 signals:
     void leftPressed(); // for keypad mode only
     void rightPressed(); // ""
+    void aboutToChange(bool& ok, quint64 sizeDelta);
+    void changed();
 
 protected:
     virtual void mousePressEvent ( QMouseEvent * e );
@@ -129,13 +182,16 @@ public:
     void setAudio( const QContent &fn );
     void setAudio( const QByteArray &, const QString & );
     QByteArray audio() const;
+
     QString mimeType() const;
 
     bool isEmpty() const;
 
     QContent& document();
 
-private slots:
+    quint64 numBytes() const;
+
+public slots:
     void select();
 
 protected:
@@ -144,6 +200,7 @@ protected:
 signals:
     void leftPressed(); // for keypad mode only
     void rightPressed(); // ""
+    void aboutToChange(bool& ok, quint64 sizeDelta);
     void changed();
 
 private:
@@ -160,6 +217,7 @@ struct MMSSmilPart
     QString image;
     QString text;
     QString audio;
+    QString video;
 };
 
 struct MMSSmil
@@ -169,10 +227,10 @@ struct MMSSmil
     QList<MMSSmilPart> parts;
 };
 
-
 class MMSSlide : public QWidget
 {
-    friend class MMSComposer; // crap, composer needs to install context menus on widgets
+    friend class MMSComposerInterface;
+    friend class MMSComposer;
 
     Q_OBJECT
 public:
@@ -181,78 +239,35 @@ public:
     MMSSlideImage *imageContent() const;
     MMSSlideText *textContent() const;
     MMSSlideAudio *audioContent() const;
+    MMSSlideVideo* videoContent() const;
 
     void setDuration( int t );
     int duration() const;
+
+    quint64 numBytes() const;
 
 signals:
     void leftPressed();
     void rightPressed();
     void durationChanged(int);
+    void aboutToChange(bool& ok, quint64 sizeDelta);
+    void changed();
+
+private slots:
+    void selectMedia();
+    void mediaChanged();
+
+protected:
+    void showEvent(QShowEvent* e);
 
 private:
     MMSSlideImage *m_imageContent;
     MMSSlideText *m_textContent;
     MMSSlideAudio *m_audioContent;
     int m_duration;
-};
-
-class MMSComposer : public QWidget
-{
-    Q_OBJECT
-public:
-    MMSComposer(QWidget *parent = 0);
-    ~MMSComposer();
-
-    void addActions(QMenu* menu);
-
-    QRect contentsRect() const;
-
-    bool isEmpty() const;
-
-    uint slideCount() const;
-    MMSSlide *slide( uint slide ) const;
-    int currentSlide() const;
-
-public slots:
-    void setMessage( const QMailMessage &mail );
-    void clear();
-    void addSlide();
-    void removeSlide();
-    void addSlide( int a_slide );
-    void removeSlide( int a_slide );
-    void nextSlide();
-    void previousSlide();
-    void setCurrentSlide( int slide );
-    void updateLabels();
-    void setTextColor( const QColor &col );
-    void setBackgroundColor( const QColor &col );
-    QColor textColor() const;
-    QColor backgroundColor() const;
-
-protected slots:
-    void slideOptions();
-    void elementChanged();
-
-protected:
-    void keyPressEvent(QKeyEvent *);
-
-private:
-    MMSSmil parseSmil( const QString &doc );
-
-signals:
-    void currentChanged( uint );
-    void contentChanged();
-    void finished();
-
-private:
-    QLabel *m_slideLabel, *m_durationLabel;
-    QStackedWidget *m_slideStack;
-    int m_curSlide;
-    QList<MMSSlide*> m_slides;
-    bool m_internalUpdate;
-    QColor m_textColor, m_backgroundColor;
-    QAction* m_removeSlide;
+    QStackedWidget* m_mediaStack;
+    QPushButton* m_noMediaButton;
+    MMSSlideVideo* m_videoContent;
 };
 
 class MMSComposerInterface : public QMailComposerInterface
@@ -261,22 +276,84 @@ class MMSComposerInterface : public QMailComposerInterface
 
 public:
     MMSComposerInterface(QWidget *parent = 0);
-    ~MMSComposerInterface();
+    virtual ~MMSComposerInterface();
 
     bool isEmpty() const;
     QMailMessage message() const;
 
-    QWidget *widget() const;
+    int currentSlide() const;
+    uint slideCount() const;
+    MMSSlide *slide( uint slide ) const;
+    QRect contentsRect() const;
 
-    virtual void addActions(QMenu* menu) const;
+    void setDefaultAccount(const QMailAccountId& id);
+    void setTo(const QString& toAddress);
+    void setFrom(const QString& fromAddress);
+    void setCc(const QString& ccAddress);
+    void setBcc(const QString& bccAddress);
+    void setSubject(const QString& subject);
+    QString from() const;
+    QString to() const;
+    QString cc() const;
+    QString bcc() const;
+    bool isReadyToSend() const;
+    bool isDetailsOnlyMode() const;
+    void setDetailsOnlyMode(bool val);
+    QString contextTitle() const;
+    QMailAccount fromAccount() const;
+
+    quint64 numBytes() const;
+
+signals:
+    void currentChanged( uint );
 
 public slots:
     void setMessage( const QMailMessage &mail );
     void clear();
     virtual void attach( const QContent &lnk, QMailMessage::AttachmentsAction action = QMailMessage::LinkToAttachments );
 
+    void addSlide();
+    void addSlide( int a_slide );
+    void setCurrentSlide( int slide );
+    void setBackgroundColor( const QColor &col );
+    void setTextColor( const QColor &col );
+    QColor backgroundColor() const;
+    void removeSlide();
+    void removeSlide( int a_slide );
+    void updateLabels();
+    void nextSlide();
+    void previousSlide();
+    void reply(const QMailMessage& source, int action);
+
+protected:
+    void keyPressEvent(QKeyEvent *);
+
+protected slots:
+    void slideOptions();
+    void elementChanged();
+    void detailsPage();
+    void composePage();
+    void slideAboutToChange(bool& ok, quint64 sizeDelta);
+
 private:
-    MMSComposer *m_composer;
+    void init();
+    MMSSmil parseSmil( const QString &doc );
+    void setContext(const QString& title);
+
+private:
+    QStackedWidget* m_widgetStack;
+    QWidget* m_composerWidget;
+    DetailsPage* m_detailsWidget;
+    QLabel *m_slideLabel, *m_sizeLabel;
+    QStackedWidget *m_slideStack;
+    int m_curSlide;
+    QList<MMSSlide*> m_slides;
+    bool m_internalUpdate;
+    QColor m_textColor, m_backgroundColor;
+    QAction* m_removeSlide;
+    QAction* m_nextSlide;
+    QAction* m_previousSlide;
+    QString m_title;
 };
 
 class MMSComposerPlugin : public QMailComposerPlugin
@@ -285,13 +362,6 @@ class MMSComposerPlugin : public QMailComposerPlugin
 
 public:
     MMSComposerPlugin();
-
-    virtual QString key() const;
-    virtual QMailMessage::MessageType messageType() const;
-
-    virtual QString name() const;
-    virtual QString displayName() const;
-    virtual QIcon displayIcon() const;
 
     QMailComposerInterface* create( QWidget* parent );
 };

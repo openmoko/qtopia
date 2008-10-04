@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Theme Editor</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">Theme Editor<br /><span class="subtitle"></span>
+</h1>
+<a name="top"></a><ul><li><a href="#overview">Overview</a></li>
+<li><a href="#basic-tasks">Basic Tasks</a></li>
+<ul><li><a href="#creating-a-new-theme">Creating a New Theme</a></li>
+<li><a href="#opening-an-existing-theme">Opening an Existing Theme</a></li>
+<li><a href="#saving-a-theme">Saving a Theme</a></li>
+<li><a href="#modifying-theme-items">Modifying Theme Items</a></li>
+</ul>
+<li><a href="#other-tasks">Other Tasks</a></li>
+<ul><li><a href="#modifying-theme-meta-data">Modifying Theme Meta-data</a></li>
+<li><a href="#modifying-the-xml-file">Modifying the XML File</a></li>
+<li><a href="#value-space-integration">Value Space Integration</a></li>
+<li><a href="#color-scheme-editing">Color Scheme Editing</a></li>
+<li><a href="#icon-selection">Icon Selection</a></li>
+</ul>
+<li><a href="#configuration">Configuration</a></li>
+<li><a href="#command-line-arguments">Command Line Arguments</a></li>
+<li><a href="#limitations">Limitations</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<a name="overview"></a>
+<h2>Overview</h2>
+<p>The Qt Extended Theme Editor is a tool intended to help designers create <a href="syscust-theming.html">themes</a> for Qt Extended. The Theme Editor provides a graphical user interface designed to facilitate common tasks in creating themes for Qt Extended. The Theme Editor can create, load and save themes, and within the themes can populate themed views, edit color palettes and set icon images.</p>
+<p>The theme editor contains several tools to assist in creating themes, accessible from the 'Tools' menu. These tools include an XML editor to directly modify the themed view XML files, a color scheme editor and selector to assist in creating color schemes for a theme, and a simulated Value Space for previewing theme elements which use values from the Value Space. Some of these tools open in their own windows, others dock inside the main window. For the latter type you can toggle their visibility from inside the 'Tools' menu.</p>
+<a name="basic-tasks"></a>
+<h2>Basic Tasks</h2>
+<a name="creating-a-new-theme"></a>
+<h3>Creating a New Theme</h3>
+<p>To create a new theme in the theme editor select 'New Theme' from the 'File' menu. This will present a dialog, requesting some required information about the theme you are creating.</p>
+<p>A name is required for every theme, as themes are often referred to by name. It is best if this name is not already used by another theme. The name can be changed at any time in the properties dialog.</p>
+<p>Height and width(in pixels) are recommended to be specified here. This is primarily used by the editor, and other people looking at the theme, as Qt Extended will use the device's screen size at all times. The size chosen here will be the size of each page in the editor. The height and width can be changed at any time in the properties dialog, however the theme will need to be reloaded for changes to take effect.</p>
+<p>Many user interface components in Qt Extended are themeable, and a theme does not need to specify what all of them look like. The most common user interface components are available to choose from, and the selection here determines which user interface components the theme will specify an appearance for. User interface components can be added or removed at a later stage by editing the theme configuration file. It is not strictly required, but it is recommended that a theme specify the appearance of at least one user interface component.</p>
+<p>Once you have decided upon these details press the 'Ok' button and an empty theme will be created, based on the provided information. All of the themed views will be empty at this stage, but the theme editor should make filling them fairly easy.</p>
+<a name="opening-an-existing-theme"></a>
+<h3>Opening an Existing Theme</h3>
+<p>Themes can be stored in one of two ways: either as a theme package or as a collection of files in a directory. You can save and load both of these formats. Note that only one theme may be opened in the editor at a time; the open actions will be unavailable if another theme is currently open. Select the 'Close' option from the 'File' menu if you wish to open another theme (but ensure you have saved any work you wish to keep first).</p>
+<p>To open a theme package, select 'Open Package' from the 'File' menu, and then browse to the package you wish to open. Once it is selected, press the 'Open' button.</p>
+<p>To open a theme stored in a directory select 'Open Source Directory' from the 'File' menu. The 'Open Last Directory' option will open the last source directory which you opened with the 'Open Source Directory' option, or saved to a directory. The directory is expected to conform to a certain structure, with one directory containing all of the files except possibly images (it is referred to in the dialog as the 'XML directory:' as .xml files are its primary content). The configuration file may be in the directory above the XML directory, and it must be named '<i>&lt;name&gt;</i>.conf' where <i>&lt;name&gt;</i> is the name of the theme. If the images for the theme are stored in a separate directory, tick the 'Separate Images Directory' check box and select the correct path for the directory which contains the images. When you click the 'Ok' button, the theme will be loaded. If the paths provided are not valid, an error will appear and no Theme will be loaded. Should the paths be valid, but a theme organized as above is not found, an empty theme will be loaded. It is recommended that the 'New Theme' option be used instead if you wish to create a new theme in a specified location.</p>
+<a name="saving-a-theme"></a>
+<h3>Saving a Theme</h3>
+<p>Themes can be saved in the same formats as they can be loaded. To save a theme, a theme must first be open. If no theme is open, the save options will be disabled. If you wish to save a theme in this case, first open or create a new theme as detailed above.</p>
+<p>To save a theme in a package, select 'Save Package' from the 'File' menu. Browse to where you wish to save it and enter an appropriate file name. If the file name you entered does not end in '.qpkg' it will be automatically appended to the file name when you save.</p>
+<p>To save an entire theme into a directory select the 'Save All' option from the 'File' menu. This will prompt for the directory or directories which you would like to save it in. These do not have to be the same as the ones you loaded from, although that is what they default to. The structure of the directories is the same as for opening a theme, as detailed above.</p>
+<p>If you wish to save only the current view, and you loaded the theme from a directory as opposed to from a package, select the 'Save' option from the file menu. This will only save the current view, and any resources (such as pictures) that it depends on. If you are concerned about losing your work, note that the Theme Editor auto saves the work frequently, and these auto saves will be offered for recovery if the theme editor exits unexpectedly (they will not overwrite files in the specified directory). If the theme editor exits in an expected manner, but has unsaved views, it will require confirmation before the work is lost.</p>
+<a name="modifying-theme-items"></a>
+<h3>Modifying Theme Items</h3>
+<p>Once you have a theme open you can add, remove, and modify items in it. If these methods are not suitable for your needs, an XML editor is built into the theme editor, and you can modify the items directly in it.</p>
+<p>To add an item to the active view, press and hold the left mouse button on an item in the item palette, and drag it onto the page or the item browser. The highlighted item at the time you release the mouse button will be the parent of the newly created item. Basic items are initially empty, and so may not be visible until you add content to them.</p>
+<p>To delete an item, simply select it and press the delete key on your keyboard. Remember that you can select items by clicking on them in the central view, or by clicking on their entry in the item browser.</p>
+<p>To modify the positional properties of an item in the active view, you can click on it in the main area to select it, and then either drag it to a new location or drag the resize handles that have appeared on top of it so as to alter the item's size. When moving an item, the item which is highlighted in red below is the item which will be its parent item when it is moved there. If you wish to move an item without reparenting it, use the item editor's controls for altering x and y. If you wish to reparent an item without moving it drag the entry for the item you wish to reparent onto the item you wish to be the new parent. Note however that position is expressed relative to the parent item, and so this may result in an unintended change of position.</p>
+<p>If you are having difficulty clicking on an item to select it, press the right mouse button anywhere on top of it and a menu will appear listing the items at that location. Selecting an item from the menu will select it in the main view.</p>
+<p>If you are having difficulty clicking on an item to drag it into a new position, holding down shift while dragging the resize handles will cause the item to move instead of resizing. It does not matter which resize handle you drag.</p>
+<p>Another method of modifying an item is through the item editor. The item editor displays the properties of the currently selected item, and these properties can be modified. The available properties will depend upon the type of item selected.</p>
+<a name="other-tasks"></a>
+<h2>Other Tasks</h2>
+<a name="modifying-theme-meta-data"></a>
+<h3>Modifying Theme Meta-data</h3>
+<p>Some of the theme meta-data can be edited from the 'Properties' option in the 'Theme' menu. This allows convenient editing of commonly used meta data (this includes the name and default dimensions which you may have specified in theme creation). Should you need to alter other parts of the theme meta-data, the 'Edit .conf file' option in the 'Theme' menu provides convenient access to the configuration file of the theme. A small text editing window will be opened, where you can make the required changes and then save the file. Note that this will still work when opening the theme from a package.</p>
+<a name="modifying-the-xml-file"></a>
+<h3>Modifying the XML File</h3>
+<p>The theme editor does not do everything (see 'Limitations' below), and so editing of the XML files by hand may still be necessary. To assist this when needed, the theme editor contains an XML editor for directly editing the XML of the theme you are working on.</p>
+<p>To access the XML Editor, select 'XML Editor' from the 'Tools' menu. The XML Editor will now appear. Note that you cannot edit the theme except via the XML Editor while it is open. The theme editor is still running, and will display the theme for which you currently have the .xml file open. This view will be updated when you save the XML file (by pressing the 'Write XML File' button), so that you can view your changes. You can switch to another XML file in the theme using the box at the top of the editor. Click the 'Close' button to return to the main view.</p>
+<a name="value-space-integration"></a>
+<h3>Value Space Integration</h3>
+<p>Themes often wish to interact with the Qt Extended <a href="qvaluespaceitem.html">Value Space</a> and the Theme Editor attempts to facilitate this. The theme editor loads an example Value Space which contains all of the commonly used Value Space items. There are two views on the Value Space, a common view and a full view. The common view provides easy access to the most common Value Space items, and allows you to change their values directly, to witness the effect on the theme. The full view provides the full range of Value Space items which might be expected on a Qt Extended based phone, and also allows you to edit their values and view the effects on the theme. In both views, you can click and drag the Value Space item label to a text field to get the full Value Space path.</p>
+<a name="color-scheme-editing"></a>
+<h3>Color Scheme Editing</h3>
+<p>The theme editor assists both in the creation and selection of color schemes for use in a theme. From the color scheme palette, the available color schemes are show with options to create new or edit existing color schemes. The check box next to each color scheme indicates whether this color scheme should be listed as a possible color scheme for use with this theme; the user will only be able to select from the checked themes. If you select a theme, the palette of the views currently shown will be updated, so you can preview you theme with the selected color scheme.</p>
+<a name="icon-selection"></a>
+<h3>Icon Selection</h3>
+<p>To conveniently replace some of the icons in Qt Extended the theme editor allows for easy replacement of the icons. Select the 'Icon Editor' option from the 'Tools' menu, and the Icon editor will load. In this window you can navigate the icons which are in Qt Extended, and double click on one to nominate a replacement icon. The replacement icon should then be shown next to the original icon.</p>
+<a name="configuration"></a>
+<h2>Configuration</h2>
+<p>The theme editor gets many of it's resources from a resource directory. Should you wish, you can configure which directory it should retrieve resources from. To do so, select 'Preferences..&#x2e;' from the 'Edit' menu. This dialog also allows you to choose whether invisible items should be shown by default.</p>
+<a name="command-line-arguments"></a>
+<h2>Command Line Arguments</h2>
+<p>If you pass a .qpkg file as a command line argument to it, it will load the specified file immediately. This, and '--help', are the only supported command line arguments at this time.</p>
+<a name="limitations"></a>
+<h2>Limitations</h2>
+<p>The Qt Extended theme editor is only designed to facilitate common tasks in theme creation. The following things are not made easier by the theme editor, although the theme editor does try to help you in manually altering the text files.</p>
+<ul>
+<li>List items</li>
+<li>Plugin items</li>
+<li>Widget items</li>
+<li>Theme Translation</li>
+<li>Adding xml files</li>
+</ul>
+<a name="references"></a>
+<h2>References</h2>
+<p>The following are documentation regarding Theming in Qt Extended. These do not assume the existence of the theme editor, and refer directly to the XML representation.</p>
+<ul>
+<li><a href="syscust-theming.html">Theming Overview</a></li>
+<li><a href="themed-views.html">Themed Views</a></li>
+<li><a href="themed-view-elements.html">Themed View Elements</a></li>
+<li><a href="buildsystem/task-translating-themes-1.html">Translating Themes</a></li>
+<li><a href="tut-themefiles.html">Tutorial: Theming Files</a></li>
+<li><a href="tut-contextbar.html">Tutorial: Context Bar Theme</a></li>
+<li><a href="tut-screenthemes.html">Tutorial: Screen Themes</a></li>
+<li><a href="tut-titlebar.html">Tutorial: Title Bar Theme</a></li>
+<li><a href="tut-winddectheme.html">Tutorial: Window Decoration Theme</a></li>
+</ul>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2008 Trolltech</td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
+</tr></table></div></address></body>
+</html>

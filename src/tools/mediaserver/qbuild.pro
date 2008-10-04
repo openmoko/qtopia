@@ -1,0 +1,16 @@
+TEMPLATE=app
+CONFIG+=qtopia singleexec
+TARGET=mediaserver
+
+QTOPIA*=media audio 
+enable_telephony:QTOPIA*=phone
+QTOPIA.CONFIG=singleexec
+
+DEFINES+=CONFIGURED_ENGINES=$$define_string($$QTOPIAMEDIA_ENGINES)
+
+include(mediaserver.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

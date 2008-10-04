@@ -1,36 +1,38 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <gst/gst.h>
 
-#include <QMediaVideoControlServer>
 #include <QDebug>
+#include <QVideoSurface>
+#include <QMediaVideoControlServer>
+#include <qtopiavideo.h>
 
-#include <qmediahandle_p.h>
+#include <private/qmediahandle_p.h>
 
 #include "gstreamerbushelper.h"
 #include "gstreamermessage.h"
-#include "gstreamerdirectpainterwidget.h"
+#include "gstreamervideowidget.h"
 
 #include "gstreamerplaybinsession.h"
+
+#include <custom.h>
 
 
 namespace gstreamer
@@ -46,6 +48,7 @@ public:
     quint32                 position;
     quint32                 length;
     QtopiaMedia::State      state;
+    QtopiaMedia::State      stateBeforeSuspend;
     QMediaHandle            id;
     QString                 domain;
     QUrl                    url;
@@ -53,8 +56,9 @@ public:
     Engine*                 engine;
     GstElement*             playbin;
     GstBus*                 bus;
-    DirectPainterWidget*    sinkWidget;
+    SinkWidget*             sinkWidget;
     QStringList             interfaces;
+    gint64                  jumpPosition;
 
     QMediaVideoControlServer*   videoControlServer;
 };
@@ -77,10 +81,11 @@ PlaybinSession::PlaybinSession
 {
     d->haveStreamInfo = false;
     d->muted = false;
-    d->volume = 5.0;
+    d->volume = 1.0;
     d->position = 0;
-    d->length  = -1;
+    d->length  = quint32(-1);
     d->state = QtopiaMedia::Stopped;
+    d->stateBeforeSuspend = QtopiaMedia::Stopped;
     d->engine = engine;
     d->id = QMediaHandle(id);
     d->url = url;
@@ -88,6 +93,7 @@ PlaybinSession::PlaybinSession
     d->bus = 0;
     d->sinkWidget = 0;
     d->videoControlServer = 0;
+    d->jumpPosition = 0;
 
     d->interfaces << "Basic";
 
@@ -104,8 +110,6 @@ PlaybinSession::~PlaybinSession()
         gst_object_unref(GST_OBJECT(d->bus));
         gst_object_unref(GST_OBJECT(d->playbin));
     }
-
-    delete d->videoControlServer;
 
     delete d;
 }
@@ -139,12 +143,21 @@ void PlaybinSession::stop()
 
 void PlaybinSession::suspend()
 {
-    pause();
+    if (d->playbin != 0) {
+        d->stateBeforeSuspend = d->state;
+        GstFormat   format = GST_FORMAT_TIME;
+        gst_element_query_position(d->playbin, &format, &d->jumpPosition);
+    }
+
+    stop();
 }
 
 void PlaybinSession::resume()
 {
+    if ( d->stateBeforeSuspend == QtopiaMedia::Playing )
     start();
+    else
+        pause();
 }
 
 void PlaybinSession::seek(quint32 ms)
@@ -162,11 +175,15 @@ quint32 PlaybinSession::length()
     return d->length;
 }
 
+#ifndef GST_MAX_VOLUME
+#define GST_MAX_VOLUME 1
+#endif
+
 void PlaybinSession::setVolume(int volume)
 {
     if (d->playbin != 0)
     {
-        d->volume = gdouble(volume) / 10;
+        d->volume = gdouble(volume) / (100/GST_MAX_VOLUME);
 
         if (!d->muted)
         {
@@ -179,7 +196,7 @@ void PlaybinSession::setVolume(int volume)
 
 int PlaybinSession::volume() const
 {
-    return int(d->volume * 10);
+    return int(d->volume * (10/GST_MAX_VOLUME));
 }
 
 void PlaybinSession::setMuted(bool mute)
@@ -231,7 +248,11 @@ QString PlaybinSession::id() const
 
 QString PlaybinSession::reportData() const
 {
-    return d->url.toString();
+    QStringList sl;
+
+    sl << "engine:GStreamer" << ("uri:" + d->url.toString());
+
+    return sl.join(",");
 }
 
 void PlaybinSession::busMessage(Message const& msg)
@@ -245,7 +266,7 @@ void PlaybinSession::busMessage(Message const& msg)
 
         if (gst_element_query_position(d->playbin, &format, &position) == TRUE)
         {
-            quint32 pos = position / 1000000;
+            quint32 pos = (position / 1000000) / 1000 * 1000;
 
             if (pos != d->position)
             {
@@ -274,7 +295,15 @@ void PlaybinSession::busMessage(Message const& msg)
                     case GST_STATE_VOID_PENDING:
                     case GST_STATE_NULL:
                     case GST_STATE_READY:
+                        break;
                     case GST_STATE_PAUSED:
+                        if ( d->state != QtopiaMedia::Paused )
+                            emit playerStateChanged(d->state = QtopiaMedia::Paused);
+
+                        if ( d->jumpPosition ) {
+                            gst_element_seek_simple(d->playbin, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH, d->jumpPosition );
+                            d->jumpPosition = 0;
+                        }
                         break;
                     case GST_STATE_PLAYING:
                         if (oldState == GST_STATE_PAUSED)
@@ -320,7 +349,7 @@ void PlaybinSession::busMessage(Message const& msg)
 void PlaybinSession::getStreamsInfo()
 {
     // Get Length if have not before.
-    if (qint32(d->length) == -1)
+    if (d->length == quint32(-1))
     {
         GstFormat   format = GST_FORMAT_TIME;
         gint64      duration = 0;
@@ -361,10 +390,24 @@ void PlaybinSession::getStreamsInfo()
                 break;
 
             case GST_STREAM_TYPE_VIDEO:
-                d->videoControlServer = new QMediaVideoControlServer(d->id);
-                d->videoControlServer->setRenderTarget(d->sinkWidget->winId());
-                d->interfaces << "Video";
-                emit interfaceAvailable("Video");
+                {
+                    d->videoControlServer = new QMediaVideoControlServer( d->id,
+                                                                          0, //target
+                                                                          this );
+
+                    d->videoControlServer->setRenderTarget(d->sinkWidget->windowId());
+                    d->interfaces << "Video";
+
+                    QVideoSurface *surface = d->sinkWidget->videoSurface();
+                    surface->setRotation(d->videoControlServer->videoRotation());
+                    surface->setScaleMode(d->videoControlServer->videoScaleMode());
+                    connect( d->videoControlServer, SIGNAL(rotationChanged(QtopiaVideo::VideoRotation)),
+                             surface, SLOT(setRotation(QtopiaVideo::VideoRotation)) );
+                    connect( d->videoControlServer, SIGNAL(scaleModeChanged(QtopiaVideo::VideoScaleMode)),
+                             surface, SLOT(setScaleMode(QtopiaVideo::VideoScaleMode)) );
+
+                    emit interfaceAvailable("Video");
+                }
                 break;
 
             case GST_STREAM_TYPE_UNKNOWN:
@@ -390,7 +433,9 @@ void PlaybinSession::readySession()
     d->playbin = gst_element_factory_make("playbin", NULL);
     if (d->playbin != 0) {
         // Pre-set video element, even if no video
-        d->sinkWidget = new DirectPainterWidget;
+        d->sinkWidget = new VideoWidget;
+        connect( d->sinkWidget->videoSurface(), SIGNAL(formatsChanged()), this, SLOT(updateSinkFormat()) );
+        connect( d->sinkWidget->videoSurface(), SIGNAL(updateRequested()), this, SLOT(repaintLastFrame()) );
         g_object_set(G_OBJECT(d->playbin), "video-sink", d->sinkWidget->element(), NULL);
 
         // Sort out messages
@@ -404,6 +449,23 @@ void PlaybinSession::readySession()
         // URI for media
         g_object_set(G_OBJECT(d->playbin), "uri", d->url.toString().toLocal8Bit().constData(), NULL);
     }
+}
+
+
+void PlaybinSession::updateSinkFormat()
+{
+    GstFormat   format = GST_FORMAT_TIME;
+    gst_element_query_position(d->playbin, &format, &d->jumpPosition);
+
+    stop();
+    start();
+}
+
+
+void PlaybinSession::repaintLastFrame()
+{
+    if ( d->state != QtopiaMedia::Playing )
+        d->sinkWidget->repaintLastFrame();
 }
 
 // }}}

@@ -1,97 +1,121 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #ifndef VIDEOVIEW_H
 #define VIDEOVIEW_H
 
-#include <qwidget.h>
+#include <QFrame>
 #include <qimage.h>
 #include <qlist.h>
+#include <qtabwidget.h>
+#include "camerastateprocessor.h"
+#include <QCameraDevice>
+#include <QCameraDeviceLoader>
 
-#include <QSocketNotifier>
 
+class QCameraControl;
+class CameraStateProcessor;
+class ViewPrivate;
+class QVideoFrame;
 
-namespace camera
-{
-class VideoCaptureDevice;
-}
-
-class QSlider;
-class VideoCaptureView : public QWidget
+class VideoCaptureView : public QFrame
 {
     Q_OBJECT
 
 public:
-    VideoCaptureView(QWidget *parent = 0, Qt::WFlags fl = 0);
+    VideoCaptureView(QWidget *parent = 0);
     ~VideoCaptureView();
+
 
     bool available() const;
 
-    QImage image() const { return m_image; }
-    void setLive(int period=0);
-    void setStill(const QImage&);
+    void startCapture();
+    void endCapture();
 
-    QList<QSize> photoSizes() const;
-    QList<QSize> videoSizes() const;
+    void setLive(int);
+    void showBlankFrame(bool);
 
-    QSize recommendedPhotoSize() const;
-    QSize recommendedVideoSize() const;
-    QSize recommendedPreviewSize() const;
+    QList<QSize> stillSizes();
+    QList<QSize> previewSizes();
+    QList<QSize> videoSizes();
 
-    QSize captureSize() const;
-    void setCaptureSize( QSize size );
+    QSize stillDefaultSize();
+    QSize videoDefaultSize();
+    QSize previewDefaultSize();
 
-    uint refocusDelay() const;
 
-    void zoomIn();
-    void zoomOut();
-    void doZoom();
-
-    int maxZoom() const;
     int minZoom() const;
+    int maxZoom() const;
+    bool hasZoom() const;
 
+    bool initializeCamera();
+
+    void toggleVideo(bool recording, QSize resolution);
+
+    void takePhoto(QSize resolution, int count = 1);
+
+    bool hasVideo();
+    bool hasStill();
+
+    bool lensCoverState();
+
+    void autoFocus();
 protected:
     void moveEvent(QMoveEvent* moveEvent);
     void resizeEvent(QResizeEvent* resizeEvent);
-    void paintEvent(QPaintEvent* paintEvent);
-    void timerEvent(QTimerEvent* timerEvent);
+    void mousePressEvent(QMouseEvent* mouseEvent);
+    void hideEvent(QHideEvent*);
+    void showEvent(QShowEvent*);
+
+public slots:
+    void cameraError(QtopiaCamera::CameraError, QString errorString);
+    void lensCoverStateChanged();
+    void rotationChanged();
+    void zoomIn();
+    void zoomOut();
+
+private slots:
+    void displayPreviewFrame(QVideoFrame const&);
+    void renderBlankFrame();
+
+signals:
+    void cameraUnavailable();
+    void cameraReady();
+    void imageReadyForSaving(QContent&);
+    void imageReadyRaw(QImage&);
+    void videoReadyForSaving(QContent&);
+    void lensCoverChanged();
+    void noCamera();
+
 private:
-    bool                m_cleared;
-    int                 m_tidUpdate;
-    QImage              m_image;
-    camera::VideoCaptureDevice  *m_capture;
+    void switchToEmbeddedWidget(bool);
 
-    // Zoom 
-    bool m_doZoom;
-    int m_maxZoom;
-    int m_minZoom;
-    int m_zoomlevel;
-    float m_zoomfactor;
+    bool m_hasCamera;
 
-    bool m_force;
+    QCameraDevice *m_device;
+    QCameraDeviceLoader *m_loader;
+    CameraStateProcessor *m_state;
+    bool m_still;
 
-    QSlider *m_zoomWidget;
-    void showZoom();
-    void hideZoom();
+    ViewPrivate *d;
 };
+
 
 #endif
 

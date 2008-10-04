@@ -10,11 +10,11 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QMediaSessionBuilder Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QMediaSessionBuilder Class Reference<br /><span class="small-subtitle">[<a href="qtmediamodule.html">QtMediaModule</a>]</span>
+</h1>
 <p>The QMediaSessionBuilder class is a base class to be used by Media Engines which need to create sessions within the Media Server. <a href="#details">More...</a></p>
 <pre>    #include &lt;QMediaSessionBuilder&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
-<p>Inherited by </p>
 <ul>
 <li><a href="qmediasessionbuilder-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -80,7 +80,7 @@
 <h3 class="fn"><a name="dtor.QMediaSessionBuilder"></a>QMediaSessionBuilder::~QMediaSessionBuilder ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destruct a <a href="qmediasessionbuilder.html">QMediaSessionBuilder</a>.</p>
 <h3 class="fn"><a name="attributes"></a><a href="qmediasessionbuilder.html#Attributes-typedef">Attributes</a> const &amp; QMediaSessionBuilder::attributes () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Returns a <a href="qmap.html">QMap</a> of Attribute Name and Value pairs. This may be used for communication of some builder type information to a builder type manager, or for custom builder types may just be information that is useful to be presented into the Qtopia Value-space.</p>
+<p>Returns a <a href="qmap.html">QMap</a> of Attribute Name and Value pairs. This may be used for communication of some builder type information to a builder type manager, or for custom builder types may just be information that is useful to be presented into the Qt Extended Value-space.</p>
 <p>See also <a href="qvaluespaceitem.html">QValueSpaceItem</a>.</p>
 <h3 class="fn"><a name="createSession"></a><a href="qmediaserversession.html">QMediaServerSession</a> * QMediaSessionBuilder::createSession ( <a href="qmediasessionrequest.html">QMediaSessionRequest</a> <i>sessionRequest</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function should create a <a href="qmediaserversession.html">QMediaServerSession</a>, if able, based upon the information in the session request. This function will be called if the type of the <a href="qmediasessionrequest.html">QMediaSessionRequest</a> <i>sessionRequest</i> matches the type of the builder. Additionally, if the builder is one of the common builder types it will only be called if it matches extra criteria, as defined by the builder type, for example, the mime type of the content.</p>
@@ -91,8 +91,8 @@
 <p>Returns a string used as an identifier for the type of builder. The string should be of the form reverse-dns.local-type. Example: com.trolltech.qtopia.uri.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

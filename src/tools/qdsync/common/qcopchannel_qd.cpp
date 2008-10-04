@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef Q_QDOC
@@ -68,31 +66,7 @@ static bool containsWildcards( const QString &channel )
     return channel.contains(QLatin1Char('*'));
 }
 
-/*!
-  \class QCopChannel
-  \brief The QCopChannel class is used to send and receive messages between
-  components that otherwise cannot communicate.
-  \mainclass
-
-  QCopChannel should be used to receiving messages but QCopEnvelope should be used to sending them.
-
-  You generally create a QCopChannel in your constructor and connect it's received() signal to a slot on your object.
-
-  \code
-    QCopChannel *chan = new QCopChannel("QD/Connection", this);
-    connect(chan, SIGNAL(received(QString,QByteArray)), this, SLOT(messageReceived(QString,QByteArray)));
-  \endcode
-
-  You can also listen to channels with wildcards.
-
-  \code
-    QCopChannel *chan = new QCopChannel("QPE/*", this);
-    connect(chan, SIGNAL(received(QString,QByteArray)), this, SLOT(messageReceived(QString,QByteArray)));
-  \endcode
-
-  Note that messages sent to you will be wrapped up into the message forwardedMessage(QString,QString,QByteArray)
-  with the channel, message and data as the arguments.
-*/
+// See qcopchannel_qd.qdoc for class documentation
 
 /*!
   Construct a QCopChannel listening to the specified \a channel and with \a parent as the owning QObject.

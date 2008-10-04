@@ -1,35 +1,35 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include "mediaplayer.h"
+#include <QtopiaApplication>
+#include <QSoftMenuBar>
+
+#include <qmediatools.h>
 
 #include "playercontrol.h"
 #include "playerwidget.h"
 #include "mediabrowser.h"
 #include "keyhold.h"
 #include "requesthandler.h"
+#include "playmediaservice.h"
 
-#include <QtopiaApplication>
-
-#include <qsoftmenubar.h>
+#include "mediaplayer.h"
 
 #ifndef NO_NICE
 #include <unistd.h>
@@ -42,6 +42,9 @@ public:
     {
         MediaPlayer *mediaplayer;
         PlayerControl *control;
+#ifdef USE_PICTUREFLOW
+        MediaBrowser *mediabrowser;
+#endif
     };
 
     MediaServiceRequestHandler( const Context& context, RequestHandler* handler = 0 )
@@ -62,15 +65,10 @@ void MediaServiceRequestHandler::execute( ServiceRequest* request )
     case ServiceRequest::OpenUrl:
         {
         OpenUrlRequest *req = (OpenUrlRequest*)request;
-        m_context.mediaplayer->openUrl( req->url() );
-
-        delete request;
-        }
-        break;
-    case ServiceRequest::OpenPlaylist:
-        {
-        OpenPlaylistRequest *req = (OpenPlaylistRequest*)request;
-        m_context.mediaplayer->setPlaylist( req->playlist() );
+        if (req->closeOnFinish())
+            m_context.mediaplayer->setDocument(req->url());
+        else
+            m_context.mediaplayer->openUrl( req->url() );
 
         delete request;
         }
@@ -78,17 +76,17 @@ void MediaServiceRequestHandler::execute( ServiceRequest* request )
     case ServiceRequest::CuePlaylist:
         {
         CuePlaylistRequest *req = (CuePlaylistRequest*)request;
-        PlaylistCue *playlistcue = qobject_cast<PlaylistCue*>(m_context.mediaplayer->playlist().data());
         if(!m_context.mediaplayer->isPlayerVisible()) {
             m_context.mediaplayer->playerWidget();
             m_context.mediaplayer->setPlayerVisible(false);
         }
-        if( playlistcue ) {
-            if(m_context.mediaplayer->playlist()->rowCount() != 0)
-                playlistcue->cue( req->playlist() );
-            else
-                playlistcue->playNow( req->playlist() );
+        if(m_context.mediaplayer->playlist().rowCount() != 0) {
+            QMediaPlaylist playlist(m_context.mediaplayer->playlist());
+            playlist.enqueue( req->playlist() );
+            m_context.mediaplayer->setPlaylist(playlist);
         }
+        else
+            m_context.mediaplayer->setPlaylist(req->playlist());
         m_context.control->setState( PlayerControl::Playing );
 
         delete request;
@@ -97,16 +95,13 @@ void MediaServiceRequestHandler::execute( ServiceRequest* request )
     case ServiceRequest::PlayNow:
         {
         PlayNowRequest *req = (PlayNowRequest*)request;
-        PlaylistCue *playlistcue = qobject_cast<PlaylistCue*>(m_context.mediaplayer->playlist().data());
         // ensure the player widget is already existing
         if(!m_context.mediaplayer->isPlayerVisible()) {
             m_context.mediaplayer->playerWidget();
             m_context.mediaplayer->setPlayerVisible(false);
         }
-        if( playlistcue ) {
-            playlistcue->playNow( req->playlist() );
-            m_context.control->setState( PlayerControl::Playing );
-        }
+        m_context.mediaplayer->setPlaylist(req->playlist());
+        m_context.control->setState( PlayerControl::Playing );
 
         delete request;
         }
@@ -118,6 +113,15 @@ void MediaServiceRequestHandler::execute( ServiceRequest* request )
         delete request;
         }
         break;
+#ifdef USE_PICTUREFLOW
+    case ServiceRequest::ShowCoverArt:
+        {
+        m_context.mediaplayer->mediabrowser()->setCoverArtVisible(true);
+
+        delete request;
+        }
+        break;
+#endif
     default:
         RequestHandler::execute( request );
         break;
@@ -131,7 +135,7 @@ MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
     m_playerwidget( 0 ),
     m_closeonback( false ),
     m_acceptclose( true ),
-    m_playlist( 0 )
+    m_playlist(QStringList())
 {
     setWindowTitle( tr( "Media Player" ) );
 
@@ -143,10 +147,7 @@ MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
     MediaServiceRequestHandler::Context requestcontext = { this, m_playercontrol };
     m_requesthandler = new MediaServiceRequestHandler( requestcontext );
 
-    m_playlist = new BasicPlaylist( QStringList() );
-
     m_mediabrowser = new MediaBrowser( m_playercontrol, m_requesthandler );
-
     m_mediabrowser->setCurrentPlaylist( m_playlist );
 
     m_layout->addWidget( m_mediabrowser );
@@ -174,13 +175,15 @@ MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
     // Increase process priority to improve gui responsiveness
     nice( NICE_DELTA );
 #endif
+
+    new PlayMediaService(m_requesthandler, this);
 }
 
 MediaPlayer::~MediaPlayer()
 {
 }
 
-void MediaPlayer::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
+void MediaPlayer::setPlaylist( const QMediaPlaylist &playlist )
 {
     if( playlist != m_playlist ) {
         // Open playlist in player
@@ -190,12 +193,12 @@ void MediaPlayer::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
         m_playlist = playlist;
 
         // Connect to new playlist
-        connect( m_playlist, SIGNAL(playingChanged(QModelIndex)),
+        connect( &m_playlist, SIGNAL(playingChanged(QModelIndex)),
             this, SLOT(playingChanged(QModelIndex)) );
     }
 
     // Launch playlist if playing index is valid
-    if( m_playlist->playing().isValid() ) {
+    if( m_playlist.playing().isValid() ) {
         m_acceptclose = false;
         setPlayerVisible( true );
         m_playercontrol->setState( PlayerControl::Playing );
@@ -224,8 +227,8 @@ void MediaPlayer::setPlayerVisible( bool visible )
 
 void MediaPlayer::openUrl( const QString& url )
 {
-    QExplicitlySharedDataPointer<Playlist> playlist = Playlist::construct_playlist( url );
-    playlist->setPlaying( playlist->index( 0 ) );
+    QMediaPlaylist playlist( QStringList() << url );
+    playlist.setPlaying( playlist.index( 0 ) );
 
     setPlaylist( playlist );
 }
@@ -233,11 +236,7 @@ void MediaPlayer::openUrl( const QString& url )
 void MediaPlayer::setDocument( const QString& doc )
 {
     m_closeonback = true;
-
-    QExplicitlySharedDataPointer<Playlist> playlist = Playlist::construct_playlist( doc );
-    playlist->setPlaying( playlist->index( 0 ) );
-
-    setPlaylist( playlist );
+    openUrl( doc );
 }
 
 void MediaPlayer::playingChanged( const QModelIndex& index )
@@ -329,4 +328,10 @@ PlayerWidget *MediaPlayer::playerWidget()
         m_playerwidget->setPlaylist(m_playlist);
     }
     return m_playerwidget;
+}
+
+MediaBrowser *MediaPlayer::mediabrowser()
+{
+    // todo do some dynamic adding of this, as a safety mechanism
+    return m_mediabrowser;
 }

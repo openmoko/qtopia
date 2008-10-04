@@ -1,0 +1,12 @@
+TEMPLATE=app
+CONFIG+=qtopia singleexec
+TARGET=appearance
+
+CONFIG+=quicklaunch
+
+include(appearance.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

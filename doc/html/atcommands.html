@@ -10,8 +10,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">AT Commands<br /><span class="subtitle"></span>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">AT Commands<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <ul><li><a href="#general-commands-3gpp-ts-27-007-section-5">General commands (3GPP TS 27.007, section 5)</a></li>
@@ -55,7 +55,7 @@
 <tr valign="top" class="even"><td><tt>NO CARRIER</tt>, <tt>NO ANSWER</tt>, <tt>NO DIALTONE</tt>, <tt>BUSY</tt></td><td>Unsolicited result codes that indicate call termination</td></tr>
 </table></p>
 <p><b>Note:</b> When the <tt>ATD</tt> command is used with a trailing '<b>;</b>', it is highly recommended that it immediately return to command mode after command processing. Some modems have been known to wait until the receiving party answers the call, or busy is detected, before returning to command mode. Such modems are not compliant with the 3GPP specification but can still be supported by overriding <a href="qmodemcallprovider.html#atdBehavior">QModemCallProvider::atdBehavior</a>() in the modem vendor plug-in.</p>
-<p>The 3GPP TS specification permits <tt>ATD</tt> to be used in a special mode for dialing directly from phone books. This mode is not required as Qtopia implements its own algorithm for converting phone book entries to numbers.</p>
+<p>The 3GPP TS specification permits <tt>ATD</tt> to be used in a special mode for dialing directly from phone books. This mode is not required as Qt Extended implements its own algorithm for converting phone book entries to numbers.</p>
 <p>It is important that <tt>ATD</tt> recognize numbers starting with <tt>+</tt> as international, and all other numbers as being local.</p>
 <a name="network-service-related-commands-3gpp-ts-27-007-section-7"></a>
 <h3>Network service related commands (3GPP TS 27.007, section 7)</h3>
@@ -117,7 +117,7 @@
 <tr valign="top" class="even"><td><tt>AT+CTZR</tt></td><td>Time zone reporting</td></tr>
 <tr valign="top" class="odd"><td><tt>+CTZV</tt></td><td>Unsolicited result code for time zone change events</td></tr>
 </table></p>
-<p>The phone book commands are intended for accessing phone books stored on SIM cards, typically the <tt>SM</tt> phone book. Qtopia Phone provides its own mechanisms for managing phone books stored within the phone memory.</p>
+<p>The phone book commands are intended for accessing phone books stored on SIM cards, typically the <tt>SM</tt> phone book. Qt Extended provides its own mechanisms for managing phone books stored within the phone memory.</p>
 <a name="mobile-termination-errors-3gpp-ts-27-007-section-9"></a>
 <h3>Mobile termination errors (3GPP TS 27.007, section 9)</h3>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -154,10 +154,10 @@
 <tr valign="top" class="odd"><td><tt>+CDSI</tt></td><td>Notification of an SMS status report message</td></tr>
 <tr valign="top" class="even"><td><tt>+CBM</tt></td><td>Notification of a directly delivered cell broadcast message</td></tr>
 </table></p>
-<p>It is assumed that incoming SMS messages are stored in a temporary storage area on the device and that Qtopia will retrieve the messages using the <tt>AT+CMGL</tt> and <tt>AT+CMGR</tt> commands.</p>
+<p>It is assumed that incoming SMS messages are stored in a temporary storage area on the device and that Qt Extended will retrieve the messages using the <tt>AT+CMGL</tt> and <tt>AT+CMGR</tt> commands.</p>
 <a name="multiplexing-commands-3gpp-ts-07-10"></a>
 <h3>Multiplexing commands (3GPP TS 07.10)</h3>
-<p>Qtopia Phone expects to use 3GPP TS 07.10 multiplexing to establish multiple communications paths with the modem. The modem needs to support the <tt>AT+CMUX</tt> command plus the basic packet mode in 3GPP TS 07.10. If the modem supports some other form of multiplexing, then it is necessary to implement a <a href="tut-multiplexing.html">multiplexer plug-in</a>.</p>
+<p>Qt Extended expects to use 3GPP TS 07.10 multiplexing to establish multiple communications paths with the modem. The modem needs to support the <tt>AT+CMUX</tt> command plus the basic packet mode in 3GPP TS 07.10. If the modem supports some other form of multiplexing, then it is necessary to implement a <a href="tut-multiplexing.html">multiplexer plug-in</a>.</p>
 <a name="other-commands-3gpp-ts-27-007-appendix-c"></a>
 <h3>Other commands (3GPP TS 27.007, Appendix C)</h3>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -169,8 +169,8 @@
 </table></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.2</div></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
 </tr></table></div></address></body>
 </html>

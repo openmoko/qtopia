@@ -1,12 +1,13 @@
+!qbuild{
 qtopia_project(qtopia plugin)
 TARGET       = pkim
 VERSION      = 4.1.0
 license(FREEWARE)
-
 depends(3rdparty/libraries/inputmatch)
 # if commercial only?
 depends(libraries/handwriting)
 VPATH+=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/inputmatch
+}
 
 HEADERS      = pkim.h \
                pkimpl.h \
@@ -35,11 +36,11 @@ fsim.files = $$QTOPIA_DEPOT_PATH/etc/qimpen/fstext.qpt\
 	$$QTOPIA_DEPOT_PATH/etc/qimpen/fs.conf
 fsim.path=/etc/qimpen/
 INSTALLS+=fsim
-fspics.files=$$QTOPIA_DEPOT_PATH/pics/fshw/*.png
-fspics.path=/pics/fshw
-fspics.hint=pics
-INSTALLS+=fspics
 
 pkg.domain=trusted
 
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=im-pkim.html im-handwriting.html
+help.hint=help
+INSTALLS+=help
 

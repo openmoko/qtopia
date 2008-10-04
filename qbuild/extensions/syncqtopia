@@ -1,0 +1,127 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use File::Basename;
+use File::stat;
+use File::Path;
+
+my $qt = 0;
+my $func = \&processFile;
+if ( $ARGV[0] eq "-fast" ) {
+    $func = \&fastProcessFile;
+    shift;
+    if ( $ARGV[0] eq "-qt" ) {
+        $qt = 1;
+        shift;
+    }
+}
+
+my $outdir = shift;
+my $moutdir = shift;
+mkpath($outdir);
+mkpath($moutdir);
+
+while ( @ARGV ) {
+    my $infile = shift;
+    &$func($infile);
+}
+
+exit(0);
+
+sub processFile
+{
+    my ( $filename ) = @_;
+
+    open INPUT, $filename or die "Can't read $filename";
+
+    my $src_s = stat($filename);
+    my $now = $src_s->mtime;
+
+    while (<INPUT>) {
+        if ( /^\s*class\s+.*_EXPORT\s+([^\s:]+)/ ||
+             ( /^\s*class\s+([^\s:<]+)/ && index($_, ";") == -1 ) ||
+             /syncqtopia\s+header\s+([^\s:]+)/ )
+        {
+            # Skip preprocessor-related items
+            next if ( $1 =~ /#/ );
+
+            my $outfile = "$outdir/$1";
+            my $moutfile = "$moutdir/$1";
+
+            print "Create header $outfile\n";
+            open OUT, ">$outfile" or die "Can't write $outfile";
+            print OUT "#include \"".basename($filename)."\"\n";
+            close OUT;
+            utime $now, $now, $outfile;
+
+            open OUT, ">$moutfile" or die "Can't write $moutfile";
+            print OUT "#include \"".basename($filename)."\"\n";
+            close OUT;
+            utime $now, $now, $moutfile;
+        }
+    }
+    close INPUT;
+}
+
+sub fastProcessFile
+{
+    my ( $filename ) = @_;
+
+    open INPUT, $filename or die "Can't read $filename";
+
+    my $src_s = stat($filename);
+    my $now = $src_s->mtime;
+
+    while (<INPUT>) {
+        if ( /^\s*class\s+.*_EXPORT\s+([^\s:]+)/ ||
+             ( /^\s*class\s+([^\s:<]+)/ && index($_, ";") == -1 ) ||
+             /syncqtopia\s+header\s+([^\s:]+)/ )
+        {
+            # Skip preprocessor-related items
+            next if ( $1 =~ /#/ );
+
+            my $outfile = "$outdir/$1";
+            my $moutfile = "$moutdir/$1";
+            my $dest_s = stat($outfile);
+            my $mdest_s = stat($moutfile);
+            if ( ! -f $outfile || !defined($dest_s) || $src_s->mtime > $dest_s->mtime ) {
+                print "Create header $outfile\n";
+                open OUT, ">$outfile" or die "Can't write $outfile";
+                print OUT "#include \"".basename($filename)."\"\n";
+                close OUT;
+                utime $now, $now, $outfile;
+            }
+            if ( ! -f $moutfile || !defined($mdest_s) || $src_s->mtime > $mdest_s->mtime ) {
+                open OUT, ">$moutfile" or die "Can't write $moutfile";
+                print OUT "#include \"".basename($filename)."\"\n";
+                close OUT;
+                utime $now, $now, $moutfile;
+            }
+        }
+    }
+    close INPUT;
+
+    {
+        my $outfile = "$outdir/".basename($filename);
+        my $moutfile = "$moutdir/".basename($filename);
+        my $dest_s = stat($outfile);
+        my $mdest_s = stat($moutfile);
+        if ( ! -f $outfile || !defined($dest_s) || $src_s->mtime > $dest_s->mtime ) {
+            print "Create header $outfile\n";
+            open OUT, ">$outfile" or die "Can't write $outfile";
+            print OUT "#include \"$filename\"\n";
+            close OUT;
+            utime $now, $now, $outfile;
+        }
+        if ( ! -f $moutfile || !defined($mdest_s) || $src_s->mtime > $mdest_s->mtime ) {
+            open OUT, ">$moutfile" or die "Can't write $moutfile";
+            print OUT "#include \"$filename\"\n";
+            close OUT;
+            utime $now, $now, $moutfile;
+        }
+    }
+
+}
+

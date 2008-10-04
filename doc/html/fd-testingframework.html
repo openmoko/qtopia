@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QA: Testing Framework</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="modules-index.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">QA: Testing Framework<br><small>Functional Description</small></h1><p>
+<h2>Features</h2>
+<ul><li><a href="#QTOPIA-78">System Test Framework</a>
+</ul><h3><a name=QTOPIA-78>System Test Framework</a></h3>
+<p>Qt Extended provides a framework (<em>QtUiTest</em>) for writing high-level system tests.
+
+<p>The functionality provided by the framework includes simulation of keypad and touchscreen input, and verification of expected behavior at the widget and application level. Verification takes place by textual or graphical snapshots of widgets. QtUiTest allows both manual and automated tests to be specified within the same test script, including some tests that may be partially automated and partially manual.</p>
+
+<h4><a name="TestScripts"></a>Test Scripts</h4>
+<p>System tests are written in a high-level scripting language, which is based on QtScript. Tests can be versioned in the source control system. Test scripts are composed of one or more test functions, each of which may have an associated set of test data. The test framework iterates over the test data set, calling the test function for each entry. The test data set is contained within the test script, but is separate from the test function. Common functionality may be specified in modules which can be referenced from within the test scripts.</p>
+
+<h4><a name="DeviceandImplementationIndependence"></a>Device and Implementation Independence</h4>
+<p>QtUiTest does not rely on internal data such as object names nor does it require a memory mapping mechanism to allocate widget elements. A test can therefore be completely written before the code even exists as long as there is an agreement about the Label names that in the User Interface. This also means that tests do not generally fail as a result of theme selection, display resolution, or minor UI implementation changes.</p>
+
+<p>QtUiTest supports both keyboard based and touchscreen based devices out-of-the-box, and it does so in such a way that the script is transparent, i.e. can be run on both types of devices.</p>
+
+<p>The tests can be run on a development workstation using the Qt virtual framebuffer, or on a target device.</p>
+
+<h4><a name="IntegrationwithModemSimulator"></a>Integration with Modem Simulator</h4>
+<p>QtUiTest is integrated with the Modem Simulator to enable testing of GSM related functionality. This includes simulation of incoming voice calls and SMS messages, including Class 0 (Flash) SMS.</p>
+
+<h4><a name="ExtensionofQtUiTestFramework"></a>Extension of QtUiTest Framework</h4>
+<p>QtUiTest can be extended by end-users for use with custom input methods and widgets via a plugin architecture. QtUiTest provides a plugin interface which allows plugins to be dynamically loaded to control interaction with widgets and input methods. When writing a new input method or custom input widget, it is possible to write a single new QtUiTest plugin and have all existing tests work with no modification.</p>
+
+<h4><a name="TestResults"></a>Test Results</h4>
+<p>Test results are semantically and syntactically compatible with the results of tests written with Qt's QTestLib. This allows unit tests and automated system tests to be grouped together and run as a single set of tests.</p>
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td align="left">Copyright &copy; 2008 Trolltech</td>
+<td align="center"><a href="trademarks.html">Trademarks</a></td>
+<td align="right"><div align="right">Qt Extended 4.4.1</div></td>
+</tr></table></div>
