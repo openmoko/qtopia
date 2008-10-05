@@ -66,7 +66,9 @@ private:
     QComboBox *atz;
     QTimeZoneSelector *tz;
     QComboBox *weekStartCombo;
+#ifndef QT_ILLUME_LAUNCHER
     QComboBox *ampmCombo;
+#endif
     QComboBox *dateFormatCombo;
     QLabel *tz_label, *time_label, *date_label;
 

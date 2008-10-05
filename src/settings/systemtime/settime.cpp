@@ -113,7 +113,7 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
             this, SLOT(setAutomatic(int)));
 
     /* on to the format page/layout */
-
+#ifndef QT_ILLUME_LAUNCHER
     ampmCombo = new QComboBox;
     ampmCombo->addItem( tr("24 hour") );
     ampmCombo->addItem( tr("12 hour") );
@@ -125,6 +125,7 @@ SetDateTime::SetDateTime(QWidget *parent, Qt::WFlags f )
 
     connect(ampmCombo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(updateTimeFormat(int)));
+#endif
 
     weekStartCombo = new QComboBox;
     weekStartCombo->addItem( tr("Sunday") );
@@ -341,6 +342,8 @@ void SetDateTime::storeSettings()
     if ( dfch) // Notify everyone what date format to use
         QtopiaIpcEnvelope setDateFormat( "QPE/System", "setDateFormat()" );
 
+
+#ifndef QT_ILLUME_LAUNCHER
     QSettings config("Trolltech","qpe");
     config.beginGroup( "Time" );
     int show12hr = config.value("AMPM").toBool() ? 1 : 0;
@@ -350,6 +353,7 @@ void SetDateTime::storeSettings()
         QtopiaIpcEnvelope setClock( "QPE/System", "clockChange(bool)" );
         setClock << (int)ampm;
     }
+#endif
 
     // Restore screensaver
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
