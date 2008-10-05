@@ -14,9 +14,7 @@ SOURCES		= predictivekeyboard.cpp \
                   keyboard.cpp \
                   proxyscreen.cpp
 x11 {
-    HEADERS += qwsinputmethod_x11.h
-    SOURCES += qwsinputmethod_x11.cpp
-    LIBS += -lXtst
+    depends(libraries/qtopiainputmethod)
 }
 
 pkg.name=qpe-predictivekeyboard
