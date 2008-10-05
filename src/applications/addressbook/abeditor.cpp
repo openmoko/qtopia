@@ -2613,7 +2613,7 @@ void parseEmailTo( const QString &strDefaultEmail,
 #ifdef QTOPIA_CELL
 
 AbSimEditor::AbSimEditor(QWidget *parent, Qt::WFlags fl)
-    : AbEditor(parent, fl|Qt::FramelessWindowHint)
+    : AbEditor(parent, fl)
 {
     setObjectName("edit");
     setModal(true);
