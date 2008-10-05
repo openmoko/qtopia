@@ -2631,47 +2631,13 @@ AbSimEditor::~AbSimEditor()
 
 void AbSimEditor::initSimUI()
 {
-    QVBoxLayout *mainVBox = new QVBoxLayout(this);
-    mainVBox->setSpacing(0);
-    mainVBox->setContentsMargins(0, 0, 0, 0);
-
-    simEditor = new QWidget(0);
-    mainVBox->addWidget(simEditor);
-
-    QGridLayout *gridLayout = new QGridLayout(simEditor);
-
-    gridLayout->addItem(new QSpacerItem(4, 0), 0, 1);
-    gridLayout->setSpacing(0);
-
-    int rowCount = 0;
-
-    //
-    //  Name
-    //
-
-    QLabel *label = new QLabel(tr("Name"));
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    gridLayout->addWidget(label, rowCount, 0);
+    QFormLayout* layout = new QFormLayout(this);
 
     simName = new QLineEdit(0);
-    gridLayout->addWidget(simName, rowCount, 2);
-
-    rowCount++;
-
-    //
-    //  Phone number
-    //
-
-    label = new QLabel(tr("Number"));
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    gridLayout->addWidget(label, rowCount, 0);
+    layout->addRow(tr("Name"), simName);
 
     simNumber = new QLineEdit(0);
-    QtopiaApplication::setInputMethodHint(simNumber,QtopiaApplication::PhoneNumber);
-    gridLayout->addWidget(simNumber, rowCount, 2);
-
-    rowCount++;
-    gridLayout->addItem(new QSpacerItem(4, 0), rowCount, 1);
+    layout->addRow(tr("Number"), simNumber);
 }
 
 void AbSimEditor::setEntry( const QContact &entry, bool newEntry)
