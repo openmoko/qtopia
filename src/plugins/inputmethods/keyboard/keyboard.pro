@@ -13,6 +13,10 @@ SOURCES		= keyboard.cpp \
 		    keyboardimpl.cpp\
                     keyboardframe.cpp
 
+x11 {
+    depends(libraries/qtopiainputmethod)
+}
+
 pics.files=$${QTOPIA_DEPOT_PATH}/pics/keyboard/*
 pics.path=/pics/keyboard
 pics.hint=pics
