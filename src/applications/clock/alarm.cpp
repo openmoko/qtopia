@@ -120,7 +120,6 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
         QString msg = ts + "\n" + tr( "(Daily Alarm)" );
         setRingPriority(true);
         Qtopia::soundAlarm();
-        alarmCount = 0;
         alarmt->start( 2000 );
         if ( !alarmDlg ) {
             alarmDlg = new QDialog( this );
@@ -160,14 +159,7 @@ void Alarm::setDailyEnabled(bool enableDaily)
 
 void Alarm::alarmTimeout()
 {
-    if ( alarmCount < 20 ) {
-        Qtopia::soundAlarm();
-        alarmCount++;
-    } else {
-        setRingPriority(false);
-        alarmCount = 0;
-        alarmt->stop();
-    }
+    Qtopia::soundAlarm();
 }
 
 QDateTime Alarm::nextAlarm( int h, int m )

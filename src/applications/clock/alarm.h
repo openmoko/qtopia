@@ -58,7 +58,6 @@ private:
     QTimer *alarmt;
     bool ampm;
     bool weekStartsMonday;
-    int alarmCount;
     bool initEnabled;
     QDialog* alarmDlg;
     QLabel* alarmDlgLabel;
