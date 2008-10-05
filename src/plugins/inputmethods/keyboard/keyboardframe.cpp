@@ -23,6 +23,8 @@
 
 #ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
+#else
+#include <qwsinputmethod_x11.h>
 #endif
 #include <qpainter.h>
 #include <qfontmetrics.h>
@@ -247,6 +249,23 @@ void  KeyboardConfig::generateText(const QString &s)
     }
     qwsServer->processKeyEvent( ' ', Qt::Key_Space, 0, true, false );
     qwsServer->processKeyEvent( ' ', Qt::Key_Space, 0, false, false );
+    backspaces = 0;
+#else
+    int i;
+    for ( i=0; i<(int)backspaces; i++) {
+        QWSServer::sendKeyEvent( 8, Qt::Key_Backspace, 0, true, false );
+        QWSServer::sendKeyEvent( 8, Qt::Key_Backspace, 0, false, false );
+    }
+    for ( i=0; i<(int)s.length(); i++) {
+        uint code = 0;
+        if ( s[i].unicode() >= 'a' && s[i].unicode() <= 'z' ) {
+            code = s[i].unicode() - 'a' + Qt::Key_A;
+        }
+        QWSServer::sendKeyEvent( s[i].unicode(), code, 0, true, false );
+        QWSServer::sendKeyEvent( s[i].unicode(), code, 0, false, false );
+    }
+    QWSServer::sendKeyEvent( ' ', Qt::Key_Space, 0, true, false );
+    QWSServer::sendKeyEvent( ' ', Qt::Key_Space, 0, false, false );
     backspaces = 0;
 #endif
 }
@@ -596,7 +615,11 @@ void KeyboardFrame::mousePressEvent(QMouseEvent *e)
 
         qLog(Input) << "keypressed: code=" << unicode;
 
+#ifdef Q_WS_QWS
         qwsServer->processKeyEvent( unicode, qkeycode, modifiers, true, false );
+#else
+        QWSServer::sendKeyEvent( unicode, qkeycode, modifiers, true, false );
+#endif
 
         shift = alt = ctrl = false;
 
@@ -643,12 +666,14 @@ void KeyboardFrame::mouseReleaseEvent(QMouseEvent*)
     repeatTimer->stop();
     if ( pressTid == 0 )
         clearHighlight();
-#if defined(Q_WS_QWS) || defined(Q_WS_QWS)
     if ( unicode != -1 || qkeycode != 0) {
         qLog(Input) << "keyrelease: code=" << unicode;
+#if defined(Q_WS_QWS) || defined(Q_WS_QWS)
         qwsServer->processKeyEvent( unicode, qkeycode, modifiers, false, false );
-    }
+#else
+        QWSServer::sendKeyEvent( unicode, qkeycode, modifiers, false, false );
 #endif
+    }
     pressed = false;
 }
 
@@ -666,7 +691,11 @@ void KeyboardFrame::repeat()
 {
     if ( pressed && (unicode != -1 || qkeycode != 0)) {
         repeatTimer->start( 150 );
+#ifdef Q_WS_QWS
         qwsServer->processKeyEvent( unicode, qkeycode, modifiers, true, true );
+#else
+        QWSServer::sendKeyEvent( unicode, qkeycode, modifiers, true, true );
+#endif
     } else
         repeatTimer->stop();
 }
