@@ -13,6 +13,7 @@ PROJECTS*=\
     libraries/qtopiacomm \
     libraries/qtopiapim \
     libraries/qtopiaprinting \
+    libraries/qtopiainputmethod \
     settings/appearance \
     settings/handwriting \
     settings/homescreen \
