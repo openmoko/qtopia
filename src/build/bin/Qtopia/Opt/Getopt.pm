@@ -48,6 +48,7 @@ sub opt_get_options
             for my $set ( qw(set unset) ) {
                 my $ref = $optref->{"$set"};
                 if ( defined($ref) && ref($ref) eq "ARRAY" ) {
+                    my $ignored = 0;
                     my $paramstring = $$ref[0];
                     if ( index($paramstring, "%") != -1 ) {
                         my $paramname = $optname;
@@ -60,6 +61,7 @@ sub opt_get_options
                         # Silently ignore this switch if optref->{"silentignore"} says to, otherwise
                         # leave it unhandled so it causes an error.
                         if ( $ignore{$paramstring} ) {
+                            $ignored = 1;
                             $funcref = sub {
                                 my $p = $paramstring;
                                 $p =~ s/=.*//;
@@ -70,17 +72,15 @@ sub opt_get_options
                         }
                     }
                     if ( !defined($funcref) ) {
-                        if ( !defined($optref->{"value"}) ) {
-                            if ( defined($optref->{"type"}) && $optref->{"type"} eq '@' ) {
-                                my $listref = [];
-                                $optref->{"value"} = $listref;
-                                $funcref = $listref;
-                            } elsif ( defined($optref->{"type"}) && $optref->{"type"} eq 'multi-value' ) {
-                                $funcref = sub { opt($optname) = $_[1]; opt($optname) =~ s/,/ /g; };
-                            } else {
-                                # FIXME should this really be here?
-                                $optref->{"value"} = undef;
-                            }
+                        if ( defined($optref->{"type"}) && $optref->{"type"} eq '@' ) {
+                            my $listref = [];
+                            $optref->{"value"} = $listref;
+                            $funcref = $listref;
+                        } elsif ( defined($optref->{"type"}) && $optref->{"type"} eq 'multi-value' ) {
+                            $funcref = sub { opt($optname) = $_[1]; opt($optname) =~ s/,/ /g; };
+                        } elsif ( !defined($optref->{"value"}) ) {
+                            # FIXME should this really be here?
+                            $optref->{"value"} = undef;
                         }
                         if ( !defined($funcref) ) {
                             if ( $set eq "set" ) {
@@ -90,25 +90,12 @@ sub opt_get_options
                             }
                         }
                     }
-                    #print "Adding -$paramstring for $optname\n";
-                    push(@optl, $paramstring => $funcref);
+                    push(@optl, handle_option($optname, $optref, $set, $paramstring, $funcref, $ignored));
                     # Aliases (for backwards compatibility)
                     my $aliasref = $optref->{$set."aliases"};
                     if ( defined($aliasref) && ref($aliasref) eq "ARRAY" ) {
                         for my $alias ( @$aliasref ) {
-                            my $func = sub {
-                                warn "WARNING: -$alias is deprecated. Please use -$paramstring instead.\n";
-                                if ( ref($funcref) eq "CODE" ) {
-                                    &$funcref();
-                                } elsif ( ref($funcref eq "ARRAY") ) {
-                                    push(@$funcref, $_[1]);
-                                } elsif ( ref($funcref eq "SCALAR") ) {
-                                    $$funcref = $_[1];
-                                } else {
-                                    $$funcref = $_[1];
-                                }
-                            };
-                            push(@optl, $alias => $func);
+                            push(@optl, handle_option($optname, $optref, $set, $paramstring, $funcref, $ignored, $alias));
                         }
                     }
                 }
@@ -132,6 +119,112 @@ sub opt_get_options
     if ( !$ok || (exists($optvar_storage{"help"}) && opt("help")) ) {
         get_help();
     }
+}
+
+sub handle_option
+{
+    my @optl;
+    my ( $optname, $optref, $set, $paramstring, $funcref, $ignore, $alias ) = @_;
+
+    my $warn = sub {};
+    my $param = $paramstring;
+
+    my $ignorefunc = sub {
+        my $p = shift(@_);
+        $p =~ s/=.*//;
+        warn "WARNING: -$p has no effect in this configuration.\n";
+    };
+
+    # Aliases require extra work (for the warnings and such)
+    if ( $alias ) {
+        $param = $alias;
+        $warn = sub {
+            warn "WARNING: -$alias is deprecated. Please use -$paramstring instead.\n";
+        };
+    } elsif ( $optref->{"deprecated"} ) {
+        my $msg = $optref->{"deprecated"};
+        if ( ref($msg) eq "ARRAY" ) {
+            $msg = $$msg[($set eq "set")?0:1];
+        }
+        $warn = sub {
+            warn "$msg\n";
+        };
+    }
+
+    my $func = $funcref;
+    if ( $alias || $optref->{"deprecated"} ) {
+        $func = sub {
+            &$warn();
+            if ( ref($funcref) eq "CODE" ) {
+                &$funcref(@_);
+            } elsif ( ref($funcref eq "ARRAY") ) {
+                push(@$funcref, $_[1]);
+            } elsif ( ref($funcref eq "SCALAR") ) {
+                $$funcref = $_[1];
+            } else {
+                $$funcref = $_[1];
+            }
+        };
+    }
+
+    #print "Adding -$param for $optname\n";
+    push(@optl, $param => $func);
+
+    # no-[option] removes an entry from a list (type '@')
+    if ( $optref->{"type"} && $optref->{"type"} eq '@' ) {
+        if ( $ignore ) {
+            push(@optl, "no-$param" => sub { &$ignorefunc("no-$param"); });
+        } else {
+            push(@optl, "no-$param" => sub {
+                &$warn();
+                my $ref = opt($optname);
+                my @tmp = @$ref;
+                @$ref = ();
+                for my $val ( @tmp ) {
+                    if ( $val ne $_[1] ) {
+                        push(@$ref, $val);
+                    }
+                }
+            });
+        }
+    }
+
+    # add-[option] adds an entry from a list (type 'multi-value')
+    # remove-[option] removes an entry from a list (type 'multi-value')
+    if ( $optref->{"type"} && $optref->{"type"} eq 'multi-value' ) {
+        push(@optl, "add-$param" => sub {
+            &$warn();
+            my @tmp;
+            if ( _resolve_to_scalar(opt($optname)) ) {
+                @tmp = split(/\s+/, _resolve_to_scalar(opt($optname)));
+            }
+            # Only add if it does not already exist!
+            my $found = 0;
+            for ( @tmp ) {
+                if ( $_ eq $_[1] ) {
+                    $found = 1;
+                    last;
+                }
+            }
+            if (!$found) {
+                push(@tmp, $_[1]);
+            }
+            #print "opt $optname = ".join(" ", @tmp)."\n";
+            opt($optname) = join(" ", @tmp);
+        });
+        push(@optl, "remove-$param" => sub {
+            &$warn();
+            my @tmp;
+            for my $val ( split(/\s+/, _resolve_to_scalar(opt($optname))) ) {
+                if ( $val ne $_[1] ) {
+                    push(@tmp, $val);
+                }
+            }
+            opt($optname) = join(" ", @tmp);
+        });
+    }
+
+    @optl;
 }
 
 sub get_help
@@ -195,7 +288,8 @@ sub get_help
                             $paramstar = "+";
                         }
                     } else {
-                        my $def = _resolve_to_scalar($optref->{"default"});
+                        my $def;
+                        $def = _resolve_to_scalar($optref->{"default"});
                         if ( ($set eq "set" && $def) ||
                              ($set eq "unset" && defined($def) && !$def) ) {
                             $paramstar = "*";
@@ -230,7 +324,12 @@ sub get_help
 
 The defaults (*) are usually acceptable. A plus (+) denotes a default
 value that needs to be evaluated. If the evaluation succeeds, the
-feature is included. Here is a short explanation of each option:
+feature is included.
+
+Multi-value options also accept -add-[option] and -remove-[option] to
+add or remove a value rather than explicitly setting all values.
+
+Here is a short explanation of each option:
 
 ";
 
@@ -415,10 +514,3 @@ sub _init_formats
 
 # Make this file require()able.
 1;
-__END__
-
-=head1 NAME
-
-Qtopia::Opt::Getopt - Getopt engine for the Qtopia::Opt system.
-
-=cut

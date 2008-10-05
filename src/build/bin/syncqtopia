@@ -54,11 +54,15 @@ if ( basename($destdir) eq "private" ) {
 if ( $qtheaders ) {
     $destdir =~ s/^(\/include\/)/$1classic\//;
 }
+my $mdestdir = "$destdir/module/".basename($destdir);
 $destdir = fixpath("$QPEDIR/$destdir");
+$mdestdir = fixpath("$QPEDIR/$mdestdir");
 # FIXME this should be changed to include once we switch
 my $targetdir = fixpath("$QPEDIR/include/$target");
+my $mtargetdir = fixpath("$QPEDIR/include/$targetname/module/$target");
 if ( $destdir =~ /qtopiadesktop/ ) {
     $targetdir = fixpath("$QPEDIR/include/qtopiadesktop/$target");
+    $mtargetdir = fixpath("$QPEDIR/include/qtopiadesktop/$targetname/module/$target");
 }
 
 my @package_files;
@@ -84,6 +88,10 @@ for my $source ( @ARGV ) {
     DEBUG and print "do_symlink enter 1\n";
     do_symlink($source, $dest, $sdk);
     DEBUG and print "do_symlink exit 1\n";
+    $dest = fixpath("$mdestdir/$filename");
+    DEBUG and print "do_symlink enter 1\n";
+    do_symlink($source, $dest, $sdk);
+    DEBUG and print "do_symlink exit 1\n";
 
     if ( $qtheaders ) {
         DEBUG and print "qtheaders\n";
@@ -95,18 +103,27 @@ for my $source ( @ARGV ) {
             DEBUG and print "do_symlink($source, $dest, $sdk)\n";
             do_symlink($source, $dest, $sdk);
             DEBUG and print "do_symlink exit 2\n";
+            $dest = fixpath("$mtargetdir/$filename");
+            DEBUG and print "do_symlink($source, $dest, $sdk)\n";
+            do_symlink($source, $dest, $sdk);
+            DEBUG and print "do_symlink exit 2\n";
         } else {
             my $found = 0;
             open IN, $source or die "Can't read ".fixpath($source);
             while ( defined($_ = <IN>) ) {
                 if ( /^\s*class\s+.*_EXPORT\s+([^\s:#]+)/ ||
                      ( /^\s*class\s+([^\s:#]+)/ && index($_, ";") == -1 ) ||
-                     /^\s*namespace\s+([^\s:#]+)/ ) {
+                     /syncqtopia\s+header\s+([^\s:]+)/ ) {
                     $found = 1;
                     #DEBUG and print "(2) Why get \$filename again? $filename vs $1\n" if $filename ne $1;
                     # We need to get $filename again because otherwise we'll be creating qfoo.h instead of QFoo
                     my $filename = $1;
                     my $dest = fixpath("$targetdir/$filename");
+                    # Do a "relative" link
+                    DEBUG and print "do_symlink enter 3\n";
+                    do_symlink(basename($source), $dest, 0);
+                    DEBUG and print "do_symlink exit 3\n";
+                    $dest = fixpath("$mtargetdir/$filename");
                     # Do a "relative" link
                     DEBUG and print "do_symlink enter 3\n";
                     do_symlink(basename($source), $dest, 0);
@@ -117,6 +134,15 @@ for my $source ( @ARGV ) {
             DEBUG and print "(3) Why get \$filename again? $filename vs ".basename($source)."\n" if $filename ne basename($source);
             #my $filename = basename($source);
             my $dest = fixpath("$targetdir/$filename");
+            if ( $found ) {
+                DEBUG and print "symlink_file $source $dest $sdk\n";
+                symlink_file($source, $dest, $sdk);
+            } else {
+                DEBUG and print "do_symlink $source $dest $sdk\n";
+                do_symlink($source, $dest, $sdk);
+                DEBUG and print "do_symlink exit 4\n";
+            }
+            $dest = fixpath("$mtargetdir/$filename");
             if ( $found ) {
                 DEBUG and print "symlink_file $source $dest $sdk\n";
                 symlink_file($source, $dest, $sdk);
@@ -137,12 +163,31 @@ if ( $qtheaders ) {
         print OUT "#include \"$_\"\n";
     }
     close OUT;
-    # FIXME this is a temporary file left for compatibility reasons
-    open OUT, ">$targetdir/$targetname.h" or die "Can't write $targetdir/$targetname.h";
+    open OUT, ">$mtargetdir/$targetname" or die "Can't write $mtargetdir/$targetname";
     for ( @package_files ) {
         print OUT "#include \"$_\"\n";
     }
     close OUT;
+
+    # Don't output a $targetname.h if that would clobber a real header
+    my $skip_compat_header = 0;
+    for ( @package_files ) {
+        ($_ eq "$targetname.h") and ($skip_compat_header=1) and last;
+    }
+
+    if (not $skip_compat_header) {
+        # FIXME this is a temporary file left for compatibility reasons
+        open OUT, ">$targetdir/$targetname.h" or die "Can't write $targetdir/$targetname.h";
+        for ( @package_files ) {
+            print OUT "#include \"$_\"\n";
+        }
+        close OUT;
+        open OUT, ">$mtargetdir/$targetname.h" or die "Can't write $mtargetdir/$targetname.h";
+        for ( @package_files ) {
+            print OUT "#include \"$_\"\n";
+        }
+        close OUT;
+    }
 }
 
 exit 0;

@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _QTOPIASERVERAPPLICATION_H_
-#define _QTOPIASERVERAPPLICATION_H_
+#ifndef QTOPIASERVERAPPLICATION_H
+#define QTOPIASERVERAPPLICATION_H
 
 #include <qtopiaapplication.h>
 #include <QList>
@@ -34,6 +32,7 @@ Q_ENUMS(ShutdownType)
 public:
     enum ShutdownType { NoShutdown, ShutdownSystem, RebootSystem,
                         RestartDesktop, TerminateDesktop };
+    enum StartupType  { ImmediateStartup, IdleStartup };
 
     // Construction
     QtopiaServerApplication(int& argc, char **argv);
@@ -54,11 +53,12 @@ public:
 #endif
 
     // Tasks
-    static bool startup(int &argc, char **argv, const QList<QByteArray> &startupGroups);
+    static bool startup(int &argc, char **argv, const QList<QByteArray> &startupGroups, QtopiaServerApplication::StartupType type = QtopiaServerApplication::ImmediateStartup);
     static QString taskConfigFile();
 
     static QObject *qtopiaTask(const QByteArray &taskName,
                                bool onlyRunning = false);
+    static void excludeFromTaskCleanup(QObject* task, bool exclude);
     static void addAggregateObject(QObject *me, QObject *them);
 
     static QByteArray taskValueSpaceObject(const QByteArray &taskName);
@@ -102,6 +102,7 @@ private:
     static QtopiaServerApplication *m_instance;
     QByteArray mainWidgetName;
     QValueSpaceObject* serverWidget_vso;
+    static void loadTaskPlugins();
 };
 
 template<class T>
@@ -264,9 +265,12 @@ public:
     virtual bool systemRestart();
     virtual bool systemShutdown();
 
+    static inline int timeout()
+    { return 5000; }
+
 signals:
     void proceed();
 };
 QTOPIA_TASK_INTERFACE(SystemShutdownHandler);
 
-#endif // _QTOPIASERVERAPPLICATION_H_
+#endif

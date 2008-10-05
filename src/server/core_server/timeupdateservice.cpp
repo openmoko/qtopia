@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -52,12 +50,13 @@ void TimeUpdater::ask()
     }
     prompt = new QMessageBox(QMessageBox::Question, tr("Time Changed"), QString(), QMessageBox::Yes | QMessageBox::No);
     connect(prompt, SIGNAL(finished(int)), this, SLOT(userCommit(int)));
+    prompt->setWindowModality(Qt::WindowModal);
     if (updatetime)
         timer.start(1000,this);
     else
         timer.stop();
     timerEvent(0);
-    prompt->show();
+    QtopiaApplication::showDialog(prompt);
 }
 void TimeUpdater::timerEvent(QTimerEvent*)
 {
@@ -90,7 +89,8 @@ void TimeUpdater::commitUpdate()
 
 /*!
     \service TimeUpdateService TimeUpdate
-    \brief Provides the Qtopia TimeUpdate service.
+    \inpublicgroup QtBaseModule
+    \brief The TimeUpdateService class provides the TimeUpdate service.
 
     The \i TimeUpdate service monitors time and timezone data from sources
     such as the modem and updates the system time and timezone accordingly.
@@ -112,42 +112,82 @@ TimeUpdateService::TimeUpdateService()
       lasttz(-1),externalTimeTimeStamp(0), externalTime(0), externalDstOffset(0),
       updater(0)
 {
+    vsObject = new QValueSpaceObject("/System/Time/ExternalTimeSource", this);
     publishAll();
+
+#ifdef __UCLIBC__
+    timeZoneAlarm();
+#endif
 }
 
 
 /*! \internal */
 void TimeUpdateService::changeSystemTime(uint newutc, QString newtz)
 {
-    // This should be the only place in Qtopia that does this...
-
-    QSettings lconfig("Trolltech","locale");
-    if (newtz != lconfig.value("Location/Timezone")) {
-        lconfig.setValue("Location/Timezone",newtz);
-        setenv( "TZ", newtz.toLatin1().constData(), 1 );
-#if defined(QTOPIA_ZONEINFO_PATH)
-        QString filename = QTOPIA_ZONEINFO_PATH + newtz;
-#else
-        QString filename = "/usr/share/zoneinfo/" + newtz;
-#endif
-        QString cmd = "cp -f " + filename + " /etc/localtime";
-        system(cmd.toLocal8Bit().constData());
-    }
     if (newutc) {
         if ( externalTimeTimeStamp ) {
             int deltatime = newutc - ::time(0);
             externalTimeTimeStamp += deltatime;
+            vsObject->setAttribute(externalSourceId+"/LastUpdate",externalTimeTimeStamp);
         }
         struct timeval myTv;
+        ::gettimeofday( &myTv, 0 );
+        uint oldutc = myTv.tv_sec;
         myTv.tv_sec = newutc;
-        myTv.tv_usec = 0;
+        // Leave usec as it is to avoid timestamp skew
         ::settimeofday( &myTv, 0 );
         Qtopia::writeHWClock();
+
+        // Advertise the change (old utc and new utc)
+        QtopiaIpcEnvelope( "QPE/System", "timeChange(uint,uint)" )
+            << oldutc
+            << newutc
+        ;
     }
+
+    // This should be the only place in Qtopia that does this...
+    QTimeZone::setSystemTimeZone(newtz);
+
+#ifdef __UCLIBC__
+    Qtopia::deleteAlarm(QDateTime(), "TimeUpdate", "timeZoneAlarm()");
+
+    QRegExp expr("[^,]*,(\\d+)/(\\d+:\\d\\d:\\d\\d),(\\d+)/(\\d+:\\d\\d:\\d\\d)");
+    // we need to use getenv here to get the uClibc TZ environment variable
+    // QTimeZone::current() returns the corresponding zoneinfo string.
+    if (expr.indexIn(getenv("TZ")) > -1) {
+        int dstStartDay = expr.cap(1).toInt() + 1;
+        QTime dstStartTime = QTime::fromString(expr.cap(2), "h:mm:ss");
+        int dstEndDay = expr.cap(3).toInt() + 1;
+        QTime dstEndTime = QTime::fromString(expr.cap(4), "h:mm:ss");
+
+        QDateTime now = QDateTime::currentDateTime();
+
+        // find next DST end time
+        QDateTime dstEnd = QDateTime(QDate(now.date().year(), 1, 1), dstEndTime);
+        if (dstStartDay > dstEndDay && now.date().dayOfYear() > dstEndDay)
+            dstEnd = dstEnd.addYears(1);
+        dstEnd = dstEnd.addDays(dstEndDay - 1);
+
+        Qtopia::addAlarm(dstEnd, "TimeUpdate", "timeZoneAlarm()");
+    }
+#endif
+
     // set the time (from system) and zone (given to their TZ) for everyone else...
     QtopiaIpcEnvelope setTimeZone( "QPE/System", "timeChange(QString)" );
     setTimeZone << newtz;
 }
+
+#ifdef __UCLIBC__
+/*!
+    \internal
+
+    Periodically updates the daylight savings start and end times on systems that require it.
+*/
+void TimeUpdateService::timeZoneAlarm()
+{
+    changeSystemTime(0, QTimeZone::current().id());
+}
+#endif
 
 /*!
   Records an external time update from a source identified by \a sourceid. The recorded time is
@@ -166,17 +206,24 @@ void TimeUpdateService::storeExternalSource(QString sourceid,uint time,int time_
     // possibly prioritized, and would require this class to
     // distinguish between different sources according to the user's wishes.
     //
-    Q_UNUSED(sourceid); // ignored, just one supported
+    externalSourceId = sourceid; // not really used, just one supported
+
+    vsObject->setAttribute(sourceid,"1");
+
+    externalTimeTimeStamp = ::time(0);
+    vsObject->setAttribute(sourceid+"/LastUpdate",externalTimeTimeStamp);
 
     if ( time ) {
-        externalTimeTimeStamp = ::time(0);
         externalTime = time;
         externalDstOffset = dstoffset;
+        vsObject->setAttribute(sourceid+"/Time",externalTime);
+        vsObject->setAttribute(sourceid+"/DstOffset",externalDstOffset);
     }
 
     if ( time_zone != lasttz ) {
         lasttz = time_zone;
         externalTimeZone = QTimeZone::findFromMinutesEast(QDateTime::currentDateTime(),time_zone,externalDstOffset!=0).id();
+        vsObject->setAttribute(sourceid+"/TimeZone",externalTimeZone);
     }
 
     updateFromExternalSources();
@@ -217,7 +264,7 @@ void TimeUpdateService::updateFromExternalSources(bool autotz, bool autotm, bool
     // Too high may cause confusion (eg. files on system dated after now).
     const int maxtimejitter = 60;
 
-    bool tzchanged = autotz && externalTimeZone != getenv("TZ");
+    bool tzchanged = autotz && externalTimeZone != QTimeZone::current().id();
     bool tchanged = autotm;
 
     if (!tzchanged && !tchanged || externalTimeZone.isEmpty())

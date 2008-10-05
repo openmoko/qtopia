@@ -1,35 +1,39 @@
 qtopia_project(qtopia lib)
 TARGET=qtopiacomm
-depends(3rdparty/libraries/openobex)
 
-PREFIX=COMM
-COMM_HEADERS += qcommdevicecontroller.h \
-                qcommdevicesession.h \
-                qcomminterface.h \
-                qcommservicemanager.h
+include(qtopiacomm.pri)
 
-COMM_SOURCES += qcommdevicecontroller.cpp \
-                qcommdevicesession.cpp \
-                qcomminterface.cpp \
-                qcommservicemanager.cpp
-
-#COMM_PRIVATE_HEADERS +=  
-
-resolve_include()
+sdk_qtopiacomm_headers.files=$${HEADERS}
+sdk_qtopiacomm_headers.path=/include/qtopia/comm
+sdk_qtopiacomm_headers.hint=sdk headers
+INSTALLS+=sdk_qtopiacomm_headers
 
 defineTest(setupTranslatables) {
     file=$$1
     include($$file)
     VARS=HEADERS SOURCES FORMS PRIVATE_HEADERS
     for(v,VARS) {
-        eval(TRANSLATABLES+=\$${$${PREFIX}_$$v})
+        eval(TRANSLATABLES+=\$${$$v})
     }
     export(TRANSLATABLES)
     export(VPATH)
 }
 
-include(obex/obex.pri)
-resolve_include()
+defineTest(projectEnabled) {
+    PROJECTS=
+    include($$QTOPIA_DEPOT_PATH/src/projects.pri)
+    contains(PROJECTS,$$1):return(1)
+    else:return(0)
+}
+
+projectEnabled(3rdparty/libraries/openobex) {
+    depends(3rdparty/libraries/openobex)
+    include(obex/obex.pri)
+    resolve_include()
+} else {
+    setupTranslatables(obex/obex.pri)
+}
+
 enable_bluetooth {
     depends(3rdparty/libraries/qtdbus)
     include(bluetooth/bluetooth.pri)
@@ -57,12 +61,10 @@ enable_vpn {
     setupTranslatables(vpn/vpn.pri)
 }
 
-CONFIG += qtopia_visibility
+include(usb/usb.pri)
+resolve_include()
 
-sdk_qtopiacomm_headers.files=$${COMM_HEADERS}
-sdk_qtopiacomm_headers.path=/include/qtopia/comm
-sdk_qtopiacomm_headers.hint=sdk headers
-INSTALLS+=sdk_qtopiacomm_headers
+CONFIG += qtopia_visibility
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)

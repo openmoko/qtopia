@@ -1,30 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qabstractserverinterface.h"
-
-#ifdef QTOPIA_UNPORTED
-#include "firstuse.h"
-#endif
-
 #include <qtopiaapplication.h>
 #include <qtimezone.h>
 #include <custom.h>
@@ -60,71 +53,20 @@
 QSXE_APP_KEY
 
 #include "qtopiaserverapplication.h"
-
 #include <QDesktopWidget>
 #include <QLibraryInfo>
 
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <QValueSpaceItem>
 #include <QKeyEvent>
 #include <ThemedView>
+#include "uifactory.h"
 
 // Not currently supported, available for demonstration purposes.
 //#define QTOPIA_ANIMATED_SPLASH
-
-static void refreshTimeZoneConfig()
-{
-   // We need to help WorldTime in setting up its configuration for
-   //   the current translation
-    // BEGIN no tr
-    const char *defaultTz[] = {
-        "America/New_York",
-        "Asia/Beijing",
-        "America/Los_Angeles",
-        "Europe/London",
-        "Asia/Tokyo",
-        "Europe/Paris",
-        0
-    };
-
-    // END no tr
-
-    QTimeZone curZone;
-    QString zoneID;
-    int zoneIndex;
-    QSettings cfg( "Trolltech", "WorldTime" );
-    cfg.beginGroup( "TimeZones" );
-    if (!cfg.contains( "Zone0" )){
-        // We have no existing timezones - use the defaults that are untranslated strings
-        QString currTz = QTimeZone::current().id();
-        QStringList zoneDefaults;
-        zoneDefaults.append( currTz );
-        for ( int i = 0; defaultTz[i] && zoneDefaults.count() < 6; i++ ) {
-            if ( defaultTz[i] != currTz )
-                zoneDefaults.append( defaultTz[i] );
-        }
-        zoneIndex = 0;
-        for (QStringList::Iterator it = zoneDefaults.begin(); it != zoneDefaults.end() ; ++it){
-            cfg.setValue( "Zone" + QString::number( zoneIndex ) , *it);
-            zoneIndex++;
-        }
-    }
-    // We have an existing list of timezones - refresh the
-    //  translations of QTimeZone name
-    zoneIndex = 0;
-    while (cfg.contains( "Zone"+ QString::number( zoneIndex ))){
-        zoneID = cfg.value( "Zone" + QString::number( zoneIndex )).toString();
-        curZone = QTimeZone( zoneID.toLatin1() );
-        if ( !curZone.isValid() ){
-            qWarning( "initEnvironment() Invalid QTimeZone %s", (const char *)zoneID.toLatin1() );
-            break;
-        }
-        zoneIndex++;
-    }
-
-}
 
 static void initKeyboard()
 {
@@ -142,33 +84,61 @@ static void initKeyboard()
     QString layout = config.value( "Layout", "us101" ).toString();
 }
 
-#ifdef QTOPIA_UNPORTED
+
 static bool firstUse()
 {
-    bool needFirstUse = false;
-#if 0 //  defined(QPE_NEED_CALIBRATION)
-    if ( !QFile::exists( "/etc/pointercal" ) )
-        needFirstUse = true;
+    QSettings config("Trolltech","qpe");
+    config.beginGroup( "Startup" );
+
+#ifdef QPE_NEED_CALIBRATION
+    if (UIFactory::isAvailable("Calibrate")) {
+        //if we don't want calibration we shouldn't even test pointercal
+        if (config.value("NeedCalibrate", true).toBool()) {
+            bool cal=false;
+            QString calFile = QString::fromLocal8Bit(qgetenv("POINTERCAL_FILE"));
+            if (calFile.isEmpty())
+                calFile = QLatin1String("/etc/pointercal");
+
+            QFile file(calFile);
+            if (file.open(QIODevice::ReadOnly)) {
+                QTextStream t(&file);
+                int a,b,c,d,e,f,s = 0;
+                t >> a >> b >> c >> d >> e >> f >> s;
+                qWarning() << s << t.status();
+                if (s == 0 || t.status() != QTextStream::Ok)
+                    cal=true;
+                file.close();
+            } else {
+                cal=true;
+            }
+
+            if(cal) {
+                QDialog *calibrateDlg = UIFactory::createDialog("Calibrate");
+                if (calibrateDlg) {
+                    calibrateDlg->exec();
+                    delete calibrateDlg;
+                } else {
+                    qLog(Component) << "Main: Calibrate not available";
+                }
+            }
+        }
+    }
 #endif
 
-    {
-        QSettings config("Trolltech","qpe");
-        config.beginGroup( "Startup" );
-        needFirstUse |= config.value( "FirstUse", true ).toBool();
-    }
-
-    if ( !needFirstUse )
+    if (!config.value("FirstUse", true).toBool())
         return false;
 
-    ServerApplication::login(true);
+    QDialog *firstUseDlg = UIFactory::createDialog("FirstUse");
+    if (firstUseDlg) {
+        firstUseDlg->exec();
+        delete firstUseDlg;
+        return true;
+    } else {
+        qLog(Component) << "Main: FirstUse component not available";
+        return false;
+    }
 
-    FirstUse *fu = new FirstUse();
-    fu->exec();
-    bool rs = fu->restartNeeded();
-    delete fu;
-    return rs;
 }
-#endif
 
 #if defined(QTOPIA_ANIMATED_SPLASH)
 class DirectMovie : public QObject, public QImageReader {
@@ -409,7 +379,6 @@ private:
     QValueSpaceItem vsoCharging;
 };
 
-void Qtopia_initAlarmServer(); // from qalarmserver.cpp
 
 //
 // IMPORTANT NOTE: This function implements part of the Qtopia startup
@@ -420,18 +389,16 @@ void Qtopia_initAlarmServer(); // from qalarmserver.cpp
 //
 int initApplication( int argc, char ** argv )
 {
-    QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "initApplication";
+    qLog(QtopiaServer) << "begin initApplication";
 
     if(!QtopiaServerApplication::startup(argc, argv, QList<QByteArray>() << "prestartup"))
         qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
 
-    QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "adjusting time zone";
-    QTime t = QTime::currentTime();
-    refreshTimeZoneConfig();
-    QPerformanceLog("QtopiaServer") << QPerformanceLog::End << "adjusting time zone";
-
     initKeyboard();
-    QPerformanceLog("QtopiaServer") << "Keyboard initialisation";
+
+    firstUse();
+
+    qLog(QtopiaServer) << "Keyboard initialisation";
 
     const QByteArray warmBootFile = "/tmp/warm-boot";
     if ( !QFile::exists( warmBootFile ) &&
@@ -460,19 +427,12 @@ int initApplication( int argc, char ** argv )
 #if defined(QTOPIA_ANIMATED_SPLASH)
     SplashScreen *splash = new SplashScreen;
     splash->splash(QString(":image/splash"));
-    QPerformanceLog("QtopiaServer") << "Splash screen creation";
+    qLog(QtopiaServer) << "Splash screen creation";
 #endif
 
     if(!QtopiaServerApplication::startup(argc, argv, QList<QByteArray>() << "startup"))
         qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
 
-
-#ifdef QTOPIA_UNPORTED // FIXME first use is broken. just disable it for now
-    if ( firstUse() ) {
-        a.restart();
-        return 0;
-    }
-#endif
 
     // Load and show UI
     QAbstractServerInterface *interface =
@@ -482,30 +442,24 @@ int initApplication( int argc, char ** argv )
     splash->setReplacement(interface);
 #else
     if(interface) {
-        // showMaximized() doesn't work for frameless windows.
-        QDesktopWidget *desktop = QApplication::desktop();
-        QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
-        interface->setGeometry(desktopRect);
         interface->show();
+    } else {
+        qWarning() << "Missing main widget of type QAbstractServerInterface";
     }
 #endif
-    QPerformanceLog("QtopiaServer") << "Display the server";
 
-    Qtopia_initAlarmServer();
-    QPerformanceLog("QtopiaServer") << "AlarmServer startup";
+    if(!QtopiaServerApplication::startup(argc, argv, QList<QByteArray>() << "idle", QtopiaServerApplication::IdleStartup))
+        qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
 
-    QPerformanceLog("QtopiaServer") << (QPerformanceLog::Begin|QPerformanceLog::EventLoop);
+    qLog(QtopiaServer) << "begin event loop";
 
-//    int rv =  a.exec();
-    //Can't do this either, exec is static int rv =  qApp->exec();
     int rv = static_cast<QtopiaApplication *>(qApp)->exec();
 
-    qLog(QtopiaServer) << "exiting...";
-    QPerformanceLog("QtopiaServer") << (QPerformanceLog::End|QPerformanceLog::EventLoop);
+    qLog(QtopiaServer) << "end event loop";
 
     delete interface;
 
-    QPerformanceLog("QtopiaServer") << QPerformanceLog::End << "initApplication";
+    qLog(QtopiaServer) << "end initApplication";
     return rv;
 }
 
@@ -546,7 +500,7 @@ int main( int argc, char ** argv )
     executableName = executableName.right(executableName.length() - executableName.lastIndexOf('/') - 1);
 
     if ( executableName != "qpe" ) {
-        QPerformanceLog(executableName.toLatin1().constData()) << "Starting single-exec main";
+        qLog(ApplicationLauncher) << "Starting single-exec main";
         QPEMainMap *qpeMainMap();
         if ( qpeMainMap()->contains(executableName) ) {
             // This is a non-quicklaunch app
@@ -564,9 +518,9 @@ int main( int argc, char ** argv )
     check_prefix();
 
 #endif // SINGLE_EXEC
-    setpgrp();  // New process group
+    qLog(QtopiaServer) << "begin qpe main";
 
-    QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "qpe main";
+    setpgrp();  // New process group
 
     signal( SIGCHLD, SIG_IGN );
 
@@ -578,7 +532,6 @@ int main( int argc, char ** argv )
     restartMarker.close();
 
     int retVal = initApplication( argc, argv );
-
     // Have we been asked to restart?
     if(!(QtopiaServerApplication::shutdownType() == QtopiaServerApplication::RestartDesktop)) {
         //we assume that the calling script is running
@@ -608,9 +561,14 @@ int main( int argc, char ** argv )
         // Die
         if (killpg(qpeGroup, SIGKILL ) != 0)
             qWarning("Unable to send SIGKILL %s", strerror(errno));
+
+        // Force a reaping; something messing with sigchld => sig_ign?
+        while (::wait(0) != -1 || errno == EINTR)
+            ;
     }
 
-    QPerformanceLog("QtopiaServer") << QPerformanceLog::End << "qpe main";
+    qLog(QtopiaServer) << "end qpe main";
+    delete QtopiaServerApplication::instance();
     return retVal;
 }
 

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -424,6 +422,9 @@ public:
 
     const QContentSet &documents() const;
 
+    QStringList selectedCategories() const
+            { return m_categoryFilter.arguments(QContentFilter::Category); }
+
 signals:
     void documentSelected( const QContent &content );
     void currentChanged();
@@ -551,8 +552,8 @@ DocumentView::DocumentView( QWidget *parent )
     m_itemMenu->addAction(m_deleteAction);
     m_itemMenu->addAction(m_propertiesAction);
 
-    connect(this, SIGNAL(pressed(const QModelIndex&)),
-            this, SLOT(itemPressed(const QModelIndex&)));
+    connect(this, SIGNAL(pressed(QModelIndex)),
+            this, SLOT(itemPressed(QModelIndex)));
 }
 
 DocumentView::~DocumentView()
@@ -926,23 +927,41 @@ void DocumentView::filterDefaultCategories()
         return;
     }
 
-    QContentFilter filter;
-
-    foreach( QString category, m_defaultCategories )
-        filter |= QContentFilter( QContentFilter::Category, category );
-
-    filter &= m_baseFilter;
-
-    m_filteredDefaultCategories
-            = filter.argumentMatches( QContentFilter::Category, QString() )
-            + filter.argumentMatches( QContentFilter::Category, QLatin1String( "Documents" ) );
-
     m_defaultCategoriesDirty = true;
-
     m_categoryFilter = QContentFilter();
 
-    foreach( QString category, m_filteredDefaultCategories )
-        m_categoryFilter |= QContentFilter( QContentFilter::Category, category );
+    const QString unfiled = QLatin1String("Unfiled");
+
+    QStringList categories
+            = m_baseFilter.argumentMatches(QContentFilter::Category, QString())
+            + m_baseFilter.argumentMatches(QContentFilter::Category, QLatin1String("Documents"));
+
+    foreach (QString category, categories)
+        if (m_defaultCategories.contains(category))
+            m_filteredDefaultCategories.append(category);
+
+    if (m_defaultCategories.contains(unfiled))
+        m_filteredDefaultCategories.append(unfiled);
+
+    if (m_filteredDefaultCategories.count() > 0) {
+        foreach(QString category, m_filteredDefaultCategories)
+            m_categoryFilter |= QContentFilter( QContentFilter::Category, category );
+
+
+        QString label;
+
+        if (m_filteredDefaultCategories.count() > 1)
+            label = tr("(Multi)");
+        else if (m_filteredDefaultCategories.first() == unfiled)
+            label = tr("Unfiled");
+        else
+            label = QCategoryManager().label(m_filteredDefaultCategories.first());
+
+        emit setCategoryLabel(tr("Category: %1").arg(label));
+        emit categoriesSelected(true);
+    } else {
+        emit categoriesSelected(false);
+    }
 }
 
 void DocumentView::itemPressed(const QModelIndex &index)
@@ -992,8 +1011,9 @@ public:
 
 /*!
     \class QDocumentSelector
+    \inpublicgroup QtBaseModule
     \ingroup documentselection
-    \mainclass
+
     \brief The QDocumentSelector widget allows the user choose a document from
             a list of documents available on the device.
 
@@ -1088,7 +1108,7 @@ public:
      
 
 
-    QDocumentSelector is often the first widget seen in a \l {Qtopia - Main Document Widget}{document-oriented application }. Used in combination with
+    QDocumentSelector is often the first widget seen in a \l {Main Document Widget}{document-oriented application }. Used in combination with
     \l {QStackedWidget}, a typical application allows
     choosing of a document using the QDocumentSelector, before revealing the document in a viewer or editor.
 
@@ -1418,6 +1438,16 @@ const QContentSet &QDocumentSelector::documents() const
 }
 
 /*!
+    Returns a list of categories selected in a document selector's category filter dialog.
+
+    \sa setDefaultCategories()
+*/
+QStringList QDocumentSelector::selectedCategories() const
+{
+    return d->selectedCategories();
+}
+
+/*!
     \fn QDocumentSelector::documentSelected( const QContent &content )
 
     Signals that the user has chosen \a content from the document list.
@@ -1533,8 +1563,9 @@ public:
 
 /*!
     \class QDocumentSelectorDialog
+    \inpublicgroup QtBaseModule
     \ingroup documentselection
-    \mainclass
+
     \brief The QDocumentSelectorDialog class provides a user with the ability to select documents from
             a list of documents available on the device.
 
@@ -1826,6 +1857,16 @@ QSize QDocumentSelectorDialog::sizeHint() const
     QDesktopWidget *desktop = QApplication::desktop();
 
     return desktop->screenGeometry(desktop->primaryScreen()).size();
+}
+
+/*!
+    Returns a list of categories selected in a document selector's category filter dialog.
+
+    \sa setDefaultCategories()
+*/
+QStringList QDocumentSelectorDialog::selectedCategories() const
+{
+    return d->selectedCategories();
 }
 
 #include "qdocumentselector.moc"

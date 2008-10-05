@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -27,7 +25,7 @@
 #include <QContentSet>
 #include <QCategoryManager>
 #include <QMap>
-#include "phonebrowser.h"
+#include "lazycontentstack.h"
 #include <QStackedWidget>
 #include <QContentSet>
 #include <QContent>
@@ -48,16 +46,17 @@ public:
 
 signals:
     void launched(const QString &);
-    void currentView(const QString &);
+    void currentViewChanged(const QString &);
 
 protected:
     virtual QObject* createView(const QString &);
     virtual void raiseView(const QString &, bool reset);
     virtual void busy(const QContent &);
+    virtual QObject* currentViewObject();
 
 private:
     QStackedWidget *m_stack;
-    QMap<QString, ApplicationLauncherView *> m_views;
+    QMap<QString, LauncherView *> m_views;
     QString m_currentView;
     QListView::ViewMode m_mode;
 };
@@ -79,7 +78,7 @@ void E2BrowserStack::setViewMode(QListView::ViewMode mode)
 {
     m_mode = mode;
 
-    for(QMap<QString, ApplicationLauncherView *>::Iterator iter = m_views.begin(); iter != m_views.end(); ++iter) {
+    for(QMap<QString, LauncherView *>::Iterator iter = m_views.begin(); iter != m_views.end(); ++iter) {
         (*iter)->setViewMode(m_mode);
     }
 }
@@ -89,15 +88,20 @@ QObject* E2BrowserStack::createView(const QString &category)
     if(category == "Main")
         return 0;
 
-    ApplicationLauncherView * alv = 0;
+    LauncherView *alv = LauncherView::createLauncherView( "ApplicationLauncherView", m_stack );
+    if ( !alv ) {
+        qLog(Component) << "E1PhoneBrowser: ApplicationLauncherView not available";
+        return 0;
+    }
     if("All" == category) {
-        alv = new ApplicationLauncherView(m_stack);
         QContentSet set(QContent::Application);
         QContentList list = set.items();
         for(int ii = 0; ii < list.count(); ++ii)
             alv->addItem(new QContent(list.at(ii)));
     } else {
-        alv = new ApplicationLauncherView(category, m_stack);
+        QContentFilter filters = (QContentFilter( QContent::Application ) | QContentFilter( QContent::Folder ))
+                    & QContentFilter( QContentFilter::Category, category );
+        alv->showCategory( filters );
     }
     alv->setColumns(3);
     alv->setViewMode(m_mode);
@@ -117,7 +121,12 @@ void E2BrowserStack::raiseView(const QString &category, bool)
     QWidget * wid = m_views[category];
     m_stack->setCurrentWidget(wid);
     m_currentView = category;
-    emit currentView(category);
+    emit currentViewChanged(category);
+}
+
+QObject* E2BrowserStack::currentViewObject()
+{
+    return m_stack->currentWidget();
 }
 
 void E2BrowserStack::resetToView(const QString &view)
@@ -155,7 +164,7 @@ E2BrowserScreen::E2BrowserScreen(QWidget *parent, Qt::WFlags flags)
     layout->addWidget(m_stack);
     QObject::connect(m_stack, SIGNAL(launched(QString)),
                      this, SIGNAL(applicationLaunched(QString)));
-    QObject::connect(m_stack, SIGNAL(currentView(QString)),
+    QObject::connect(m_stack, SIGNAL(currentViewChanged(QString)),
                      this, SLOT(viewChanged(QString)));
 
     E2Bar *bbar = new E2Bar(this);

@@ -1,5 +1,5 @@
 # This is an example of a distribution-specific config.pri.
-# See buildsystem.html for more information.
+# See doc/html/buildsystem.html for more information.
 
 # to add a component to a project list, (for example, mymediaplayer)
 #
@@ -24,6 +24,6 @@
 #     PROJECTS*=myplugins/myaudiocodec
 # }
 
-# for more information see "The Qtopia Build System"
-# and "qmake - a Qtopia make tool" in the Qtopia documentation.
+# For more information see "The Qt Extended Build System"
+# in the Qt Extended documentation.
 

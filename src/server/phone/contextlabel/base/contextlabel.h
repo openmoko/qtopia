@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,54 +23,55 @@
 #include <qtopiaglobal.h>
 #include <themedview.h>
 #include "qtopiainputevents.h"
-#include "serverthemeview.h"
 #include "qsoftmenubarprovider.h"
+#include "qabstractcontextlabel.h"
 
 class QTimer;
 class QSettings;
 
-class ContextLabel : public PhoneThemedView, public QtopiaKeyboardFilter
+
+
+class BaseContextLabel : public QAbstractContextLabel, public QtopiaKeyboardFilter
 {
     Q_OBJECT
 public:
-    ContextLabel( QWidget *parent=0, Qt::WFlags f=0 );
-    ~ContextLabel();
+    BaseContextLabel( QWidget *parent=0, Qt::WFlags f=0 );
+    ~BaseContextLabel();
+    virtual QSize reservedSize() const = 0;
 
+    class BaseButton
+    {
+    public:
+        BaseButton(int key ) : m_key(key)
+        {
+            m_changed = false;
+        };
 
-    QSize reservedSize() const;
+        int  key() { return m_key; };
+        bool changed() { return m_changed; };
+        void setChanged(bool c) { m_changed = c; };
 
-protected:
-    void updateLabels();
-    virtual bool filter(int unicode, int keycode, int modifiers, bool press,
-                        bool autoRepeat);
-
-protected slots:
-    void itemPressed(ThemeItem *item);
-    void itemReleased(ThemeItem *item);
-    void keyChanged(const QSoftMenuBarProvider::MenuButton &);
-
-protected:
-    virtual void themeLoaded(const QString &);
-
-private slots:
-    void initializeButtons();
-
-private:
-    struct Button {
-        int key;
-        ThemeImageItem *imgItem;
-        ThemeTextItem *txtItem;
-        bool changed;
+    private:
+        int m_key;
+        bool m_changed;
     };
 
-    int buttonForItem(ThemeItem *item) const;
+signals:
+    void buttonsChanged();
+protected:
+    virtual bool filter(int unicode, int keycode, int modifiers, bool press,
+                        bool autoRepeat);
+    QSoftMenuBarProvider *softMenuProvider() const;
+protected slots:
+    void keyChanged(const QSoftMenuBarProvider::MenuButton &);
+    void buttonPressed(int);
+    void buttonReleased(int);
+protected:
+    QList<BaseButton*> baseButtons() const;
 
-    Button *buttons;
-    int buttonCount;
-    bool blockUpdates;
-    int pressedBtn;
-    bool loadedTheme;
-    bool themeInit;
+
+private:
+    QList<BaseButton*> baseBtns;
     QSoftMenuBarProvider *menuProvider;
 };
 

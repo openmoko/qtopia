@@ -1,474 +1,478 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qspeeddial.h"
 
 #include <qtopiaapplication.h>
-#include <qtranslatablesettings.h>
 #include <qexpressionevaluator.h>
 #include <qsoftmenubar.h>
-
-#include <QPainter>
-#include <QLineEdit>
-#include <QLayout>
-#include <QPushButton>
-#include <QEvent>
-#include <QKeyEvent>
-#include <QLabel>
+#include <QtopiaSql>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <qtranslatablesettings.h>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QString>
+#include <qtopiaserviceselector.h>
+#include <QAbstractListModel>
+#include <QtopiaItemDelegate>
 #include <QDialog>
-#include <QHash>
-#include <QListWidgetItem>
-#include <QAction>
 #include <QMenu>
-#include <QSettings>
-
-#include <time.h>
-
-
-
-static QHash<QString, QtopiaServiceDescription*>* recs=0;
-static QString recs_filename;
-static QDateTime recs_ts;
-
-/*!
-  \internal
-  Removes all input and service mapping.
-*/
-static void clearReqs()
-{
-    if(recs)
-    {
-        delete recs;
-        recs = 0;
-    }
-}
-
-/*!
-  \internal
-  Reads the configuration file and populates recs.
-*/
-static void updateReqs()
-{
-    // recs_filename may not exist (never written), in which case, must
-    // at least read once, even though recs_ts remains null.
-    bool forceread=false;
-
-    if ( recs_filename.isEmpty() ) {
-        recs_filename = QTranslatableSettings(QLatin1String("Trolltech"),QLatin1String("SpeedDial")).fileName();
-        forceread = true; // once
-    }
-    QFileInfo fi(recs_filename);
-    QDateTime ts = fi.lastModified();
-
-    if( forceread || ts != recs_ts )
-    {
-        clearReqs();
-
-        recs = new QHash<QString, QtopiaServiceDescription*>;
-        recs_ts = ts;
-
-        QTranslatableSettings cfg(QLatin1String("Trolltech"),QLatin1String("SpeedDial"));
-        cfg.beginGroup(QLatin1String("Dial"));
-
-        QStringList d = cfg.value(QLatin1String("Defined")).toString().split( ',');
-        for(QStringList::ConstIterator it = d.begin(); it != d.end(); ++it)
-        {
-            cfg.endGroup();
-            cfg.beginGroup(QLatin1String("Dial") + *it);
-
-            QString s = cfg.value(QLatin1String("Service")).toString();
-
-            if (s.isEmpty()
-                || cfg.value(QLatin1String("RemoveIfUnavailable")).toBool()
-                  && QtopiaService::app(s).isEmpty()
-            )
-                continue;
-
-            QByteArray r = cfg.value(QLatin1String("Requires")).toByteArray();
-            QExpressionEvaluator expr(r);
-            if ( !r.isEmpty() && !(expr.isValid() && expr.evaluate() && expr.result().toBool()) )
-                continue;
-
-            QString m = cfg.value(QLatin1String("Message")).toString();
-            QByteArray a = cfg.value(QLatin1String("Args")).toByteArray();
-            QString l = cfg.value(QLatin1String("Label")).toString();
-            QString ic = cfg.value(QLatin1String("Icon")).toString();
-            QMap<QString, QVariant> p = cfg.value(QLatin1String("OptionalProperties")).toMap();
-
-            QtopiaServiceRequest req(s, m.toLatin1());
-
-            if(!a.isEmpty())
-                QtopiaServiceRequest::deserializeArguments(req, a);
-
-            QtopiaServiceDescription* t = new QtopiaServiceDescription(req, l, ic, p);
-            recs->insert((*it), t);
-        }
-    }
-}
-
-/*!
-  \internal
-  Writes the current recs to the configuration file.
-*/
-static void writeReqs(const QString& changed)
-{
-    QSettings cfg(QLatin1String("Trolltech"),QLatin1String("SpeedDial"));
-    QStringList strList;
-    QHashIterator<QString, QtopiaServiceDescription*> it(*recs);
-    QtopiaServiceDescription* rec;
-    bool found = false;
-
-    while( it.hasNext() )
-    {
-        it.next();
-
-        rec = it.value();
-        strList.append(it.key());
-        if( changed.isNull() || changed == it.key())
-        {
-            cfg.beginGroup(QLatin1String("Dial")+it.key());
-            cfg.setValue(QLatin1String("Service"),rec->request().service());
-            cfg.setValue(QLatin1String("Message"),QString(rec->request().message()));
-            cfg.setValue(QLatin1String("Args"),
-                         QtopiaServiceRequest::serializeArguments(rec->request()));
-            cfg.setValue(QLatin1String("Label"),rec->label());
-            cfg.setValue(QLatin1String("Icon"),rec->iconName());
-            cfg.setValue(QLatin1String("OptionalProperties"), rec->optionalProperties());
-            found = true;
-            cfg.endGroup();
-        }
-    }
-
-    if( !found )
-    {
-        // removed it
-        cfg.remove(QLatin1String("Dial") + changed);
-    }
-
-    cfg.beginGroup(QLatin1String("Dial"));
-    cfg.setValue(QLatin1String("Defined"), strList.join(QString(',')));
-    cfg.endGroup();
-
-    if ( !recs_filename.isEmpty() )
-        recs_ts = QFileInfo(recs_filename).lastModified();
-}
-
-/*!
-  \internal
-  Finds the first available input slot to highlight.
-*/
-int firstAvailableSlot()
-{
-    // possible slots - 1 ~ 99
-    QSettings cfg(QLatin1String("Trolltech"),QLatin1String("SpeedDial"));
-    cfg.beginGroup(QLatin1String("Dial"));
-    QStringList d = cfg.value(QLatin1String("Defined")).toString().split( ',');
-    QList<int> defined;
-    bool ok;
-    int num;
-    // convert to int
-    foreach (QString str, d) {
-        num = str.toInt(&ok);
-        if (ok)
-            defined << num;
-    }
-    qSort(defined);
-    num = 1;
-    // search for the first empty slot
-    foreach (int i, defined) {
-        if (num != i)
-            break;
-        else
-            num++;
-    }
-    // all slots are used.
-    if (num == 100)
-        num = 0;
-    return num;
-}
-
-
-class QSpeedDialDialog : public QDialog
-{
-    Q_OBJECT
-public:
-    QSpeedDialDialog(const QString& l, const QString& ic, const QtopiaServiceRequest& a,
-        QWidget* parent);
-    QSpeedDialDialog(QWidget* parent);
-    QString choice();
-    void setBlankSetEnabled(bool on) { list->setBlankSetEnabled(on); }
-private slots:
-    void store(const int row);
-
-private:
-    void init();
-    QtopiaServiceRequest action;
-    QString label, icon;
-    QLineEdit *inputle; // non-integer speeddials no supported yet
-    QWidget *currinfo;
-    QLabel *curricon;
-    QLabel *currlabel;
-    QPushButton *ok;
-    QSpeedDialList *list;
-
-    QString userChoice;
-};
-
-class QSpeedDialItem
-{
-public:
-    QSpeedDialItem(const QString& i, const QtopiaServiceDescription& rec, QListView* parent);
-
-    void changeRecord(QtopiaServiceDescription* src);
-
-    QString input() const { return _input; }
-    QtopiaServiceDescription description() const { return _record; }
-    void clear()
-    {
-        _record = QtopiaServiceDescription();
-    }
-
-private:
-    QString _input;
-    QtopiaServiceDescription _record;
-};
-
+#include <QAction>
+#include <QVBoxLayout>
+#include <QDebug>
+#include <QObject>
+#include <QSpinBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QPainter>
+#include <QKeyEvent>
+#include <QtopiaStyle>
+#include <QTimer>
+#include <QWaitWidget>
 
 class QSpeedDialModel : public QAbstractListModel
 {
-    friend class QSpeedDialItem;
-
+    Q_OBJECT
+    friend class QSpeedDialList;
 public:
     QSpeedDialModel(QObject* parent = 0);
     ~QSpeedDialModel();
 
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    QSpeedDialItem* item(const QModelIndex & index);
-    QSpeedDialItem* item(int index);
-    QSpeedDialItem* takeItem(int index);
-
+    void setSelector(int startPos, const QString &label, const QString &icon);
+    void moveSelector(int newPos);
+    
+private slots:
+    void change();
 private:
-    QList<QSpeedDialItem*> mItems;
-
-    void addItem(QSpeedDialItem* item);
+    mutable bool changed;
+    mutable bool countChanged;
+    mutable int rowCountCache;
+    mutable QList<QString> displayCache;
+    mutable QList<QString> iconCache;
+    mutable QList<QString> inputCache;
+    QString selectorLabel;
+    QString selectorIcon;
+    mutable int selectorPos;//Set to 0 if no selector item
+    mutable int selectorRow;
+    mutable bool shadowing;
 };
 
-class QSpeedDialItemDelegate : public QAbstractItemDelegate
+class QSpeedDialItemDelegate : public QtopiaItemDelegate
 {
+    Q_OBJECT
 public:
-    QSpeedDialItemDelegate(QListView* parent);
+    QSpeedDialItemDelegate(QSmoothList* parent);
     ~QSpeedDialItemDelegate();
 
     void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const;
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index) const;
 
-    void setSelectionDetails(QString label, QString icon);
-    void setBlankSetEnabled(bool on) { showSet = on; }
-    bool isBlankSetEnabled() const { return showSet; }
-
 private:
-    QListView* parentList;
+    QSmoothList* parentList;
     int iconSize;
     int textHeight;
     int itemHeight;
 
     QIcon selIcon;
     QString selText;
-    bool showInput;
-    bool showSet;
 };
 
-
-
-
-class QSpeedDialListPrivate : QObject
+class  QSpeedDialDialog : public QDialog
 {
     Q_OBJECT
 public:
-    QSpeedDialListPrivate(QSpeedDialList* parent) :
-        delegate(parent),
-        model(parent),
-        parentList(parent),
-        a_edit(0),
-        a_del(0),
-	recentChange(-1)
-    {
-        parent->setItemDelegate(&delegate);
-        parent->setModel(&model);
-        actionChooser = 0;
-        allowActionChooser = false;
-        connect(parentList,SIGNAL(currentRowChanged(int)),
-                this,SLOT(updateActions()));
-    }
-
-
-
-    void setSelectionDetails(QString label, QString icon)
-    {
-        delegate.setSelectionDetails(label, icon);
-    }
-
-    QSpeedDialItem* item(int row)
-    {
-        return model.item(row);
-    }
-
-    QSpeedDialItemDelegate delegate;
-    QSpeedDialModel model;
-    QSpeedDialList* parentList;
-    QtopiaServiceSelector* actionChooser;
-    bool allowActionChooser;
-
-    QAction *a_edit;
-    QAction *a_del;
-
-    QString seltext, selicon;
-    int sel;
-    int sel_tid;
-    int recentChange;
-
+    QSpeedDialDialog(QWidget *parent);
+    QString inputChoice() const {return m_inputChoice;}
 private slots:
-    void updateActions()
-    {
-        QSpeedDialItem* i = item(parentList->currentRow());
-        if (a_del)
-            a_del->setVisible(i && !i->description().request().isNull());
-    }
+    void store(const QModelIndex &selected);
+private:
+    QString m_inputChoice;
+    QSpeedDialModel *model;
+    QSpeedDialItemDelegate *delegate;
+    QSmoothList *list;
 };
 
+class QSpeedDialAddDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    QSpeedDialAddDialog(const QtopiaServiceRequest &req,
+            const QString &label, const QString &icon, int input, QWidget *parent);
+    QString inputChoice() const {return m_inputChoice;}
+private slots:
+    void store();
+    void undoRemove();
+private:
+    QString m_inputChoice;
+    QString m_prevInput;
+    QtopiaServiceDescription m_desc;
+    QSpeedDialModel *model;
+    QSpeedDialList *list;
+};
 
+class QSpeedDialListPrivate
+{
+public:
+    QSpeedDialListPrivate(QSpeedDialList* parent):selectorPos(0),input(0),
+        parentList(parent), model(new QSpeedDialModel()),
+        delegate(new QSpeedDialItemDelegate(parent)), serviceSelector(0)
+        {
+            inputTimer = new QTimer();
+            QObject::connect(inputTimer,SIGNAL(timeout()), parent, SLOT(clearKeyInput()));
+        }
 
+    ~QSpeedDialListPrivate()
+        {
+            delete inputTimer;
+        }
 
+    int selectorPos;
+    int input;
+    QSpeedDialList *parentList;
+    QTimer *inputTimer;
+    QSpeedDialModel *model;
+    QSpeedDialItemDelegate *delegate;
+    QtopiaServiceSelector *serviceSelector;
+};
 /*!
-  Constructs a QSpeedDialItem object.
+  \internal
+  Finds the first available input number
 */
-QSpeedDialItem::QSpeedDialItem(const QString& i, const QtopiaServiceDescription& rec, QListView* parent) :
-    _input(i),
-    _record(rec)
+int QSpeedDial::firstAvailableSlot()
 {
-    ((QSpeedDialModel*)parent->model())->addItem(this);
-}
-
-/*!
-  Updates service description for this item.
-*/
-void QSpeedDialItem::changeRecord(QtopiaServiceDescription* src)
-{
-    _record = *src;
-}
-
-
-/*!
-  Constructs a QSpeedDialDialog object for storing the given action.
-*/
-QSpeedDialDialog::QSpeedDialDialog(const QString& l, const QString& ic,
-    const QtopiaServiceRequest& a, QWidget* parent) :
-    QDialog(parent),
-    action(a),
-    label(l),
-    icon(ic)
-{
-    init();
-}
-
-/*!
-  Constructs a QSpeedDialDialog object for selecting a speed dial action.
-*/
-QSpeedDialDialog::QSpeedDialDialog(QWidget* parent) :
-    QDialog(parent)
-{
-    init();
-}
-
-void QSpeedDialDialog::init()
-{
-    setModal(true);
-    setWindowState(windowState() | Qt::WindowMaximized);
-
-    QVBoxLayout *vb = new QVBoxLayout(this);
-    vb->setMargin(0);
-
-    if ( action.isNull() ) {
-        list = new QSpeedDialList(this);
-        list->setActionChooserEnabled(false);
-    } else {
-        list = new QSpeedDialList(label, icon, this);
+    // possible slots - 1 ~ 99
+    QList<QString> notAvailableStrings = QSpeedDial::assignedInputs();
+    QList<int> notAvailable;
+    bool ok=false;
+    foreach(QString str, notAvailableStrings){
+        int num = str.toInt(&ok);
+        if(ok&&num)
+            notAvailable<<num;
     }
-    list->setFrameStyle(QFrame::NoFrame);
-    if (list->count() > 0) {
-        int currentRow = action.isNull() ? 0 : firstAvailableSlot() - 1;
-        list->setCurrentRow(currentRow);
-        // scroll to the row above the current row to indicate this row is the next available slot.
-        list->scrollTo(list->model()->index( currentRow > 0 ? currentRow - 1 : currentRow, 0, QModelIndex()));
-    } else {
-        list->setCurrentRow(-1);
+    qSort(notAvailable);
+    int acc=0;
+    foreach(int i, notAvailable){
+        if(i != ++acc)
+            return acc;
     }
-    vb->addWidget(list);
-
-    setWindowTitle(list->windowTitle());
-
-    connect(list, SIGNAL(rowClicked(int)),
-        this, SLOT(store(int)));
-
-    QtopiaApplication::setMenuLike(this, true);
+    //No gaps, but not all used
+    if(++acc<100)
+        return acc;
+    // all slots are used.
+    return 0;
 }
 
 /*!
-  Returns the selected input.
+  \class QSpeedDial
+    \inpublicgroup QtBaseModule
+
+  \brief The QSpeedDial class provides access to the Speed Dial settings.
+
+  The QSpeedDial class includes a set of static functions that give access to the
+  Speed Dial settings. This class should not be instantiated.
+
+  The Speed Dial actions are actions from the Favorite Services, with an associated
+  input for faster access.
+
+  The input range is from 1 to 99. To allow the user to select
+  an input for a given action, use addWithDialog().
+  \image qspeeddial.png "Add with Dialog"
+
+  To directly modify the Speed Dial settings, use remove() and set().
+  Use find() to retrieve the assigned action for a given input or position.
+
+  \sa QSpeedDialList, QFavoriteServicesModel
+
+  \ingroup userinput
 */
-QString QSpeedDialDialog::choice()
+
+/*!
+  Provides a dialog that allows the user to select an input for action \a action,
+  using \a label and \a icon as the display label and icon respectively.
+  The dialog has the given \a parent.
+
+  Returns the input that the user selected, and also assigns the input to the action.
+
+  If the user cancels the dialog, a null string is returned.
+
+  \sa set()
+*/
+QString QSpeedDial::addWithDialog(const QString& label, const QString& icon,
+    const QtopiaServiceRequest& action, QWidget* parent)
 {
-    return userChoice;
+    QString ret = QString();
+    QSpeedDialAddDialog dlg(action, label,icon,qMax(firstAvailableSlot(),1),parent);
+    dlg.setObjectName("speeddial");
+    dlg.setWindowModality(Qt::WindowModal);
+    if ( QtopiaApplication::execDialog(&dlg) ){
+        ret = dlg.inputChoice();
+        QSpeedDial::set(ret,QtopiaServiceDescription(action,label,icon));
+    }
+    return ret;
 }
 
 /*!
-  Saves the service description at the input slot selected by the user.
-*/
-void QSpeedDialDialog::store(const int row)
-{
-    if(list->d->recentChange==row){
-	    list->d->recentChange=-1;
-	    return;
-    }
-    list->d->recentChange=-1;
+  Provides a dialog that allows the user to select an existing speed dial item.
+  The dialog has the given \a parent.
 
-    userChoice = QString("%1").arg(row+1);//Row 0 has speed dial 1
-    if ( !action.isNull() ){
-        QSpeedDial::set(userChoice, QtopiaServiceDescription(action, label, icon));
-    }else if ( list->isBlankSetEnabled() ) {
-        QtopiaServiceDescription* desc = QSpeedDial::find(userChoice);
-        if ( !desc || desc->request().isNull() ) {
-            //list->editItem(row);
-            return; // no accept yet
+  Similar to selectServiceWithDialog(), but returns the speed dial input selected
+  instead of the service.
+
+  If the user cancels the dialog, a null pointer is returned.
+*/
+QString QSpeedDial::selectWithDialog(QWidget* parent)
+{
+    QSpeedDialDialog dlg(parent);
+    dlg.setObjectName("speeddial");
+    dlg.setWindowModality(Qt::WindowModal);
+    if ( QtopiaApplication::execDialog(&dlg) )
+        return dlg.inputChoice();
+    else
+        return 0;
+}
+
+
+/*!
+  Returns a QtopiaServiceDescription for the given Speed Dial \a input. If the
+  input is not assigned, returns 0. The caller is responsible for deleting the
+  QtopiaServiceDescription when it is no longer needed.
+*/
+QtopiaServiceDescription* QSpeedDial::find(const QString& input)
+{
+    QSqlDatabase db = QtopiaSql::instance()->systemDatabase();
+    QSqlQuery q(db);
+    if(!q.prepare("SELECT label,icon,service,message,arguments,optionalMap FROM favoriteservices WHERE speedDial=:input")){
+        qWarning() << "Prepare Find speeddial failed:" << q.lastError().text();
+        return 0;
+    }
+    q.bindValue("input",input);
+    if(!q.exec()){
+        qWarning() << "Exec Find speeddial failed:" << q.lastError().text();
+        qLog(Sql) << q.executedQuery();
+        return 0;
+    }
+    if(q.next()){
+        QString label = q.value(0).toString();
+        QString icon = q.value(1).toString();
+        QString service = q.value(2).toString();
+        QString message = q.value(3).toString();
+        QByteArray args = q.value(4).toByteArray();
+
+        QtopiaServiceRequest req(service, message);
+        QtopiaServiceRequest::deserializeArguments(req, args);
+        QByteArray map = q.value(5).toByteArray();
+        QVariantMap optionalMap;
+        if(!map.isEmpty()){
+            QDataStream in(map);
+            in >> optionalMap;
+        }
+
+        QtopiaServiceDescription *desc= new QtopiaServiceDescription(req, label, icon, optionalMap);
+
+        return desc;
+    }
+    return 0;
+}
+
+/*!
+  Removes the action currently associated with the given Speed Dial \a input.
+  If the action is in the favorites list, it will be deleted from there as well.
+*/
+void QSpeedDial::remove(const QString& input)
+{
+    QSqlDatabase db = QtopiaSql::instance()->systemDatabase();
+    QSqlQuery q(db);
+    if(!q.prepare(QLatin1String("DELETE FROM favoriteservices WHERE speedDial = :input"))){
+        qWarning() << "Prepare remove speeddial failed:" << q.lastError().text();
+        return;
+    }
+    q.bindValue("input",input);
+    if(!q.exec()){
+        qWarning() << "Exec remove speeddial failed:" << q.lastError().text();
+        qLog(Sql) << q.executedQuery();
+    }
+
+    QtopiaIpcAdaptor tempAdaptor("QPE/FavoriteServices");
+    tempAdaptor.send(MESSAGE(change()));
+}
+
+/*!
+  Assigns the given QtopiaServiceDescription, \a r, as the action to perform when the given
+  Speed Dial \a input, is detected. Will remove any previous services assigned to that \a input
+  from the Speed Dial.
+*/
+void QSpeedDial::set(const QString& input, const QtopiaServiceDescription& r)
+{
+
+    if(input.isEmpty())
+        return;
+
+    QSqlDatabase db = QtopiaSql::instance()->systemDatabase();
+    QSqlQuery q(db);
+    if(!q.prepare(QLatin1String("SELECT id FROM favoriteservices WHERE ") +
+                QLatin1String("speedDial = :input"))){
+        qWarning() << "Prepare set speeddial failed:" << q.lastError().text();
+        return;
+    }
+    q.bindValue("input", input);
+    if(!q.exec()){
+        qWarning() << "Exec set speeddial failed:" << q.lastError().text();
+        qLog(Sql) << q.executedQuery();
+    }
+    while(q.next()){
+        QSqlQuery q2(db);
+        if(!q2.prepare(QLatin1String("UPDATE favoriteservices SET speedDial = NULL WHERE id = :id"))){
+            qWarning() << "Prepare set speeddial failed:" << q2.lastError().text();
+            return;
+        }
+        q2.bindValue(QLatin1String("id"), q.value(0).toInt());
+        if (!q2.exec()) {
+            qWarning() << "Exec Insert speed dial failed:" << q2.lastError().text();
+            qLog(Sql) << q2.executedQuery();
+            return;
         }
     }
-    accept();
+    //If no desc, don't put a null item in the list
+    if(r.isNull()){
+        QtopiaIpcAdaptor tempAdaptor("QPE/FavoriteServices");
+        tempAdaptor.send(MESSAGE(change()));
+        return;
+    }
+    if(!q.prepare(QLatin1String("SELECT id FROM favoriteservices WHERE ") +
+                QLatin1String("label = :label AND icon = :icon AND service = :service") +
+                QLatin1String(" AND message = :message AND arguments = :arguments"))){
+        qWarning() << "Prepare set speeddial failed:" << q.lastError().text();
+        return;
+    }
+    q.bindValue(QLatin1String("label"), r.label());
+    q.bindValue(QLatin1String("icon"), r.iconName());
+    q.bindValue(QLatin1String("service"), r.request().service());
+    q.bindValue(QLatin1String("message"), r.request().message());
+    QByteArray args = QtopiaServiceRequest::serializeArguments(r.request());
+    q.bindValue(QLatin1String("arguments"), args);
+    if(!q.exec()){
+        qWarning() << "Exec set speeddial failed:" << q.lastError().text();
+        qLog(Sql) << q.executedQuery();
+    }
+
+    if(q.next()){
+    //If the description is already in the list, set it's input
+        QSqlQuery q2(db);
+        if(!q2.prepare(QLatin1String("UPDATE favoriteservices SET speedDial = :input WHERE id = :id"))){
+            qWarning() << "Prepare set speeddial failed:" << q2.lastError().text();
+            return;
+        }
+        q2.bindValue(QLatin1String("input"), input);
+        q2.bindValue(QLatin1String("id"), q.value(0).toInt());
+        if (!q2.exec()) {
+            qWarning() << "Exec Insert speed dial failed:" << q2.lastError().text();
+            qLog(Sql) << q2.executedQuery();
+            return;
+        }
+    } else {
+        //Else add it (with the input)
+        QSqlQuery q2(db);
+        if(!q2.exec("SELECT COUNT(id) FROM favoriteservices")){
+            qWarning() << "Insert speed dial failed:" << q2.lastError().text();
+            qLog(Sql) << q2.executedQuery();
+        }
+        q2.first();
+        int nextIndex = q2.value(0).toInt();
+
+        if (!q2.prepare(QLatin1String("INSERT INTO favoriteservices ") +
+                    QLatin1String("(sortIndex, speedDial, label, icon, service, message, arguments, optionalMap) ") +
+                    QLatin1String("VALUES (:index, :input, :label, :icon, :service, :message, :arguments, :optionalMap)"))) {
+            qWarning() << "Prepare insert speeddial failed:" << q2.lastError().text();
+            return;
+        }
+        q2.bindValue(QLatin1String("index"), nextIndex);
+        q2.bindValue(QLatin1String("input"), input);
+        q2.bindValue(QLatin1String("label"), r.label());
+        q2.bindValue(QLatin1String("icon"), r.iconName());
+        q2.bindValue(QLatin1String("service"), r.request().service());
+        q2.bindValue(QLatin1String("message"), r.request().message());
+        //Reuse args from above
+        q2.bindValue(QLatin1String("arguments"), args);
+        if(r.optionalProperties().isEmpty()){
+            q2.bindValue(QLatin1String("optionalMap"),QVariant());
+        }else{
+            QByteArray map;
+            QDataStream ds(&map, QIODevice::WriteOnly);
+            ds << r.optionalProperties();
+            q2.bindValue(QLatin1String("optionalMap"),map);
+        }
+
+        if (!q2.exec()) {
+            qWarning() << "Exec Insert speed dial failed:" << q2.lastError().text();
+            qLog(Sql) << q2.executedQuery();
+            return;
+        }
+    }
+    QtopiaIpcAdaptor tempAdaptor("QPE/FavoriteServices");
+    tempAdaptor.send(MESSAGE(change()));
 }
 
+/*!
+  Returns a list of the currently assigned Speed Dial inputs.
+  \since 4.3
+  \sa possibleInputs()
+*/
+QList<QString> QSpeedDial::assignedInputs()
+{
 
+    QList<QString> ret;
+    QSqlDatabase db = QtopiaSql::instance()->systemDatabase();
+    QSqlQuery q(db);
+    if(!q.exec(QLatin1String("SELECT DISTINCT speedDial FROM favoriteservices WHERE speedDial IS NOT NULL"))){
+        qWarning() << "select inputs from speeddial failed" << q.lastError().text();
+        return ret;
+    }
+    while(q.next())
+        ret << q.value(0).toString();
+    return ret;
+}
 
 /*!
+  Returns a list of possible Speed Dial inputs, some of which
+  may be assigned already.
+
+  \since 4.3
+  \sa assignedInputs()
+*/
+QList<QString> QSpeedDial::possibleInputs()
+{
+    QList<QString> ret;
+
+    for (int i = 1; i < 100; i++) {
+        ret << QString::number(i);
+    }
+    return ret;
+}
+
+//QSpeedDialList Implementation
+/*!
   \class QSpeedDialList
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QSpeedDialList class provides a list widget for editing Speed Dial entries.
 
   If you need a dialog that allows the user to select a spot to insert an already selected
@@ -493,7 +497,6 @@ void QSpeedDialDialog::store(const int row)
   This signal is emitted whenever the user selects
   a different \a row (either with the keypad or the mouse).
 */
-
 /*!
   \fn QSpeedDialList::rowClicked(int row)
 
@@ -503,77 +506,44 @@ void QSpeedDialDialog::store(const int row)
 */
 
 /*!
-  \fn QSpeedDialList::itemSelected(QString input)
-
-  This signal is emitted whenever the user selects the item with
-  the specified \a input string.
-*/
-
-/*!
   Constructs a QSpeedDialList object with the given \a parent.
 */
-QSpeedDialList::QSpeedDialList(QWidget* parent) :
-    QListView(parent)
+
+QSpeedDialList::QSpeedDialList(QWidget* parent) : QSmoothList(parent)
 {
-    updateReqs();
-    init(QString());
-
-    setActionChooserEnabled(true);
-
-    connect(this, SIGNAL(rowClicked(int)), this, SLOT(editItem(int)));
-    connect(selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-            this, SLOT(sendRowChanged()));
-
-    setWindowTitle( tr( "Speed Dial" ) );
+    d = new QSpeedDialListPrivate(this);
+    setItemDelegate(d->delegate);
+    setModel(d->model);
+    setCurrentIndex(d->model->index(0,0));
+    setWindowTitle(  tr( "Speed Dial" ) );
+    connect(this,SIGNAL(activated(QModelIndex)),
+            this,SLOT(select(QModelIndex)));
+    QMenu *contextMenu = QSoftMenuBar::menuFor(this);
+    QAction *a_add = new QAction( QIcon( ":icon/edit" ),  tr("Add", "Add action"), this);
+    connect( a_add, SIGNAL(triggered()), this, SLOT(addItem()) );
+    contextMenu->addAction(a_add);
+    QAction *a_del = new QAction( QIcon( ":icon/trash" ),  tr("Remove", "Remove action"), this);
+    connect( a_del, SIGNAL(triggered()), this, SLOT(clearItem()) );
+    contextMenu->addAction(a_del);
+    QAction *a_edit = new QAction( QIcon( ":icon/edit" ),  tr("Edit", "Edit action"), this);
+    connect( a_edit, SIGNAL(triggered()), this, SLOT(editItem()) );
+    contextMenu->addAction(a_edit);
+    //setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 /*!
-    If \a on, makes blank items have a "Set..." option, even if
-    setActionChooserEnabled() has been called with the inverse
-    of \a on as its parameter.
-
-    \sa isBlankSetEnabled()
+  \internal
+  Removes the list's edit menu.
+  There is not currently a method to get it back.
 */
-void QSpeedDialList::setBlankSetEnabled(bool on)
+void QSpeedDialList::disableEditMenu()
 {
-    d->delegate.setBlankSetEnabled(on);
+    delete QSoftMenuBar::menuFor(this);
+    QSoftMenuBar::menuFor(this);
 }
 
 /*!
-    Returns true if blank items have a "Set..." option, even if
-    setActionChooserEnabled() has been called.
-
-    \sa setBlankSetEnabled()
-*/
-bool QSpeedDialList::isBlankSetEnabled() const
-{
-    return d->delegate.isBlankSetEnabled();
-}
-
-void QSpeedDialList::setActionChooserEnabled(bool on)
-{
-    d->allowActionChooser = on;
-    if ( on ) {
-        QMenu *contextMenu = QSoftMenuBar::menuFor(this);
-
-        d->a_edit = new QAction( QIcon( ":icon/edit" ), tr("Set...", "set action"), this);
-        connect( d->a_edit, SIGNAL(triggered()), this, SLOT(editItem()) );
-        contextMenu->addAction(d->a_edit);
-
-        d->a_del = new QAction( QIcon( ":icon/trash" ), tr("Delete"), this);
-        connect( d->a_del, SIGNAL(triggered()), this, SLOT(clearItem()) );
-        contextMenu->addAction(d->a_del);
-    } else {
-        delete d->a_edit;
-        d->a_edit = 0;
-        delete d->a_del;
-        d->a_del = 0;
-    }
-    d->delegate.setBlankSetEnabled(on);
-}
-
-/*!
-  Destroys the QSpeedDialList object.
+  Destroys this QSpeedDialList
 */
 QSpeedDialList::~QSpeedDialList()
 {
@@ -581,214 +551,45 @@ QSpeedDialList::~QSpeedDialList()
 }
 
 /*!
-  \internal
-
-  Used by QSpeedDialDialog to create a special single-action insertion version of the list.
-*/
-QSpeedDialList::QSpeedDialList(const QString& label, const QString& icon, QWidget* parent) :
-    QListView(parent)
-{
-    updateReqs();
-    init(QString());
-
-    setWindowTitle( tr( "Speed Dial" ) );
-
-    d->setSelectionDetails(label, icon);
-}
-
-/*!
-  Removes the Speed Dial entry in the list at \a row.
-*/
-void QSpeedDialList::clearItem(int row)
-{
-    QSpeedDialItem* item = d->item(row);
-    if( item  ) {
-        item->clear();
-        QSpeedDial::remove(item->input());
-    }
-}
-
-/*!
-  \overload
-
-  Removes the Speed Dial entry at the currently selected row.
-*/
-void QSpeedDialList::clearItem()
-{
-    QSpeedDialItem* item = d->item(currentRow());
-    if( item  ) {
-        item->clear();
-        QSpeedDial::remove(item->input());
-    }
-}
-
-/*!
-  Edits the Speed Dial entry at \a row.
-
-  Presents the a QtopiaServiceSelector for the user
-  to select an service performed when the input at \a row is triggered.
-
-  \sa QtopiaServiceSelector
-*/
-void QSpeedDialList::editItem(int row)
-{
-    if ( (d->allowActionChooser || isBlankSetEnabled()) && !d->actionChooser ) {
-        d->actionChooser = new QtopiaServiceSelector(this);
-        d->actionChooser->addApplications();
-        QtopiaApplication::setMenuLike( d->actionChooser, true );
-    }
-    QSpeedDialItem* item = d->item(row);
-    if( item && (d->allowActionChooser || isBlankSetEnabled()) ) {
-        QtopiaServiceDescription desc = item->description();
-        if ( d->allowActionChooser || desc.request().isNull() ) {
-            d->recentChange=row;
-            if ( d->actionChooser->edit(item->input(),desc) ) {
-                if ( desc.request().isNull() ) {
-                    QSpeedDial::remove(item->input());
-                } else {
-                    QSpeedDial::set(item->input(), desc);
-                }
-                reload(item->input());
-                // force a reload of the context menu
-                //emit activated(currentIndex());
-                return;
-            }
-        }
-    }
-    emit itemSelected(rowInput(row));
-}
-
-/*!
-  \overload
-
-  Edits the Speed Dial entry at the currently selected row.
-*/
-void QSpeedDialList::editItem()
-{
-    editItem(currentRow());
-}
-
-/*!
-  \internal
-
-  Used to initialize the list and populate it with entries.
-*/
-void QSpeedDialList::init(const QString& f)
-{
-    d = new QSpeedDialListPrivate(this);
-    d->sel = 0;
-    d->sel_tid = 0;
-    int fn = 0;
-
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    //
-    //  Create entries for each possible speed dial number
-    //
-
-    for( int i = 1; i < 100; i++ )
-    {
-        QString inp = QString::number(i);
-        QHash<QString, QtopiaServiceDescription*>::iterator it = recs->find(inp);
-        QtopiaServiceDescription* rec = 0;
-
-        if(it != recs->end())
-            rec = recs->find(inp).value();
-
-        new QSpeedDialItem(QString::number(i), rec ? *rec : QtopiaServiceDescription(), this);
-        if( f == inp || i == fn )
-            setCurrentRow(i - 1);
-    }
-
-    if(f.isEmpty() && model()->rowCount() > 0)
-        setCurrentRow(0);
-
-    //
-    //  Deal with speed dials above 100 ?
-    //
-
-    QHashIterator<QString, QtopiaServiceDescription*> it(*recs);
-    QtopiaServiceDescription* rec;
-    while( it.hasNext() )
-    {
-        it.next();
-        rec = it.value();
-        QString inp = it.key();
-        bool ok;
-        int num = inp.toInt(&ok);
-
-        if( !ok || num > 99 ) // skip numbers 0..99, done above
-        {
-            new QSpeedDialItem(inp, *rec, this);
-            if( f == inp )
-                setCurrentRow(count() - 1);
-        }
-    }
-
-    connect(this,SIGNAL(activated(QModelIndex)),
-            this,SLOT(select(QModelIndex)));
-    connect(this,SIGNAL(clicked(QModelIndex)),
-            this,SLOT(click(QModelIndex)));
-}
-
-void QSpeedDialList::setCurrentRow(int row)
-{
-    setCurrentIndex(model()->index(row, 0));
-}
-
-/*!
   \fn void QSpeedDialList::setCurrentInput(const QString& input)
 
   Selects the row from the list that corresponds to the Speed Dial \a input.
+  If there is no such row then it will go the the one before where it would be.
 */
 void QSpeedDialList::setCurrentInput(const QString& sd)
 {
-    for(int i = 0; i < (int)count(); ++i)
+    int i;
+    for(i = 0; i < d->model->rowCount(); ++i)
     {
-        if(d->item(i)->input() == sd)
+        if(d->model->data(d->model->index(i,0,QModelIndex()),Qt::UserRole).toInt() == sd.toInt())
         {
             setCurrentRow(i);
             return;
         }
+        else if(d->model->data(d->model->index(i,0,QModelIndex()),Qt::UserRole).toInt() > sd.toInt())
+        {
+            break;
+        }
     }
+    if(i==0)
+        ++i;
+    setCurrentRow(--i);
+    return;
 }
-
 
 /*!
   \fn void QSpeedDialList::reload(const QString& input)
 
   Forces the entry for Speed Dial at \a input to be refreshed from the source.
 */
-void QSpeedDialList::reload(const QString& sd)
+void QSpeedDialList::reload(const QString& input)
 {
-    QHash<QString, QtopiaServiceDescription*>::iterator it = recs->find(sd);
-    QtopiaServiceDescription* r = 0;
-
-    if(it != recs->end())
-        r = it.value();
-
-    for(int i = 0; i < (int)count(); ++i)
-    {
-        QSpeedDialItem *it = (QSpeedDialItem*)d->item(i);
-        if( it && it->input() == sd )
-        {
-            if( r )
-                it->changeRecord(r);
-            else
-                it->clear();
-
-            update();
-            return;
-        }
-    }
-
-    if( r )
-    {
-        new QSpeedDialItem(sd, *r, this);
-        setCurrentRow(count() - 1);
-    }
+    //Q_UNUSED(input);
+    /*Easiest to just say something's changed, if that's too slow
+    then the model could just be told that specific row changed*/
+    d->model->change();
+    setCurrentInput(input);
 }
-
 /*!
   \internal
 
@@ -804,18 +605,32 @@ void QSpeedDialList::sendRowChanged()
   \internal
 
   Catches selection events and emits an event more meaningful to outside this class
-  (emits a row instead of a QModelIndex)
+  (emits a row instead of a QModelIndex). Also attempts the selected service request.
 */
 void QSpeedDialList::select(const QModelIndex& index)
 {
+    if(d->selectorPos){
+        d->selectorPos = rowInput(index.row()).toInt();
+        d->model->moveSelector(d->selectorPos);
+        setCurrentInput(QString::number(d->selectorPos));
+        emit currentRowChanged(index.row());
+        emit rowClicked(index.row());
+        return;//When in selector mode don't activate, but move Selector
+    }
     emit currentRowChanged(index.row());
+    emit rowClicked(index.row());
+    QtopiaServiceDescription *desc = QSpeedDial::find(rowInput(index.row()));
+    if(desc){
+        desc->request().send();
+        delete desc;
+    }
 }
 
 /*!
   \internal
 
   Catches click events and emits an event more meaningful to outside this class
-  (emits a row instead of a QModelIndex)
+  (emits a row instead of a QModelIndex).
 */
 void QSpeedDialList::click(const QModelIndex& index)
 {
@@ -829,7 +644,7 @@ void QSpeedDialList::click(const QModelIndex& index)
 QString QSpeedDialList::rowInput(int row) const
 {
     if(row >= 0 && row < count())
-        return d->item(row)->input();
+        return d->model->data(d->model->index(row,0,QModelIndex()),Qt::UserRole).toString();
     else
         return QString();
 }
@@ -841,72 +656,17 @@ QString QSpeedDialList::rowInput(int row) const
 */
 QString QSpeedDialList::currentInput() const
 {
-    QSpeedDialItem *it = d->item(currentRow());
-    return it ? it->input() : QString();
+    return d->model->data(currentIndex(),Qt::UserRole).toString();
 }
 
 /*!
   \internal
 
-  Detects button presses and uses them to navigate the list and make selections
+  Does nothing as QSmoothList doesn't support it.
+  Preserved for binary compatibility.
 */
-void QSpeedDialList::keyPressEvent(QKeyEvent* e)
+void QSpeedDialList::scrollContentsBy(int /*dx*/, int /*dy*/)
 {
-    int k = e->key();
-    if( k >= Qt::Key_0 && k <= Qt::Key_9 )
-    {
-        d->sel = d->sel * 10 + k - Qt::Key_0;
-        if ( d->sel_tid )
-        {
-            killTimer(d->sel_tid);
-            d->sel_tid = 0;
-        }
-
-        if ( d->sel )
-        {
-            setCurrentInput(QString::number(d->sel));
-            if ( d->sel < 10 )
-                d->sel_tid = startTimer(800);
-            else
-                d->sel = 0;
-        }
-    }
-    else if( k == Qt::Key_Select )
-    {
-        if(currentRow() > -1)
-            emit rowClicked(currentRow());
-    }
-    else
-    {
-        QListView::keyPressEvent(e);
-    }
-}
-
-/*!
-  \internal
-
-  Used as a timer to help detect Speed Dial style user input (holding down number keys)
-*/
-void QSpeedDialList::timerEvent(QTimerEvent* e)
-{
-    if ( e->timerId() == d->sel_tid ) {
-        killTimer(d->sel_tid);
-        d->sel = 0;
-        d->sel_tid = 0;
-    } else {
-        QListView::timerEvent( e );
-    }
-}
-
-/*!
-  \internal
-
-  Make sure the list gets redisplayed on scroll
-*/
-void QSpeedDialList::scrollContentsBy(int dx, int dy)
-{
-    QListView::scrollContentsBy(dx, dy);
-    update();
 }
 
 /*!
@@ -915,7 +675,7 @@ void QSpeedDialList::scrollContentsBy(int dx, int dy)
 */
 int QSpeedDialList::count() const
 {
-    return ((QSpeedDialModel*)model())->rowCount();
+    return d->model->rowCount();
 }
 
 /*!
@@ -927,177 +687,398 @@ int QSpeedDialList::currentRow() const
     return currentIndex().row();
 }
 
-
-
-
 /*!
-  \class QSpeedDial
-  \mainclass
-  \brief The QSpeedDial class provides access to the Speed Dial settings.
-
-  The QSpeedDial class includes a set of static functions that give access to the
-  Speed Dial settings. This class should not be instantiated.
-
-  The input range is from 1 to 99. To allow the user to select
-  an input for a given action, use addWithDialog().
-  \image qspeeddial.png "Add with Dialog"
-
-  To directly modify the Speed Dial settings, use remove() and set().
-  Use find() to retrieve the assigned action for a given input.
-
-  \sa QSpeedDialList
-
-  \ingroup userinput
+  Sets the current row to \a row.
 */
-
-/*!
-  Provides a dialog that allows the user to select an input for action \a action,
-  using \a label and \a icon as the display label and icon respectively.
-  The dialog has the given \a parent.
-
-  Returns the input that the user selected, and assigns the input to the action. 
-
-  If the user cancels the dialog, a null string is returned.
-
-  \sa set()
-*/
-QString QSpeedDial::addWithDialog(const QString& label, const QString& icon,
-    const QtopiaServiceRequest& action, QWidget* parent)
+void QSpeedDialList::setCurrentRow(int row)
 {
-    QSpeedDialDialog dlg(label, icon, action, parent);
-    dlg.setObjectName("speeddial");
-    if ( QtopiaApplication::execDialog(&dlg) )
-        return dlg.choice();
-    else
-        return QString();
+    setCurrentIndex(d->model->index(row,0,QModelIndex()));
 }
 
 /*!
-  Provides a dialog that allows the user to select an existing speed dial item.
-  The dialog has the given \a parent.
+  Adds a service to the Speed Dial
 
-  This dialog may be useful for example to provide a list of "Favourites".
+  Presents the a QtopiaServiceSelector for the user
+  to select a service performed, and also asks for an input to associate with it.
 
-  Returns the speed dial selected.
-
-  If the user cancels the dialog, a null pointer is returned.
+  \sa QtopiaServiceSelector
 */
-QString QSpeedDial::selectWithDialog(QWidget* parent)
+void QSpeedDialList::addItem()
 {
-    QSpeedDialDialog dlg(parent);
-    dlg.setObjectName("speeddial");
-    dlg.setBlankSetEnabled(true);
-    if ( QtopiaApplication::execDialog(&dlg) )
-        return dlg.choice();
-    else
-        return 0;
+    if(!d->serviceSelector){
+        QWaitWidget *waitWidget = new QWaitWidget(this);
+        waitWidget->show();
+        QtopiaApplication::processEvents(QEventLoop::AllEvents,1000);
+
+        d->serviceSelector = new QtopiaServiceSelector(this);
+        d->serviceSelector->addApplications();
+        QtopiaApplication::setMenuLike(d->serviceSelector,true);
+
+        delete waitWidget;
+    }
+    QtopiaServiceDescription desc;
+    if(d->serviceSelector->edit(tr("Speed Dial"),desc)){
+        if(!desc.isNull()){
+            QString ok = QSpeedDial::addWithDialog(desc.label(),desc.iconName(),
+                            desc.request(),this);
+            if(ok.isNull())
+                return;
+            reload(ok);
+        }
+     }
 }
 
+/*!
+  Edits the Speed Dial entry at \a row.
+
+  Presents the a QtopiaServiceSelector for the user
+  to select a service performed for the same input.
+
+  \sa QtopiaServiceSelector
+*/
+void QSpeedDialList::editItem(int row)
+{
+    if(!d->serviceSelector){
+        QWaitWidget *waitWidget = new QWaitWidget(this);
+        waitWidget->show();
+        QtopiaApplication::processEvents(QEventLoop::AllEvents,1000);
+
+        d->serviceSelector = new QtopiaServiceSelector(this);
+        d->serviceSelector->addApplications();
+        QtopiaApplication::setMenuLike(d->serviceSelector,true);
+
+        delete waitWidget;
+    }
+    QString inp = rowInput(row);
+    QtopiaServiceDescription *desc;
+    desc = QSpeedDial::find(inp);
+    if(desc && d->serviceSelector->edit(tr("Speed Dial"),*desc)){
+        QSpeedDial::remove(inp);
+        QSpeedDial::set(inp,*desc);
+        reload(inp);
+    }
+    if (desc)
+        delete desc;
+}
 
 /*!
-  Returns a QtopiaServiceDescription for the given Speed Dial \a input.
+
+  Edits the Speed Dial entry at the currently selected row.
 */
-QtopiaServiceDescription* QSpeedDial::find(const QString& input)
+
+void QSpeedDialList::editItem()
 {
-    QHash<QString, QtopiaServiceDescription*>::iterator it;
-    QtopiaServiceDescription* rec;
+    editItem(currentRow());
+}
 
-    updateReqs();
+/*!
+  Removes the Speed Dial entry at the given \a row. The action
+  is not removed from Favorite Services.
+*/
+void QSpeedDialList::clearItem(int row)
+{
+    QSpeedDial::remove(rowInput(row));
+    d->model->change();
+    if(row >= count())
+        row--;
+    setCurrentRow(row);
+}
 
-    it = recs->find(input);
-    if(it != recs->end())
+/*!
+  Removes the Speed Dial entry at the currently selected row. The action
+  is not removed from Favorite Services.
+*/
+void QSpeedDialList::clearItem()
+{
+    clearItem(currentRow());
+}
+
+/*!
+  \internal
+  Sets the list to 'selection mode' where it shows where the given
+  action would end up. Must have a QSpeedDial Model already set 
+*/
+void QSpeedDialList::setSelector(int startPos, const QString &label, const QString &icon)
+{
+    d->selectorPos = startPos;
+    d->model->setSelector(startPos, label, icon);
+    setCurrentInput(QString::number(startPos));
+}
+
+/*!
+  \internal
+*/
+QString QSpeedDialList::selectorInput()
+{
+    return QString::number(d->selectorPos);
+}
+
+/*!
+  \internal
+*/
+void QSpeedDialList::clearKeyInput()
+{
+    d->input=0;
+}
+
+/*!\internal
+  Preserved for Binary Compatibility, no longer used in implementation
+*/
+void QSpeedDialList::timerEvent(QTimerEvent*e)
+{
+    QSmoothList::timerEvent(e);
+}
+
+/*!
+  \internal
+*/
+void QSpeedDialList::keyPressEvent(QKeyEvent* e)
+{
+    int k = e->key();
+    if(!d->selectorPos){
+        if( k >= Qt::Key_0 && k <= Qt::Key_9 ){
+            d->input = d->input * 10 + k - Qt::Key_0;
+            if ( d->input ){
+                setCurrentInput(QString::number(d->input));
+                if ( d->input < 10 ){
+                    d->inputTimer->start(800);
+                }else{
+                    d->input = 0;
+                    d->inputTimer->stop();
+                }
+            }
+        }else{
+            QSmoothList::keyPressEvent(e);
+        }
+        return;
+    }
+    if( k >= Qt::Key_0 && k <= Qt::Key_9 ){
+        d->input = d->input * 10 + k - Qt::Key_0;
+        if ( d->input ){
+            d->model->moveSelector(d->input);
+            setCurrentInput(QString::number(d->input));
+            d->selectorPos = d->input;
+            if ( d->input < 10 ){
+                d->inputTimer->start(800);
+            }else{
+                d->input = 0;
+                d->inputTimer->stop();
+            }
+        }
+    }else if(k == Qt::Key_Up){
+        if(d->selectorPos>1){
+            d->selectorPos--;
+            d->model->moveSelector(d->selectorPos);
+            setCurrentInput(QString::number(d->selectorPos));
+        }
+    }else if(k == Qt::Key_Down){
+        if(d->selectorPos<99){
+            d->selectorPos++;
+            d->model->moveSelector(d->selectorPos);
+            setCurrentInput(QString::number(d->selectorPos));
+        }
+    }else if( k == Qt::Key_Select ){
+        if(currentRow() > -1)
+            emit rowClicked(currentRow());
+    }else{
+        QSmoothList::keyPressEvent(e);
+    }
+}
+//QSpeedDialDialog Implementation
+
+QSpeedDialDialog::QSpeedDialDialog(QWidget *parent):QDialog(parent)
+{
+    setModal(true);
+    setWindowState(windowState() | Qt::WindowMaximized);
+
+    model = new QSpeedDialModel(this);
+    list = new QSmoothList(this);
+    delegate = new QSpeedDialItemDelegate(list);
+    list->setModel(model);
+    list->setItemDelegate(delegate);
+    //list->setFrameStyle(QFrame::NoFrame);
+
+    QVBoxLayout *vb = new QVBoxLayout(this);
+    vb->setMargin(0);
+    vb->addWidget(list);
+    m_inputChoice = QString();
+    QObject::connect(list, SIGNAL(activated(QModelIndex)),
+            this, SLOT(store(QModelIndex)));
+    setWindowTitle(tr("Select Speed Dial"));
+}
+void QSpeedDialDialog::store(const QModelIndex &selected){
+    m_inputChoice = model->data(selected,Qt::UserRole).toString();
+    accept();
+}
+
+//QSpeedDialModel Implementation
+/*!
+    \internal
+    This class accesses the SQL Database directly for efficiency.
+    Care must be taken to keep it in sync with QFavoritesList
+*/
+QSpeedDialModel::QSpeedDialModel(QObject* parent) : QAbstractListModel(parent)
+{
+    QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor("QPE/FavoriteServices", this);
+    QtopiaIpcAdaptor::connect(adaptor, MESSAGE(change()),
+                              this, SLOT(change()));
+    changed = true;
+    countChanged = true;
+    selectorPos = 0;
+}
+QSpeedDialModel::~QSpeedDialModel()
+{
+}
+void QSpeedDialModel::change()
+{
+    changed = true;
+    countChanged = true;
+    reset();
+}
+/*!
+  \internal
+  The Selector item is not really there, it is there to show what would happen
+  if that item was added. The way this is implemented is that it's details are
+  stored, and it is treated as another item from outside the model. Internally
+  it doesn't enter the cache, values like rowCount and the cache lists indexes
+  are modified to go around it or to it.
+*/
+void QSpeedDialModel::setSelector(int startPos, const QString &label, const QString &icon)
+{
+    shadowing=false;
+    selectorLabel = label;
+    selectorIcon = icon[0] == '/' || icon[0] == ':' ? icon : QLatin1String(":icon/") + icon;
+    selectorRow = -1;
+    moveSelector(startPos);
+    reset();
+}
+void QSpeedDialModel::moveSelector(int newPos)
+{
+    //Iff there are other entries, inputcache must be loaded
+    if(rowCount())
+        data(index(0,0,QModelIndex()));
+
+    bool oldShadowing=shadowing;
+    int oldRow = selectorRow;
+    selectorPos = newPos;
+    Q_ASSERT(selectorPos);
+    int i;
+
+    for(i = 0; i<inputCache.size(); i++)
     {
-        rec = it.value();
-        return rec;
+        if(inputCache.at(i).toInt()>=selectorPos){
+            break;
+        }
     }
-
-    return 0;
-}
-
-/*!
-  Removes the action currently associated with the given Speed Dial \a input.
-*/
-void QSpeedDial::remove(const QString& input)
-{
-    updateReqs();
-    recs->remove(input);
-    writeReqs(input); // NB. must do this otherwise won't work
-}
-
-/*!
-  Assigns the given QtopiaServiceDescription, \a r, as the action to perform when the given
-  Speed Dial \a input, is detected.
-*/
-void QSpeedDial::set(const QString& input, const QtopiaServiceDescription& r)
-{
-    updateReqs();
-    recs->insert(input,new QtopiaServiceDescription(r));
-    writeReqs(input);
-}
-
-/*!
-  Returns a list of the currently assigned Speed Dial inputs.
-  \since 4.3
-  \sa possibleInputs()
-*/
-QList<QString> QSpeedDial::assignedInputs()
-{
-    updateReqs();
-    return recs->uniqueKeys();
-}
-
-/*!
-  Returns a list of possible Speed Dial inputs, some of which
-  may be assigned already.
-
-  \since 4.3
-  \sa assignedInputs()
-*/
-QList<QString> QSpeedDial::possibleInputs()
-{
-    QList<QString> ret;
-
-    for (int i = 1; i < 100; i++) {
-        ret << QString::number(i);
+    selectorRow = i;
+    shadowing = (i==inputCache.size() ? false : inputCache.at(i).toInt()==selectorPos);
+    if(shadowing!=oldShadowing){
+        //Either it went up and isn't shadowing, which is redraw it and what it was covering but don't move,
+        //or it went down and they swap places, and need redraws. This can't happen if it was the last row
+        emit dataChanged(index(oldRow,0,QModelIndex()), index(oldRow+1,0,QModelIndex()));
+        return;
     }
-    return ret;
+    if(oldRow<0)
+        oldRow = selectorRow;
+    emit dataChanged(index(oldRow,0,QModelIndex()), index(selectorRow,0,QModelIndex()));
+}
+int QSpeedDialModel::rowCount(const QModelIndex & parent) const
+{
+    Q_UNUSED(parent);
+    if(countChanged){
+        QSqlDatabase db = QtopiaSql::instance()->systemDatabase();
+        QSqlQuery q(db);
+        if(!q.exec("SELECT COUNT(speedDial) FROM favoriteServices WHERE speedDial IS NOT NULL")){
+            qWarning() << "Count speed dial failed:" << q.lastError().text();
+            return 0;
+        }
+        q.first();
+        rowCountCache=q.value(0).toInt();
+        countChanged = false;
+    }
+    if(selectorPos)
+        return rowCountCache+1;
+    return rowCountCache;
+}
+QVariant QSpeedDialModel::data(const QModelIndex & index, int role) const
+{
+    if(!index.isValid())
+        return QVariant();
+    
+    if(changed){
+        QSqlDatabase db = QtopiaSql::instance()->systemDatabase();
+        QSqlQuery q(db);
+        if(!q.exec(QLatin1String("SELECT label,icon,speedDial FROM favoriteservices WHERE speedDial IS NOT NULL ORDER BY speedDial asc"))){
+            qWarning() << "Select from speed dial failed:" << q.lastError().text();
+            return QVariant(tr("An Error Has Occured"));
+        }
+        iconCache.clear();
+        displayCache.clear();
+        inputCache.clear();
+        while (q.next()) {
+            QString input = q.value(2).toString();
+            QString label = q.value(0).toString();
+            QString icon = q.value(1).toString();
+            if ( icon[0] != '/' && icon[0] != ':' )
+                icon = QLatin1String(":icon/") + icon;
+            displayCache << label;
+            iconCache << icon;
+            inputCache << input;
+        }
+        changed = false;
+    }
+    int offset=0;
+    if(selectorPos){
+        if(index.row() == selectorRow){
+            if(role==Qt::DisplayRole){
+                return QVariant(selectorLabel);
+            }else if(role==Qt::DecorationRole){
+                return QVariant(QIcon(selectorIcon));
+            }else if(role==Qt::UserRole){
+                return QVariant(selectorPos);
+            }else if(role==Qt::UserRole+1){
+                return QVariant(false);
+            }
+            return QVariant();
+        }else if (index.row()>selectorRow){
+            offset=-1;
+        }
+    }
+    if(role==Qt::DisplayRole){
+        return QVariant(displayCache[index.row()+offset]);
+    }else if(role==Qt::DecorationRole){
+        return QVariant(QIcon(iconCache[index.row()+offset]));
+    }else if(role==Qt::UserRole){
+        return QVariant(inputCache[index.row()+offset]);
+    }else if(role==Qt::UserRole+1){
+        if(selectorPos && index.row() == selectorRow+1 && shadowing)
+            return QVariant(true);
+        return QVariant(false);
+    }
+    return QVariant();
 }
 
-QSpeedDialItemDelegate::QSpeedDialItemDelegate(QListView* parent)
-    : QAbstractItemDelegate(parent)
+//QSpeedDialItemDelegate implmentation
+QSpeedDialItemDelegate::QSpeedDialItemDelegate(QSmoothList* parent)
+    : QtopiaItemDelegate(parent)
 {
     parentList = parent;
 
     iconSize = QApplication::style()->pixelMetric(QStyle::PM_ListViewIconSize);
-    showInput = !QApplication::style()->inherits("QThumbStyle");
-    showSet = false;
-
     QFontMetrics fm(parent->font());
     textHeight = fm.height();
 
-    if(iconSize > textHeight)
-        itemHeight = iconSize;
-    else
-        itemHeight = textHeight;
+    itemHeight = qMax(iconSize,textHeight);
 }
 
 QSpeedDialItemDelegate::~QSpeedDialItemDelegate()
 {
 }
 
-void QSpeedDialItemDelegate::setSelectionDetails(QString label, QString icon)
-{
-    selText = label;
-    selIcon = QIcon(QLatin1String(":icon/")+icon);
-    if (selIcon.isNull())
-        selIcon = QIcon(QLatin1String(":image/")+icon);
-}
-
 void QSpeedDialItemDelegate::paint(QPainter * painter,
     const QStyleOptionViewItem & option, const QModelIndex & index) const
 {
     QSpeedDialModel* model = (QSpeedDialModel*)index.model();
-
     if(model)
     {
         QFontMetrics fm(option.font);
@@ -1115,122 +1096,111 @@ void QSpeedDialItemDelegate::paint(QPainter * painter,
         else
         {
             painter->setPen(option.palette.text().color());
-            painter->fillRect(option.rect, option.palette.base());
         }
 
-        QSpeedDialItem* item = model->item(index);
-        QString input = item->input();
-        QPixmap pixmap;
-        QString label;
+        QString input = model->data(index,Qt::UserRole).toString();
+        QPixmap pixmap = model->data(index,Qt::DecorationRole).value<QIcon>().pixmap(option.decorationSize);
+        QString label = model->data(index,Qt::DisplayRole).toString();
+        bool overwrite = model->data(index,Qt::UserRole+1).toBool();
 
-        if(selected && !selText.isEmpty())
-        {
-            pixmap = selIcon.pixmap(option.decorationSize);
-            label = selText;
-        }
-        else
-        {
-            if (!item->description().iconName().isEmpty())
-                pixmap = QIcon(QLatin1String(":icon/")+item->description().iconName()).pixmap(option.decorationSize);
-            label = item->description().label();
-        }
+        if(overwrite)
+            pixmap =model->data(index,Qt::DecorationRole).value<QIcon>().pixmap(option.decorationSize,QIcon::Disabled);
 
         QTextOption to;
         to.setAlignment( QStyle::visualAlignment(qApp->layoutDirection(),
                     Qt::AlignLeft) | Qt::AlignVCenter);
         bool rtl = qApp->layoutDirection() == Qt::RightToLeft;
-
-        if ( showInput ) {
+        if(!overwrite)
             painter->drawText(QRect(x, y+1, width, height), input, to);
-            if ( rtl )
-                width -= fm.width(input);
-            else
-                x += fm.width(input);
-
+        if (!rtl )
+            x += fm.width(QLatin1String("00"));
+        width -= fm.width(QLatin1String("00"));
+        if(!overwrite)
             painter->drawText(QRect(x,y+1,width,height), QLatin1String(":"), to);
-            if ( rtl )
-                width -= fm.width(QLatin1String(": "));
-            else
-                x += fm.width(QLatin1String(": "));
-        }
-
-        if ( showSet && pixmap.isNull() && label.isEmpty() ) {
-            pixmap = QIcon(":icon/reset").pixmap(option.decorationSize);
-            label = QSpeedDialList::tr("Set...", "set action");
-        }
-
+        if (!rtl )
+            x += fm.width(QLatin1String(": "));
+        width -= fm.width(QLatin1String(": "));
+    
         if(!pixmap.isNull())
         {
             if ( rtl ) {
-                painter->drawPixmap(x+width-pixmap.width(), y+1, pixmap);
-                width -= pixmap.width() + fm.width(QLatin1String(" "));
+                painter->drawPixmap(QRect(x+width-pixmap.width(), y+1, height-1,height-1), pixmap);
+                width -= (height - 1) + fm.width(QLatin1String(" "));
             } else {
-                painter->drawPixmap(x, y+1, pixmap);
-                x += pixmap.width() + fm.width(QLatin1String(" "));
+                painter->drawPixmap(QRect(x, y+1, height-1, height-1), pixmap);
+                x += height - 1  + fm.width(QLatin1String(" "));
+                width -= (height - 1) + fm.width(QLatin1String(" "));
             }
         }
         label = elidedText( fm, width, Qt::ElideRight, label );
+        if(overwrite){
+            QFont struckFont(painter->font());
+            struckFont.setStrikeOut(true);
+            painter->setFont(struckFont);
+        }
         painter->drawText(QRect(x, y+1, width, height), label, to);
+        if(overwrite){
+            QFont unstruckFont(painter->font());
+            unstruckFont.setStrikeOut(false);
+            painter->setFont(unstruckFont);
+        }
     }
 }
 
 QSize QSpeedDialItemDelegate::sizeHint(const QStyleOptionViewItem &, const QModelIndex &) const
 {
-    return QSize(parentList->viewport()->width(), itemHeight+2);
+    return QSize(parentList->width(), itemHeight+2);
 }
 
+//QSpeedDialAddDialog Implementation
 
-
-QSpeedDialModel::QSpeedDialModel(QObject* parent)
-    : QAbstractListModel(parent)
+QSpeedDialAddDialog::QSpeedDialAddDialog(const QtopiaServiceRequest &req, const QString &label,
+        const QString &icon, int input, QWidget *parent): QDialog(parent),
+    m_prevInput(QString())
 {
+    m_inputChoice = QString();
+    setModal(true);
+    setWindowModality(Qt::WindowModal);
+    setWindowState(windowState() | Qt::WindowMaximized);
+    QtopiaApplication::setMenuLike(this,true);
+    QSoftMenuBar::menuFor(this);
+
+    m_desc = QtopiaServiceDescription(req,label,icon);
+    QFavoriteServicesModel *favoriteModel = new QFavoriteServicesModel(this);
+    QModelIndex descIndex = favoriteModel->indexOf(m_desc);
+    if(descIndex.isValid()){
+        m_prevInput = favoriteModel->speedDialInput(descIndex);
+        if(!m_prevInput.isEmpty()){
+            QSpeedDial::remove(m_prevInput);
+            input = m_prevInput.toInt();
+        }
+    }
+
+    list = new QSpeedDialList(this);
+    list->setSelector(input, label, icon);
+    list->disableEditMenu();
+
+    QVBoxLayout *vb = new QVBoxLayout(this);
+    vb->setMargin(0);
+    vb->addWidget(list);
+    connect(list, SIGNAL(rowClicked(int)),
+            this, SLOT(store()));
+    connect(this, SIGNAL(rejected()),
+            this, SLOT(undoRemove()));
+    setWindowTitle(tr("Set Speed Dial"));
+
 }
 
-QSpeedDialModel::~QSpeedDialModel()
+void QSpeedDialAddDialog::undoRemove()
 {
-    for(int i = 0; i < mItems.size(); i++)
-        delete mItems[i];
+    if(!m_prevInput.isEmpty())
+        QSpeedDial::set(m_prevInput, m_desc);
 }
 
-int QSpeedDialModel::rowCount(const QModelIndex & parent) const
+void QSpeedDialAddDialog::store()
 {
-    if(parent.parent() == QModelIndex())
-        return mItems.count();
-    else
-        return 0;
+    m_inputChoice = list->selectorInput();
+    accept();
 }
-
-QVariant QSpeedDialModel::data(const QModelIndex &, int) const
-{
-    return QVariant();
-}
-
-QSpeedDialItem* QSpeedDialModel::item(const QModelIndex & index)
-{
-    int row = index.row();
-    int rowcount = rowCount();
-
-    if(row >= 0 && row < rowcount)
-        return mItems.at(index.row());
-    else if(rowcount)
-        return mItems.at(rowcount - 1);
-    else
-        return 0;
-}
-
-QSpeedDialItem* QSpeedDialModel::item(int index)
-{
-    if(index >= 0 && index < mItems.count())
-        return mItems.at(index);
-    else
-        return 0;
-}
-
-void QSpeedDialModel::addItem(QSpeedDialItem* item)
-{
-    mItems.append(item);
-}
-
-
 
 #include "qspeeddial.moc"

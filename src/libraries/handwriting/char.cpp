@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -56,8 +54,9 @@ const QIMPenSpecialKeys qimpen_specialKeys[] = {
 
 /*!
   \class QIMPenChar
+    \inpublicgroup QtInputMethodsModule
   \brief The QIMPenChar class handles a single character for the stroke recognition libraries.
-  \mainclass
+
   \preliminary
 
   Each QIMPenChar associates a unicode character with a series of strokes.
@@ -215,7 +214,8 @@ QIMPenChar::~QIMPenChar()
 */
 QIMPenChar &QIMPenChar::operator=( const QIMPenChar &character )
 {
-    strokes.clear();
+    while ( strokes.count() )
+        delete strokes.takeLast();
     mUnicode = character.mUnicode;
     mKey = character.mKey;
     flags = character.flags;
@@ -272,7 +272,8 @@ void QIMPenChar::clear()
     mUnicode = 0;
     mKey = 0;
     flags = 0;
-    strokes.clear();
+    while ( strokes.count() )
+        delete strokes.takeLast();
 }
 
 /*!
@@ -550,7 +551,8 @@ bool QIMPenCharMatch::operator<=( const QIMPenCharMatch &m ) const
 
 /*!
   \class QIMPenCharSet
-  \mainclass
+    \inpublicgroup QtInputMethodsModule
+
   \preliminary
   \brief The QIMPenCharSet class maintains a set of related characters.
   \ingroup userinput
@@ -599,9 +601,8 @@ QIMPenCharSet::~QIMPenCharSet()
 */
 void QIMPenCharSet::clear()
 {
-    if (count() > 0) {
-        chars.clear();
-    }
+    while(chars.count())
+        delete chars.takeLast();
 }
 
 /*!

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -33,14 +31,16 @@ static const int FadeOutTime = 500;
 
 /*!
   \class WaitIndicator
-  \brief The WaitIndicator class provides widget that is shown while an application starts.
+    \inpublicgroup QtBaseModule
+  \brief The WaitIndicator class provides a widget that is shown while an application starts.
+  \ingroup QtopiaServer::GeneralUI
 
-  This task provides a widget that is Qtopia's equivalent to an hour glass.
-  It is only visible while the system is busy starting a Qtopia application. In order to determine 
+  This task provides a widget that is the Qt Extended equivalent to an hour glass.
+  It is only visible while the system is busy starting a Qt Extended application. In order to determine 
   whether an application is in the process of being started this task monitors the valuespace
   path \c /System/applications/Info/Busy.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   */
 
 /*! \internal */
@@ -123,7 +123,8 @@ void WaitIndicator::busyChanged()
         timer.start(250, this);
     } else {
         timeline.setDirection(QTimeLine::Backward);
-        timeline.start();
+        if(timeline.state() == QTimeLine::NotRunning)
+            timeline.start();
     }
 }
 

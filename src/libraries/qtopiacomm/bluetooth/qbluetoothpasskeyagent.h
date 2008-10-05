@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef __QBLUETOOTHPASSKEYAGENT_H__
-#define __QBLUETOOTHPASSKEYAGENT_H__
+#ifndef QBLUETOOTHPASSKEYAGENT_H
+#define QBLUETOOTHPASSKEYAGENT_H
 
 #include <QObject>
 
@@ -41,6 +39,7 @@ public:
 
     QString name() const;
 
+protected:
     virtual void requestPasskey(QBluetoothPasskeyRequest &req) = 0;
     virtual void cancelRequest(const QString &localDevice,
                                const QBluetoothAddress &remoteAddr);
@@ -49,6 +48,7 @@ public:
                                 const QString &passkey);
     virtual void release();
 
+public:
     enum Error {
         NoError,
         AlreadyExists,
@@ -69,6 +69,7 @@ public:
     bool unregisterForAddress(const QString &localDevice, QBluetoothAddress &addr);
 
 private:
+    friend class QBluetoothPasskeyAgent_Private;
     QBluetoothPasskeyAgent_Private *m_data;
     Q_DISABLE_COPY(QBluetoothPasskeyAgent)
 };

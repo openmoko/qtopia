@@ -1,21 +1,21 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
+**
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
+**
 **
 ****************************************************************************/
-
-/*
- * KAsteroids - Copyright (c) Martin R. Jones 1997
- *
- * Part of the KDE project
- */
 
 #include "view.h"
 
@@ -27,11 +27,6 @@
 //#define REFRESH_DELAY          20
 #define REFRESH_DELAY          33
 #define TEXT_SPEED              2
-
-/*!
-  \externalpage http://doc.trolltech.com/4.2/graphicsview.html
-  \title Qt Graphics View Framework
- */
 
 /*!
   \class MyGraphicsView
@@ -77,7 +72,7 @@ void MyGraphicsView::resizeEvent(QResizeEvent* event)
 /*!
   \class KAsteroidsView
   \brief The KAsteroidsView class contains the asteroids game's
-         use of the \l {Qt Graphics View Framework} API.
+         use of the \l {The Graphics View Framework} API.
   \internal
 
   The class creates a \l {QGraphicsScene} {scene} and a
@@ -124,6 +119,7 @@ KAsteroidsView::KAsteroidsView(QWidget* parent)
     vitalsChanged_ = false;
     instruct_user_ = true;
     game_paused_ = true;
+    QTimer::singleShot(1, this, SLOT(mainTimerEvent()));
 }
 
 /*!
@@ -151,6 +147,7 @@ void KAsteroidsView::newGame()
 {
     KSprite::reset();
     game_paused_ = false;
+    setCanPause(true);
     mainTimer_->start();
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Disable);
     emit updateVitals();
@@ -167,18 +164,25 @@ void KAsteroidsView::newGame()
   pressed, this function is called again with \a p set
   to false.
  */
-void KAsteroidsView::pause(bool p)
+void KAsteroidsView::pause()
 {
-    if (!game_paused_ && p) {
+    if(!canPause())
+        return;
+    if (!game_paused_) {
         mainTimer_->stop();
         QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
     }
-    else if (game_paused_ && !p)
-    {
+    else if (game_paused_) {
         mainTimer_->start();
         QtopiaApplication::setPowerConstraint(QtopiaApplication::Disable);
     }
-    game_paused_ = p;
+
+    game_paused_ = !game_paused_;
+
+    if(game_paused_)
+        showText(tr("Game Paused\nPress pause button\nto continue"));
+    else
+        hideText();
 }
 
 /*!
@@ -187,6 +191,7 @@ void KAsteroidsView::pause(bool p)
  */
 void KAsteroidsView::newShip()
 {
+    setCanPause(true);
     if (!KSprite::ship()) {
 	KSprite::newShip();
 	raiseShield();
@@ -358,7 +363,7 @@ KAsteroidsView::mainTimerEvent()
   Emit the missileFired() signal to tell the game to play
   the launching missile sound.
  */
-void 
+void
 KAsteroidsView::reportMissileFired()
 {
     emit missileFired();

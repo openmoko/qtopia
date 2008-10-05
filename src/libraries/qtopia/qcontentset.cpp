@@ -1,25 +1,22 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <qcontentset.h>
-#include <private/contentserverinterface_p.h>
 
 #include <qtopiasql.h>
 #include <qstorage.h>
@@ -30,9 +27,9 @@
 #endif
 #include <qtopialog.h>
 #include <qtopiaipcadaptor.h>
-#include <private/qcontent_p.h>
-#include <qtopia/private/qcontentstore_p.h>
-#include <qtopia/private/qcontentsetengine_p.h>
+#include "qcontent_p.h"
+#include "qcontentstore_p.h"
+#include "qcontentsetengine_p.h"
 
 class NullQContentSetEngine : public QContentSetEngine
 {
@@ -75,7 +72,8 @@ Q_GLOBAL_STATIC(NullQContentSetEngine,nullQContentSetEngine);
 
 /*!
     \class QContentSet
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QContentSet class represents a filtered view of all content on a device.
 
     The content that appears in a QContentSet is defined by a applying a filtering
@@ -959,7 +957,8 @@ public:
 
 /*!
   \class QContentSetModel
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The QContentSetModel class provides a data model to represent the items in a QContentSet.
 
@@ -1036,6 +1035,22 @@ int QContentSetModel::rowCount( const QModelIndex & /* parent */ ) const
 }
 
 /*!
+  \enum QContentSetModel::ItemDataRole
+
+  Each item in the model has a set of data elements associated with it,
+  each with its own role. The roles are used by the view to indicate to
+  the model which type of data it needs.
+
+  QContentSetModel adds the following roles:
+
+  \value FilenameRole The filename of the data item to be displayed.
+  \value ContentRole The QContent object of the data item to be displayed.
+  \value ThumbnailRole The thumbnail if available of the data item to be displayed.
+
+  \sa Qt::ItemDataRole, Qtopia::ItemDataRole
+*/
+
+/*!
   Returns the appropriate QVariant data from the model for the given \a index.
   Depending upon the \a role, the QVariant will contain the name of the QContent
   object at that index, its icon, or relevant tooltip text.  The "ToolTip"
@@ -1059,10 +1074,12 @@ QVariant QContentSetModel::data( const QModelIndex & index, int role ) const
             return content( index ).error()
                 ? content( index ).errorString()
                 : content( index ).comment();
-        case Qt::UserRole:
+        case FilenameRole:
             return content( index ).fileName();
-        case Qt::UserRole + 1:
+        case ContentRole:
             return QVariant::fromValue( content( index ) );
+        case ThumbnailRole:
+            return content( index ).thumbnail();
         case Qtopia::AdditionalDecorationRole:
             {
                 QContent c = content( index );

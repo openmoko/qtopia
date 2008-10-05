@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -48,25 +46,15 @@ private:
     bool m_runningAppsViewLoaded;
     bool m_showWhenViewLoaded;
 
-#if QT_VERSION < 0x040400
-    static QBasicAtomic idCounter;
-#else
     static QAtomicInt idCounter;
-#endif
     static int nextId();
 };
 
-
-#if QT_VERSION < 0x040400
-QBasicAtomic TaskManagerEntryPrivate::idCounter = Q_ATOMIC_INIT(1);
-#else
 QAtomicInt TaskManagerEntryPrivate::idCounter(1);
-#endif
-
 
 /*
     This talks over IPC to the RunningAppsLauncherView class in
-    src/server/phone/phonebrowser.h.
+    src/server/ui/launcherviews/taskmanagerview/taskmanagerlauncherview.cpp.
 */
 
 TaskManagerEntryPrivate::TaskManagerEntryPrivate(TaskManagerEntry *parent, const QString &description, const QString &iconPath)
@@ -83,25 +71,18 @@ TaskManagerEntryPrivate::TaskManagerEntryPrivate(TaskManagerEntry *parent, const
 
 void TaskManagerEntryPrivate::show()
 {
-    if (!m_runningAppsViewLoaded) {
-        m_showWhenViewLoaded = true;
-        return;
-    }
+    m_showWhenViewLoaded = true;
     emit addDynamicLauncherItem(m_id, m_description, m_iconPath);
 }
 
 void TaskManagerEntryPrivate::hide()
 {
-    if (!m_runningAppsViewLoaded && m_showWhenViewLoaded) {
-        m_showWhenViewLoaded = false;
-        return;
-    }
+    m_showWhenViewLoaded = false;
     emit removeDynamicLauncherItem(m_id);
 }
 
 void TaskManagerEntryPrivate::runningApplicationsViewLoaded()
 {
-    m_runningAppsViewLoaded = true;
     if (m_showWhenViewLoaded)
         show();
 }
@@ -117,15 +98,6 @@ void TaskManagerEntryPrivate::activatedLaunchItem(int id)
 */
 int TaskManagerEntryPrivate::nextId()
 {
-#if QT_VERSION < 0x040400
-    register int id;
-    for (;;) {
-        id = idCounter;
-        if (idCounter.testAndSet(id, id + 1))
-            break;
-    }
-    return id;
-#else
     register int id;
     for (;;) {
         id = idCounter;
@@ -133,23 +105,23 @@ int TaskManagerEntryPrivate::nextId()
             break;
     }
     return id;
-#endif
 }
 
 
 /*!
     \class TaskManagerEntry
-    \brief The TaskManagerEntry class is used to insert non-application items into Qtopia's Running Applications/TaskManager window.
+    \inpublicgroup QtBaseModule
+    \brief The TaskManagerEntry class is used to insert non-application items into the Running Applications/TaskManager window.
     \ingroup QtopiaServer::AppLaunch
 
-    Normally, the TaskManager window only shows Qtopia applications.
-    However, there may be times when you need to show other items in this
-    window. For example, if you have a server task that displays an
+    Normally, the TaskManager only shows Qt Extended applications.
+    However, there may be times when you need to show other items in the
+    TaskManager. For example, if you have a server task that displays an
     informational dialog about a long-running activity, you might want the dialog
     to be accessible via the TaskManager window so the user can return
     to the dialog if it is backgrounded. However, in this situation, the
     dialog will not automatically be displayed in the TaskManager
-    because it is an ordinary dialog and not a Qtopia application.
+    because it is an ordinary dialog and not a Qt Extended application.
 
     In these cases, you can use the TaskManagerEntry class. For
     example:
@@ -162,7 +134,7 @@ int TaskManagerEntryPrivate::nextId()
     cpuMonitorItem->show();
     \endcode
 
-    The activated() is emitted when the user activates the item in the
+    The activated() signal is emitted when the user activates the item in the
     TaskManager window.
 */
 
@@ -178,7 +150,10 @@ TaskManagerEntry::TaskManagerEntry(const QString &description, const QString &ic
 }
 
 /*!
-    Shows this item in the Running Applications window.
+    Shows this item in the Running Applications window. This is equivalent to registering the
+    this new entry with the task manager.
+
+    \sa hide()
 */
 void TaskManagerEntry::show()
 {
@@ -186,7 +161,9 @@ void TaskManagerEntry::show()
 }
 
 /*!
-    Hides this item in the Running Applications window.
+    Hides this item in the TaskManager. This is equivalent to deregistering the entry.
+
+    \sa show()
 */
 void TaskManagerEntry::hide()
 {
@@ -196,8 +173,7 @@ void TaskManagerEntry::hide()
 /*!
     \fn TaskManagerEntry::activated()
 
-    Emitted when the user has activated this item from the Running
-    Applications window.
+    Emitted when the user has activated this item from the TaskManager.
 */
 
 #include "taskmanagerentry.moc"

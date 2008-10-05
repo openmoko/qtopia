@@ -1,25 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#ifndef __QPE_APPLICATION_H__
-#define __QPE_APPLICATION_H__
+
+#ifndef QTOPIAAPPLICATION_H
+#define QTOPIAAPPLICATION_H
 
 #include <qtopiaglobal.h>
 #include <qtopianamespace.h>
@@ -31,7 +30,6 @@
 #include <qtopialog.h>
 #include <qtopiasxe.h>
 
-#include "qperformancelog.h"
 class QtopiaChannel;
 class QtopiaApplicationData;
 struct QWSEvent;
@@ -156,9 +154,7 @@ signals:
 private slots:
     void systemMessage( const QString &msg, const QByteArray &data );
     void pidMessage( const QString &msg, const QByteArray &data );
-#ifndef QTOPIA_DBUS_IPC
     void dotpidMessage( const QString &msg, const QByteArray &data );
-#endif
     void removeSenderFromStylusDict();
     void removeSenderFromIMDict();
     void hideOrQuit();
@@ -166,6 +162,9 @@ private slots:
     void multiLineEditTextChange();
     void buttonChange(bool);
     void textBrowserHighlightChange(const QString &);
+#ifndef QT_NO_WIZARD
+    void wizardPageCompleteChanged();
+#endif
 
     void removeFromWidgetFlags();
     void updateDialogGeometry();
@@ -199,6 +198,7 @@ private:
     void commonInit( int &argc, char **argv );
 
     static void sendInputHintFor(QWidget*,QEvent::Type);
+    static void inputMethodStatusChanged(QWidget* w);
 
     QtopiaApplicationData *d;
 };
@@ -297,12 +297,14 @@ extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
             QTOPIA_SET_KEY(qPrintable(appName)) \
         } \
         virtual QWidget *createMainWindow( const QString &appName, QWidget *parent, Qt::WFlags f ) { \
-            qLog(Quicklauncher) << "created main window for quicklaunched" << appName.toLocal8Bit().constData(); \
+            QWidget* widget = 0; \
             if ( qpeAppMap()->contains(appName) ) { \
+                qLog(Quicklauncher) << "creating main window for quicklaunched" << appName.toLocal8Bit().constData(); \
                 QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION(); \
-                return (*qpeAppMap())[appName](parent, f); \
+                widget = (*qpeAppMap())[appName](parent, f); \
+                qLog(Quicklauncher) << "created main window for quicklaunched" << appName.toLocal8Bit().constData(); \
             } \
-            return 0; \
+            return widget; \
         } \
         virtual QStringList keys() const { \
             QStringList list; \
@@ -316,10 +318,10 @@ extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
 // The main function (dynamic/normal)
 #define QTOPIA_MAIN_IMPL \
     int main( int argc, char **argv ) { \
+        qLog(ApplicationLauncher) << "Starting main()"; \
         QTOPIA_SET_KEY(argv[0]) \
         QString executableName(argv[0]); \
         executableName = executableName.right(executableName.length() - executableName.lastIndexOf('/') - 1); \
-        QPerformanceLog(executableName.toLatin1().constData())  << "Starting main()"; \
         QtopiaApplication a( argc, argv ); \
         QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION(); \
         QWidget *mw = 0; \
@@ -335,11 +337,11 @@ extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
             } else { \
                 a.showMainWidget(); \
             } \
-            QPerformanceLog(executableName.toLatin1().constData()) << "Entering event loop"; \
+            qLog(ApplicationLauncher) << "Entering event loop"; \
             rv = a.exec(); \
-            QPerformanceLog(executableName.toLatin1().constData()) << "Exited event loop"; \
+            qLog(ApplicationLauncher) << "Exited event loop"; \
             delete mw; \
-            QPerformanceLog(executableName.toLatin1().constData()) << "Exiting main"; \
+            qLog(ApplicationLauncher) << "Exiting main"; \
             return rv; \
         } \
         return -1; \
@@ -389,5 +391,4 @@ extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
 
 #endif // QTOPIA_MAIN
 
-#endif // __QPE_APPLICATION_H__
-
+#endif

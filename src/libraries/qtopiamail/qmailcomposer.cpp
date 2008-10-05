@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,17 +23,16 @@
 #include <QIcon>
 #include <QMap>
 #include <QWidget>
-
 #include <qcontent.h>
 #include <qtopialog.h>
 #include <qpluginmanager.h>
-
+#include "qmailaccount.h"
 #include "qmailmessage.h"
 #include "qmailcomposerplugin.h"
 
 #define PLUGIN_KEY "composers"
 
-// Previously, we used plugins as a general extensibility mechanism for 
+// Previously, we used plugins as a general extensibility mechanism for
 // adding composer types.  Now, we will use this mechanism to instead control
 // which parts of code are loaded, and when.
 
@@ -50,13 +47,24 @@ public:
 
     // Support the interface of QMailComposerPluginInterface
     virtual QString key() const = 0;
-    virtual QMailMessage::MessageType messageType() const = 0;
 
-    virtual QString name() const = 0;
-    virtual QString displayName() const = 0;
-    virtual QIcon displayIcon() const = 0;
+    virtual QList<QMailMessage::MessageType> messageTypes() const = 0;
 
-    virtual bool isSupported(QMailMessage::MessageType t) const { return ((t == messageType()) || (t == QMailMessage::AnyType)); }
+    virtual QList<QMailMessage::ContentType> contentTypes() const = 0;
+
+    virtual QString name(QMailMessage::MessageType type) const = 0;
+
+    virtual QString displayName(QMailMessage::MessageType type) const = 0;
+
+    virtual QIcon displayIcon(QMailMessage::MessageType type) const = 0;
+
+    virtual bool isSupported(QMailMessage::MessageType t, QMailMessage::ContentType c = QMailMessage::NoContent) const
+    {
+        bool supportsMessageType(t == QMailMessage::AnyType || messageTypes().contains(t));
+        bool supportsContentType(c == QMailMessage::NoContent || contentTypes().contains(c));
+
+        return (supportsMessageType && supportsContentType);
+    }
 
     // Load the plugin if necessary and create a composer object
     virtual QMailComposerInterface* create(QWidget* parent)
@@ -90,12 +98,58 @@ public:
     static QString pluginKey() { return "EmailComposer"; }
 
     virtual QString key() const { return pluginKey(); }
-    virtual QMailMessage::MessageType messageType() const { return QMailMessage::Email; }
 
-    virtual QString name() const { return qApp->translate("EmailComposerPlugin","Email"); }
-    virtual QString displayName() const { return qApp->translate("EmailComposerPlugin","Email"); }
-    virtual QIcon displayIcon() const { return QIcon(":icon/email"); }
+    virtual QList<QMailMessage::MessageType> messageTypes() const
+    {
+        return QList<QMailMessage::MessageType>() << QMailMessage::Email;
+    }
+
+    virtual QList<QMailMessage::ContentType> contentTypes() const
+    {
+        return QList<QMailMessage::ContentType>() << QMailMessage::RichTextContent
+                                                  << QMailMessage::PlainTextContent
+                                                  << QMailMessage::VCardContent
+                                                  << QMailMessage::MultipartContent;
+    }
+
+    virtual QString name(QMailMessage::MessageType) const { return qApp->translate("EmailComposerPlugin","Email"); }
+
+    virtual QString displayName(QMailMessage::MessageType) const { return qApp->translate("EmailComposerPlugin","Email"); }
+
+    virtual QIcon displayIcon(QMailMessage::MessageType) const { return QIcon(":icon/email"); }
+
 };
+
+#ifdef QTOPIA_HOMEUI
+
+class VideomailComposerPluginDescriptor : public ComposerPluginDescriptor
+{
+public:
+    VideomailComposerPluginDescriptor(QPluginManager& manager) : ComposerPluginDescriptor(manager) {}
+
+    static QString pluginKey() { return "VideomailComposer"; }
+
+    virtual QString key() const { return pluginKey(); }
+
+    virtual QList<QMailMessage::MessageType> messageTypes() const
+    {
+        return QList<QMailMessage::MessageType>() << QMailMessage::Email;
+    }
+
+    virtual QList<QMailMessage::ContentType> contentTypes() const
+    {
+        return QList<QMailMessage::ContentType>() << QMailMessage::VideomailContent;
+    }
+
+    virtual QString name(QMailMessage::MessageType) const { return qApp->translate("VideomailComposerPlugin","Videomail"); }
+
+    virtual QString displayName(QMailMessage::MessageType) const { return qApp->translate("VideomailComposerPlugin","Video mail"); }
+
+    virtual QIcon displayIcon(QMailMessage::MessageType) const { return QIcon(":icon/email"); }
+
+};
+
+#endif //QTOPIA_HOMEUI
 
 class GenericComposerPluginDescriptor : public ComposerPluginDescriptor
 {
@@ -105,19 +159,50 @@ public:
     static QString pluginKey() { return "GenericComposer"; }
 
     virtual QString key() const { return pluginKey(); }
-    virtual QMailMessage::MessageType messageType() const { return QMailMessage::Sms; }
 
-    virtual QString name() const { return qApp->translate("GenericComposerPlugin","Text message"); }
-    virtual QString displayName() const { return qApp->translate("GenericComposerPlugin","Message"); }
-    virtual QIcon displayIcon() const { return QIcon(":icon/txt"); }
-
-    virtual bool isSupported( QMailMessage::MessageType type ) const
+    virtual QList<QMailMessage::MessageType> messageTypes() const
     {
-        return ((type == QMailMessage::Sms) || 
-                (type == static_cast<QMailMessage::MessageType>(QMailMessage::Sms | QMailMessage::Email)) ||
-                (type == QMailMessage::AnyType));
+        return QList<QMailMessage::MessageType>()
+#ifndef QTOPIA_NO_SMS
+            << QMailMessage::Sms
+#endif
+            << QMailMessage::Instant;
+    }
+
+    virtual QList<QMailMessage::ContentType> contentTypes() const
+    {
+        return QList<QMailMessage::ContentType>()
+#ifndef QTOPIA_NO_SMS
+            << QMailMessage::VCardContent
+#endif
+            << QMailMessage::PlainTextContent;
+    }
+
+    virtual QString name(QMailMessage::MessageType type) const
+    {
+        return qApp->translate("GenericComposerPlugin", (type == QMailMessage::Sms ? "Text message" : "Instant message"));
+    }
+
+    virtual QString displayName(QMailMessage::MessageType) const
+    {
+        return qApp->translate("GenericComposerPlugin", "Message");
+    }
+
+    virtual QIcon displayIcon(QMailMessage::MessageType type) const
+    {
+        if (type == QMailMessage::Sms) {
+            return QIcon(":icon/txt");
+        }
+
+#ifdef QTOPIA_HOMEUI
+        return QIcon(":icon/home/message");
+#else
+        return QIcon(":icon/im");
+#endif
     }
 };
+
+#ifndef QTOPIA_NO_MMS
 
 class MMSComposerPluginDescriptor : public ComposerPluginDescriptor
 {
@@ -127,12 +212,26 @@ public:
     static QString pluginKey() { return "MMSComposer"; }
 
     virtual QString key() const { return pluginKey(); }
-    virtual QMailMessage::MessageType messageType() const { return QMailMessage::Mms; }
 
-    virtual QString name() const { return qApp->translate("MMSComposerPlugin","Multimedia message"); }
-    virtual QString displayName() const { return qApp->translate("MMSComposerPlugin","MMS"); }
-    virtual QIcon displayIcon() const { return QIcon(":icon/multimedia"); }
+    virtual QList<QMailMessage::MessageType> messageTypes() const
+    {
+        return QList<QMailMessage::MessageType>() << QMailMessage::Mms;
+    }
+
+    virtual QList<QMailMessage::ContentType> contentTypes() const
+    {
+        return QList<QMailMessage::ContentType>() << QMailMessage::SmilContent;
+    }
+
+    virtual QString name(QMailMessage::MessageType) const { return qApp->translate("MMSComposerPlugin","Multimedia message"); }
+
+    virtual QString displayName(QMailMessage::MessageType) const { return qApp->translate("MMSComposerPlugin","MMS"); }
+
+    virtual QIcon displayIcon(QMailMessage::MessageType) const { return QIcon(":icon/multimedia"); }
+
 };
+
+#endif
 
 typedef QMap<QString, ComposerPluginDescriptor*> PluginMap;
 
@@ -142,7 +241,11 @@ static PluginMap initMap(QPluginManager& manager)
     PluginMap map;
 
     map.insert(EmailComposerPluginDescriptor::pluginKey(), new EmailComposerPluginDescriptor(manager));
+#ifdef QTOPIA_HOMEUI
+    map.insert(VideomailComposerPluginDescriptor::pluginKey(), new VideomailComposerPluginDescriptor(manager));
+#endif
     map.insert(GenericComposerPluginDescriptor::pluginKey(), new GenericComposerPluginDescriptor(manager));
+
 #ifndef QTOPIA_NO_MMS
     map.insert(MMSComposerPluginDescriptor::pluginKey(), new MMSComposerPluginDescriptor(manager));
 #endif
@@ -172,34 +275,39 @@ static ComposerPluginDescriptor* mapping(const QString& key)
 
 /*!
     \class QMailComposerInterface
-    \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
     \brief The QMailComposerInterface class defines the interface to objects that can compose a mail message.
     \ingroup messaginglibrary
 
-    Qtopia uses the QMailComposerInterface interface for composing mail messages.  A class may implement the 
+    Qt Extended uses the QMailComposerInterface interface for composing mail messages.  A class may implement the
     QMailComposerInterface interface to compose a mail message format.
-    
+
     The composer class may start composing with no associated message, or it may be provided with an existing
-    message to edit, via the \l {QMailComposerInterface::setMessage()}{setMessage()} or 
-    \l {QMailComposerInterface::setText()}{setText()} functions.  A client can query whether the composer 
-    object is empty with the \l {QMailComposerInterface::isEmpty()}{isEmpty()} function, and extract the 
-    composed message with the \l {QMailComposerInterface::message()}{message()} function.  If the 
-    message type supports attachments, these can be attached with the 
+    message to edit, via the \l {QMailComposerInterface::setMessage()}{setMessage()} function.
+    A client can query whether the composer object is empty with the
+    \l {QMailComposerInterface::isEmpty()}{isEmpty()} function, and extract the
+    composed message with the \l {QMailComposerInterface::message()}{message()} function.  If the
+    message type supports attachments, these can be attached with the
     \l {QMailComposerInterface::attach()}{attach()} function.  The current state of composition can be cleared
     with the \l {QMailComposerInterface::clear()}{clear()} function.
 
-    The composer object should emit the \l {QMailComposerInterface::contentChanged()}{contentChanged()} signal 
-    whenever the composed message changes.
+    The composer object should emit the \l {QMailComposerInterface::changed()}{changed()} signal
+    whenever the composed message changes. If composition is cancelled, the composer should emit the
+    \l {QMailComposerInterface::cancel()}{cancel()} signal. When the message is ready to send, the composer should
+    emit the \l {QMailComposerInterface::sendMessage()}{sendMessage()} signal. For composers which need to inform
+    of state changes during composition, such as multi-page composers,
+    the \l {QMailComposerInterface::contextChanged()}{contextChanged()} signal should be emitted to allow container
+    objects to update their view of the \l {QMailComposerInterface::contextTitle()}{contextTitle()} string.
 
     Each composer class must export metadata describing itself and the messages it is able to compose.  To do
-    this, the composer must implement the \l {QMailComposerInterface::key()}{key()},
-    \l {QMailComposerInterface::messageType()}{messageType()},
+    this, the composer must implement the
+    \l {QMailComposerInterface::key()}{key()},
+    \l {QMailComposerInterface::messageTypes()}{messageTypes()},
     \l {QMailComposerInterface::name()}{name()},
     \l {QMailComposerInterface::displayName()}{displayName()} and
     \l {QMailComposerInterface::displayIcon()}{displayIcon()} functions.
-
-    Rather than creating objects that implement the QMailComposerInterface directly, clients should create an object
-    of an appropriate type by using the QMailComposerFactory class:
 
     \code
     QString key = QMailComposerFactory::defaultKey( QMailMessage::Email );
@@ -213,56 +321,26 @@ static ComposerPluginDescriptor* mapping(const QString& key)
 */
 
 /*!
-    \fn bool QMailComposerInterface::isEmpty() const
+    \enum QMailComposerInterface::ComposeContext
 
-    Returns true if the composer contains no message content; otherwise returns false.
+    Identifies the desired context for message composition.
+
+    \value Create Create a new message
+    \value Reply Create a reply message to a previously received message
+    \value ReplyToAll Create a reply message addressed to all recipients of a previously received message
+    \value Forward Create a message that forwards an existing message
 */
 
-/*!
-    \fn QMailMessage QMailComposerInterface::message() const
-
-    Returns the current content of the composer.
-*/
-
-/*!
-    \fn void QMailComposerInterface::setMessage(const QMailMessage& mail)
-
-    Sets the content of the composer to \a mail.
-*/
-
-/*!
-    \fn void QMailComposerInterface::clear()
-
-    Clears any message content contained in the composer.
-*/
-
-/*!
-    \fn QWidget* QMailComposerInterface::widget() const
-
-    Returns the widget implementing the composer interface.
-*/
-
-/*!
-    \fn QMailComposerInterface::contentChanged()
-
-    This signal is emitted whenever the composer's content is changed.
-*/
-
-/*!
-    \fn QMailComposerInterface::finished()
-
-    This signal is emitted when the user has completed editing.
-*/
 
 /*!
     Constructs the QMailComposerInterface object with the parent widget \a parent.
 */
 QMailComposerInterface::QMailComposerInterface( QWidget *parent )
-    : QObject( parent )
+    : QWidget( parent )
 {
 }
 
-/*! 
+/*!
     Destructs the QMailComposerInterface object.
 */
 QMailComposerInterface::~QMailComposerInterface()
@@ -281,43 +359,51 @@ QString QMailComposerInterface::key() const
 }
 
 /*!
-    Returns the type of message created by the composer.
+    Returns the message types created by the composer.
 */
-QMailMessage::MessageType QMailComposerInterface::messageType() const
+QList<QMailMessage::MessageType> QMailComposerInterface::messageTypes() const
 {
-    return mapping(key())->messageType();
+    return mapping(key())->messageTypes();
 }
 
 /*!
-    Returns the translated name of the message type created by the composer.
+    Returns the content types created by the composer.
 */
-QString QMailComposerInterface::name() const
+QList<QMailMessage::ContentType> QMailComposerInterface::contentTypes() const
 {
-    return mapping(key())->name();
+    return mapping(key())->contentTypes();
 }
 
 /*!
-    Returns the translated name of the message type created by the composer, in a form suitable
-    for display on a button or menu.
+    Returns the translated name of the message type \a type created by the composer.
 */
-QString QMailComposerInterface::displayName() const
+QString QMailComposerInterface::name(QMailMessage::MessageType type) const
 {
-    return mapping(key())->displayName();
+    return mapping(key())->name(type);
 }
 
 /*!
-    Returns the icon representing the message type created by the composer.
+    Returns the translated name of the message type \a type created by the composer,
+    in a form suitable for display on a button or menu.
 */
-QIcon QMailComposerInterface::displayIcon() const
+QString QMailComposerInterface::displayName(QMailMessage::MessageType type) const
 {
-    return mapping(key())->displayIcon();
+    return mapping(key())->displayName(type);
 }
 
 /*!
-    Sets the message to contain \a text, if that is meaningful to the message type created by the composer.
+    Returns the icon representing the message type \a type created by the composer.
+*/
+QIcon QMailComposerInterface::displayIcon(QMailMessage::MessageType type) const
+{
+    return mapping(key())->displayIcon(type);
+}
+
+/*!
+    Sets the message to contain body with \a text, if that is meaningful to the message type created by the composer.
     The text has the mime-type \a type.
 */
-void QMailComposerInterface::setText( const QString& text, const QString &type )
+void QMailComposerInterface::setBody( const QString& text, const QString &type )
 {
     // default implementation does nothing
     Q_UNUSED(text)
@@ -345,21 +431,158 @@ void QMailComposerInterface::setSignature( const QString& signature )
 }
 
 /*!
-    Allows the composer object to add any relevant actions to the application \a menu supplied.
+    Sets the composer to produce a message of type \a type.
 */
-void QMailComposerInterface::addActions( QMenu* menu ) const
+void QMailComposerInterface::setMessageType( QMailMessage::MessageType type )
 {
-    // default implementation does nothing
-    Q_UNUSED(menu)
+    // default implementation does nothing - override for composers supporting multiple types
+    Q_UNUSED(type)
 }
 
 /*!
+    \fn bool QMailComposerInterface::isEmpty() const
+
+    Returns true if the composer contains no message content; otherwise returns false.
+*/
+
+/*!
+    \fn QMailMessage QMailComposerInterface::message() const
+
+    Returns the current content of the composer.
+*/
+
+/*!
+    \fn void QMailComposerInterface::setMessage(const QMailMessage& mail)
+
+    Presets the content of the composer to \a mail.
+*/
+
+/*!
+    \fn void QMailComposerInterface::clear()
+
+    Clears any message content contained in the composer.
+*/
+
+/*!
+    \fn QString QMailComposerInterface::contextTitle() const
+
+    Returns a string description of the current composition context.
+*/
+
+/*!
+    \fn QString QMailComposerInterface::from() const
+
+    Returns the from address string for the currently composed message.
+*/
+
+/*!
+    \fn QMailAccount QMailComposerInterface::fromAccount() const
+
+    Returns the sending account for the currently composed message or an
+    invalid \c QMailAccount if no account could be set.
+*/
+
+/*!
+    \fn bool QMailComposerInterface::isDetailsOnlyMode() const
+
+    Returns \c true if the composer is in details only mode, or \c false otherwise.
+    This only applies to composers which may present a different view for message
+    address details entry.
+*/
+
+/*!
+    \fn void QMailComposerInterface::setDetailsOnlyMode(bool val)
+
+    If supported, sets the composer into details only mode if \a val is \c true.
+    Otherwise the composer is set into normal composition mode.
+*/
+
+/*!
+    \fn bool QMailComposerInterface::isReadyToSend() const
+
+    Returns \c true if the composed message is ready to send or \c false otherwise.
+*/
+
+/*!
+    \fn void QMailComposerInterface::reply(const QMailMessage& source, int type)
+
+    Presets the content of the composer from the message \a source. The message
+    may be presented differently based on the type of composition specified by \a type.
+*/
+
+/*!
+    \fn void QMailComposerInterface::setDefaultAccount(const QMailAccountId& id)
+
+    Sets the default sending account to the QMailAccount with a \c QMailAccountId \a id.
+*/
+
+/*!
+    \fn void QMailComposerInterface::setFrom(const QString& fromAddress)
+
+    Sets the composed message from address to \a fromAddress.
+*/
+
+/*!
+    \fn void QMailComposerInterface::setSubject(const QString& subject)
+
+    Sets the composed message subject to \a subject.
+*/
+
+/*!
+    \fn void QMailComposerInterface::setTo(const QString& to)
+
+    Sets the composed message recipient address to \a to.
+*/
+
+/*!
+    \fn QString QMailComposerInterface::to() const
+
+    Returns the recipient address of the composed message.
+*/
+
+/*!
+    \fn void QMailComposerInterface::cancel()
+
+    Signal that is emitted when message composition is cancelled.
+
+    \sa changed()
+*/
+
+/*!
+    \fn void QMailComposerInterface::changed()
+
+    Signal that is emitted when the currently composed message has been changed.
+
+    \sa cancel()
+*/
+
+/*!
+    \fn void QMailComposerInterface::contextChanged()
+
+    Signal that is emitted when the message composition context has changed. For example
+    when transitioning from message body composition to message details composition in a multi page
+    composer.
+
+    \sa cancel(), changed()
+*/
+
+/*!
+    \fn void QMailComposerInterface::sendMessage()
+
+    Signal that is emitted when message composition has finished and the message is ready to send.
+
+    \sa isReadyToSend()
+*/
+
+/*!
     \class QMailComposerFactory
-    \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
     \brief The QMailComposerFactory class creates objects implementing the QMailComposerInterface interface.
     \ingroup messaginglibrary
 
-    The QMailComposerFactory class creates objects that are able to compose mail messages, and 
+    The QMailComposerFactory class creates objects that are able to compose mail messages, and
     that implement the QMailComposerInterface interface.  The factory chooses an implementation
     based on the type of message to be composed.
 
@@ -371,21 +594,21 @@ void QMailComposerInterface::addActions( QMenu* menu ) const
 */
 
 /*!
-    Returns a list of keys identifying classes that can create a message containing \a type content.
+    Returns a list of keys identifying classes that can compose messages of type \a type containing \a contentType content.
 */
-QStringList QMailComposerFactory::keys( QMailMessage::MessageType type )
+QStringList QMailComposerFactory::keys( QMailMessage::MessageType type , QMailMessage::ContentType contentType)
 {
     QStringList in;
 
     foreach (PluginMap::mapped_type plugin, pluginMap())
-        if (plugin->isSupported(type))
+        if (plugin->isSupported(type, contentType))
             in << plugin->key();
 
     return in;
 }
 
 /*!
-    Returns the key identifying the first class found that can create a message containing \a type content.
+    Returns the key identifying the first class found that can compose messages of type \a type.
 */
 QString QMailComposerFactory::defaultKey( QMailMessage::MessageType type )
 {
@@ -394,47 +617,47 @@ QString QMailComposerFactory::defaultKey( QMailMessage::MessageType type )
 }
 
 /*!
-    Returns the message type for the composer identified by \a key.
+    Returns the message types created by the composer identified by \a key.
 
-    \sa QMailComposerInterface::messageType()
+    \sa QMailComposerInterface::messageTypes()
 */
-QMailMessage::MessageType QMailComposerFactory::messageType( const QString& key )
+QList<QMailMessage::MessageType> QMailComposerFactory::messageTypes( const QString& key )
 {
-    return mapping(key)->messageType();
+    return mapping(key)->messageTypes();
 }
 
 /*!
-    Returns the name for the composer identified by \a key.
+    Returns the name for the message type \a type created by the composer identified by \a key.
 
     \sa QMailComposerInterface::name()
 */
-QString QMailComposerFactory::name( const QString& key )
+QString QMailComposerFactory::name(const QString &key, QMailMessage::MessageType type)
 {
-    return mapping(key)->name();
+    return mapping(key)->name(type);
 }
 
 /*!
-    Returns the display name for the composer identified by \a key.
+    Returns the display name for the message type \a type created by the composer identified by \a key.
 
     \sa QMailComposerInterface::displayName()
 */
-QString QMailComposerFactory::displayName( const QString& key )
+QString QMailComposerFactory::displayName(const QString &key, QMailMessage::MessageType type)
 {
-    return mapping(key)->displayName();
+    return mapping(key)->displayName(type);
 }
 
 /*!
-    Returns the display icon for the composer identified by \a key.
+    Returns the display icon for the message type \a type created by the composer identified by \a key.
 
     \sa QMailComposerInterface::displayIcon()
 */
-QIcon QMailComposerFactory::displayIcon( const QString& key )
+QIcon QMailComposerFactory::displayIcon(const QString &key, QMailMessage::MessageType type)
 {
-    return mapping(key)->displayIcon();
+    return mapping(key)->displayIcon(type);
 }
 
 /*!
-    Creates a composer object of the class identified by \a key, setting the returned object to 
+    Creates a composer object of the class identified by \a key, setting the returned object to
     have the parent widget \a parent.
 */
 QMailComposerInterface *QMailComposerFactory::create( const QString& key, QWidget *parent )

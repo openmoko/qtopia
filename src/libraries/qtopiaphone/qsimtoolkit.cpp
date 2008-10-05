@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,7 +22,8 @@
 
 /*!
     \class QSimToolkit
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QSimToolkit class provides an interface to SIM toolkit applications.
 
     This class is used by a host program (usually \c simapp) to access
@@ -541,7 +540,7 @@ void QSimToolkit::help( QSimCommand::Type command, uint item )
     \endtable
 
     The following commands are expected to be handled internally by the modem,
-    or the modem vendor plugin.  Qtopia will simply acknowledge receipt of the
+    or the modem vendor plugin.  Qt Extended will simply acknowledge receipt of the
     command with sendResponse() and then passes the command up to the client applications.
     Most of these can be safely ignored by client applications, or the application
     only needs to display a text string and/or an icon until such time as a
@@ -578,7 +577,7 @@ void QSimToolkit::help( QSimCommand::Type command, uint item )
     handle text display while the message is being sent.
 
     In the case of \c ProvideLocalInformation, if the language setting is being
-    requested, the current Qtopia language code is returned.
+    requested, the current Qt Extended language code is returned.
 
     \sa command(), sendResponse()
 */

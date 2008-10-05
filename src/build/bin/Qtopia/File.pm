@@ -112,16 +112,25 @@ sub rmrf
 {
     my ( $path ) = @_;
     if ( -d $path && ! -l $path ) {
-        for ( glob("$path/*") ) {
+        # Since filehandles are global and this function calls recursively we have a slight problem.
+        # Luckily we can tie a filehandle to the local scope using the 'local' keyword to avoid this problem.
+        local *DIR;
+        opendir(DIR, $path) or die "Can't opendir $path";
+        for ( readdir(DIR) ) {
+            if ( $_ eq "." or $_ eq ".." ) {
+                next;
+            }
+            $_ = "$path/$_";
             if ( -d $_ && ! -l $_ ) {
                 rmrf($_);
             } else {
-                unlink($_);
+                unlink($_) || die "Couldn't unlink $_";
             }
         }
-        rmdir $path;
-    } else {
-        unlink($path);
+        closedir DIR;
+        rmdir $path || die "Couldn't rmdir $path";
+    } elsif ( -e $path || -l $path ) {
+        unlink($path) || die "Couldn't unlink $path";
     }
 }
 
@@ -240,42 +249,3 @@ sub cpR
 
 # Make this file require()able.
 1;
-__END__
-
-=head1 NAME
-
-Qtopia::File - File management routines for Qtopia
-
-=head1 SYNOPSIS
-
-    use Qtopia::File;
-    symlink_file($source, $dest, $copy);
-    rmrf($dir);
-    resolveHeader($file);
-    needCopy($source, $dest);
-    overwriteIfChanged($source, $dest);
-    fixpath($path);
-
-=head1 DESCRIPTION
-
-This module contains helper functions that do file management operations.
-The funtions here work on Windows and Unix.
-
-=head2 EXPORT
-
-    symlink_file
-    rmrf
-    resolveHeader
-    needCopy
-    overwriteIfChanged
-    fixpath
-
-=head1 AUTHOR
-
-Trolltech AS
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2006 TROLLTECH ASA. All rights reserved.
-
-=cut

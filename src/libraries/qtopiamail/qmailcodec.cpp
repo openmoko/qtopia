@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -38,7 +36,9 @@ int QTOPIAMAIL_EXPORT QuotedPrintableMaxLineLength = 74;
 
 /*!
   \class QMailCodec
-  \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
   \preliminary
   \brief The QMailCodec class provides mechanisms for encoding and decoding between 7-bit ASCII strings
   and arbitrary octet sequences.
@@ -369,7 +369,9 @@ static inline unsigned char base64Index(const char ascii)
 
 /*!
   \class QMailBase64Codec
-  \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
   \preliminary
   \brief The QMailBase64Codec class encodes or decodes between 8-bit data and 7-bit ASCII, using the Base64
   character mapping scheme.
@@ -662,7 +664,9 @@ static inline unsigned char decodeCharacter(unsigned char value)
 
 /*!
   \class QMailQuotedPrintableCodec
-  \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
   \preliminary
   \brief The QMailQuotedPrintableCodec class encodes or decodes between 8-bit data and 7-bit ASCII, 
   using the 'quoted printable' character mapping scheme.
@@ -926,7 +930,9 @@ static void writeStream(QDataStream& out, const char* it, int length)
 
 /*!
   \class QMailPassThroughCodec
-  \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
   \preliminary
   \brief The QMailPassThroughCodec class uses the QMailCodec interface to move data between streams
   without coding or decoding.
@@ -973,7 +979,9 @@ void QMailPassThroughCodec::decodeChunk(QDataStream& out, const char* it, int le
 
 /*!
   \class QMailLineEndingCodec
-  \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
   \preliminary
   \brief The QMailLineEndingCodec class encodes textual data to use CR/LF line endings required for SMTP transmission.
 

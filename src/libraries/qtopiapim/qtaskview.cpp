@@ -1,25 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/pim/qtaskview.h>
+#include <qtaskview.h>
 
 #include <QLabel>
 #include <QLayout>
@@ -33,14 +31,15 @@
 #include <QAbstractTextDocumentLayout>
 
 #include <qtopiaapplication.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 
 /*!
   \class QTaskDelegate
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QTaskDelegate class provides drawing of QTaskModel items (\l{QTask}{QTasks}).
 
@@ -264,8 +263,11 @@ QSize QTaskDelegate::decorationsSizeHint(const QStyleOptionViewItem& option, con
 
 /*!
   \class QTaskListView
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QTaskListView class provides a list view widget with some convenience functions
   for use with QTaskModel.
@@ -393,8 +395,11 @@ public:
 
 /*!
   \class QTaskSelector
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QTaskSelector class provides a way of selecting a single task from a QTaskModel.
 
@@ -429,19 +434,12 @@ QTaskSelector::QTaskSelector(bool allowNew, QWidget *parent)
 
     l->addWidget( d->view );
 
-    if( allowNew )
-    {
-#ifndef QTOPIA_PHONE
-        //TODO pda
-#else
+    if( allowNew ) {
         QMenu *menu = QSoftMenuBar::menuFor( this );
         menu->addAction( QIcon(":icon/new"), tr("New"), this, SLOT(setNewSelected()) );
-#endif
     }
 
-#ifdef QTOPIA_PHONE
     QtopiaApplication::setMenuLike( this, true );
-#endif
 }
 
 /*!

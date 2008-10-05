@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "qobexpushservice.h"
@@ -129,8 +127,13 @@ QObex::ResponseCode QObexPushServicePrivate::get(const QObexHeader &header)
     }
 
     // OPP spec 5.6 - NotFound if there is no default object
-    if (m_vcard.isEmpty())
-        return QObex::NotFound;
+    if (m_vcard.isEmpty()) {
+        m_vcard = m_parent->businessCard();
+        if (m_vcard.isEmpty()) {
+            qLog(Obex) << "QObexPushService: default vCard requested, but none set!";
+            return QObex::NotFound;
+        }
+    }
 
     m_total = m_vcard.size();
     m_bytes = 0;
@@ -383,7 +386,8 @@ void QObexPushServicePrivate::cleanUpPut(bool aborted)
 
 /*!
     \class QObexPushService
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QObexPushService class provides an OBEX Push service.
 
     The QObexPushService class can be used to provide OBEX Push services
@@ -547,7 +551,7 @@ static QString qobexpushservice_getSaveFileName(const QString &path, const QStri
     QDir::homePath(), using \a name as the name of the file. (If \a name
     contains a path, only the filename at the end of the
     path will be used, and if \a name is an empty string, the file will be
-    saved as "unnamed".) If the file is successfully created, the \c Put
+    saved as "received_file".) If the file is successfully created, the \c Put
     request will be accepted; otherwise, the request will be refused.
 
     \sa putRequested(), currentDevice(), dataTransferProgress(), requestFinished()
@@ -561,7 +565,7 @@ QIODevice *QObexPushService::acceptFile(const QString &name, const QString &, qi
 
     // get unique filename in home directory
     fname = QFileInfo(qobexpushservice_getSaveFileName(
-            QDir::homePath(), fname.isEmpty() ? "unnamed" : fname)).fileName();
+            QDir::homePath(), fname.isEmpty() ? tr("received_file", "placeholder name for a received file with no name") : fname)).fileName();
 
     QFile *file = 0;
     if (QDir::homePath().endsWith(QDir::separator())) {

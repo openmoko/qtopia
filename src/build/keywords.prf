@@ -110,3 +110,8 @@ keyword.systemtest.commands=\
     "CONFIG+=systemtest"
 PROJECT_KEYWORDS+=systemtest
 
+# A server library (static lib compiled into the server)
+keyword.server_lib.equiv=qtopia lib
+keyword.server_lib.commands=\
+    "CONFIG+=staticlib no_tr"
+PROJECT_KEYWORDS+=server_lib

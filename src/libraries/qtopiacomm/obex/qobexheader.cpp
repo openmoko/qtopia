@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <private/qobexheader_p.h>
-#include <private/qobexauthenticationchallenge_p.h>
-#include <private/qobexauthentication_p.h>
+#include "qobexheader_p.h"
+#include "qobexauthenticationchallenge_p.h"
+#include "qobexauthentication_p.h"
 
 #include <QList>
 #include <QDataStream>
@@ -98,20 +96,6 @@ int QObexHeaderPrivate::size() const
     return m_hash.size();
 }
 
-QString QObexHeaderPrivate::toString()
-{
-    QString s = "{";
-    QList<int> keys = this->keys();
-    for (int i=0; i<keys.size(); i++) {
-        s.append(' ' + headerIdToString(keys[i]));
-        s.append(QLatin1String(": "));
-        s.append(m_hash[keys[i]].toString());
-        s.append(',');
-    }
-    s.append(QLatin1String(" }"));
-    return s;
-}
-
 /*!
     \internal
     Takes the date & time stored in \a timeString (containing the date/time
@@ -124,10 +108,12 @@ void QObexHeaderPrivate::dateTimeFromString(QDateTime &dateTime, const QString &
 
     if (timeString[timeString.size()-1] == UTC_TIME_POSTFIX) {
         dateTime = QDateTime::fromString(timeString, UTC_TIME_FORMAT);
-        dateTime.setTimeSpec(Qt::UTC);
+        if (dateTime.isValid())
+            dateTime.setTimeSpec(Qt::UTC);
     } else {
         dateTime = QDateTime::fromString(timeString, LOCAL_TIME_FORMAT);
-        dateTime.setTimeSpec(Qt::LocalTime);
+        if (dateTime.isValid())
+            dateTime.setTimeSpec(Qt::LocalTime);
     }
 }
 
@@ -138,8 +124,10 @@ void QObexHeaderPrivate::dateTimeFromString(QDateTime &dateTime, const QString &
 */
 void QObexHeaderPrivate::stringFromDateTime(QString &timeString, const QDateTime &dateTime)
 {
-    timeString = dateTime.toString(dateTime.timeSpec() == Qt::UTC?
-            UTC_TIME_FORMAT : LOCAL_TIME_FORMAT);
+    if (dateTime.isValid()) {
+        timeString = dateTime.toString(dateTime.timeSpec() == Qt::UTC?
+                UTC_TIME_FORMAT : LOCAL_TIME_FORMAT);
+    }
 }
 
 
@@ -522,7 +510,8 @@ QString QObexHeaderPrivate::headerIdToString(int headerId)
 
 /*!
     \class QObexHeader
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QObexHeader class contains header information for an OBEX request or response.
 
     The QObexHeader class provides a container for a set of headers for an
@@ -1245,20 +1234,56 @@ void QObexHeader::clear()
 }
 
 /*!
-    \overload
-    Writes the header \a header to stream \a out.
- */
-QDataStream &operator<<(QDataStream &out, const QObexHeader &header)
+    Returns a QDateTime that represents the date/time specified by
+    \a dateTimeString, which must be in the \c Time header value format
+    defined in the OBEX specification. That is, it must be in the
+    format YYYYMMDDTHHMMSS (for local times) or YYYYMMDDTHHMMSSZ (for
+    UTC time). The letter 'T' separates the date from the time.
+
+    Returns an invalid QDateTime if \a dateTimeString could not be parsed.
+
+    \sa stringFromDateTime()
+*/
+QDateTime QObexHeader::dateTimeFromString(const QString &dateTimeString)
 {
-    out << header.m_data->toString();
-    return out;
+    QDateTime dateTime;
+    QObexHeaderPrivate::dateTimeFromString(dateTime, dateTimeString);
+    return dateTime;
 }
 
 /*!
-    \internal
- */
-QDebug &operator<<(QDebug &d, const QObexHeader &header)
+    Returns a date/time string that represents \a dateTime in the format
+    defined for the \c Time header value in the OBEX specification.
+
+    The \a dateTime \l {QDateTime::timeSpec()}{timeSpec()} value is used to
+    determine the time zone information. That is, the string will be in
+    the format YYYYMMDDTHHMMSS if \l {QDateTime::timeSpec()}{timeSpec()}
+    is Qt::LocalTime, or the format YYYYMMDDTHHMMSSZ if it is Qt::UTC.
+
+    Returns an empty string if \a dateTime is invalid.
+
+    \sa dateTimeFromString()
+*/
+QString QObexHeader::stringFromDateTime(const QDateTime &dateTime)
 {
-    d << header.m_data->toString();
-    return d;
+    QString s;
+    QObexHeaderPrivate::stringFromDateTime(s, dateTime);
+    return s;
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug dbg, const QObexHeader &header)
+{
+    dbg.nospace() << "QObexHeader({";
+    QList<int> ids = header.headerIds();
+    for (int i=0; i<ids.size(); i++) {
+        dbg.nospace() << QObexHeaderPrivate::headerIdToString(ids[i]);
+        dbg.nospace() << ": ";
+        dbg.nospace() << header.value(ids[i]).toString();
+        if (i < ids.size()-1)
+            dbg.nospace() << ", ";
+    }
+    dbg.nospace() << " })";
+    return dbg.space();
+}
+#endif

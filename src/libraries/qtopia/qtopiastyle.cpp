@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,6 +21,7 @@
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QLabel>
 #include <QPainter>
 
 static int indicatorSize = 11;
@@ -39,13 +38,14 @@ static int verticalSpacing = 6;
 
 /*!
     \class QtopiaStyle
-    \mainclass
-    \brief The QtopiaStyle class encapsulates the common Look and Feel of a Qtopia GUI.
+    \inpublicgroup QtBaseModule
+
+    \brief The QtopiaStyle class encapsulates the common Look and Feel of a Qt Extended GUI.
 
     \ingroup appearance
 
     This class implements some of the widget's look and feel that is common to all 
-    Qtopia GUI styles.
+    Qt Extended GUI styles.
 
     \sa QWindowsXPStyle, QMacStyle, QPlastiqueStyle, QCDEStyle, QMotifStyle
 */
@@ -249,3 +249,43 @@ void QtopiaStyle::drawRoundRect(QPainter *painter, const QRect &r, int xRnd, int
 {
     drawRoundRect(painter, QRectF(r), xRnd, yRnd);
 }
+
+/*!
+  Returns the label that has \a widget assigned as its buddy.
+
+  If no buddy is assigned, 0 is returned.
+*/
+QLabel *QtopiaStyle::buddyForWidget(const QWidget *widget)
+{
+    QLabel *hl = 0;
+    const QWidget *theWidget = widget;
+    const QWidget *w = widget;
+    int pass = 0;   //two passes total (for situations like qtimezonecombo/qtimezonewidget)
+    while (1) {
+        if (w && w->parentWidget()) {
+            QObjectList ol = w->parentWidget()->children();
+            foreach (QObject *o, ol) {
+                if (o->isWidgetType()) {
+                    if (QLabel *l = qobject_cast<QLabel*>(o)) {
+                        if (l->buddy() == theWidget) {  //to be more lenient, change theWidget to w
+                            theWidget = w;
+                            hl = l;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (hl || pass)
+                break;
+            w = w->parentWidget();
+            if (w->focusProxy() == theWidget)
+                theWidget = w;
+        }
+        if (pass)
+            break;
+        ++pass;
+    }
+
+    return hl;
+}
+

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -37,6 +35,7 @@
 class QContentSet;
 class QDawg;
 
+// syncqtopia header Qtopia
 namespace Qtopia
 {
     /*
@@ -142,21 +141,33 @@ namespace Qtopia
     QTOPIABASE_EXPORT const QDawg& addedDawg();
     QTOPIABASE_EXPORT const QDawg& dawg(const QString& name, const QString& language = QString());
 
-    QTOPIABASE_EXPORT void addWords(const QStringList& word);
-    QTOPIABASE_EXPORT void addWords(const QString& dictname, const QStringList& word);
-    QTOPIABASE_EXPORT void removeWords(const QStringList& word);
-    QTOPIABASE_EXPORT void removeWords(const QString& dictname, const QStringList& word);
+    QTOPIABASE_EXPORT bool isWord(const QString& word);
+    QTOPIABASE_EXPORT void addWords(const QStringList& words);
+    QTOPIABASE_EXPORT void addWords(const QString& dictname, const QStringList& words);
+    QTOPIABASE_EXPORT void removeWords(const QStringList& words);
+    QTOPIABASE_EXPORT void removeWords(const QString& dictname, const QStringList& words);
     QTOPIABASE_EXPORT void qtopiaReloadWords( const QString& dictname );
 
     /*
 
-    Qtopia enums
+    Qt Extended enums
 
     */
     enum ItemDataRole {
         AdditionalDecorationRole = 1000,
         UserRole = 2000
     };
+
+    /*
+
+    Special Qt Extended keys.
+
+    */
+    static const Qt::Key Key_Headset = Qt::Key_F5;
+    static const Qt::Key Key_Speaker = Qt::Key_F6;
+    static const Qt::Key Key_Hook = Qt::Key_F27;
+    static const Qt::Key Key_HeadsetButton = Qt::Key_F28;
+    static const Qt::Key Key_Lock = Qt::Key_F29;
 
 }
 #endif

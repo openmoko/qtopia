@@ -1,32 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _MESSAGECONTROL_H_
-#define _MESSAGECONTROL_H_
+#ifndef MESSAGECONTROL_H
+#define MESSAGECONTROL_H
 
 #include <QObject>
 #include <qvaluespace.h>
-#ifdef QTOPIA_CELL
-#include <qsmsreader.h>
-#endif
 #include <qtopiaipcenvelope.h>
 #include <QtopiaIpcAdaptor>
 class QString;
@@ -37,43 +32,39 @@ class MessageControl : public QObject
 {
 Q_OBJECT
 public:
-    static MessageControl *instance();
-
+    MessageControl( QObject *parent = 0);
     int messageCount() const;
-    bool smsFull() const;
-    QString lastSmsId() const;
 
+#ifdef QTOPIA_CELL
 signals:
-    void messageCount(int, bool, bool, bool);
-    void newMessage(const QString &type, const QString &from, const QString &subject);
     void smsMemoryFull(bool);
     void messageRejected();
+#endif
 
 private slots:
-    void smsUnreadCountChanged();
-    void telephonyServicesChanged();
-    void sysMessage(const QString& message, const QByteArray&);
+#ifdef QTOPIA_CELL
     void smsMemoryFullChanged();
+#endif
+    void controlMessage(const QString& message, const QByteArray&);
     void messageCountChanged();
 
 private:
+    void doNewCount(bool write = true);
+    void updateMessageCount(int &messageCount, QDataStream &stream);
+
     QValueSpaceObject phoneValueSpace;
-    QValueSpaceItem smsMemFull;
-    void doNewCount(bool write=true, bool fromSystem=false, bool notify=true);
-    MessageControl();
-    QCommServiceManager *mgr;
 #ifdef QTOPIA_CELL
-    QSMSReader *smsreq;
+    QValueSpaceItem smsMemFull;
+    int prevSmsMemoryFull;
 #endif
     QtopiaIpcAdaptor *messageCountUpdate;
     QtopiaChannel channel;
-    QString smsId;
 
     int smsCount;
     int mmsCount;
     int systemCount;
-    bool smsIsFull;
-    int prevSmsMemoryFull;
+    int instantCount;
+    int emailCount;
 };
 
-#endif // _MESSAGECONTROL_H_
+#endif

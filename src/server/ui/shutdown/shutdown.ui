@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>ShutdownDialog</class>
- <widget class="QWidget" name="ShutdownDialog" >
+ <class>ShutdownDlg</class>
+ <widget class="QWidget" name="ShutdownDlg" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -71,7 +71,7 @@
             </sizepolicy>
            </property>
            <property name="text" >
-            <string>Restart Qtopia</string>
+            <string>Restart Qt Extended</string>
            </property>
           </widget>
          </item>
@@ -113,7 +113,7 @@
             </sizepolicy>
            </property>
            <property name="text" >
-            <string>Shutdown Qtopia</string>
+            <string>Shutdown Qt Extended</string>
            </property>
           </widget>
          </item>

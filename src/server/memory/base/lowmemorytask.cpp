@@ -1,22 +1,19 @@
-// -*-C++-*-
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -27,16 +24,20 @@
 #include <QtopiaIpcEnvelope>
 #include <QValueSpaceItem>
 #include "applicationlauncher.h"
+#include "qabstractmessagebox.h"
 #include "windowmanagement.h"
+#include "oommanager.h"
 
 /*!
   \class LowMemoryTask
+    \inpublicgroup QtDevToolsModule
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \ingroup QtopiaServer::Memory
   \brief The LowMemoryTask class responds to low memory situations by closing applications.
 
 
-  The LowMemoryTask provides a Qtopia Server Task.  Qtopia Server Tasks are
+  The LowMemoryTask provides a Qt Extended Server Task.  Qt Extended Server Tasks are
   documented in full in the QtopiaServerApplication class documentation.
 
   \table
@@ -88,9 +89,16 @@
   Although the LowMemoryTask is notified of \bold all memory
   state changes, no action is taken when the memory state improves.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
+struct LowMemoryTaskPrivate
+{
+public:
+    QAbstractMessageBox* warningMsgBox;
+};
+
+static const int WarningTimeout = 5000;  
 /*!
   \internal
   The constructor sets up the class to be notified whenever the
@@ -100,6 +108,9 @@
 LowMemoryTask::LowMemoryTask()
     : m_prevState(MemoryMonitor::MemUnknown)
 {
+    d = new LowMemoryTaskPrivate();
+    d->warningMsgBox = 0;
+
     MemoryMonitor* mm = qtopiaTask<MemoryMonitor>();
     ApplicationLauncher* al = qtopiaTask<ApplicationLauncher>();
 
@@ -118,7 +129,7 @@ LowMemoryTask::LowMemoryTask()
  */
 LowMemoryTask::~LowMemoryTask()
 {
-    // nothing to do.
+    delete d;
 }
 
 /*!
@@ -211,18 +222,16 @@ LowMemoryTask::handleVeryLowMemory()
 void
 LowMemoryTask::handleLowMemory()
 {
-    int count = quitIfInvisible(m_oomManager.expendableProcs());
-    count += quitIfInvisible(m_oomManager.importantProcs());
+    OomManager* oom = qtopiaTask<OomManager>();
+    int count = 0;
+    if ( oom ) {
+        count = quitIfInvisible(oom->expendableProcs());
+        count += quitIfInvisible(oom->importantProcs());
+    }
+
     if (!count)
         qLog(OOM) << "No lazy shutdown procs to quit";
 }
-
-/*!
-  \fn void LowMemoryTask::showWarning(const QString &title, const QString &body)
-
-  Emitted whenever the LowMemoryTask requires the UI to display a message with
-  specified \a title and \a body to the user.
- */
 
 /*!
   Sends a \l {QCop} {message} to the application process
@@ -238,9 +247,10 @@ LowMemoryTask::handleLowMemory()
   would cause the process to die without shutting itself
   down.
 
-  This function emits a showWarning() signal with the texts
-  required for raising a message box to warn the user that a
-  process has been terminated.
+  This function opens a message box to warn the user that
+  a process has been terminated. The appearance of the message 
+  box is determined by the QAbstractMessageBox implementation
+  that is used throughout the server.
  */
 bool
 LowMemoryTask::quit(const QString& proc)
@@ -255,7 +265,7 @@ LowMemoryTask::quit(const QString& proc)
                         "quit()");
     QString title("Very Low Memory");
     QString text = QString("%1 quit to recover memory").arg(proc);
-    emit showWarning(title,text);
+    showWarningBox( title, text );
     return true;
 }
 
@@ -268,9 +278,10 @@ LowMemoryTask::quit(const QString& proc)
   not kill a process. If true is returned, it means we did
   kill a process.
 
-  This function emits a showWarning() signal with the texts
-  required for raising a message box to warn the user that a
-  process has been terminated.
+  This function opens a message box to warn the user that
+  a process has been terminated. The appearance of the message 
+  box is determined by the QAbstractMessageBox implementation
+  that is used throughout the server.
  */
 bool
 LowMemoryTask::kill(const QString& proc)
@@ -286,7 +297,7 @@ LowMemoryTask::kill(const QString& proc)
         QString title("Very Low Memory");
         QString text =
             QString("%1 killed to recover memory").arg(proc);
-        emit showWarning(title,text);
+        showWarningBox( title, text );
     }
     return true;
 }
@@ -314,17 +325,22 @@ LowMemoryTask::kill(const QString& proc)
 QString LowMemoryTask::selectProcess()
 {
     QString app = WindowManagement::activeAppName();
-    if (m_oomManager.isExpendable(app)) {
+    OomManager* oom = qtopiaTask<OomManager>();
+    if ( !oom ) {
+        return QLatin1String("");
+    }
+
+    if (oom->isExpendable(app)) {
         return app;
     }
-    app = m_oomManager.procWithBiggestScore(OomManager::Expendable);
+    app = oom->procWithBiggestScore(OomManager::Expendable);
     if (!app.isEmpty()) {
         return app;
     }
-    if (m_oomManager.isImportant(app)) {
+    if (oom->isImportant(app)) {
         return app;
     }
-    app = m_oomManager.procWithBiggestScore(OomManager::Important);
+    app = oom->procWithBiggestScore(OomManager::Important);
     if (app.isEmpty())
         qLog(OOM) << "No non-critical procs to kill";
     return app;
@@ -375,6 +391,26 @@ LowMemoryTask::quitIfInvisible(const QMap<QString,int>& map)
     }
     QtopiaIpcEnvelope e("QPE/System", "RecoverMemory()");
     return count;
+}
+
+/*!
+  This slot function is notified whenever it is required to pop up a message box
+  that notifies the user about the current action taken by the OOM management system.
+  */
+void LowMemoryTask::showWarningBox( const QString& title, const QString& msg ) 
+{
+    if (!d->warningMsgBox)
+            d->warningMsgBox =
+                QAbstractMessageBox::messageBox(0,title,msg,
+					    QAbstractMessageBox::Warning);
+
+    if ( !d->warningMsgBox ) {
+        qLog(Component) << "LowMemoryTask: Missing QAbstractMessageBox implementation";
+        return;
+    }
+    d->warningMsgBox->setText(msg);
+    d->warningMsgBox->setTimeout(WarningTimeout,QAbstractMessageBox::NoButton);
+    QtopiaApplication::showDialog(d->warningMsgBox);
 }
 
 QTOPIA_TASK(LowMemoryTask, LowMemoryTask);

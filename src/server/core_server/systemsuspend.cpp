@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,10 +23,11 @@
 
 /*!
   \class SystemSuspend
+    \inpublicgroup QtBaseModule
   \brief The SystemSuspend class manages entering and leaving system suspend.
   \ingroup QtopiaServer::Task
 
-  The SystemSuspend provides a Qtopia Server Task.  Qtopia Server Tasks are
+  The SystemSuspend provides a Qt Extended Server Task.  Qt Extended Server Tasks are
   documented in full in the QtopiaServerApplication class documentation.
 
   \table
@@ -68,7 +67,7 @@
   req.send();
   \endcode
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   \sa SystemSuspendHandler, SuspendService
  */
 
@@ -136,15 +135,15 @@
 
 /*!
   \class SystemSuspendHandler
+    \inpublicgroup QtBaseModule
   \brief The SystemSuspendHandler class provides an interface for tasks that
          provide system suspension or resumption functionality.
   \ingroup QtopiaServer::Task::Interfaces
 
-  The SystemSuspendHandler provides a Qtopia Server Task interface.  Qtopia 
-  Server Tasks are documented in full in the QtopiaServerApplication class 
+  The SystemSuspendHandler provides a Qt Extended Server Task interface.  Qt Extended Server Tasks are documented in full in the QtopiaServerApplication class 
   documentation.
 
-  Server components can use the SystemSuspendHandler to integrate into Qtopia's
+  Server components can use the SystemSuspendHandler to integrate into the
   suspend mechanism.
 
   Tasks that provide the SystemSuspendHandler interface will be called whenever
@@ -153,7 +152,7 @@
   SystemSuspendHandler implementers are called, is available in the 
   documentation for that class.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   \sa SystemSuspend
  */
 
@@ -336,7 +335,8 @@ bool SystemSuspendPrivate::qwsEventFilter(QWSEvent *e)
 // define SuspendService
 /*!
   \service SuspendService Suspend
-  \brief Provides the Suspend service.
+    \inpublicgroup QtBaseModule
+  \brief The SuspendService class provides the Suspend service.
 
   The \i Suspend service allows applications request that the device enter its
   suspend state.  The suspend state is likely to be a very low, but

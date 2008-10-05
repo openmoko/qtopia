@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,18 +23,20 @@
 
 /*!
     \service AlertService Alert
-    \brief Provides the Qtopia Alert service.
+    \inpublicgroup QtMediaModule
+    \inpublicgroup QtMediaModule
+    \brief The AlertService class provides the \i Alert service.
 
     The \i Alert service enables applications to sound the audible
     system alert.  Normally an application will use Qtopia::soundAlarm()
     for this.
 
     The \i Alert service is typically supplied by the AlertServiceTask task in
-    the Qtopia server, but the system integrator may change the provider
+    the Qt Extended server, but the system integrator may change the provider
     of this service if the device has special hardware (e.g. a buzzer or
     vibration system) that can alert the user.
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
     \sa Qtopia::soundAlarm()
 */
 
@@ -67,10 +67,12 @@ AlertService::~AlertService()
 
 /*!
   \class AlertServiceTask
+    \inpublicgroup QtMediaModule
+    \inpublicgroup QtMediaModule
   \ingroup QtopiaServer::Task
   \brief The AlertServiceTask class provides a WAV file implementation of the Alert service.
 
-  The AlertServiceTask provides a Qtopia Server Task.  Qtopia Server Tasks are
+  The AlertServiceTask provides a Qt Extended Server Task.  Qt Extended Server Tasks are
   documented in full in the QtopiaServerApplication class documentation.
 
   \table
@@ -82,7 +84,7 @@ AlertService::~AlertService()
   On reception of the Alert::soundAlert() service message the \c {:sound/alarm} system sound 
   is played using the QSoundControl API.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   \sa AlertService, Qtopia::soundAlarm()
  */
 

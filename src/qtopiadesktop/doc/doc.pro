@@ -47,6 +47,7 @@ mkdocs.commands=$$COMMAND_HEADER\
         $$MKDOCS_QDSYNC\
         $$MKDOCS_CONF\
         $$QPEDIR\
+        $$QTOPIA_SDKROOT\
         $$QTOPIA_DEPOT_PATH\
         $$DQTDIR\
         $$qdoc\

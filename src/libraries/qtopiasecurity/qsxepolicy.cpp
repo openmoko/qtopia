@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -51,34 +49,35 @@ static time_t fileModified(const QString &filename)
     struct stat statbuf;
     if (stat(filename.toLocal8Bit(), &statbuf) == 0)
         return statbuf.st_mtime;
-    
+
     return ((time_t)-1);
 }
 
 /*!
   \class SXEPolicyManager
-  \mainclass
-  \brief The SXEPolicyManager class provides a management interface for Qtopia Safe Execution Environment policies
+    \inpublicgroup QtPkgManagementModule
+
+  \brief The SXEPolicyManager class provides a management interface for Qt Extended Safe Execution Environment policies
 
   In order for Qtopia \l {Safe Execution Environment (SXE)} programs to function they must request services and
   other functionality from other components of Qtopia.  However to provide
   a level of security for the SXE, requests must only be actioned for those
   programs which are authorised.
 
-  The SXEPolicy manager provides an interface to the Qtopia system policy
+  The SXEPolicy manager provides an interface to the Qt Extended system policy
   files which record which programs are authorised for what service requests.
 
   In the context of SXE Policy, the word \i{service request} is intended to
-  be more general than \l {Services} {Qtopia Services}.
+  be more general than \l {Services} {Qt Extended Services}.
   Policy does cover these services, but it also is designed to work with
   any type of inter-process communication which maybe described by a string name.
 
   In the context of SXE Policy, a \i{program} is a number of (at least one)
   binary executable files, and support files that are installed onto the
-  storage media available to the Qtopia device.  Any binary installed with
+  storage media available to the Qt Extended device.  Any binary installed with
   the program or executing on its behalf is identified by that program's
   unique Program Identity, a number between 1 and 255 inclusive.  Program
-  Identity 0 is reserved for the Qtopia server.
+  Identity 0 is reserved for the Qt Extended server.
 
   SXE Policies provide a list of profile names for each Program Identity.
   Each profile name stands for a list of service request names.  Some examples
@@ -167,10 +166,10 @@ static int parseNumberInSquareBrackets( const QString &s )
 /*!
   Given the \a progId return a list of the profile names which that
   program is authorised to access.  The information is read from the
-  Qtopia SXE policy file [qt_prefix]/etc/sxe.policy.  A caching algorithm
+  Qt Extended SXE policy file [qt_prefix]/etc/sxe.policy.  A caching algorithm
   is used to lessen the number of file accesses required for
   recurring lookups.  The cache is checked for freshness against this
-  files last modify time, as the Qtopia installer may have changed
+  files last modify time, as the Qt Extended installer may have changed
   it since it was last accessed.
 */
 QStringList SXEPolicyManager::findPolicy( unsigned char progId )

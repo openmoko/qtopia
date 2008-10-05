@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -35,6 +33,13 @@
 #include <qtopianamespace.h>
 #include <qtopialog.h>
 #include <qfile.h>
+
+#include "custom.h"
+
+// Add override to your device profiles custom.h to use an alternative pcm
+#ifndef INPUT_AUDIO
+#define INPUT_AUDIO "default"
+#endif
 
 #define ALSA_PCM_NEW_HW_PARAMS_API  // Needed for older Alsa versions.
 #include <alsa/asoundlib.h>
@@ -390,7 +395,7 @@ QAudioInput::QAudioInput( const QByteArray &device, QObject *parent) : QIODevice
 QAudioInput::QAudioInput( QObject *parent )
     : QIODevice( parent )
 {
-    d = new QAudioInputPrivate("default");
+    d = new QAudioInputPrivate(INPUT_AUDIO);
 }
 
 QAudioInput::~QAudioInput()

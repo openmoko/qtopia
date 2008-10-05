@@ -145,7 +145,15 @@ sub opt_apply_defaults
                 if ( $optref->{"type"} && $optref->{"type"} eq "multi-value" ) {
                     $def =~ s/,/ /g;
                 }
-                $optref->{"value"} = $def;
+                my $setfunc = $optref->{"setfunc"};
+                if ( defined($def) && $def eq "0" ) {
+                    $setfunc = $optref->{"unsetfunc"};
+                }
+                if ( $setfunc && ref($setfunc) eq "CODE" ) {
+                    &$setfunc("dummy", $def);
+                } else {
+                    $optref->{"value"} = $def;
+                }
                 $optref->{"auto"} = 1;
             }
         }
@@ -188,6 +196,36 @@ sub set_optvar($$)
     }
     $optvar_storage{$optname} = $hashref;
     push(@ordered_optvar_keys, $optname);
+
+    # All module options are hidden
+    if ( $hashref->{"module"} ) {
+        $hashref->{"visible"} = 1;
+        my $set = $hashref->{"set"};
+        if ( !$hashref->{"module_help"} ) {
+            $hashref->{"module_help"} = $$set[1];
+        }
+        $$set[1] = "hidden";
+        $hashref->{"setfunc"} = sub {
+            my $paramstring = $$set[0];
+            $paramstring =~ s/%/$optname/;
+            $paramstring =~ s/_/-/g;
+            warn "WARNING: -$paramstring is deprecated. Please use -add-modules ".$hashref->{"module"}." instead.\n";
+            Qtopia::Opt::enable_module_for($optname);
+            my $ref = $hashref->{"module_setfunc"};
+            if ( ref($ref) eq "CODE" ) {
+                &$ref("dummy", 1);
+            }
+        };
+        my $unset = $hashref->{"unset"};
+        $$unset[1] = "hidden";
+        $hashref->{"unsetfunc"} = sub {
+            my $paramstring = $$unset[0];
+            $paramstring =~ s/%/$optname/;
+            $paramstring =~ s/_/-/g;
+            warn "WARNING: -$paramstring is deprecated. Please use -remove-modules ".$hashref->{"module"}." instead.\n";
+            Qtopia::Opt::disable_module_for($optname);
+        };
+    }
 }
 
 # Shorthand to access the value
@@ -226,9 +264,10 @@ sub add_note($)
 # Dump the opt_ variables to config.cache
 sub write_config_cache()
 {
-    my %ignored_attributes = map { $_ => 1 } qw(set unset setfunc unsetfunc setaliases arg visible autodep);
+    my %ignored_attributes = map { $_ => 1 } qw(set unset setfunc module_setfunc unsetfunc setaliases arg visible autodep);
     my $ret = "";
-    OPT: for my $optname ( keys %optvar_storage ) {
+    OPT: for my $optname ( @ordered_optvar_keys ) {
+        next if ( $optname =~ /^---/ );
         my $noted = 0;
         my $optref = $optvar_storage{$optname};
         ATTR: for my $attribute ( grep { !exists($ignored_attributes{$_}) } keys %$optref ) {
@@ -392,7 +431,7 @@ sub validate
         my $optref = $optvar_storage{$optname};
         if ( defined($optref->{"value"}) && $optref->{"available"} && ref($optref->{"available"}) ne "" ) {
             my @available = _resolve_to_array($optref->{"available"});
-            AVAILWORD: for my $word ( split(/ /, $optref->{"value"}) ) {
+            AVAILWORD: for my $word ( split(/\s+/, $optref->{"value"}) ) {
                 if ( $word ) {
                     for my $a ( @available ) {
                         if ( $word eq $a ) {
@@ -411,46 +450,99 @@ sub validate
     $ok;
 }
 
+sub get_feature_modules
+{
+    my @ret;
+    OPT: for my $optname ( @ordered_optvar_keys ) {
+        next if ( $optname =~ /^---/ );
+        my $optref = $optvar_storage{$optname};
+        if ( $optref->{"module"} ) {
+            push(@ret, $optname, $optref->{"module"});
+        }
+    }
+    @ret;
+}
+
+sub get_features
+{
+    my @ret;
+    OPT: for my $optname ( @ordered_optvar_keys ) {
+        next if ( $optname =~ /^---/ );
+        my $optref = $optvar_storage{$optname};
+        if ( $optref->{"feature"} ) {
+            push(@ret, $optname);
+        }
+    }
+    @ret;
+}
+
+sub enable_module_for
+{
+    my ( $optname ) = @_;
+    my $module;
+    for ( keys %optvar_storage ) {
+        if ( $_ eq $optname ) {
+            $module = $optvar_storage{$_}->{"module"};
+            last;
+        }
+    }
+    if ( !$module ) {
+        croak "$optname is not a module!";
+    }
+    #print "appending $module to modules ".opt("modules")."\n";
+    my @list = split(/\s+/, opt("modules"));
+    my $found = 0;
+    for ( @list ) {
+        if ( $_ eq $module ) {
+            $found = 1;
+            last;
+        }
+    }
+    if ( !$found ) {
+        push(@list, $module);
+        my %feature_modules = get_feature_modules();
+        for my $optname ( keys %feature_modules ) {
+            my $m = $feature_modules{$optname};
+            if ( $m eq $module ) {
+                opt($optname) = 1;
+                last;
+            }
+        }
+    }
+    opt("modules") = join(" ", @list);
+}
+
+sub disable_module_for
+{
+    my ( $optname ) = @_;
+    my $module;
+    for ( keys %optvar_storage ) {
+        if ( $_ eq $optname ) {
+            $module = $optvar_storage{$_}->{"module"};
+            last;
+        }
+    }
+    if ( !$module ) {
+        croak "$optname is not a module!";
+    }
+    my @list = split(/\s+/, opt("modules"));
+    my @tmp;
+    for ( @list ) {
+        if ( $_ eq $module ) {
+            my %feature_modules = get_feature_modules();
+            for my $optname ( keys %feature_modules ) {
+                my $m = $feature_modules{$optname};
+                if ( $m eq $module ) {
+                    opt($optname) = 0;
+                    last;
+                }
+            }
+            next;
+        } 
+        push(@tmp, $_);
+    }
+    opt("modules") = join(" ", @tmp);
+}
+
 # Make this file require()able.
 1;
-__END__
-
-=head1 NAME
-
-Qtopia::Opt - Option handling system
-
-=head1 SYNOPSIS
-
-    use Qtopia::Opt;
-    set_optvar(+{
-        ...
-    });
-    opt_get_options();
-    opt_apply_defaults();
-    opt_print_autodetect();
-
-=head1 DESCRIPTION
-
-Please see doc/src/buildsys/buildsystem-internals.qdoc for information about the opt system.
-
-=head2 EXPORT
-
-    opt_sanity_check
-    opt_get_options
-    opt_apply_defaults
-    opt_resolve
-    opt_print_autodetect
-    set_optvar
-    opt
-    add_separator
-    add_note
-
-=head1 AUTHOR
-
-Trolltech AS
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2006 TROLLTECH ASA. All rights reserved.
-
-=cut

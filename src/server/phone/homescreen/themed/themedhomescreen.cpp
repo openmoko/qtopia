@@ -1,52 +1,60 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
+#include "messageboard.h"
 #include "themedhomescreen.h"
 #include "serverthemeview.h"
 #include "themecontrol.h"
 #include "themebackground_p.h"
-#include "homescreenwidgets.h"
-#include "pressholdgate.h"
+#include "uifactory.h"
 #include <themedview.h>
 #include <qvaluespace.h>
-#include "touchscreenlockdlg.h"
+#include "qtopiainputevents.h"
+#include "qtopiaserverapplication.h"
 
+#include <QtopiaServiceDescription>
 #include <QtopiaServiceRequest>
-
-#ifdef QTOPIA_PHONEUI
-#include "dialercontrol.h"
-#endif
-
+#include <QtopiaIpcEnvelope>
+#include <QTimer>
+#include <QDialog>
+#include <QDesktopWidget>
 #include <QVBoxLayout>
+#include <custom.h>
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
+#include <qexportedbackground.h>
+#endif
+#include <QPainter>
 
 /*!
-  \class ThemedHomeScreen
-  \brief The ThemedHomeScreen class provides the home screen for Qtopia Phone.
-  \ingroup QtopiaServer::PhoneUI
+    \class ThemedHomeScreen
+    \inpublicgroup QtUiModule
+    \brief The ThemedHomeScreen class provides the home screen for Qt Extended.
+    \ingroup QtopiaServer::PhoneUI
 
-  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
-  It is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class extends the BasicHomeScreen by adding a \l {Theming}{themeable} user interface.
+    An image of this home screen using the Qt Extended theme can be found in the
+    \l{Server Widget Classes}{server widget gallery}.
 
-  \sa QAbstractServerInterface, QAbstractHomeScreen
+    This class is a Qt Extended \l{QtopiaServerApplication#qt-extended-server-widgets}{server widget}.
+    It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
+    \sa QAbstractHomeScreen, BasicHomeScreen
 */
 
 /*!
@@ -54,18 +62,15 @@
   and widget \a flags
   */
 ThemedHomeScreen::ThemedHomeScreen(QWidget *parent, Qt::WFlags flags)
-    : QAbstractHomeScreen(parent, flags),
-      themedView(new PhoneThemedView(parent, flags)),
-      bgIface(0)
+    : BasicHomeScreen(parent, flags),
+      themedView(new PhoneThemedView(parent, flags))
 {
     // Try to avoid double layouting.
     if (parent)
         setGeometry(0, 0, parent->width(), parent->height());
 
     vsObject = new QValueSpaceObject("/UI/HomeScreen", this);
-    themeBackground = new ThemeBackground(0, themedView);
 
-    connect(themedView, SIGNAL(loaded()), this, SLOT(themeLoaded()));
     connect(themedView, SIGNAL(itemClicked(ThemeItem*)),
             this, SLOT(themeItemClicked(ThemeItem*)));
 
@@ -73,7 +78,34 @@ ThemedHomeScreen::ThemedHomeScreen(QWidget *parent, Qt::WFlags flags)
     setLayout(vbox);
     vbox->setContentsMargins(0, 0, 0, 0);
     vbox->addWidget(themedView);
-    ThemeControl::instance()->registerThemedView(themedView, "Home");
+    vbox->activate(); // Avoid double layouting.
+
+    ThemeControl *ctrl = qtopiaTask<ThemeControl>();
+    if ( ctrl )
+        ctrl->registerThemedView( themedView, "Home");
+    else 
+        qLog(Component) << "ThemedHomeScreen: ThemeControl not available, Theme will not work properly";
+
+    board = qtopiaTask<MessageBoard>();
+    if ( !board ) {
+        qLog(Component) << "ThemedHomeScreen: MessageBoard component not available";
+    } else {
+        QObject::connect(board, SIGNAL(boardUpdated()), this, SLOT(updateInformation()));
+    }
+
+    // Listen to system channel
+    QtopiaChannel* sysChannel = new QtopiaChannel( "QPE/System", this );
+    connect( sysChannel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(sysMessage(QString,QByteArray)) );
+    connect( this, SIGNAL(showLockDisplay(bool,QString,QString)),
+             this, SLOT(showPinboxInformation(bool,QString,QString)));
+
+    QTimer::singleShot(0, this, SLOT(updateHomeScreenImage()));
+    QTimer::singleShot(0, this, SLOT(updateBackground()));
+
+    if (ctrl)
+      QObject::connect(ctrl, SIGNAL(themeChanged()), this, SLOT(themeChanged()));
+    themeLoaded();
 }
 
 /*!
@@ -89,23 +121,57 @@ ThemedHomeScreen::~ThemedHomeScreen()
  */
 void ThemedHomeScreen::updateBackground()
 {
-    themeBackground->updateBackground(themedView);
+    ThemePluginItem *background = (ThemePluginItem *)themedView->findItem("background-plugin", ThemedView::Plugin);
+    if (background) {
+        ThemeBackground *themeBackground = new ThemeBackground(themedView);
+        background->setBuiltin(themeBackground);
+    }
 }
 
 /*!
   \internal
  */
-void ThemedHomeScreen::applyHomeScreenImage()
+void ThemedHomeScreen::exportBackground()
 {
-    ThemePluginItem *ip = (ThemePluginItem *)themedView->findItem("bgplugin", ThemedView::Plugin);
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
+    ThemePluginItem *background = (ThemePluginItem *)themedView->findItem("background-plugin", ThemedView::Plugin);
+    if (background) {
+        int screen = QApplication::desktop()->screenNumber(this);
+        QDesktopWidget *desktop = QApplication::desktop();
+        QSize desktopSize = QExportedBackground::exportedBackgroundSize(screen);
+        // Create a 16bpp pixmap is possible
+        QImage::Format fmt = desktop->depth() <= 16 ? QImage::Format_RGB16 : QImage::Format_ARGB32_Premultiplied;
+        QImage img(desktopSize.width(), desktopSize.height(), fmt);
+        QPixmap pm = QPixmap::fromImage(img);
+        QPainter p(&pm);
+        QRect rect(QPoint(0,0), desktopSize);
+        background->paint(&p, rect);
+        QExportedBackground::setExportedBackground(pm, screen);
+        QExportedBackground::polishWindows(screen);
+    }
+#endif
+}
+
+void ThemedHomeScreen::themeChanged()
+{
+    QTimer::singleShot(0, this, SLOT(show()));
+    QTimer::singleShot(0, this, SLOT(updateBackground()));
+    QTimer::singleShot(0, this, SLOT(exportBackground()));
+    QTimer::singleShot(0, this, SLOT(updateHomeScreenImage()));
+}
+
+/*!
+  \internal
+ */
+void ThemedHomeScreen::updateHomeScreenImage()
+{
+    ThemePluginItem *ip = (ThemePluginItem *)themedView->findItem("homescreen-image-plugin", ThemedView::Plugin);
     if (ip) {
         QSettings cfg("Trolltech", "Launcher");
         cfg.beginGroup("HomeScreen");
         QString pname = cfg.value("Plugin", "Background").toString();
         if (pname == "Background") {
-            // DON'T delete the existing object here - it causes it to crash. Something else
-            // must be deleting it, such as "ip".
-            bgIface = new ThemeBackgroundImagePlugin;
+            ThemedItemPlugin *bgIface = new HomeScreenImagePlugin(themedView);
             ip->setBuiltin(bgIface);
         } else {
             ip->setPlugin(pname);
@@ -113,43 +179,31 @@ void ThemedHomeScreen::applyHomeScreenImage()
     }
 }
 
-// bool ThemedHomeScreen::eventFilter(QObject *object, QEvent *e)
-// {
-// #ifdef QTOPIA_PHONEUI
-//     bool calls = DialerControl::instance()->allCalls().count() != 0;
-// #else
-//     bool calls = false;
-// #endif
-// 
-// #ifdef QTOPIA_CELL
-//     bool locked = !calls && (keyLock->locked() || !simLock->open());
-// #else
-//     bool locked = !calls && (keyLock->locked());
-// #endif
-//     if (locked && (e->type() == QEvent::MouseButtonPress ||
-//                    e->type() == QEvent::MouseButtonRelease ||
-//                    e->type() == QEvent::MouseButtonDblClick ||
-//                    e->type() == QEvent::MouseMove)) {
-//         QMouseEvent *me = (QMouseEvent *)e;
-//         ThemeItem *item = themedView->itemAt(me->pos());
-//         if (item && item->itemName() == "star")
-//             return false;
-//         else
-//             return true;
-//     }
-//     return QAbstractHomeScreen::eventFilter(object, e);
-// }
-
+void ThemedHomeScreen::sysMessage(const QString& message, const QByteArray &data)
+{
+    QDataStream stream(data);
+    if (message == "updateHomeScreenImage()") {
+        updateHomeScreenImage();
+    } else if (message == "updateBackground()") {
+        updateBackground();
+    } else if (message == "exportBackground()") {
+        exportBackground();
+    } else if (message == "updateHomeScreenInfo()") {
+        updateHomeScreenInfo();
+    }
+}
 /*!
   \internal
  */
 void ThemedHomeScreen::themeLoaded()
 {
-    ThemeTextItem *textItem = (ThemeTextItem *)themedView->findItem("infobox", ThemedView::Text);
+    ThemeTextItem *textItem = (ThemeTextItem *)themedView->findItem("infobox-text", ThemedView::Text);
     if (textItem)
         textItem->setTextFormat(Qt::RichText);
-
+    updateBackground();
+    exportBackground();
     updateHomeScreenInfo();
+    updateHomeScreenImage();
 }
 
 /*!
@@ -174,23 +228,48 @@ void ThemedHomeScreen::updateHomeScreenInfo()
  */
 void ThemedHomeScreen::updateInformation()
 {
-    bool hideInfo = true;
-    ThemeTextItem *textItem;
-    if (infoData.count()) {
-        InfoData info = infoData[0];
+    if ( !board )
+        return;
 
-        textItem = (ThemeTextItem *)themedView->findItem("infobox", ThemedView::Text);
-        if (textItem)
-            textItem->setText(info.text);
-        ThemeImageItem *imgItem = (ThemeImageItem *)themedView->findItem("infobox", ThemedView::Image);
-        if (imgItem)
-            imgItem->setImage(info.pixmap);
-        hideInfo = info.text.isEmpty() && info.pixmap.isNull();
+    bool hideInfo = true;
+    static int currentId = -1;
+    ThemeTextItem *textItem;
+    if (!board->isEmpty()) {
+        MessageBoard::Note note = board->message();
+        if (currentId != note.id) {
+            textItem = (ThemeTextItem *)themedView->findItem("infobox-text", ThemedView::Text);
+            if (textItem)
+                textItem->setText(note.text);
+            ThemeImageItem *imgItem = (ThemeImageItem *)themedView->findItem("infobox-image", ThemedView::Image);
+            if (imgItem)
+                imgItem->setImage(QPixmap(note.pixmap));
+            hideInfo = note.text.isEmpty() && note.pixmap.isEmpty();
+            currentId = note.id;
+        } else {
+            hideInfo = false;
+        }
+    } else {
+        currentId = -1;
     }
 
     ThemeItem *item = themedView->findItem("infobox", ThemedView::Item);
     if (item)
         item->setActive(!hideInfo);
+}
+
+/*!
+  \internal
+ */
+void ThemedHomeScreen::showPinboxInformation(bool enable, const QString &pix, const QString &text)
+{
+    ThemeTextItem *textItem = (ThemeTextItem*)themedView->findItem("pinbox", ThemedView::Text);
+    if (textItem)
+        textItem->setText(text);
+    ThemeImageItem *imgItem = (ThemeImageItem*)themedView->findItem("pinbox", ThemedView::Image);
+    if (imgItem) {
+        imgItem->setImage(QPixmap(pix));
+    }
+    themedView->findItem("pinbox", ThemedView::Layout)->setActive(enable);
 }
 
 struct PhoneKeyDescription
@@ -241,58 +320,47 @@ void ThemedHomeScreen::themeItemClicked(ThemeItem *item)
     }
     if (in == "star")
         QtopiaInputEvents::processKeyEvent('*', Qt::Key_Asterisk, Qt::NoModifier, true, false);
-    if (keyLock->locked() || !simLock->open())
+    if (keyLock->locked() || simLock->locked())
         return;
 #endif
     if (in == "LauncherHSWidget") {
         ThemeWidgetItem* wItem = static_cast<ThemeWidgetItem*>(item);
         if (wItem != 0) {
-            LauncherHSWidget* launcher = qobject_cast<LauncherHSWidget*>(wItem->widget());
-            if (launcher != 0)
-                launcher->launch();
+            QWidget* launcher = wItem->widget();
+            if ( launcher )
+                QMetaObject::invokeMethod( launcher, "launch", Qt::DirectConnection );
         }
     } else if (in == "WorldmapHSWidget") {
         ThemeWidgetItem* wItem = static_cast<ThemeWidgetItem*>(item);
         if (wItem != 0) {
-            WorldmapHSWidget* worldmap = qobject_cast<WorldmapHSWidget*>(wItem->widget());
-            if (worldmap != 0)
-                worldmap->showCity();
+            QWidget *worldmap = wItem->widget();
+            if (worldmap)
+                QMetaObject::invokeMethod( worldmap, "showCity", Qt::DirectConnection );
         }
     } else if (in == "lock") {
-        TouchScreenLockDialog *dialog;
-        dialog = new TouchScreenLockDialog(0, Qt::WindowStaysOnTopHint);
+        setLocked(true);
     } else if (in == "mainmenu") {
         emit showPhoneBrowser();
     } else if (in == "speeddial") {
         emit speedDial(QString());
+    } else if (in == "favorites") {
+        QtopiaServiceRequest e( "Favorites", "select()" );
+        e.send();
+    } else if (in == "contacts") {
+        QtopiaIpcEnvelope e("QPE/Application/addressbook", "raise()");
     } else if( in == "dialer" ) {
         QtopiaServiceRequest e( "Dialer", "showDialer(QString)" );
         e << QString();
         e.send();
+    } else if( in == "callhistory" ) {
+        QtopiaServiceRequest e( "CallHistory", "showCallHistory(QCallList::ListType,QString)");
+        e << 0; /*QCallList::All;*/
+        e << QString();
+        e.send();
+    } else if( in == "caption" ) {
+        QtopiaServiceRequest e( "Presence", "editPresence()" );
+        e.send();
     }
-}
-
-/*!
-  \internal
- */
-void ThemedHomeScreen::showPinboxInformation(const QString &pix, const QString &text)
-{
-    ThemeTextItem *textItem = (ThemeTextItem*)themedView->findItem("pinbox", ThemedView::Text);
-    if (textItem)
-        textItem->setText(text);
-    ThemeImageItem *imgItem = (ThemeImageItem*)themedView->findItem("pinbox", ThemedView::Image);
-    if (imgItem) {
-        imgItem->setImage(QPixmap(pix));
-    }
-    themedView->findItem("pinbox", ThemedView::Layout)->setActive(true);
-}
-
-/*!
-  \internal
- */
-void ThemedHomeScreen::activatePinbox(bool enable)
-{
-    themedView->findItem("pinbox", ThemedView::Layout)->setActive(enable);
 }
 
 QTOPIA_REPLACE_WIDGET(QAbstractHomeScreen, ThemedHomeScreen);

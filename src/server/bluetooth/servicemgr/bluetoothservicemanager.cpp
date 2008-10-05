@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -235,38 +233,39 @@ void ServiceUserMessenger::setServiceSecurity(const QString &name,
 
 /*!
     \class BluetoothServiceManager
-    \brief The BluetoothServiceManager class controls Qtopia's Bluetooth services.
+    \inpublicgroup QtBluetoothModule
+    \brief The BluetoothServiceManager class controls Bluetooth services.
 
-    The Bluetooth Service Manager communicates over IPC with Qtopia's
+    The Bluetooth Service Manager communicates over IPC with the
     Bluetooth services in order to control and track their states and
     attributes. It also communicates with other parties, such as
-    Qtopia's Bluetooth settings application, who are interested in
-    controlling and tracking Qtopia's Bluetooth services.
+    the Bluetooth settings application, who are interested in
+    controlling and tracking Bluetooth services.
 
     The presence of the Bluetooth Service Manager provides several benefits:
     \list
     \o It automatically starts a Bluetooth service when it is created if it
-    was still running at the end of the last Qtopia session (or whenever it
+    was still running at the end of the last Qt Extended session (or whenever it
     was last terminated).
-    \o It records generic Bluetooth service settings across Qtopia sessions.
+    \o It records generic Bluetooth service settings across Qt Extended sessions.
     When a service is created, if it has previously registered with the 
     Bluetooth Service Manager, the manager will set the service to use the
     the security options that were previously assigned to the service.
-    \o External parties can control and access Qtopia Bluetooth services
+    \o External parties can control and access Qt Extended Bluetooth services
     through QBluetoothServiceController.
     \endlist
 
     Without the presence of the Bluetooth Service Manager, components such as
-    the QBluetoothServiceController class and Qtopia's Bluetooth settings
+    the QBluetoothServiceController class and the Bluetooth settings
     application will not function properly, as they rely on communication with
     the Bluetooth Service Manager in order to access and control Bluetooth
     services.
 
     You can create custom Bluetooth services that will be automatically
-    integrated into the Qtopia Bluetooth framework, and which will be
+    integrated into the Qt Extended Bluetooth framework, and which will be
     accessible by the Bluetooth Service Manager, by subclassing
-    QBluetoothAbstractService. This is how Qtopia's built-in Bluetooth
-    services, such as BtHandsfreeService and BtHeadsetServices, are
+    QBluetoothAbstractService. This is how the built-in Bluetooth
+    services, such as QBluetoothHandsfreeService and QbluetoothHeadsetServices, are
     implemented.
 
     The manager stores persistent service settings in \c BluetoothServices.conf.
@@ -278,7 +277,7 @@ void ServiceUserMessenger::setServiceSecurity(const QString &name,
     page for more details on the Bluetooth Service Manager's communication
     architecture.
   
-    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
+    This class is part of the Qt Extended server and cannot be used by other QtopiaApplications.
 
     \ingroup QtopiaServer::Task::Bluetooth
 */

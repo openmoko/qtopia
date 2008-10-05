@@ -1,0 +1,3 @@
+SOURCES+=\
+         systemsuspendtasks.cpp
+

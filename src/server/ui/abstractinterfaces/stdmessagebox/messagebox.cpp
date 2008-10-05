@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -30,6 +28,8 @@
 #include <qlayout.h>
 #include <qevent.h>
 #include <QPixmap>
+#include <QPushButton>
+#include <QButtonGroup>
 
 // declare PhoneMessageBoxPrivate
 class PhoneMessageBoxPrivate
@@ -46,7 +46,8 @@ public:
     customButton(false),
     icon(PhoneMessageBox::NoIcon),
     yesKey(0),
-    vbox(0) {}
+    vbox(0),
+    showPushButtons(false) {}
 
     QString title;
 
@@ -65,19 +66,28 @@ public:
     int yesKey;
 
     QVBoxLayout *vbox;
+
+    QPushButton *pushBtn0;
+    QPushButton *pushBtn1;
+    QPushButton *pushBtn2;
+
+    bool showPushButtons;
 };
 
 
 /*!
-  \class PhoneMessageBox
-  \brief The PhoneMessageBox class implements the Qtopia Phone message box.
-  \ingroup QtopiaServer::PhoneUI
-  
-  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
-  It is part of the Qtopia server and cannot be used by other Qtopia applications.
+    \class PhoneMessageBox
+    \inpublicgroup QtUiModule
+    \brief The PhoneMessageBox class implements the Qt Extended Phone message box.
+    \ingroup QtopiaServer::PhoneUI
 
-  \sa QAbstractServerInterface, QAbstractMessageBox
-  */
+    An image of this message box can be found in the \l{Server Widget Classes}{server widget gallery}.
+
+    This class is a Qt Extended \l{QtopiaServerApplication#qt-extended-server-widgets}{server widget}.
+    It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+    \sa QAbstractServerInterface, QAbstractMessageBox
+*/
 
 /*!
   Constructs a new PhoneMessageBox instance with the specified \a parent
@@ -89,11 +99,14 @@ PhoneMessageBox::PhoneMessageBox(QWidget *parent, Qt::WFlags flags)
     d = new PhoneMessageBoxPrivate;
 
     d->vbox = new QVBoxLayout(this);
+#ifdef QTOPIA_HOMEUI
+    d->showPushButtons = true; //XXX configured somehow
+    d->vbox->setMargin(40);
+#endif
+    d->vbox->addStretch(1);
     QWidget *messageArea = new QWidget(this);
     d->vbox->addWidget(messageArea);
     QHBoxLayout *hb = new QHBoxLayout(messageArea);
-    hb->setMargin(6);
-    hb->setSpacing(6);
     d->iconLabel = new QLabel(messageArea);
     d->iconLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     hb->addWidget(d->iconLabel);
@@ -101,6 +114,28 @@ PhoneMessageBox::PhoneMessageBox(QWidget *parent, Qt::WFlags flags)
     d->msg->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     d->msg->setWordWrap(true);
     hb->addWidget(d->msg, 100);
+
+    if (d->showPushButtons) {
+        QButtonGroup *bgroup = new QButtonGroup(this);
+        QHBoxLayout *btnBox = new QHBoxLayout(this);
+        btnBox->addStretch(1);
+        d->vbox->addLayout(btnBox);
+        d->pushBtn0 = new QPushButton(this);
+        btnBox->addWidget(d->pushBtn0);
+        bgroup->addButton(d->pushBtn0, 0);
+        d->pushBtn0->hide();
+        d->pushBtn1 = new QPushButton(this);
+        btnBox->addWidget(d->pushBtn1);
+        bgroup->addButton(d->pushBtn1, 1);
+        d->pushBtn1->hide();
+        d->pushBtn2 = new QPushButton(this);
+        btnBox->addWidget(d->pushBtn2);
+        bgroup->addButton(d->pushBtn2, 2);
+        d->pushBtn2->hide();
+        connect(bgroup, SIGNAL(buttonClicked(int)), this, SLOT(buttonClicked(int)));
+        btnBox->addStretch(1);
+    }
+    d->vbox->addStretch(1);
 
     if(parent)
         parent->installEventFilter(this);
@@ -129,6 +164,25 @@ void PhoneMessageBox::setButtons(Button button0, Button button1)
         if (d->btn1 == No || d->btn1 == Cancel) {
             QSoftMenuBar::setLabel(this, Qt::Key_Back, "", d->btn1 == No ? tr("No") : tr("Cancel"));
         }
+    }
+
+    if (d->showPushButtons) {
+        if (d->btn0 == Yes) {
+            d->pushBtn0->setText(tr("Yes"));
+        } else if (d->btn0 == Ok) {
+            d->pushBtn0->setText(tr("OK"));
+        }
+        d->pushBtn0->setVisible(d->btn0 == Yes || d->btn0 == Ok);
+
+        if (d->btn1 == No) {
+            d->pushBtn1->setText(tr("No"));
+        } else if (d->btn1 == Cancel) {
+            d->pushBtn1->setText(tr("Cancel"));
+        }
+        d->pushBtn1->setVisible(d->btn1 == No || d->btn1 == Cancel);
+
+        d->pushBtn2->hide();
+        layout()->activate();
     }
 }
 
@@ -166,6 +220,16 @@ void PhoneMessageBox::setButtons(const QString &button0Text, const QString &butt
     } else {
         QSoftMenuBar::setLabel(this, Qt::Key_Select, "", button1Text);
         QSoftMenuBar::setLabel(this, Qt::Key_Back, "", button2Text);
+    }
+
+    if (d->showPushButtons) {
+        d->pushBtn0->setVisible(!button0Text.isEmpty());
+        d->pushBtn0->setText(button0Text);
+        d->pushBtn1->setVisible(!button0Text.isEmpty());
+        d->pushBtn1->setText(button1Text);
+        d->pushBtn2->setVisible(!button0Text.isEmpty());
+        d->pushBtn2->setText(button2Text);
+        layout()->activate();
     }
 }
 
@@ -208,11 +272,25 @@ void PhoneMessageBox::setIcon(Icon i)
         case Warning:
             pm = QPixmap(":image/alert_warning");
             break;
-        default:
-            pm = QMessageBox::standardIcon((QMessageBox::Icon)d->icon);
+        case Critical:
+            pm = QMessageBox::standardIcon( QMessageBox::Critical );
             break;
+        case Question:
+            pm = QMessageBox::standardIcon( QMessageBox::Question );
+            break;
+        case NoIcon:
+            pm = QMessageBox::standardIcon( QMessageBox::NoIcon );
     }
     d->iconLabel->setPixmap(pm);
+}
+
+/*!
+  \reimp
+  */
+void PhoneMessageBox::setIconPixmap(const QPixmap& pixmap)
+{
+    d->icon = NoIcon;
+    d->iconLabel->setPixmap( pixmap );
 }
 
 /*!
@@ -287,8 +365,8 @@ void PhoneMessageBox::keyPressEvent(QKeyEvent *ke)
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 bool PhoneMessageBox::eventFilter(QObject *, QEvent *e)
 {
     if (e->type() == QEvent::WindowActivate && isVisible()) {
@@ -299,11 +377,29 @@ bool PhoneMessageBox::eventFilter(QObject *, QEvent *e)
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneMessageBox::addContents(QWidget *c)
 {
     d->vbox->addWidget(c);
+}
+
+/*!
+    \internal
+*/
+void PhoneMessageBox::buttonClicked(int btn)
+{
+    switch (btn) {
+    case 0:
+        done(d->btn0);
+        break;
+    case 1:
+        done(d->btn1);
+        break;
+    case 2:
+        done(d->btn2);
+        break;
+    }
 }
 
 QTOPIA_REPLACE_WIDGET(QAbstractMessageBox, PhoneMessageBox);

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "outlooksync.h"
@@ -177,6 +175,9 @@ bool OutlookSyncPlugin::getIdentifier( const QByteArray &record, QString &id, bo
         switch(reader.readNext()) {
             case QXmlStreamReader::NoToken:
             case QXmlStreamReader::Invalid:
+                WARNING() << "ERROR: getIdentifier() could not parse record due to error:"
+                          << (reader.hasError()?reader.errorString():QString("Unspecified Error"))
+                          << "record:" << endl << record;
                 return false;
             case QXmlStreamReader::StartElement:
                 if (reader.qualifiedName() == "Identifier") {
@@ -447,8 +448,8 @@ void OTSyncObject::createClientRecord(const QByteArray &record)
     QString clientid;
     bool local;
     bool ok = q->getIdentifier( record, clientid, local );
-    LOG() << "getIdentifier() returned" << "clientid" << clientid << "local" << local;
-    Q_ASSERT( ok );
+    LOG() << "getIdentifier() returned" << ok << "clientid" << clientid << "local" << local;
+    if (!ok) return;
 
     QString entryid;
 
@@ -483,8 +484,8 @@ void OTSyncObject::replaceClientRecord(const QByteArray &record)
     QString clientid;
     bool local;
     bool ok = q->getIdentifier( record, clientid, local );
-    LOG() << "getIdentifier() returned" << "clientid" << clientid << "local" << local;
-    Q_ASSERT( ok );
+    LOG() << "getIdentifier() returned" << ok << "clientid" << clientid << "local" << local;
+    if (!ok) return;
 
     QString entryid;
 

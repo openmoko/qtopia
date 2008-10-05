@@ -1,31 +1,29 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "serverthemeview.h"
-#include "homescreencontrol.h"
-#include "homescreenwidgets.h"
+#include "uifactory.h"
 #include <qtopiaservices.h>
 #include <qtopianamespace.h>
 #include <qvaluespace.h>
 #include <qtopiaipcenvelope.h>
+#include <QContent>
 
 QSet<PhoneThemedView *> PhoneThemedView::m_themedViews;
 
@@ -46,8 +44,9 @@ Q_GLOBAL_STATIC(PhoneThemedViewMonitor, phoneThemedViewMonitor);
 
 /*
   \class PhoneThemedView
+    \inpublicgroup QtBaseModule
   \brief The PhoneThemedView class provides a ThemedView supporting all the
-         common Qtopia UI theme tags.
+         common Qt Extended UI theme tags.
   \ingroup QtopiaServer::PhoneUI
 
   Deriving from this class gives your themed view the following value and
@@ -97,9 +96,15 @@ Q_GLOBAL_STATIC(PhoneThemedViewMonitor, phoneThemedViewMonitor);
   \row
     \o dialer
     \o Shows dialer
+  \row
+    \o presence
+    \o Starts presence editor
+  \row
+    \o voipsettings
+    \o Starts VoIP settings application
   \endtable
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 PhoneThemedView::PhoneThemedView(QWidget *parent, Qt::WFlags f)
@@ -118,10 +123,13 @@ PhoneThemedView::~PhoneThemedView()
 
 QWidget *PhoneThemedView::newWidget(ThemeWidgetItem *input, const QString &name)
 {
-    Q_UNUSED(input);
+    Q_UNUSED(name);
+    if (!input)
+        return 0;
 
     // First check if the theme widget is a homescreen widget
-    QWidget* widget = HomeScreenWidgets::create(name, this);
+    // we cannot use \a name because it is lower case and we need the case sensitive name
+    QWidget* widget = UIFactory::createWidget(input->itemName().toUtf8(), this );
     if (widget != 0)
         return widget;
     return 0;
@@ -137,9 +145,19 @@ void PhoneThemedView::myItemClicked(ThemeItem *item)
         e << true;
         e.send();
     } else if( in == "calls" ) {
-#ifdef QTOPIA_PHONEUI
-        HomeScreenControl::instance()->homeScreen()->showCallHistory(true, QString());
-#endif
+        QtopiaServiceRequest e( "CallHistory", "showCallHistory(QCallList::ListType,QString)");
+        //we don't want to depend on telephony hence we dont use QCallList directly
+        e << 3;     /*QASSERT(QCallList::Missed == 3)*/
+        e << QString(); // don't apply filtering
+        e.send();
+    } else if( in == "callhistory" ) {
+        QtopiaIpcEnvelope e("QPE/Application/callhistory", "raise()");
+    } else if( in == "inbox" ) {
+        QtopiaIpcEnvelope e("QPE/Application/qtmail", "raise()");
+    } else if( in == "dialer" ) {
+        QtopiaIpcEnvelope e("QPE/Application/dialer", "raise()");
+    } else if( in == "home" ) {
+        QtopiaIpcEnvelope e("QPE/System", "showHomeScreen()");
     } else if( in == "roaming" || in == "signal" ) {
         QContent app( QtopiaService::app( "CallNetworks" ));
         if( app.isValid() )
@@ -163,6 +181,12 @@ void PhoneThemedView::myItemClicked(ThemeItem *item)
     } else if( in == "profile" ) {
         QtopiaServiceRequest e( "RingProfiles", "showRingProfiles()" );
         e.send();
+    } else if (in == "contacts") {
+        QtopiaIpcEnvelope e("QPE/Application/contacts", "raise()");
+    } else if( in == "media" ) {
+        QContent app( QtopiaService::app( "PlayMedia" ));
+        if( app.isValid() )
+            app.execute();
     }
 }
 

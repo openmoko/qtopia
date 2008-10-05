@@ -1,172 +1,520 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qmailid.h"
 
-class QMailIdPrivate : public QSharedData
+class MailIdPrivate : public QSharedData
 {
 public:
-    QMailIdPrivate():QSharedData(){};
+    MailIdPrivate():QSharedData(){};
 
     quint64 id;
 };
 
-/*!
-    \class QMailId
-    \mainclass
-    \preliminary
-    \brief The QMailId class defines the 64bit database ID's for message store elements.
-    \ingroup messaginglibrary
+Q_IMPLEMENT_USER_METATYPE(MailId);
 
-    The QMailID class represents the message store identifiers for QMailMessages and QMailFolders.
-    A QMailId can be either valid or invalid. A message or folder with a valid ID is expected
-    to exist on the store and have a quint64 value greater than 0.
-
-    \sa QMailMessage
-*/
-
-Q_IMPLEMENT_USER_METATYPE(QMailId);
-
-/*!
-   Constructs a new invalid QMailId.
-*/
-
-QMailId::QMailId()
+MailId::MailId()
 {
-    d = new QMailIdPrivate();
+    d = new MailIdPrivate();
     d->id = 0;
 }
 
-/*!
-    Explicitly constructs a new QMailId from a quint64 \a id.
-*/
-
-QMailId::QMailId(const quint64& id)
+MailId::MailId(quint64 value)
 {
-    d = new QMailIdPrivate();
-    d->id = id;
+    d = new MailIdPrivate();
+    d->id = value;  
 }
 
-/*!
-    Constructs a QMailId that is a copy of the QMailId \a other.
-*/
-
-QMailId::QMailId(const QMailId& other)
+MailId::MailId(const MailId& other)
 {
     d = other.d;
 }
 
-/*!
-    Destroys the QMailId.
-*/
-
-QMailId::~QMailId()
+MailId::~MailId()
 {
 }
 
-/*!
-    Returns \c true if this QMailId is valid or \c false otherwise. A valid
-    QMailId is one which is expected to exist on the message store.
-*/
-
-bool QMailId::isValid() const
-{
-    return d->id > 0;
-}
-
-/*!
-  Returns the quint64 representation of the QMailId.
-*/
-
-quint64 QMailId::toULongLong() const
-{
-    return d->id;
-}
-
-/*!
-  Returns the QVariant representation of this QMailId.
-*/
-
-QMailId::operator QVariant() const
-{
-    return QVariant::fromValue(*this);
-}
-
-/*!
-    Returns \c true if this QMailId does not equal the QMailId \a other,
-    and \c false otherwise.
-*/
-
-bool QMailId::operator!= ( const QMailId & other ) const
-{
-    return d->id != other.d->id;
-}
-
-/*!
-    Returns \c true if this QMailId equals the QMailId \a other, and \c false
-    otherwise.
-*/
-
-bool QMailId::operator== ( const QMailId& other ) const
-{
-    return d->id == other.d->id;
-}
-
-/*!
-    Returns \c true if this QMailId is less than the value of \a other, and \c false
-    otherwise.
-*/
-bool QMailId::operator< (const QMailId& other) const
-{
-    return d->id < other.d->id;
-}
-
-/*!
-    Assignes the value of this QMailId to the value of the QMailId \a other.
-*/
-
-QMailId& QMailId::operator=(const QMailId& other)
+MailId& MailId::operator=(const MailId& other) 
 {
     d = other.d;
     return *this;
 }
 
-/*!
-    \fn QMailId::serialize(Stream &stream) const
+bool MailId::isValid() const
+{
+    return d->id != 0;
+}
 
-    Writes the contents of a QMailId to a \a stream.
-*/
-template <typename Stream> void QMailId::serialize(Stream &stream) const
+quint64 MailId::toULongLong() const
+{
+    return d->id;
+}
+
+bool MailId::operator!= (const MailId & other) const
+{
+    return d->id != other.d->id;
+}
+
+bool MailId::operator== (const MailId& other) const
+{
+    return d->id == other.d->id;
+}
+
+bool MailId::operator< (const MailId& other) const
+{
+    return d->id < other.d->id;
+}
+
+template <typename Stream> void MailId::serialize(Stream &stream) const
 {
     stream << d->id;
 }
 
-/*!
-    \fn QMailId::deserialize(Stream &stream)
-
-    Reads the contents of a QMailId from \a stream.
-*/
-template <typename Stream> void QMailId::deserialize(Stream &stream)
+template <typename Stream> void MailId::deserialize(Stream &stream)
 {
     stream >> d->id;
+}
+
+
+QDebug& operator<< (QDebug& debug, const MailId &id)
+{
+    return debug << id.toULongLong();
+}
+
+
+/*!
+    \class QMailAccountId
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+    \ingroup messaginglibrary
+
+    \preliminary
+    \brief The QMailAccountId class is used to identify accounts stored by QMailStore.
+
+    QMailAccountId is a class used to represent accounts stored by the QMailStore, identified
+    by their unique numeric internal indentifer.
+
+    A QMailAccountId instance can be tested for validity, and compared to other instances
+    for equality.  The numeric value of the identifier is not intrinsically meaningful 
+    and cannot be modified.
+    
+    \sa QMailAccount, QMailStore::account()
+*/
+
+/*!
+    \typedef QMailAccountIdList
+    \relates QMailAccountId
+*/
+
+Q_IMPLEMENT_USER_METATYPE(QMailAccountId);
+
+/*! 
+    Construct an uninitialized QMailAccountId, for which isValid() returns false.
+*/
+QMailAccountId::QMailAccountId()
+    : MailId()
+{
+}
+
+/*! 
+    Construct a QMailAccountId with the supplied numeric identifier \a value.
+*/
+QMailAccountId::QMailAccountId(quint64 value)
+    : MailId(value)
+{
+}
+
+/*! \internal */
+QMailAccountId::QMailAccountId(const QMailAccountId& other)
+    : MailId(other)
+{
+}
+
+/*! \internal */
+QMailAccountId::~QMailAccountId()
+{
+}
+
+/*! \internal */
+QMailAccountId& QMailAccountId::operator=(const QMailAccountId& other) 
+{
+    MailId::operator=(other);
+    return *this;
+}
+
+/*!
+    Returns true if this object has been initialized with the identifier of an
+    existing message contained by QMailStore.
+*/
+bool QMailAccountId::isValid() const
+{
+    return MailId::isValid();
+}
+
+/*! \internal */
+quint64 QMailAccountId::toULongLong() const
+{
+    return MailId::toULongLong();
+}
+
+/*!
+    Returns a QVariant containing the value of this account identfier.
+*/
+QMailAccountId::operator QVariant() const
+{
+    return QVariant::fromValue(*this);
+}
+
+/*!
+    Returns true if this object's identifier value differs from that of \a other.
+*/
+bool QMailAccountId::operator!= (const QMailAccountId& other) const
+{
+    return MailId::operator!=(other);
+}
+
+/*!
+    Returns true if this object's identifier value is equal to that of \a other.
+*/
+bool QMailAccountId::operator== (const QMailAccountId& other) const
+{
+    return MailId::operator==(other);
+}
+
+/*!
+    Returns true if this object's identifier value is less than that of \a other.
+*/
+bool QMailAccountId::operator< (const QMailAccountId& other) const
+{
+    return MailId::operator<(other);
+}
+
+/*! 
+    \fn QMailAccountId::serialize(Stream&) const
+    \internal 
+*/
+template <typename Stream> void QMailAccountId::serialize(Stream &stream) const
+{
+    MailId::serialize(stream);
+}
+
+/*! 
+    \fn QMailAccountId::deserialize(Stream&)
+    \internal 
+*/
+template <typename Stream> void QMailAccountId::deserialize(Stream &stream)
+{
+    MailId::deserialize(stream);
+}
+
+/*! \internal */
+QDebug& operator<< (QDebug& debug, const QMailAccountId &id)
+{
+    return debug << static_cast<const MailId&>(id);
+}
+
+Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QMailAccountIdList, QMailAccountIdList)
+
+
+/*!
+    \class QMailFolderId
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+    \ingroup messaginglibrary
+
+    \preliminary
+    \brief The QMailFolderId class is used to identify folders stored by QMailStore.
+
+    QMailFolderId is a class used to represent folders stored by the QMailStore, identified
+    by their unique numeric internal indentifer.
+
+    A QMailFolderId instance can be tested for validity, and compared to other instances
+    for equality.  The numeric value of the identifier is not intrinsically meaningful 
+    and cannot be modified.
+    
+    \sa QMailFolder, QMailStore::folder()
+*/
+
+/*!
+    \typedef QMailFolderIdList
+    \relates QMailFolderId
+*/
+
+Q_IMPLEMENT_USER_METATYPE(QMailFolderId);
+
+/*! 
+    Construct an uninitialized QMailFolderId, for which isValid() returns false.
+*/
+QMailFolderId::QMailFolderId()
+    : MailId()
+{
+}
+
+/*! 
+    Construct a QMailFolderId with the supplied numeric identifier \a value.
+*/
+QMailFolderId::QMailFolderId(quint64 value)
+    : MailId(value)
+{
+}
+
+/*! \internal */
+QMailFolderId::QMailFolderId(const QMailFolderId& other)
+    : MailId(other)
+{
+}
+
+/*! \internal */
+QMailFolderId::~QMailFolderId()
+{
+}
+
+/*! \internal */
+QMailFolderId& QMailFolderId::operator=(const QMailFolderId& other) 
+{
+    MailId::operator=(other);
+    return *this;
+}
+
+/*!
+    Returns true if this object has been initialized with the identifier of an
+    existing message contained by QMailStore.
+*/
+bool QMailFolderId::isValid() const
+{
+    return MailId::isValid();
+}
+
+/*! \internal */
+quint64 QMailFolderId::toULongLong() const
+{
+    return MailId::toULongLong();
+}
+
+/*!
+    Returns a QVariant containing the value of this folder identfier.
+*/
+QMailFolderId::operator QVariant() const
+{
+    return QVariant::fromValue(*this);
+}
+
+/*!
+    Returns true if this object's identifier value differs from that of \a other.
+*/
+bool QMailFolderId::operator!= (const QMailFolderId& other) const
+{
+    return MailId::operator!=(other);
+}
+
+/*!
+    Returns true if this object's identifier value is equal to that of \a other.
+*/
+bool QMailFolderId::operator== (const QMailFolderId& other) const
+{
+    return MailId::operator==(other);
+}
+
+/*!
+    Returns true if this object's identifier value is less than that of \a other.
+*/
+bool QMailFolderId::operator< (const QMailFolderId& other) const
+{
+    return MailId::operator<(other);
+}
+
+/*! 
+    \fn QMailFolderId::serialize(Stream&) const
+    \internal 
+*/
+template <typename Stream> void QMailFolderId::serialize(Stream &stream) const
+{
+    MailId::serialize(stream);
+}
+
+/*! 
+    \fn QMailFolderId::deserialize(Stream&)
+    \internal 
+*/
+template <typename Stream> void QMailFolderId::deserialize(Stream &stream)
+{
+    MailId::deserialize(stream);
+}
+
+/*! \internal */
+QDebug& operator<< (QDebug& debug, const QMailFolderId &id)
+{
+    return debug << static_cast<const MailId&>(id);
+}
+
+Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QMailFolderIdList, QMailFolderIdList)
+
+
+/*!
+    \class QMailMessageId
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+    \ingroup messaginglibrary
+
+    \preliminary
+    \brief The QMailMessageId class is used to identify messages stored by QMailStore.
+
+    QMailMessageId is a class used to represent messages stored by the QMailStore, identified
+    by their unique numeric internal indentifer.
+
+    A QMailMessageId instance can be tested for validity, and compared to other instances
+    for equality.  The numeric value of the identifier is not intrinsically meaningful 
+    and cannot be modified.
+    
+    \sa QMailMessage, QMailStore::message()
+*/
+
+/*!
+    \typedef QMailMessageIdList
+    \relates QMailMessageId
+*/
+
+Q_IMPLEMENT_USER_METATYPE(QMailMessageId);
+
+/*! 
+    Construct an uninitialized QMailMessageId, for which isValid() returns false.
+*/
+QMailMessageId::QMailMessageId()
+    : MailId()
+{
+}
+
+/*! 
+    Construct a QMailMessageId with the supplied numeric identifier \a value.
+*/
+QMailMessageId::QMailMessageId(quint64 value)
+    : MailId(value)
+{
+}
+
+/*! \internal */
+QMailMessageId::QMailMessageId(const QMailMessageId& other)
+    : MailId(other)
+{
+}
+
+/*! \internal */
+QMailMessageId::~QMailMessageId()
+{
+}
+
+/*! \internal */
+QMailMessageId& QMailMessageId::operator=(const QMailMessageId& other) 
+{
+    MailId::operator=(other);
+    return *this;
+}
+
+/*!
+    Returns true if this object has been initialized with the identifier of an
+    existing message contained by QMailStore.
+*/
+bool QMailMessageId::isValid() const
+{
+    return MailId::isValid();
+}
+
+/*! \internal */
+quint64 QMailMessageId::toULongLong() const
+{
+    return MailId::toULongLong();
+}
+
+/*!
+    Returns a QVariant containing the value of this message identfier.
+*/
+QMailMessageId::operator QVariant() const
+{
+    return QVariant::fromValue(*this);
+}
+
+/*!
+    Returns true if this object's identifier value differs from that of \a other.
+*/
+bool QMailMessageId::operator!= (const QMailMessageId& other) const
+{
+    return MailId::operator!=(other);
+}
+
+/*!
+    Returns true if this object's identifier value is equal to that of \a other.
+*/
+bool QMailMessageId::operator== (const QMailMessageId& other) const
+{
+    return MailId::operator==(other);
+}
+
+/*!
+    Returns true if this object's identifier value is less than that of \a other.
+*/
+bool QMailMessageId::operator< (const QMailMessageId& other) const
+{
+    return MailId::operator<(other);
+}
+
+/*! 
+    \fn QMailMessageId::serialize(Stream&) const
+    \internal 
+*/
+template <typename Stream> void QMailMessageId::serialize(Stream &stream) const
+{
+    MailId::serialize(stream);
+}
+
+/*! 
+    \fn QMailMessageId::deserialize(Stream&)
+    \internal 
+*/
+template <typename Stream> void QMailMessageId::deserialize(Stream &stream)
+{
+    MailId::deserialize(stream);
+}
+
+/*! \internal */
+QDebug& operator<< (QDebug& debug, const QMailMessageId &id)
+{
+    return debug << static_cast<const MailId&>(id);
+}
+
+Q_IMPLEMENT_USER_METATYPE_TYPEDEF(QMailMessageIdList, QMailMessageIdList)
+
+/*! \internal */
+uint qHash(const QMailAccountId &id)
+{
+    return qHash(id.toULongLong());
+}
+
+/*! \internal */
+uint qHash(const QMailFolderId &id)
+{
+    return qHash(id.toULongLong());
+}
+
+/*! \internal */
+uint qHash(const QMailMessageId &id)
+{
+    return qHash(id.toULongLong());
 }
 
 

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -32,7 +30,8 @@
 
 /*!
     \class QAbstractSoftKeyLabelHelper
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \internal
 
     \brief The QAbstractSoftKeyLabelHelper class provides an abstract base class for the softkey helpers, assisting in ensuring that the qsoftkey labels show the correct icons or words.
@@ -263,7 +262,7 @@ bool QAbstractSoftKeyLabelHelper::leaveEditFocus(QWidget* widget) {
 
 // Label manipulation functions
 /*!
-    Set the label for \key to the standard Qtopia label \a label.
+    Set the label for \key to the standard Qt Extended label \a label.
 
     Qt::Key_Select and Qt::Key_Back are the most common values for \a key.  Qt::Key_Menu is used to change the third softkey, but this is uncommon in Qtopia, as this key is usually used for the soft menu and left unchanged.
     \sa setLabelText(), setLabelPixmap(), clearLabel()
@@ -353,6 +352,7 @@ bool QSoftKeyLabelHelperPrivate::eventFilter(QObject* watched, QEvent *event)
 
 /*!
     \class QSoftKeyLabelHelper
+    \inpublicgroup QtBaseModule
     \internal
     \brief The QSoftKeyLabelHelper class is a softkey helper suitable for most widgets that do not use edit focus.
 
@@ -440,6 +440,7 @@ void QSoftKeyLabelHelper::updateAllLabels(QWidget *widget){
 
 /*!
     \class QLineEditSoftKeyLabelHelper
+    \inpublicgroup QtBaseModule
     \internal
     \brief The QLineEditSoftKeyLabelHelper class is a handler for the softkeys for the \l QLineEdit class.
 
@@ -691,6 +692,7 @@ public:
 
 /*!
     \class QDateTimeEditSoftKeyLabelHelper
+    \inpublicgroup QtBaseModule
     \internal
     \brief The QDateTimeEditSoftKeyLabelHelper class is a handler for the softkeys for the \l QDateTimeEdit class.
 */

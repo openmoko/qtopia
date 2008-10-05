@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -77,35 +75,14 @@ QStringList QTaskSqlIO::otherFilters() const
     return l;
 }
 
-void QTaskSqlIO::setContextFilter(const QSet<int> &list)
-{
-    if (list != contextFilter()) {
-        QPimSqlIO::setContextFilter(list, ExcludeContexts);
-        invalidateCache();
-    }
-}
-
-QSet<int> QTaskSqlIO::contextFilter() const
-{
-    return QPimSqlIO::contextFilter();
-}
-
-void QTaskSqlIO::setCategoryFilter(const QCategoryFilter &f)
-{
-    if (f != categoryFilter()) {
-        QPimSqlIO::setCategoryFilter(f);
-        emit filtersUpdated();
-    }
-}
-
 QTaskSqlIO::QTaskSqlIO(QObject *parent, const QString &)
-    : QTaskIO(parent),
-    QPimSqlIO(contextId(), "tasks", "taskcategories", "taskcustom",
+    : QPimSqlIO(parent, contextId(), "tasks", "taskcategories", "taskcustom",
             "description = :description, status = :status, priority = :priority, "
             "percentcompleted = :pc, due = :due, started = :started, completed = :completed",
             " (recid, context, description, status, priority, percentcompleted, due, started, completed"
             ") VALUES (:i, :context, :description, :status, :priority, :pc, :due, :started, "
-            ":completed)"),
+            ":completed)",
+            "PIM/Tasks"),
     cCompFilter(false), cSort(QTaskModel::Description), taskByRowValid(false),
     repeatFieldQuery("SELECT alarm, repeatrule, repeatenddate, repeatfrequency, repeatweekflags FROM appointments WHERE recid = (SELECT destrecid FROM pimdependencies WHERE srcrecid = :id AND deptype = 'duedate')")
 {
@@ -188,7 +165,6 @@ void QTaskSqlIO::setCompletedFilter(bool b)
             QPimSqlIO::setFilter(QLatin1String("percentcompleted != 100"));
         else
             QPimSqlIO::clearFilter();
-        emit filtersUpdated();
     }
 }
 
@@ -215,13 +191,12 @@ void QTaskSqlIO::invalidateCache()
 {
     QPimSqlIO::invalidateCache();
     taskByRowValid = false;
-    emit filtersUpdated();
 }
 
 QTask QTaskSqlIO::task(int row) const
 {
     // caching belongs in task lookup.
-    return task(recordId(row));
+    return task(id(row));
 }
 
 QVariant QTaskSqlIO::taskField(int row, QTaskModel::Field k) const
@@ -238,7 +213,7 @@ QVariant QTaskSqlIO::taskField(int row, QTaskModel::Field k) const
         case QTaskModel::RepeatFrequency:
         case QTaskModel::RepeatWeekFlags:
             repeatFieldQuery.prepare();
-            repeatFieldQuery.bindValue(":id", recordId(row).toUInt());
+            repeatFieldQuery.bindValue(":id", id(row).toUInt());
             repeatFieldQuery.exec();
             ret = repeatFieldQuery.value(k-QTaskModel::Alarm);
             repeatFieldQuery.reset();
@@ -250,17 +225,112 @@ QVariant QTaskSqlIO::taskField(int row, QTaskModel::Field k) const
         default:
             break;
     }
-    return QTaskIO::taskField(row, k);
+
+    QTask t = task(row);
+    switch(k) {
+        default:
+        case QTaskModel::Invalid:
+            break;
+        case QTaskModel::Identifier:
+            return t.uid().toByteArray();
+        case QTaskModel::Categories:
+            return QVariant(t.categories());
+        case QTaskModel::Description:
+            return t.description();
+        case QTaskModel::Priority:
+            return t.priority();
+        case QTaskModel::Completed:
+            return t.isCompleted();
+        case QTaskModel::PercentCompleted:
+            return t.percentCompleted();
+        case QTaskModel::Status:
+            return t.status();
+        case QTaskModel::DueDate:
+            return t.dueDate();
+        case QTaskModel::StartedDate:
+            return t.startedDate();
+        case QTaskModel::CompletedDate:
+            return t.completedDate();
+        case QTaskModel::Notes:
+            return t.notes();
+    }
+    return QVariant();
 }
 
 bool QTaskSqlIO::setTaskField(int row, QTaskModel::Field k,  const QVariant &v)
 {
-    return QTaskIO::setTaskField(row, k, v);
+    QTask t = task(row);
+    switch(k) {
+        default:
+        case QTaskModel::Invalid:
+            break;
+        case QTaskModel::Categories:
+            if (v.canConvert(QVariant::StringList)) {
+                t.setCategories(v.toStringList());
+                return updateTask(t);
+            }
+            return false;
+        case QTaskModel::Description:
+            if (v.canConvert(QVariant::String)) {
+                t.setDescription(v.toString());
+                return updateTask(t);
+            }
+            return false;
+        case QTaskModel::Priority:
+            if (v.canConvert(QVariant::Int)) {
+                t.setPriority(v.toInt());
+                return updateTask(t);
+            }
+            return false;
+        case QTaskModel::Completed:
+            if (v.canConvert(QVariant::Bool)) {
+                t.setCompleted(v.toBool());
+                return updateTask(t);
+            }
+            return false;
+        case QTaskModel::PercentCompleted:
+            if (v.canConvert(QVariant::Int)) {
+                t.setPercentCompleted(v.toInt());
+                return updateTask(t);
+            }
+            return false;
+        case QTaskModel::Status:
+            if (v.canConvert(QVariant::Int)) {
+                t.setStatus(v.toInt());
+                return updateTask(t);
+            }
+            return false;
+        case QTaskModel::DueDate:
+            if (v.canConvert(QVariant::Date)) {
+                t.setDueDate(v.toDate());
+                return updateTask(t);
+            }
+            return false;
+        case QTaskModel::StartedDate:
+            if (v.canConvert(QVariant::Date)) {
+                t.setStartedDate(v.toDate());
+                return updateTask(t);
+            }
+            return false;
+        case QTaskModel::CompletedDate:
+            if (v.canConvert(QVariant::Date)) {
+                t.setCompletedDate(v.toDate());
+                return updateTask(t);
+            }
+            return false;
+        case QTaskModel::Notes:
+            if (v.canConvert(QVariant::String)) {
+                t.setNotes(v.toString());
+                return updateTask(t);
+            }
+            return false;
+    }
+    return false;
 }
 
 bool QTaskSqlIO::removeTask(int row)
 {
-    QUniqueId u = recordId(row);
+    QUniqueId u = id(row);
     return removeTask(u);
 }
 
@@ -270,8 +340,6 @@ bool QTaskSqlIO::removeTask(const QUniqueId & id)
         return false;
 
     if (QPimSqlIO::removeRecord(id)) {
-        notifyRemoved(id);
-        emit recordsUpdated();
         return true;
     }
     return false;
@@ -284,15 +352,12 @@ bool QTaskSqlIO::removeTask(const QTask &t)
 
 bool QTaskSqlIO::removeTasks(const QList<int> &rows)
 {
-    QList<QUniqueId> ids = recordIds(rows);
-    return removeTasks(ids);
+    return removeTasks(ids(rows));
 }
 
 bool QTaskSqlIO::removeTasks(const QList<QUniqueId> &ids)
 {
     if (QPimSqlIO::removeRecords(ids)) {
-        notifyRemoved(ids);
-        emit recordsUpdated();
         return true;
     }
     return false;
@@ -301,8 +366,6 @@ bool QTaskSqlIO::removeTasks(const QList<QUniqueId> &ids)
 bool QTaskSqlIO::updateTask(const QTask &t)
 {
     if (QPimSqlIO::updateRecord(t)) {
-        notifyUpdated(t.uid());
-        emit recordsUpdated();
         return true;
     }
     return false;
@@ -317,23 +380,8 @@ QUniqueId QTaskSqlIO::addTask(const QTask &task, const QPimSource &source, bool 
     if (!i.isNull()) {
         QTask added = task;
         added.setUid(i);
-        notifyAdded(i);
-	emit recordsUpdated();
     }
     return i;
-}
-
-QVariant QTaskSqlIO::key(int row) const
-{
-    QList<QTaskModel::Field> mOrder;
-    mOrder << QTaskModel::CompletedDate;
-    mOrder << QTaskModel::Priority;
-    mOrder << QTaskModel::Description;
-    QStringList sc;
-    foreach(QTaskModel::Field f, mOrder) {
-        sc << taskField(row, f).toString();
-    }
-    return sc;
 }
 
 /***************

@@ -7,3 +7,5 @@ CREATE TABLE contactphonenumbers (
 
 CREATE INDEX contactphonenumbersbytype ON contactphonenumbers (phone_type, phone_number);
 CREATE INDEX contactphonenumbersindex ON contactphonenumbers (recid);
+CREATE INDEX contactphonenumbersnumbers ON contactphonenumbers (phone_number, recid);
+CREATE INDEX contactphnenumberscontacts ON contactphonenumbers (recid, phone_number);

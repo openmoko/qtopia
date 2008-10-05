@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <qdplugin.h>
@@ -120,10 +118,10 @@ QDPluginFactory::~QDPluginFactory()
 
 /*!
   \class QDPlugin 
-  \brief The QDPlugin class represents a Qtopia Sync Agent plugin.
+  \brief The QDPlugin class represents a Qt Extended Sync Agent plugin.
   \mainclass
 
-  All Qtopia Sync Agent plugins inherit from QDPlugin but the class itself is abstract.
+  All Qt Extended Sync Agent plugins inherit from QDPlugin but the class itself is abstract.
 
   When creating a plugin you can use the QD_CONSTRUCT_PLUGIN macro to simplify the
   construction boilerplate that must be created.
@@ -281,7 +279,7 @@ QWidget *QDAppPlugin::initSettings()
   \mainclass
 
   This plugin should be used to bring up a network interface and provide an IP address
-  for Qtopia Sync Agent to connect to.
+  for Qt Extended Sync Agent to connect to.
 */
 
 /*!
@@ -506,7 +504,7 @@ QDDevPlugin::~QDDevPlugin()
 
 /*!
   \fn QString QDDevPlugin::model()
-  Return the model name of the device. For example, "Trolltech Greenphone".
+  Return the model name of the device. For example, "Greenphone".
 */
 
 /*!
@@ -529,7 +527,7 @@ QDDevPlugin::~QDDevPlugin()
 /*!
   \fn QPixmap QDDevPlugin::icon()
   Return an image that can be used as an icon for the device. This is used so the user can see
-  what they have connected to Qtopia Sync Agent.
+  what they have connected to Qt Extended Sync Agent.
 */
 
 /*!
@@ -552,10 +550,10 @@ QDDevPlugin::~QDDevPlugin()
 
 /*!
   \class QDSyncPlugin 
-  \brief The QDSyncPlugin class represents a Qtopia Sync Agent sync plugin.
+  \brief The QDSyncPlugin class represents a Qt Extended Sync Agent sync plugin.
   \mainclass
 
-  All Qtopia Sync Agent sync plugins inherit from QDSyncPlugin but the class itself is abstract.
+  All Qt Extended Sync Agent sync plugins inherit from QDSyncPlugin but the class itself is abstract.
 */
 
 /*!
@@ -638,7 +636,7 @@ void QDSyncPlugin::finishSync()
   \mainclass
 
   The sync implementation uses both client and server plugins. Client plugins
-  represent a dataset on a Qtopia device and are expected to handle the entire
+  represent a dataset on a Qt Extended device and are expected to handle the entire
   sync protocol. If you do not know what datasets will be supported at compile
   time, use QDClientSyncPluginFactory instead.
 
@@ -815,7 +813,7 @@ QDClientSyncPluginFactory::~QDClientSyncPluginFactory()
   \brief The QDServerSyncPlugin class handles a single dataset on the desktop.
   \mainclass
 
-  This class is implemented to add support for a new dataset to Qtopia Sync Agent.
+  This class is implemented to add support for a new dataset to Qt Extended Sync Agent.
   It is called by the Sync Manager. Note that the sync process is designed to
   be asynchronous. The methods of this class can return immediately as status
   is returned via signals.

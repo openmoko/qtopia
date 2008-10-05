@@ -25,15 +25,15 @@ if ( $isWindows ) {
 use constant DEBUG => 0;
 
 my $QTOPIA_SDKROOT = shift(@ARGV);
-my $INSTALL_ROOT = shift(@ARGV);
+my $INSTALL_ROOT = $QTOPIA_SDKROOT;
 
 DEBUG and print "QTOPIA_SDKROOT = $QTOPIA_SDKROOT\n";
 DEBUG and print "INSTALL_ROOT = $INSTALL_ROOT\n";
 DEBUG and print "QTOPIA_DEPOT_PATH = $depotpath\n";
 DEBUG and print "QPEDIR = $QPEDIR\n";
-DEBUG and print "QTEDIR = $QTEDIR\n";
-DEBUG and print "DQTDIR = $DQTDIR\n";
-DEBUG and print "QT_DEPOT_PATH = $qt_depot_path\n";
+#DEBUG and print "QTEDIR = $QTEDIR\n";
+#DEBUG and print "DQTDIR = $DQTDIR\n";
+#DEBUG and print "QT_DEPOT_PATH = $qt_depot_path\n";
 
 my %map = (
     "QTOPIA_DEPOT_PATH" => "",
@@ -45,41 +45,51 @@ my %map = (
 
 tie my %pathmap, 'Hash::Ordered';
 %pathmap = (
-    "QTEDIR" => [ $QTEDIR, "$QTOPIA_SDKROOT/qtopiacore/target" ],
-    "DQTDIR" => [ $DQTDIR, "$QTOPIA_SDKROOT/qtopiacore/host" ],
-    "qt_depot_path" => [ $qt_depot_path, "$QTOPIA_SDKROOT/qtopiacore/qt" ],
+    "QTEDIR" => [ #$QTEDIR,
+                  "$QTOPIA_SDKROOT/qtopiacore/target" ],
+    "DQTDIR" => [ #$DQTDIR,
+                  "$QTOPIA_SDKROOT/qtopiacore/host" ],
+    "qt_depot_path" => [ #$qt_depot_path,
+                         "$QTOPIA_SDKROOT/qtopiacore/qt" ],
     "QPEDIR" => [ $QPEDIR, $QTOPIA_SDKROOT ],
     "depotpath" => [ $depotpath, $QTOPIA_SDKROOT ],
 );
 
 processfile("$QPEDIR/config.cache", "$INSTALL_ROOT/config.cache");
 
-for my $fileglob ( "qtopiacore/host/lib/*.prl",
-                   "qtopiacore/host/lib/*.la",
-                   "qtopiacore/host/lib/*.pc",
-                   "qtopiacore/host/include/Qt/qconfig*.h",
-                   "qtopiacore/host/include/QtCore/qconfig*.h",
+for my $fileglob ( #"qtopiacore/host/lib/*.prl",
+                   #"qtopiacore/host/lib/*.la",
+                   #"qtopiacore/host/lib/*.pc",
+                   #"qtopiacore/host/include/Qt/qconfig*.h",
+                   #"qtopiacore/host/include/QtCore/qconfig*.h",
                    "qtopiacore/target/lib/*.prl",
                    "qtopiacore/target/lib/*.la",
                    "qtopiacore/target/lib/*.pc",
                    "qtopiacore/target/include/Qt/qconfig*.h",
                    "qtopiacore/target/include/QtCore/qconfig*.h",
                    "qtopiacore/qt/doc/html/*.html",
-                   "lib/*.prl",
-                   "src/build/extra/Makefile",
-                   "doc/html/*.html",
+                   #"lib/*.prl",
+                   #"src/build/extra/Makefile",
+                   #"doc/html/*.html",
                  ) {
     for my $file ( glob("$INSTALL_ROOT/$fileglob") ) {
         processfile($file, $file);
     }
 }
 
-find( sub {
+# Replace symlinks
+find(sub {
     my $file = $File::Find::name;
-    if ( basename($file) eq ".qmake.cache" ) {
-        processfile($file, $file);
+    return if ( $file eq $QTOPIA_SDKROOT );
+    if ( -l $file ) {
+        my $dest = readlink($file);
+        if ( $dest =~ /^\// ) {
+            #print "$file -> $dest\n";
+            unlink $file;
+            system("cp", "-aRp", $dest, $file);
+        }
     }
-}, $INSTALL_ROOT);
+}, "$QTOPIA_SDKROOT/");
 
 exit 0;
 

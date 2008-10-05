@@ -1,37 +1,43 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
+#include "applicationlauncher.h"
 #include "callscreen.h"
 #include "dialercontrol.h"
-#include "qabstracthomescreen.h"
 #include "servercontactmodel.h"
+#include "qtopiaserverapplication.h"
 #include "qabstractmessagebox.h"
-#include "videoringtone.h"
 #include "qtopiainputevents.h"
+#include "themecontrol.h"
+#include "uifactory.h"
+#include "abstractaudiohandler.h"
+#include "callaudiohandler.h"
+#include "abstractdialfilter.h"
+#include "taskmanagerentry.h"
+#ifdef MEDIA_SERVER
+#include "videoringtone.h"
+#endif
 #include <QAction>
-#include <QApplication>
 #include <QDateTime>
 #include <QDebug>
 #include <QDialog>
-#include <QItemDelegate>
+//#include <QItemDelegate>
 #include <QKeyEvent>
 #include <QLayout>
 #include <QLineEdit>
@@ -45,26 +51,16 @@
 #include <QTextDocument>
 #include <QList>
 #include <QLabel>
+#include <QScreenInformation>
 
-#include <QAudioStateConfiguration>
-#include <QAudioStateInfo>
-#include <qaudionamespace.h>
-#include <QtopiaIpcEnvelope>
 
-//#include <qexportedbackground.h>
 #include <qtopiaservices.h>
 #include <qsoftmenubar.h>
-#include <qtopia/pim/qcontactmodel.h>
-#include <qtopia/pim/qcontact.h>
+#include <qcontactmodel.h>
+#include <qcontact.h>
 #include <qtopianamespace.h>
 #include <themedview.h>
 #include <qphonecallmanager.h>
-
-#ifdef QTOPIA_CELL
-#include <QSimToolkit>
-#endif
-
-#include "delayedwaitdialog.h"
 
 static const int  MAX_JOINED_CALLS = 5;
 static const uint SECS_PER_HOUR= 3600;
@@ -72,9 +68,9 @@ static const uint SECS_PER_MIN  = 60;
 
 #define SELECT_KEY_TIMEOUT 2000
 
-static CallScreen *callScreen = 0;
+static ThemedCallScreenView *callScreen = 0;
 
-static DelayedWaitDialog *waitDlg = 0;
+static QDialog *waitDlg = 0;
 
 class CallData {
 public:
@@ -198,7 +194,7 @@ void SecondaryCallScreen::paintEvent(QPaintEvent *)
         subText = callData.state;
     else if (call().onHold())
         subText = callData.durationString() + QLatin1String(" ") + callData.state;
-    else if (call().state() == QPhoneCall::Connected && !callScreen->incomingCall())
+    else if (call().state() == QPhoneCall::Connected && DialerControl::instance()->hasIncomingCall())
         subText = callData.durationString();
     else if( call().dropped() )
         subText = callData.state;
@@ -227,7 +223,6 @@ protected:
 protected slots:
     void currentChanged(const QModelIndex &cur, const QModelIndex &prev);
 private:
-    CallScreen *mCallScreen;
     ThemeWidgetItem *thisThemeItem;
 };
 
@@ -321,7 +316,7 @@ private:
 
 /* define CallItemListView */
 CallItemListView::CallItemListView(ThemeWidgetItem *ti, QWidget *parent)
-    : QListView(parent), mCallScreen( (CallScreen *)parent), thisThemeItem( ti )
+    : QListView(parent), thisThemeItem( ti )
 {
     setResizeMode(QListView::Adjust);
 }
@@ -343,159 +338,15 @@ void CallItemListView::currentChanged(const QModelIndex &cur, const QModelIndex 
 
     CallItemModel *m = qobject_cast<CallItemModel *>(model());
     CallItemEntry *item = m->callItemEntry(cur);
-    item->setValue( "State", tr( " (Connect)",
+    if (item)
+        item->setValue( "State", tr( " (Connect)",
                 "describing an action to take on a call, make sure keeping the space in the beginning" ) );
     item = m->callItemEntry(prev);
-    item->setValue( "State", tr( " (Hold)",
+    if (item)
+        item->setValue( "State", tr( " (Hold)",
                 "describing an action to take on a call, make sure keeping the space in the beginning" ) );
 }
 
-//===========================================================================
-
-/* declare CallAudioHandler */
-class CallAudioHandler : public QObject
-{
-    Q_OBJECT
-public:
-    CallAudioHandler(QAudioStateConfiguration *conf, QObject *parent = 0);
-    ~CallAudioHandler();
-
-    void addOptionsToMenu(QMenu *menu);
-    void callStateChanged(bool enableAudio);
-
-private slots:
-    void actionTriggered(QAction *action);
-    void availabilityChanged();
-    void currentStateChanged(const QAudioStateInfo &state, QAudio::AudioCapability capability);
-
-private:
-    QHash<QAction *, QAudioStateInfo> audioModes;
-    QActionGroup *actions;
-    bool audioActive;
-    QtopiaIpcAdaptor *mgr;
-    QAudioStateConfiguration *audioConf;
-};
-
-//-----------------------------------------------------------
-/* define CallAudioHandler */
-
-CallAudioHandler::CallAudioHandler(QAudioStateConfiguration *conf, QObject *parent)
-	: QObject(parent)
-{
-    mgr = new QtopiaIpcAdaptor("QPE/AudioStateManager", this);
-    audioConf = conf;
-
-    audioActive = false;
-
-    connect(conf, SIGNAL(currentStateChanged(QAudioStateInfo,QAudio::AudioCapability)),
-            this, SLOT(currentStateChanged(QAudioStateInfo,QAudio::AudioCapability)));
-    connect(conf, SIGNAL(availabilityChanged()),
-            this, SLOT(availabilityChanged()));
-
-    QSet<QAudioStateInfo> states = conf->states("Phone");
-
-    actions = new QActionGroup(this);
-
-    foreach (QAudioStateInfo state, states) {
-        QAction *action = new QAction(state.displayName(), this);
-        action->setVisible(false);
-        action->setCheckable(true);
-        actions->addAction(action);
-        audioModes.insert(action, state);
-    }
-
-    connect(actions, SIGNAL(triggered(QAction*)),
-            this, SLOT(actionTriggered(QAction*)));
-}
-
-CallAudioHandler::~CallAudioHandler()
-{
-}
-
-void CallAudioHandler::addOptionsToMenu(QMenu *menu)
-{
-    foreach (QAction *action, audioModes.keys()) {
-	menu->addAction(action);
-    }
-}
-
-void CallAudioHandler::actionTriggered(QAction *action)
-{
-    if (!audioActive) {
-        qWarning("CallAudioHandler::actionTriggered while audio is not active!");
-        return;
-    }
-
-    if (!audioModes.contains(action)) {
-        qWarning("CallAudioHandler::actionTriggered - Invalid action!");
-        return;
-    }
-
-    mgr->send("setProfile(QByteArray)", audioModes[action].profile());
-}
-
-void CallAudioHandler::availabilityChanged()
-{
-    if (!audioActive)
-        return;
-
-    QHash<QAction *, QAudioStateInfo>::const_iterator it = audioModes.constBegin();
-    while (it != audioModes.constEnd()) {
-        bool vis = audioConf->isStateAvailable(audioModes[it.key()]);
-        it.key()->setVisible(vis);
-        ++it;
-    }
-}
-
-void CallAudioHandler::currentStateChanged(const QAudioStateInfo &state, QAudio::AudioCapability)
-{
-    if (!audioActive)
-        return;
-
-    QHash<QAction *, QAudioStateInfo>::const_iterator it = audioModes.constBegin();
-    while (it != audioModes.constEnd()) {
-        if (it.value() == state) {
-            it.key()->setChecked(true);
-            return;
-        }
-        ++it;
-    }
-}
-
-
-void CallAudioHandler::callStateChanged(bool enableAudio)
-{
-    if (enableAudio == audioActive)
-        return;
-
-    audioActive = enableAudio;
-
-    if (audioActive) {
-        QByteArray domain("Phone");
-        int capability = static_cast<int>(QAudio::OutputOnly);
-        mgr->send("setDomain(QByteArray,int)", domain, capability);
-
-        QtopiaIpcEnvelope e("QPE/AudioVolumeManager", "setActiveDomain(QString)");
-        e << QString("Phone");
-
-        availabilityChanged();
-    }
-    else {
-        foreach (QAction *action, actions->actions()) {
-            action->setChecked(false);
-            action->setVisible(false);
-        }
-
-        //TODO: This needs to be fixed  up later to send the release
-        // domain message instead
-        QByteArray domain("Media");
-        int capability = static_cast<int>(QAudio::OutputOnly);
-        mgr->send("setDomain(QByteArray,int)", domain, capability);
-
-        QtopiaIpcEnvelope e("QPE/AudioVolumeManager", "resetActiveDomain(QString)");
-        e << QString("Phone");
-    }
-}
 
 //===========================================================================
 
@@ -668,74 +519,116 @@ protected:
 //===========================================================================
 
 /*!
-  \class CallScreen
-  \brief The CallScreen class provides a phone call screen.
+    \class ThemedCallScreen
+    \inpublicgroup QtTelephonyModule
+    \brief The ThemedCallScreen class provides a phone call screen.
+    \ingroup QtopiaServer::PhoneUI
+
+    This widget can be \l{Theming}{themed}.
+    An image of this call screen using the Qt Extended theme can be found in the \l{Server Widget Classes}{server widget gallery}.
+
+    This class is a Qt Extended \l{QtopiaServerApplication#qt-extended-server-widgets}{server widget}.
+    It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+  */
+
+/*!
+    Constrcuts a new instance with the given \a parent and \a flags.
+*/
+ThemedCallScreen::ThemedCallScreen(QWidget *parent, Qt::WFlags flags)
+    : QAbstractCallScreen(parent, flags)
+{
+    QVBoxLayout *vbl = new QVBoxLayout(this);
+    vbl->setMargin(0);
+    view = new ThemedCallScreenView(DialerControl::instance(), this);
+    vbl->addWidget(view);
+
+    connect(view, SIGNAL(acceptIncoming()), this, SIGNAL(acceptIncoming()));
+    connect(view, SIGNAL(listEmpty()), this, SLOT(hide()));
+    connect(view, SIGNAL(hangupCall()), this, SIGNAL(hangupCall()));
+    connect(view, SIGNAL(raiseCallScreen()), this, SLOT(raiseCallScreen()));
+    connect(view, SIGNAL(hideCallScreen()), this, SLOT(hide()));
+}
+
+/*!
+    \reimp
+*/
+void ThemedCallScreen::stateChanged()
+{
+    view->stateChanged();
+}
+
+/*!
+    \internal
+*/
+void ThemedCallScreen::closeEvent(QCloseEvent *e)
+{
+    if (view->tryClose())
+        e->accept();
+    else
+        e->ignore();
+}
+
+/*!
+    \internal
+*/
+void ThemedCallScreen::raiseCallScreen()
+{
+    showMaximized();
+    raise();
+    activateWindow();
+}
+
+//===========================================================================
+
+/*!
+  \class ThemedCallScreenView
+    \inpublicgroup QtTelephonyModule
+  \brief The ThemedCallScreenView class provides a phone call screen.
   \ingroup QtopiaServer::PhoneUI
+  \internal
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   */
 
 
 /*!
-  \fn void CallScreen::acceptIncoming()
+  \fn void ThemedCallScreenView::acceptIncoming()
   \internal
   */
 
 /*!
-  \fn int CallScreen::activeCallCount() const
+  \fn int ThemedCallScreenView::activeCallCount() const
   \internal
   */
 
 /*!
-  \fn int CallScreen::heldCallCount() const
+  \fn int ThemedCallScreenView::heldCallCount() const
   \internal
   */
 
 
 /*!
-    \fn bool CallScreen::incomingCall() const
+    \fn bool ThemedCallScreenView::incomingCall() const
     \internal
     */
 
 /*!
-    \fn bool CallScreen::inMultiCall() const
+    \fn bool ThemedCallScreenView::inMultiCall() const
     \internal
     */
 
-/*!
-  \fn void CallScreen::muteRing()
-  \internal
-  */
-
-/*!
-  \fn void CallScreen::listEmpty()
-  \internal
-  */
-
-/*!
-    \fn void CallScreen::testKeys(const QString&, bool&)
-    \internal
-    */
-
-/*!
-  \fn void CallScreen::filterKeys(const QString&, bool&)
-  \internal
-  */
-
-/*!
-  \fn void CallScreen::filterSelect(const QString&, bool&)
-  \internal
-  */
-
-/* define CallScreen */
+/* define ThemedCallScreenView */
 /*!
   \internal
   */
-CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
-    : PhoneThemedView(parent, fl), control(ctrl), digits(0), listView(0), actionGsm(0),
+ThemedCallScreenView::ThemedCallScreenView(DialerControl *ctrl, QWidget *parent)
+    : PhoneThemedView(parent), control(ctrl), digits(0), listView(0), actionGsm(0),
     activeCount(0), holdCount(0) , keypadVisible(false), mLayout( 0 ),
-    updateTimer( 0 ), gsmActionTimer(0), secondaryCallScreen(0), m_model(0), m_callAudioHandler(0),
-    videoWidget(0), simMsgBox(0), showWaitDlg(false), symbolTimer(0), m_mouseCtrlDlg(0)
+    updateTimer( 0 ), gsmActionTimer(0), secondaryCallScreen(0), m_model(0),
+#ifdef QTOPIA_TELEPHONY
+    m_callAudioHandler(0),m_callAudio(0),
+#endif
+    videoWidget(0), showWaitDlg(false), symbolTimer(0), m_mouseCtrlDlg(0)
 {
     callScreen = this;
     setObjectName(QLatin1String("calls"));
@@ -758,7 +651,7 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     contextMenu->addAction(actionMute);
 
     actionEnd = new QAction(QIcon(":icon/phone/hangup"),tr("End"),this);
-    connect(actionEnd, SIGNAL(triggered()), control, SLOT(endCall()));
+    connect(actionEnd, SIGNAL(triggered()), this, SLOT(endCall()));
     actionEnd->setVisible(false);
     contextMenu->addAction(actionEnd);
 
@@ -795,23 +688,39 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     connect(control, SIGNAL(callControlRequested()), this, SLOT(showProgressDlg()));
     connect(control, SIGNAL(callControlSucceeded()), this, SLOT(hideProgressDlg()));
 
-    m_audioConf = new QAudioStateConfiguration(this);
 
-    if (m_audioConf->isInitialized())
-        initializeAudioConf();
-    else
-        QObject::connect(m_audioConf, SIGNAL(configurationInitialized()),
+#ifdef QTOPIA_TELEPHONY
+    m_callAudioHandler = qtopiaTask<CallAudioHandler>();
+    if (m_callAudioHandler)
+        if (m_callAudioHandler->isInitialized())
+            initializeAudioConf();
+        else
+            QObject::connect(m_callAudioHandler, SIGNAL(initialized()),
                          this, SLOT(initializeAudioConf()));
+#endif
 
     QObject::connect(this, SIGNAL(itemReleased(ThemeItem*)),
-                     this, SLOT(themeItemClicked(ThemeItem*)));
+                    this, SLOT(themeItemReleased(ThemeItem*)));
 
     setWindowTitle(tr("Calls"));
 
     if (QApplication::desktop()->numScreens() > 1) {
-        // We have a secondary screen
-        secondaryCallScreen = new SecondaryCallScreen;
-        secondaryCallScreen->setGeometry(QApplication::desktop()->availableGeometry(1));
+        // We might have a secondary screen.  Search for a normal
+        // (i.e. non-television) screen to create the secondary call screen.
+        int secondScreen = -1;
+        QDesktopWidget *desktop = QApplication::desktop();
+        for (int screen = 0; screen < desktop->numScreens(); ++screen) {
+            QScreenInformation info(screen);
+            if (screen != desktop->primaryScreen() &&
+                info.type() == QScreenInformation::Normal) {
+                secondScreen = screen;
+                break;
+            }
+        }
+        if (secondScreen != -1) {
+            secondaryCallScreen = new SecondaryCallScreen;
+            secondaryCallScreen->setGeometry(QApplication::desktop()->availableGeometry(secondScreen));
+        }
     }
 
     QObject::connect(control,
@@ -819,50 +728,69 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
                      this,
                      SLOT(requestFailed(QPhoneCall,QPhoneCall::Request)));
 
-    QObject::connect(control, SIGNAL(callConnected(const QPhoneCall&)),
-                     this, SLOT(callConnected(const QPhoneCall&)));
+    QObject::connect(control, SIGNAL(callConnected(QPhoneCall)),
+                     this, SLOT(callConnected(QPhoneCall)));
 
-    QObject::connect(control, SIGNAL(callDropped(const QPhoneCall&)),
-                     this, SLOT(callDropped(const QPhoneCall&)));
+    QObject::connect(control, SIGNAL(callDropped(QPhoneCall)),
+                     this, SLOT(callDropped(QPhoneCall)));
 
-    QObject::connect(control, SIGNAL(callDialing(const QPhoneCall&)),
-                     this, SLOT(callDialing(const QPhoneCall&)));
+    QObject::connect(control, SIGNAL(callDialing(QPhoneCall)),
+                     this, SLOT(callDialing(QPhoneCall)));
 
     // reject any dialogs when new call coming in
-    QObject::connect(control, SIGNAL(callIncoming(const QPhoneCall&)),
+    QObject::connect(control, SIGNAL(callIncoming(QPhoneCall)),
                      this, SLOT(rejectModalDialog()));
-    QObject::connect(control, SIGNAL(callIncoming(const QPhoneCall&)),
-                     this, SLOT(callIncoming(const QPhoneCall&)));
+    QObject::connect(control, SIGNAL(callIncoming(QPhoneCall)),
+                     this, SLOT(callIncoming(QPhoneCall)));
 
-    QObject::connect( VideoRingtone::instance(), SIGNAL(videoWidgetReady()),
-            this, SLOT(setVideoWidget()) );
-    QObject::connect( VideoRingtone::instance(), SIGNAL(videoRingtoneStopped()),
-            this, SLOT(deleteVideoWidget()) );
+#if defined(MEDIA_SERVER) && defined(QTOPIA_TELEPHONY)
+    VideoRingtone *vrt = qtopiaTask<VideoRingtone>();
+    if ( vrt ) {
+        QObject::connect( vrt, SIGNAL(videoWidgetReady()),
+                this, SLOT(setVideoWidget()) );
+        QObject::connect( vrt, SIGNAL(videoRingtoneStopped()),
+                this, SLOT(deleteVideoWidget()) );
+    } else {
+        qLog(Component) << "CallScreen: VideoRingtone not available";
+    }
     // delete the video widget once call is answered
     connect( this, SIGNAL(acceptIncoming()),
             this, SLOT(deleteVideoWidget()) );
-
-#ifdef QTOPIA_CELL
-    simToolkit = new QSimToolkit( QString(), this );
-    QObject::connect( simToolkit, SIGNAL(controlEvent(QSimControlEvent)),
-            this, SLOT(simControlEvent(QSimControlEvent)) );
 #endif
+
     // Due to delayed intialization of call screen
     // manual update on incoming call is required when call screen is created
     if ( control->hasIncomingCall() )
         callIncoming( control->incomingCall() );
+
+    ThemeControl *tctrl = qtopiaTask<ThemeControl>();
+    if ( tctrl )
+        tctrl->registerThemedView(this, "CallScreen");
+    else 
+        qLog(Component) << "ThemedCallScreen: ThemeControl not available, theme will not work properly";
+
+    m_taskManagerEntry = new TaskManagerEntry(tr("Calls"), "phone/calls", this);
+    QObject::connect(m_taskManagerEntry, SIGNAL(activated()), this, SIGNAL(raiseCallScreen()));
+
 }
 
 /*!
-  Sets the video player widget to the CallScreen.
+  Sets the video player widget to the ThemedCallScreenView.
   */
-void CallScreen::setVideoWidget()
+void ThemedCallScreenView::setVideoWidget()
 {
+#if defined(MEDIA_SERVER) && defined(QTOPIA_TELEPHONY)
     if ( !m_model->rowCount() )
         return;
 
-    videoWidget = VideoRingtone::instance()->videoWidget();
+    VideoRingtone *vrt = qtopiaTask<VideoRingtone>();
+    if ( !vrt )
+        return;
 
+    videoWidget = vrt->videoWidget();
+#else
+    return; //video ring tone requires qtopiamedia
+#endif
     videoWidget->setParent( this );
 
     QRect availableGeometry = rect();
@@ -878,24 +806,25 @@ void CallScreen::setVideoWidget()
     // set menu.
     QMenu *menu = QSoftMenuBar::menuFor( videoWidget );
     menu = contextMenu;
-    QSoftMenuBar::setLabel(videoWidget, Qt::Key_Select, "phone/answer", tr("Answer"));
+    QSoftMenuBar::setLabel(videoWidget, Qt::Key_Select, "phone/answer", tr("Answer", "answer call"));
     QSoftMenuBar::setLabel(listView, Qt::Key_Back, ":icon/mute", tr("Mute"));
 
     qLog(Media) << "Displaying the video ringtone";
     videoWidget->show();
 }
 
-void CallScreen::initializeAudioConf()
+void ThemedCallScreenView::initializeAudioConf()
 {
+#ifdef QTOPIA_TELEPHONY
     // add speaker, bluetooth headset actions, etc
-    m_callAudioHandler = new CallAudioHandler(m_audioConf, this);
     m_callAudioHandler->addOptionsToMenu(contextMenu);
+#endif
 }
 
 /*!
   Hides the video player widget.
 */
-void CallScreen::deleteVideoWidget()
+void ThemedCallScreenView::deleteVideoWidget()
 {
     if (videoWidget != 0)
         delete videoWidget;
@@ -906,7 +835,7 @@ void CallScreen::deleteVideoWidget()
 /*!
   \internal
   */
-bool CallScreen::dialNumbers(const QString & numbers)
+bool ThemedCallScreenView::dialNumbers(const QString & numbers)
 {
     // allow to enter '+' symbol by pressing '*' key twice quickly
     // required when an internationl number is entered
@@ -945,14 +874,14 @@ bool CallScreen::dialNumbers(const QString & numbers)
 /*!
   \internal
   */
-void CallScreen::themeLoaded( const QString & )
+void ThemedCallScreenView::themeLoaded( const QString & )
 {
     ThemeWidgetItem *item = 0;
     item = (ThemeListItem *)findItem( "callscreen", ThemedView::List );
     delete mLayout;
     mLayout = 0;
     if( !item ) {
-        qWarning("No callscreen element defined for CallScreen theme.");
+        qWarning("No callscreen element defined for ThemedCallScreenView theme.");
         mLayout = new QVBoxLayout( this );
         listView = new CallItemListView(0,this);
     } else {
@@ -970,12 +899,11 @@ void CallScreen::themeLoaded( const QString & )
     listView->setSelectionMode(QAbstractItemView::NoSelection);
     listView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     connect(listView, SIGNAL(activated(QModelIndex)), this, SLOT(callSelected(QModelIndex)));
-    connect(listView, SIGNAL(clicked(QModelIndex)), this, SLOT(callClicked(QModelIndex)));
     QSoftMenuBar::setLabel(listView, Qt::Key_Select, QSoftMenuBar::NoLabel);
 
     item = (ThemeWidgetItem *)findItem( "callscreennumber", ThemedView::Widget );
     if( !item ) {
-        qWarning("No callscreennumber input element defined for CallScreen theme.");
+        qWarning("No callscreennumber input element defined for ThemedCallScreenView theme.");
         if( !mLayout )
             mLayout = new QVBoxLayout( this );
         digits = new QLineEdit( this );
@@ -1003,7 +931,7 @@ void CallScreen::themeLoaded( const QString & )
 /*!
   \internal
   */
-void CallScreen::manualLayout()
+void ThemedCallScreenView::manualLayout()
 {
     ThemeRectItem *keypaditem = (ThemeRectItem *)findItem( "keypad-box", ThemedView::Rect );
     ThemeRectItem *keypadbutton = (ThemeRectItem *)findItem( "keypad-show-container", ThemedView::Rect );
@@ -1018,7 +946,7 @@ void CallScreen::manualLayout()
 /*!
   \internal
   */
-QString CallScreen::ringTone()
+QString ThemedCallScreenView::ringTone()
 {
     CallItemModel* m = qobject_cast<CallItemModel *>(listView->model());
     for (int i = m->rowCount()-1; i>=0; i--) {
@@ -1033,7 +961,7 @@ QString CallScreen::ringTone()
 /*!
   \internal
   */
-void CallScreen::clearDtmfDigits(bool clearOneChar)
+void ThemedCallScreenView::clearDtmfDigits(bool clearOneChar)
 {
     if(dtmfDigits.isEmpty())
         return;
@@ -1042,10 +970,12 @@ void CallScreen::clearDtmfDigits(bool clearOneChar)
         dtmfDigits = dtmfDigits.left(dtmfDigits.length() - 1);
     else
         dtmfDigits.clear();
-    digits->setText(dtmfDigits);
+    if (digits)
+        digits->setText(dtmfDigits);
 
     if (dtmfDigits.isEmpty()) {
-        digits->hide();
+        if (digits)
+            digits->hide();
         updateLabels();
     } else if (gsmActionTimer) {
         gsmActionTimer->start();
@@ -1062,22 +992,25 @@ void CallScreen::clearDtmfDigits(bool clearOneChar)
 /*!
   \internal
   */
-void CallScreen::setGsmMenuItem()
+void ThemedCallScreenView::setGsmMenuItem()
 {
+#ifdef QTOPIA_TELEPHONY
     if (!actionGsm) {
         actionGsm = new QAction(QIcon(":icon/phone/answer"),QString(), this);
         connect(actionGsm, SIGNAL(triggered()), this, SLOT(actionGsmSelected()));
         QSoftMenuBar::menuFor(this)->addAction(actionGsm);
     }
 
-    bool filterable = false;
-    emit testKeys( dtmfDigits, filterable );
+    AbstractDialFilter::Action act = AbstractDialFilter::Continue;
+    if ( AbstractDialFilter::defaultFilter() ) {
+        act = AbstractDialFilter::defaultFilter()->filterInput( dtmfDigits, false, true );
+    }
 
     actionGsm->setVisible(!dtmfDigits.isEmpty());
 
     // update menu text & lable for Key_Select
     if (!dtmfDigits.isEmpty() ) {
-        if (filterable) {
+        if (act == AbstractDialFilter::ActionTaken) {
             actionGsm->setText(tr("Send %1").arg(dtmfDigits));
             QSoftMenuBar::setLabel(listView, Qt::Key_Select, "", tr("Send"));
         } else {
@@ -1085,17 +1018,22 @@ void CallScreen::setGsmMenuItem()
             QSoftMenuBar::setLabel(listView, Qt::Key_Select, "phone/answer", tr("Call"));
         }
     }
+#endif
 }
 
 /*!
   \internal
   */
-void CallScreen::actionGsmSelected()
+void ThemedCallScreenView::actionGsmSelected()
 {
-    bool filtered = false;
-    emit filterSelect(dtmfDigits, filtered);
+#ifdef QTOPIA_TELEPHONY
+    AbstractDialFilter::Action action = AbstractDialFilter::Continue;
+    if (AbstractDialFilter::defaultFilter()) {
+        action = AbstractDialFilter::defaultFilter()->filterInput(dtmfDigits, true);
+    }
+
     // if the digits are not filtered place a call
-    if ( !filtered ) {
+    if ( action != AbstractDialFilter::ActionTaken ) {
         // check if contact exists
         QContactModel *m = ServerContactModel::instance();
         QContact cnt = m->matchPhoneNumber(dtmfDigits);
@@ -1112,12 +1050,13 @@ void CallScreen::actionGsmSelected()
     }
     // clear digits wheather filtered or not
     clearDtmfDigits();
+#endif
 }
 
 /*!
   \internal
   */
-void CallScreen::updateLabels()
+void ThemedCallScreenView::updateLabels()
 {
     // update context label according to the current call count.
     if (control->allCalls().count() >= 2)
@@ -1137,7 +1076,7 @@ void CallScreen::updateLabels()
 /*!
   \internal
   */
-void CallScreen::appendDtmfDigits(const QString &dtmf)
+void ThemedCallScreenView::appendDtmfDigits(const QString &dtmf)
 {
     dtmfDigits.append(dtmf);
     if(dtmfDigits.isEmpty())
@@ -1173,18 +1112,21 @@ void CallScreen::appendDtmfDigits(const QString &dtmf)
     }
     gsmActionTimer->start();
 
+#ifdef QTOPIA_TELEPHONY
     // filter immediate action
-    bool filtered = false;
-    emit filterKeys( dtmfDigits, filtered );
-    if ( filtered ) {
-        clearDtmfDigits();
+    if (AbstractDialFilter::defaultFilter()) {
+        if ( AbstractDialFilter::ActionTaken == 
+                AbstractDialFilter::defaultFilter()->filterInput(dtmfDigits)) {
+            clearDtmfDigits();
+        }
     }
+#endif
 }
 
 /*!
   \internal
   */
-void CallScreen::stateChanged()
+void ThemedCallScreenView::stateChanged()
 {
     if( !listView || !digits )
         return;
@@ -1236,7 +1178,7 @@ void CallScreen::stateChanged()
 
         name = item->callData.numberOrName;
         if (name.isEmpty())
-            name = CallScreen::tr("Unknown caller");
+            name = ThemedCallScreenView::tr("Unknown caller");
 
         if( call.state() != item->callData.callState ) {
             item->callData.callState = call.state();
@@ -1247,13 +1189,11 @@ void CallScreen::stateChanged()
             if (!active)
                 active = item;
             sortOrder = 2;
-            state = CallScreen::tr("Connected", "call state");
-            if ( simMsgBox && simMsgBox->isVisible() )
-                simMsgBox->hide();
+            state = ThemedCallScreenView::tr("Connected", "call state");
         } else if (call.state() == QPhoneCall::Hold) {
             holdCount++;
             sortOrder = 3;
-            state = CallScreen::tr("Hold", "call state");
+            state = ThemedCallScreenView::tr("Hold", "call state");
         } else if (call.state() == QPhoneCall::Dialing ||
                    call.state() == QPhoneCall::Alerting) {
             dialing = true;
@@ -1262,12 +1202,12 @@ void CallScreen::stateChanged()
             sortOrder = 1;
             item->callData.callState = QPhoneCall::Dialing;
             item->callData.dialTime = QDateTime::currentDateTime();
-            state = CallScreen::tr("Dialing", "call state");
+            state = ThemedCallScreenView::tr("Dialing", "call state");
         } else if (call.state() == QPhoneCall::Incoming) {
             sortOrder = 0;
             incoming = true;
             item->callData.callState = QPhoneCall::Incoming;
-            state = CallScreen::tr("Incoming", "call state");
+            state = ThemedCallScreenView::tr("Incoming", "call state");
         }
         item->setText(QChar('a'+sortOrder) + QString::number(idx));
         item->callData.state = state;
@@ -1315,8 +1255,12 @@ void CallScreen::stateChanged()
     // update the speaker and bluetooth headset actions.
     bool nonActiveDialing = dialing && !activeCount;
 
-    if (m_callAudioHandler)
-        m_callAudioHandler->callStateChanged(activeCount || holdCount || nonActiveDialing /* || incoming*/ );
+#ifdef QTOPIA_TELEPHONY
+    if (!m_callAudio)
+        m_callAudio = AbstractAudioHandler::audioHandler("CallAudio");
+    if (m_callAudio)
+        m_callAudio->activateAudio(activeCount || holdCount || nonActiveDialing /* || incoming*/ );
+#endif
 
     if (incoming) {
         QSoftMenuBar::setLabel(listView, Qt::Key_Select, "phone/answer", tr("Answer"));
@@ -1365,7 +1309,7 @@ void CallScreen::stateChanged()
 /*!
   \internal
   */
-void CallScreen::requestFailed(const QPhoneCall &,QPhoneCall::Request r)
+void ThemedCallScreenView::requestFailed(const QPhoneCall &,QPhoneCall::Request r)
 {
     hideProgressDlg();
 
@@ -1388,7 +1332,7 @@ void CallScreen::requestFailed(const QPhoneCall &,QPhoneCall::Request r)
 /*!
   \internal
   */
-CallItemEntry *CallScreen::findCall(const QPhoneCall &call, CallItemModel *m)
+CallItemEntry *ThemedCallScreenView::findCall(const QPhoneCall &call, CallItemModel *m)
 {
     CallItemEntry *item = 0;
     for (int i = m->rowCount()-1; i>=0; i--) {
@@ -1403,7 +1347,7 @@ CallItemEntry *CallScreen::findCall(const QPhoneCall &call, CallItemModel *m)
 /*!
   \internal
   */
-void CallScreen::updateAll()
+void ThemedCallScreenView::updateAll()
 {
     if( !listView || !digits )
         return;
@@ -1439,11 +1383,9 @@ void CallScreen::updateAll()
             secondaryCallScreen->showMaximized();
         }
     }
-
     if (m->rowCount() == 0) {
         emit listEmpty();
-        if (secondaryCallScreen)
-            secondaryCallScreen->hide();
+        m_taskManagerEntry->hide();
     } else {
         m->triggerUpdate();
     }
@@ -1452,7 +1394,7 @@ void CallScreen::updateAll()
 /*!
   \internal
   */
-void CallScreen::splitCall()
+void ThemedCallScreenView::splitCall()
 {
     setWindowTitle(tr("Select Call...","split 2 phone lines after having joined them"));
     setSelectMode(true);
@@ -1468,13 +1410,13 @@ void CallScreen::splitCall()
 /*!
   \internal
   */
-void CallScreen::callSelected(const QModelIndex& index)
+void ThemedCallScreenView::callSelected(const QModelIndex& index)
 {
     CallItemModel* m = qobject_cast<CallItemModel *>(listView->model());
 
     CallItemEntry *callItem = m->callItemEntry(index);
     if (!callItem )
-        qWarning("CallScreen::callSelected(): invalid index passed to CallItemModel");
+        qWarning("ThemedCallScreenView::callSelected(): invalid index passed to CallItemModel");
     if (m->flags(index) & Qt::ItemIsSelectable) {
         if (callScreen->heldCallCount() || callScreen->activeCallCount() > 1) {
             setSelectMode(false);
@@ -1490,50 +1432,11 @@ void CallScreen::callSelected(const QModelIndex& index)
     }
 }
 
-/*!
-  \internal
-  */
-void CallScreen::callClicked(const QModelIndex& index)
-{
-/*  Comment this out for the moment. We don't want to click on call items even if the touchscreen
-    is the preferred method of input. We might want to put it back for a desk phone. */
-    Q_UNUSED(index)
-/*
-    CallItemModel* m = qobject_cast<CallItemModel *>(listView->model());
-    CallItemEntry *callItem = m->callItemEntry(index);
-    if (!callItem)
-        return;
-
-    if (listView->selectionMode() == QAbstractItemView::NoSelection) {
-        // Only perform these operations if touchscreen is the preferred method of input.
-        //    This stops the user's ear putting a call on hold or accepting an incoming call etc.
-        if(Qtopia::mousePreferred()) {
-            // We are not in selection mode.
-            if (incoming && callItem->call().incoming()) {
-                if(control->incomingCall().startTime().secsTo(QDateTime::currentDateTime()) >= 1)
-                    emit acceptIncoming();
-            } else if (callItem->call().onHold()) {
-                control->unhold();
-            } else if (callItem->call().connected()) {
-                control->hold();
-            }
-        }
-    } else {
-        // In selection mode - just used to split calls at the moment
-        if (m->flags(index) & Qt::ItemIsSelectable) {
-            setSelectMode(false);
-            //XXX I could be used for more than just split
-            callItem->call().activate(QPhoneCall::CallOnly);
-            setWindowTitle(tr("Calls"));
-        }
-    }
-*/
-}
 
 /*!
   \internal
   */
-void CallScreen::setItemActive(const QString &name, bool active)
+void ThemedCallScreenView::setItemActive(const QString &name, bool active)
 {
     ThemeItem *item = (ThemeItem *)findItem(name);
     if (item)
@@ -1543,7 +1446,7 @@ void CallScreen::setItemActive(const QString &name, bool active)
 /*!
   \internal
   */
-void CallScreen::themeItemClicked(ThemeItem *item)
+void ThemedCallScreenView::themeItemReleased(ThemeItem *item)
 {
     if (!item)
         return;
@@ -1654,7 +1557,7 @@ void CallScreen::themeItemClicked(ThemeItem *item)
 /*!
   \internal
   */
-void CallScreen::keyPressEvent(QKeyEvent *k)
+void ThemedCallScreenView::keyPressEvent(QKeyEvent *k)
 {
     if (k->key() == Qt::Key_Flip) {
         QSettings cfg("Trolltech","Phone");
@@ -1665,11 +1568,11 @@ void CallScreen::keyPressEvent(QKeyEvent *k)
         }
     } else if (k->key() == Qt::Key_Hangup || k->key() == Qt::Key_No) {
         if (control->isConnected() || control->isDialing() || control->hasIncomingCall())
-            control->endCall();
+            endCall();
         else
-            hide();
+            emit hideCallScreen();
     } else if ((k->key() == Qt::Key_F28) && control->isConnected() && !control->hasIncomingCall()) {
-        control->endCall();
+        endCall();
     } else if (k->key() == Qt::Key_Call || k->key() == Qt::Key_Yes || k->key() == Qt::Key_F28) {
         if (!dtmfDigits.isEmpty()) {
             actionGsmSelected();
@@ -1685,13 +1588,17 @@ void CallScreen::keyPressEvent(QKeyEvent *k)
 /*!
   \internal
   */
-void CallScreen::showEvent( QShowEvent *e )
+void ThemedCallScreenView::showEvent( QShowEvent *e )
 {
+    if (!sourceLoaded())
+        loadSource();
     if ( !updateTimer ) {
         updateTimer = new QTimer(this);
         connect(updateTimer, SIGNAL(timeout()), this, SLOT(updateAll()));
     }
     updateTimer->start(1000);
+    m_taskManagerEntry->show();
+
     ThemedView::showEvent( e );
     manualLayout();
     QTimer::singleShot(0, this, SLOT(initializeMouseControlDialog()));
@@ -1700,7 +1607,7 @@ void CallScreen::showEvent( QShowEvent *e )
 /*!
   \internal
   */
-void CallScreen::keyReleaseEvent(QKeyEvent *k)
+void ThemedCallScreenView::keyReleaseEvent(QKeyEvent *k)
 {
     if (k->key() == Qt::Key_Flip && control->hasIncomingCall()) {
         QSettings cfg("Trolltech","Phone");
@@ -1713,33 +1620,45 @@ void CallScreen::keyReleaseEvent(QKeyEvent *k)
 /*!
   \internal
   */
-void CallScreen::closeEvent(QCloseEvent *e)
+bool ThemedCallScreenView::tryClose()
 {
     if (listView && listView->selectionMode() == QAbstractItemView::SingleSelection) {
-        e->ignore();
         setWindowTitle(tr("Calls"));
         setSelectMode(false);
         stateChanged();
+        return false;
     } else if (control->hasIncomingCall()) {
-        e->ignore();
+        return false;
     } else {
-        e->accept();
+        m_taskManagerEntry->hide();
+        return true;
     }
 }
 
 /*!
-  \internal
-  */
-void CallScreen::hideEvent( QHideEvent * )
+    \internal
+*/
+void ThemedCallScreenView::endCall()
 {
-    if ( updateTimer )
-        updateTimer->stop();
+    emit hangupCall();
 }
 
 /*!
   \internal
   */
-bool CallScreen::eventFilter(QObject *o, QEvent *e)
+void ThemedCallScreenView::hideEvent( QHideEvent * )
+{
+    if ( updateTimer )
+        updateTimer->stop();
+
+    if (secondaryCallScreen)
+        secondaryCallScreen->hide();
+}
+
+/*!
+  \internal
+  */
+bool ThemedCallScreenView::eventFilter(QObject *o, QEvent *e)
 {
     if (o == listView) {
         if (e->type() == QEvent::KeyPress) {
@@ -1770,7 +1689,7 @@ bool CallScreen::eventFilter(QObject *o, QEvent *e)
                         if ( actionMute->isVisible() )
                             muteRingSelected();
                         else
-                            control->endCall();
+                            endCall();
                         return true;
                     } else if (!dtmfDigits.isEmpty()) {
                         clearDtmfDigits(true);
@@ -1813,7 +1732,7 @@ bool CallScreen::eventFilter(QObject *o, QEvent *e)
 /*!
   \internal
   */
-void CallScreen::setSelectMode(bool s)
+void ThemedCallScreenView::setSelectMode(bool s)
 {
     if (s) {
         listView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -1839,7 +1758,7 @@ void CallScreen::setSelectMode(bool s)
 /*!
   \internal
   */
-QWidget *CallScreen::newWidget(ThemeWidgetItem* input, const QString& name)
+QWidget *ThemedCallScreenView::newWidget(ThemeWidgetItem* input, const QString& name)
 {
     if( name == "callscreen" )  {
         Q_ASSERT(input->rtti() == ThemedView::List);
@@ -1855,39 +1774,8 @@ QWidget *CallScreen::newWidget(ThemeWidgetItem* input, const QString& name)
     return 0;
 }
 
-#ifdef QTOPIA_CELL
-
-/*!
-  \internal
-  Informs user with extra information from SIM when control event occurs.
-*/
-void CallScreen::simControlEvent(const QSimControlEvent &e)
-{
-    if ( !e.text().isEmpty() ) {
-        QString title;
-        switch ( e.result() ) {
-            case QSimControlEvent::Allowed: title = tr( "Allowed" ); break;
-            case QSimControlEvent::NotAllowed: title = tr( "Not Allowed" ); break;
-            case QSimControlEvent::AllowedWithModifications: title = tr( "Number Modified" ); break;
-        }
-        if ( !simMsgBox ) {
-            simMsgBox = QAbstractMessageBox::messageBox
-                ( 0, title, e.text(), QAbstractMessageBox::Information );
-            QSoftMenuBar::removeMenuFrom( simMsgBox, QSoftMenuBar::menuFor( simMsgBox ) );
-        } else {
-            simMsgBox->setTitle( title );
-            simMsgBox->setText( e.text() );
-        }
-        if ( e.result() == QSimControlEvent::NotAllowed )
-            simMsgBox->setTimeout(3000, QAbstractMessageBox::NoButton);
-        QtopiaApplication::execDialog(simMsgBox);
-    }
-}
-
-#endif
-
 /*! \internal */
-void CallScreen::grabMouse()
+void ThemedCallScreenView::grabMouse()
 {
     // lock touch screen
     if (!Qtopia::mousePreferred())
@@ -1895,14 +1783,14 @@ void CallScreen::grabMouse()
 }
 
 /*! \internal */
-void CallScreen::releaseMouse()
+void ThemedCallScreenView::releaseMouse()
 {
     // unlock touch screen
     if (!Qtopia::mousePreferred())
         PhoneThemedView::releaseMouse();
 }
 
-void CallScreen::initializeMouseControlDialog()
+void ThemedCallScreenView::initializeMouseControlDialog()
 {
     // Do not use screen lock if touch screen only
     if (Qtopia::mousePreferred())
@@ -1916,7 +1804,7 @@ void CallScreen::initializeMouseControlDialog()
 }
 
 /*! \internal */
-void CallScreen::mousePressEvent(QMouseEvent *e)
+void ThemedCallScreenView::mousePressEvent(QMouseEvent *e)
 {
     // if touch screen is not locked no need to show unlock dialog
     if ( !QWidget::mouseGrabber() ) {
@@ -1934,15 +1822,16 @@ void CallScreen::mousePressEvent(QMouseEvent *e)
 }
 
 /*! \internal */
-void CallScreen::muteRingSelected()
+void ThemedCallScreenView::muteRingSelected()
 {
     actionMute->setVisible(false);
-    emit muteRing();
+    QtopiaServiceRequest req("Ringtone", "muteRing()");
+    req.send();
     QSoftMenuBar::setLabel(listView, Qt::Key_Back, "phone/reject", tr("Send Busy"));
 }
 
 /*! \internal */
-void CallScreen::callConnected(const QPhoneCall &)
+void ThemedCallScreenView::callConnected(const QPhoneCall &)
 {
     setItemActive("answer", false);
     setItemActive("endcall", true);
@@ -1952,7 +1841,7 @@ void CallScreen::callConnected(const QPhoneCall &)
 }
 
 /*! \internal */
-void CallScreen::callDropped(const QPhoneCall &)
+void ThemedCallScreenView::callDropped(const QPhoneCall &)
 {
     if (control->hasActiveCalls()) {
         setItemActive("hold", true);
@@ -1966,7 +1855,7 @@ void CallScreen::callDropped(const QPhoneCall &)
 }
 
 /*! \internal */
-void CallScreen::callDialing(const QPhoneCall &)
+void ThemedCallScreenView::callDialing(const QPhoneCall &)
 {
     setItemActive("menu-box", true);
     setItemActive("answer", false);
@@ -1977,12 +1866,16 @@ void CallScreen::callDialing(const QPhoneCall &)
 }
 
 /*! \internal */
-void CallScreen::callIncoming(const QPhoneCall &)
+void ThemedCallScreenView::callIncoming(const QPhoneCall &)
 {
     if ( !waitDlg )
-        waitDlg = new DelayedWaitDialog( this );
-    waitDlg->setText( tr( "Incoming Call..." ) );
-    waitDlg->setDelay( 0 );
+        waitDlg = UIFactory::createDialog( "DelayedWaitDialog", this );
+    if ( !waitDlg ) {
+        qLog(Component) << "DelayedWaitDlg component not available";
+        return;
+    }
+    QMetaObject::invokeMethod( waitDlg, "setText", Qt::DirectConnection, 
+                        Q_ARG(QString, tr("Incoming Call...")) );
     QtopiaInputEvents::addKeyboardFilter( new CallScreenKeyboardFilter );
     QTimer::singleShot( 1000, this, SLOT(interactionDelayTimeout()) );
 
@@ -2006,7 +1899,7 @@ void CallScreen::callIncoming(const QPhoneCall &)
 /*!
   \internal
   */
-void CallScreen::rejectModalDialog()
+void ThemedCallScreenView::rejectModalDialog()
 {
     // Last resort.  We shouldn't have modal dialogs in the server, but
     // just in case we need to get rid of them when a call arrives.  This
@@ -2037,7 +1930,7 @@ void CallScreen::rejectModalDialog()
 /*!
   \internal
 */
-void CallScreen::interactionDelayTimeout()
+void ThemedCallScreenView::interactionDelayTimeout()
 {
     if ( !waitDlg )
         return;
@@ -2048,20 +1941,28 @@ void CallScreen::interactionDelayTimeout()
 }
 
 /*! \internal */
-void CallScreen::showProgressDlg()
+void ThemedCallScreenView::showProgressDlg()
 {
     if ( !waitDlg )
-        waitDlg = new DelayedWaitDialog( this );
-    waitDlg->setText( tr( "Please wait..." ) );
-    waitDlg->setDelay( 500 );
+        waitDlg = UIFactory::createDialog( "DelayedWaitDialog", this );
+    if ( !waitDlg ) {
+        qLog(Component) << "DelayedWaitDlg component not available";
+        return;
+    }
+    QMetaObject::invokeMethod( waitDlg, "setText", Qt::DirectConnection, 
+                        Q_ARG(QString, tr("Please wait...")) );
+    QMetaObject::invokeMethod( waitDlg, "setDelay", Qt::DirectConnection,
+                        Q_ARG(int, 500) );
     waitDlg->show();
 }
 
 /*! \internal */
-void CallScreen::hideProgressDlg()
+void ThemedCallScreenView::hideProgressDlg()
 {
     if ( waitDlg )
         waitDlg->hide();
 }
+
+QTOPIA_REPLACE_WIDGET(QAbstractCallScreen, ThemedCallScreen);
 
 #include "callscreen.moc"

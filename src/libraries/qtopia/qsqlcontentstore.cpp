@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qsqlcontentstore_p.h"
-#include <qtopia/private/qfscontentengine_p.h>
+#include "qfscontentengine_p.h"
 
 #include <QtopiaSql>
 #include <QSqlQuery>
@@ -29,23 +27,24 @@
 #include <QFileSystem>
 #include <qtopialog.h>
 #ifndef QTOPIA_CONTENT_INSTALLER
-#include <qtopia/private/drmcontent_p.h>
-#include <qtopia/private/qdrmcontentengine_p.h>
+#include "drmcontent_p.h"
+#include "qdrmcontentengine_p.h"
 #endif
-#include <qtopia/private/qsqlcontentsetengine_p.h>
-#include <qtopia/private/qmimetypedata_p.h>
-#include <qtopia/private/contentpluginmanager_p.h>
-#include <qtopiabase/qtopianamespace.h>
+#include "qsqlcontentsetengine_p.h"
+#include "qmimetypedata_p.h"
+#include "contentpluginmanager_p.h"
+#include <qtopianamespace.h>
 
 #ifndef QTOPIA_CONTENT_INSTALLER
-#include <qtopia/private/qcontent_p.h>
+#include "qcontent_p.h"
 #endif
 
 #include <string.h>
 
 /*!
     \class QSqlContentStore
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QSqlContentStore class is an implementation of QContentStore that provides access to an SQL database of content data.
 
     \internal
@@ -198,7 +197,7 @@ QContent QSqlContentStore::contentFromFileName( const QString &fileName, LookupF
         }
     }
 
-    if( !content.isNull() )
+    if( content.id() != QContent::InvalidId )
         QContentCache::instance()->cache( content );
 
     return content;
@@ -314,8 +313,6 @@ bool QSqlContentStore::commitContent( QContent *content )
  */
 bool QSqlContentStore::moveContentTo( QContent *content, const QString &newFileName )
 {
-    QString oldFileName = contentEngine( content )->fileName();
-
     if( contentEngine( content )->moveTo( newFileName ) )
     {
         if( commitContent( content ) )
@@ -339,6 +336,14 @@ bool QSqlContentStore::copyContentTo( QContent *content, const QString &newFileN
     }
     else
         return false;
+}
+
+/*!
+    \reimp
+*/
+bool QSqlContentStore::renameContent(QContent *content, const QString &name)
+{
+    return contentEngine(content)->rename(name) && commitContent(content);
 }
 
 /*!
@@ -378,6 +383,8 @@ QContentEngine *QSqlContentStore::installContent( QContent *content )
 
         QString name = deriveName( fileName, type );
 
+        QFileInfo fileInfo(fileName);
+
 #ifndef QTOPIA_CONTENT_INSTALLER
         if( DrmContentPrivate::installContent( fileName, content ) )
         {
@@ -387,11 +394,11 @@ QContentEngine *QSqlContentStore::installContent( QContent *content )
 
             setDrmState( QContent::Protected, engine );
         }
-        else if( QContentFactory::installContent( fileName, content ) || !QFileInfo( fileName ).isDir() )
+        else if( QContentFactory::installContent( fileName, content ) || !fileInfo.isDir() )
         {
-#endif
+#else
             QContentFactory::installContent( fileName, content );
-
+#endif
             engine = new QFSContentEngine;
 
             engine->copy( *contentEngine( content ) );
@@ -408,11 +415,18 @@ QContentEngine *QSqlContentStore::installContent( QContent *content )
 
             if( engine->role() == QContent::UnknownUsage )
                 engine->setRole( QContent::Document );
+
+            if (engine->property(QLatin1String("none"), QLatin1String("CreationDate")).isEmpty()) {
+                engine->setProperty(
+                        QLatin1String("none"),
+                        QLatin1String("CreationDate"),
+                        fileInfo.created().toString(Qt::ISODate));
+            }
+
+            if (engine->lastUpdated().isNull())
+                setLastUpdated(fileInfo.lastModified(), engine);
         }
     }
-
-    if( engine )
-        setLastUpdated( QFileInfo( engine->fileName() ).lastModified(), engine );
 
     return engine;
 }
@@ -453,8 +467,6 @@ QContentEngine *QSqlContentStore::refreshContent( QContent *content )
 
         if( engine->name().isEmpty() )
             engine->setName( deriveName( engine->fileName(), engine->mimeType() ) );
-
-        setLastUpdated( QFileInfo( engine->fileName() ).lastModified(), engine );
     }
 
     return engine;
@@ -498,6 +510,10 @@ bool QSqlContentStore::uninstallContent( QContentId contentId )
     if( !db.isValid() )
         return false;
 
+    QContent content(contentId);
+#ifndef QTOPIA_CONTENT_INSTALLER
+    QFile::remove(thumbnailPath(content.fileName()));
+#endif
     bool succeeded = true;
 
     {
@@ -518,7 +534,7 @@ bool QSqlContentStore::uninstallContent( QContentId contentId )
 
             succeeded = false;
         }
-        QContent content(contentId);
+
         if(content.role() == QContent::Application)
         {
             foreach(QString current, content.mimeTypes())
@@ -577,14 +593,20 @@ void QSqlContentStore::batchCommitContent( const QContentList &content )
         }
         QSqlDatabase db = QtopiaSql::instance()->database( dbId );
 
-        if( !db.transaction() )
+        if (!db.transaction()) {
             qWarning() << "QSqlContentStore::batchCommitContent: couldn't start transaction:" << db.lastError();
+
+            continue;
+        }
 
         foreach( QContent content, list.values( dbId ) )
             commitContent( &content );
 
-        if( !db.commit() )
+        if( !db.commit() ) {
             qWarning() << "QSqlContentStore::batchCommitContent: couldn't commit transaction" << db.lastError();
+
+            db.rollback();
+        }
     }
 #ifndef QTOPIA_CONTENT_INSTALLER
     QContentUpdateManager::instance()->endInstall();
@@ -594,30 +616,42 @@ void QSqlContentStore::batchCommitContent( const QContentList &content )
 
 void QSqlContentStore::batchUninstallContent( const QContentIdList &content )
 {
-    //QTOPIA_DOCAPI_TODO, wrap this all in a transaction, this code is simply placeholder atm
     qLog(DocAPI) << "Entering QContent::uninstallBatch";
 #ifndef QTOPIA_CONTENT_INSTALLER
     QContentUpdateManager::instance()->beginInstall();
 #endif
     QMultiHash<QtopiaDatabaseId, QContentId> list;
 
-    foreach(const QContentId& id, content)
+    foreach (const QContentId& id, content)
         list.insert(id.first, id);
 
-    foreach(QtopiaDatabaseId dbid, list.uniqueKeys())
-    {
-        if( !QtopiaSql::instance()->isValidDatabaseId( dbid ) )
-        {
+    foreach (QtopiaDatabaseId dbid, list.uniqueKeys()) {
+        if (!QtopiaSql::instance()->isValidDatabaseId(dbid)) {
             qLog(Sql) << "QSqlContentStore::batchUninstallContent: invalid database id";
+
             continue;
         }
-        QSqlDatabase db=QtopiaSql::instance()->database(dbid);
-        if(!db.transaction())
-            qWarning("QSqlContentStore::batchUninstallContent: couldn't start transaction");
-        foreach(QContentId contentId, list.values(dbid))
+
+        QSqlDatabase db = QtopiaSql::instance()->database(dbid);
+
+        if (!db.transaction()) {
+            qWarning()
+                    << "QSqlContentStore::batchUninstallContent: couldn't start transaction"
+                    << db.lastError().text();
+
+            continue;
+        }
+
+        foreach (QContentId contentId, list.values(dbid))
             uninstallContent(contentId);
-        if(!db.commit())
-            qWarning("QSqlContentStore::batchUninstallContent: couldn't commit transaction");
+
+        if (!db.commit()) {
+            qWarning()
+                    << "QSqlContentStore::batchUninstallContent: couldn't commit transaction"
+                    << db.lastError().text();
+
+            db.rollback();
+        }
     }
 #ifndef QTOPIA_CONTENT_INSTALLER
     QContentUpdateManager::instance()->endInstall();
@@ -731,6 +765,8 @@ bool QSqlContentStore::insertContent( QContentEngine *engine, QtopiaDatabaseId d
     if( dbId == quint32(-1) )
         return false;
 
+    setLastUpdated(QFileInfo(engine->fileName() ).lastModified(), engine);
+
     static const QString insertString = QLatin1String(
             "insert into content( uiName, uiNameSortOrder, mType, drmFlags, docStatus, path, location, icon, lastUpdated ) "
             "values( :uiName, :uiNameSortOrder, :mType, :drmFlags, :docStatus, :path, :location, :icon, :lastUpdated )" );
@@ -806,6 +842,8 @@ bool QSqlContentStore::updateContent( QContentEngine *engine )
     if( !database.isValid() )
         return false;
 
+    setLastUpdated(QFileInfo(engine->fileName()).lastModified(), engine);
+
     QSqlQuery updateQuery( database );
     updateQuery.prepare( updateString );
 
@@ -829,7 +867,7 @@ bool QSqlContentStore::updateContent( QContentEngine *engine )
     }
 
     updateQuery.bindValue( QLatin1String( ":icon" ), engine->iconName() );
-    updateQuery.bindValue( QLatin1String( ":lastUpdated" ), QDateTime::currentDateTime().toTime_t() );
+    updateQuery.bindValue( QLatin1String( ":lastUpdated" ), engine->lastUpdated().toTime_t() );
     updateQuery.bindValue( QLatin1String( ":cid" ), engine->id().second  );
 
     QtopiaSql::instance()->logQuery( updateQuery );
@@ -2826,9 +2864,6 @@ QStringList QSqlContentStore::categoryFilterMatches( const QContentFilter &filte
 
 QStringList QSqlContentStore::directoryFilterMatches( const QContentFilter &filter, const QString &directory )
 {
-    if( directory.isEmpty() )
-        return QStringList();
-
     QString queryString;
     QList< Parameter > parameters;
 
@@ -2846,16 +2881,18 @@ QStringList QSqlContentStore::directoryFilterMatches( const QContentFilter &filt
     }
     else
     {
-        QContentFilter f
-                = filter
-                & QContentFilter( QContentFilter::Location, directory )
-                & ~QContentFilter( QContentFilter::Directory, directory + QLatin1String( "/*/*" ) );
+        QContentFilter f = filter;
+
+        if (!directory.isEmpty()) {
+                f &= QContentFilter( QContentFilter::Location, directory )
+                    & ~QContentFilter( QContentFilter::Directory, directory + QLatin1String( "/*/*" ) );
+        }
 
         QSet< QContentFilter::FilterType > types = getAllFilterTypes( f );
 
         QString directoryQuery;
 
-        if( types.contains( QContentFilter::MimeType ) || types.contains( QContentFilter::MimeType ) )
+        if( types.contains( QContentFilter::Directory ) || types.contains( QContentFilter::Location ) )
         {
             directoryQuery = QLatin1String(
                     "select distinct locationLookup.location "

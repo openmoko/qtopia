@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -113,7 +111,7 @@ SnakeGame::SnakeGame(QWidget* parent, Qt::WFlags)
     QtopiaApplication::setInputMethodHint( this, QtopiaApplication::AlwaysOff );
 
     (void)QSoftMenuBar::menuFor( this );
-    QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, "icons/play", tr("Play"));
     QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Back );
 
     // Seed the random number generator for randomly positioning the targets
@@ -145,8 +143,12 @@ void SnakeGame::resizeEvent(QResizeEvent *event)
 void SnakeGame::pause()
 {
     snake->stop();
-    showMessage(tr("Game Paused:\nPress Select\nkey to resume."));
+    if(Qtopia::mousePreferred())
+        showMessage(tr("Game Paused:\nClick to resume"));
+    else
+        showMessage(tr("Game Paused:\nPress Play\nkey to resume"));
     paused = true;
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, "icons/play", tr("Play"));
 }
 
 void SnakeGame::resume()
@@ -154,6 +156,7 @@ void SnakeGame::resume()
     paused = false;
     clearMessage();
     snake->start();
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, "icons/pause", tr("Pause"));
 }
 
 void SnakeGame::focusOutEvent(QFocusEvent *)
@@ -167,8 +170,7 @@ void SnakeGame::focusOutEvent(QFocusEvent *)
 
 void SnakeGame::newGame(bool start)
 {
-// TODO: Show pause/play icons instead of Select
-    QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, "icons/play", tr("Play"));
 
     // End any previous game
     clear();
@@ -185,10 +187,14 @@ void SnakeGame::newGame(bool start)
     if (start) {
         paused = false;
         snake->start();
+        QSoftMenuBar::setLabel( this, Qt::Key_Select, "icons/pause", tr("Pause"));
     }
     else {
         paused = true;
-        showMessage(tr("Press Select\nkey to start"));
+        if(Qtopia::mousePreferred())
+            showMessage(tr("Click to start"));
+        else
+            showMessage(tr("Press Play\nkey to start"));
     }
 
     createWalls();
@@ -292,7 +298,7 @@ void SnakeGame::clear()
 
 void SnakeGame::showMessage(const QString &text)
 {
-#define DEFAULT_TEXT_SIZE 9
+#define DEFAULT_TEXT_SIZE 12
 
     if (!gamemessage) {
         gamemessage = new QGraphicsSimpleTextItem;
@@ -314,6 +320,7 @@ void SnakeGame::showMessage(const QString &text)
     fnt.setBold( true );
 
     do {
+        fnt.setPointSize( size );
         gamemessage->setFont( fnt );
     }
     while( ( gamemessage->boundingRect().width() > (scene->width()-15) ||
@@ -343,7 +350,7 @@ void SnakeGame::clearMessage()
 
 void SnakeGame::gameOver()
 {
-    QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, "icons/play", tr("Play"));
     if (snake)
         showMessage( tr( "GAME OVER!\nYour Score: %1" ).arg( snake->getScore() ) );
     gamestopped = true;
@@ -355,7 +362,12 @@ void SnakeGame::endWait()
 {
     waitover = true;
     if (snake)
-        showMessage(tr("GAME OVER!\nYour Score: %1\nPress Select\nkey to start\nnew game").arg(snake->getScore()));
+    {
+        if(Qtopia::mousePreferred())
+            showMessage(tr("GAME OVER!\nYour Score: %1\nClick to start\nnew game").arg(snake->getScore()));
+        else
+            showMessage(tr("GAME OVER!\nYour Score: %1\nPress Play\nkey to start\nnew game").arg(snake->getScore()));
+    }
 }
 
 void SnakeGame::keyPressEvent(QKeyEvent* event)
@@ -439,10 +451,22 @@ void SnakeGame::mousePressEvent(QMouseEvent* mouseEvent)
         }
         // todo later, maybe give a bit of visual feedback of the quadrant pressed
     }
-
-    if ( paused ) {
-        resume();
+    else if ( paused ) {
         mouseEvent->accept();
+        resume();
     }
+    else if (gamestopped) {
+        mouseEvent->accept();
+        if (waitover)
+            newGame(true);
+    }
+}
 
+void SnakeGame::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
+{
+    if (!gamestopped && !paused && snake)
+    {
+        mouseEvent->accept();
+        pause();
+    }
 }

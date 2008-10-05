@@ -1,54 +1,36 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "cellmodemmanager.h"
-#include "dialercontrol.h"
-#include "qperformancelog.h"
-#include "simapp.h"
+#include "servercontactmodel.h"
 
+#include <QPhoneProfile>
 #include <qtopialog.h>
-#include <qspeeddial.h>
 #include <qtopiaapplication.h>
-#include <qtopiaservices.h>
-#include <qsoftmenubar.h>
-#include <qtopiaipcenvelope.h>
 #include <qsiminfo.h>
 #include <qcallsettings.h>
 #include <qphonerffunctionality.h>
 #include <QServiceChecker>
-#include <QFile>
-#include <QLayout>
 #include <QPinManager>
-#include <QLabel>
-#include <QSlider>
 #include <QTimer>
-#include <QEvent>
-#include <QDebug>
-#include <QDesktopWidget>
 #include <QTranslatableSettings>
 #include <QContact>
-#include <QCallList>
-#include <QCallListItem>
-#include <QPowerStatus>
-#include "servercontactmodel.h"
 
 static bool profilesControlModem = true;
 static bool cellModemManagerInstance = false;
@@ -83,57 +65,57 @@ public:
     bool m_callForwardingEnabled;
     QPhoneRfFunctionality *m_rfFunc;
     QPhoneBook *m_phoneBook;
-    QString m_simIdentity;
 };
 
 /*!
-  \class CellModemManager
-  \brief The CellModemManager class simplifies the initialization and monitoring of a cellular phone modem.
-  \ingroup QtopiaServer::Task
+    \class CellModemManager
+    \inpublicgroup QtCellModule
+    \brief The CellModemManager class simplifies the initialization and monitoring of a cellular phone modem.
+    \ingroup QtopiaServer::Telephony
 
-  The CellModeManager provides a Qtopia Server Task.  Qtopia Server Tasks are
-  documented in full in the QtopiaServerApplication class documentation.
+    The CellModeManager provides a Qt Extended Server Task.  Qt Extended Server Tasks are
+    documented in full in the QtopiaServerApplication class documentation.
 
-  \table
-  \row \o Task Name \o CellModem
-  \row \o Interfaces \o CellModemManager
-  \row \o Services \o Suspend
-  \endtable
+    \table
+    \row \o Task Name \o CellModem
+    \row \o Interfaces \o CellModemManager
+    \row \o Services \o Suspend
+    \endtable
 
-  The CellModemManager class provides a simplified goal-oriented wrapper around
-  Qtopia's telephony APIs.  While the telephony subsystem provides the ability
-  to query and control every aspect of a cellular modem, the CellModemManager
-  class focuses only the task of initializing the telephony subsystem and
-  monitoring common attributes such as the current operator or cell location.
+    The CellModemManager class provides a simplified goal-oriented wrapper around
+    the Telephony APIs.  While the telephony subsystem provides the ability
+    to query and control every aspect of a cellular modem, the CellModemManager
+    class focuses only the task of initializing the telephony subsystem and
+    monitoring common attributes such as the current operator or cell location.
 
-  To reduce the complexity of developing a system using CellModemManager, the
-  class rigidly enforces a state transition model of startup and shutdown.
-  Refer to the CellModemManager::State enumeration for this model and an exact
-  description of each state.  By guarenteeing the transition flow, validating
-  users of the API is greatly reduced.
+    To reduce the complexity of developing a system using CellModemManager, the
+    class rigidly enforces a state transition model of startup and shutdown.
+    Refer to the CellModemManager::State enumeration for this model and an exact
+    description of each state.  By guarenteeing the transition flow, validating
+    users of the API is greatly reduced.
 
-  In addition to the C++ methods provided, the CellModemManager class also
-  sets the following value space keys:
-  \table
-  \header \o Key \o Description
-  \row \o \c {/Telephony/Status/RegistrationState} \o Set to the current registration state of the network.  Possible values are "None", "Home", "Searching", "Denied", "Unknown" or "Roaming" and correspond to the values of the QTelephony::RegistrationState enumeration.
-  \row \o \c {/Telephony/Status/NetworkRegistered} \o Set to true if the network is registered (in the home or roaming states), otherwise false.
-  \row \o \c {/Telephony/Status/Roaming} \o Set to true if the network is in the roaming statem otherwise false.
-  \row \o \c {/Telephony/Status/CellLocation} \o Set to the current cell location.  This is equivalent to the value returned by the cellLocation() method.
-  \row \o \c {/Telephony/Status/OperatorName} \o Set to the current network operator name.  This is equivalent to the value returned by the networkOperator() method.
-  \row \o \c {/Telephony/Status/OperatorCountry} \o Set to the current network operator's country name, if available.  This is equivalent to the value returned by the networkOperatorCountry() method.
-  \row \o \c {/Telephony/Status/CallDivert} \o True if voice calls will be unconditionally diverted, false otherwise.
-  \row \o \c {/Telephony/Status/PlaneModeAvailable} \o True if the modem supports "plane mode".  Possible values are "Yes", "No" or "Unknown".  The "Unknown" value is set during modem initialization before Qtopia has determined whether the modem can support plane mode.
-  \row \o \c {/Telephony/Status/ModemStatus} \o Set to the string value of the current State enumeration value.
-  \row \o \c {/Telephony/Status/SimToolkit/Available} \o Set to true if SIM toolkit support is available, otherwise false.
-  \row \o \c {/Telephony/Status/SimToolkit/IdleModeText} \o Set to the value of the idle mode text string from the SIM toolkit application.
-  \row \o \c {/Telephony/Status/SimToolkit/IdleModeIcon} \o Set to the QIcon to display in idle mode.
-  \row \o \c {/Telephony/Status/SimToolkit/IdleModeIconSelfExplanatory} \o Set to true if the idle mode icon is self-explanatory without accompanying text.
-  \row \o \c {/Telephony/Status/SimToolkit/MenuTitle} \o Set to the title of the SIM toolkit application's main menu.
-  \endtable
-  
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
- */
+    In addition to the C++ methods provided, the CellModemManager class also
+    sets the following value space keys:
+    \table
+    \header \o Key \o Description
+    \row \o \c {/Telephony/Status/RegistrationState} \o Set to the current registration state of the network.  Possible values are "None", "Home", "Searching", "Denied", "Unknown" or "Roaming" and correspond to the values of the QTelephony::RegistrationState enumeration.
+    \row \o \c {/Telephony/Status/NetworkRegistered} \o Set to true if the network is registered (in the home or roaming states), otherwise false.
+    \row \o \c {/Telephony/Status/Roaming} \o Set to true if the network is in the roaming statem otherwise false.
+    \row \o \c {/Telephony/Status/CellLocation} \o Set to the current cell location.  This is equivalent to the value returned by the cellLocation() method.
+    \row \o \c {/Telephony/Status/OperatorName} \o Set to the current network operator name.  This is equivalent to the value returned by the networkOperator() method.
+    \row \o \c {/Telephony/Status/OperatorCountry} \o Set to the current network operator's country name, if available.  This is equivalent to the value returned by the networkOperatorCountry() method.
+    \row \o \c {/Telephony/Status/CallDivert} \o True if voice calls will be unconditionally diverted, false otherwise.
+    \row \o \c {/Telephony/Status/PlaneModeAvailable} \o True if the modem supports "plane mode".  Possible values are "Yes", "No" or "Unknown".  The "Unknown" value is set during modem initialization before Qt Extended has determined whether the modem can support plane mode.
+    \row \o \c {/Telephony/Status/ModemStatus} \o Set to the string value of the current State enumeration value.
+    \row \o \c {/Telephony/Status/SimToolkit/Available} \o Set to true if SIM toolkit support is available, otherwise false.
+    \row \o \c {/Telephony/Status/SimToolkit/IdleModeText} \o Set to the value of the idle mode text string from the SIM toolkit application.
+    \row \o \c {/Telephony/Status/SimToolkit/IdleModeIcon} \o Set to the QIcon to display in idle mode.
+    \row \o \c {/Telephony/Status/SimToolkit/IdleModeIconSelfExplanatory} \o Set to true if the idle mode icon is self-explanatory without accompanying text.
+    \row \o \c {/Telephony/Status/SimToolkit/MenuTitle} \o Set to the title of the SIM toolkit application's main menu.
+    \endtable
+
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+*/
 
 /*!
   \enum CellModemManager::State
@@ -181,7 +163,7 @@ public:
   aerial turned off.
   \value FailureReset The modem has encountered an error and is resetting.
   \value UnrecoverableFailure The modem has failed in such a way that it cannot
-  be recovered.  Qtopia or the device will need to be restarted.
+  be recovered.  Qt Extended or the device will need to be restarted.
  */
 
 // define CellModemManager
@@ -244,10 +226,6 @@ CellModemManager::CellModemManager(QObject *parent)
     QSimInfo *simInfo = new QSimInfo( "modem", this );
     connect( simInfo, SIGNAL(removed()), this, SLOT(simRemoved()) );
     connect( simInfo, SIGNAL(inserted()), this, SLOT(simInserted()) );
-
-    // Create the "SIM Applications" instance, to handle commands that
-    // may occur outside of a regular session.  e.g. SetupIdleModeText.
-    SimApp::instance();
 
     if(::profilesControlModem) {
         d->m_profiles = new QPhoneProfileManager(this);
@@ -320,6 +298,7 @@ void CellModemManager::setPlaneModeEnabled(bool enabled)
     }
 
     emit planeModeEnabledChanged(d->m_aerialOn);
+    emit registrationStateChanged(d->m_regState);
 }
 
 void CellModemManager::setAerialEnabled(bool enabled)
@@ -589,6 +568,11 @@ void CellModemManager::doInitialize()
 
 void CellModemManager::simNotInserted()
 {
+    // SIM missing or failure may be reported on some modems when
+    // it is waiting for a PUK.
+    if (WaitingSIMPuk == state())
+        return;
+
     Q_ASSERT(Initializing == state() || SIMMissing == state());
 
     doStateChanged(SIMMissing);
@@ -606,18 +590,6 @@ void CellModemManager::fetchEmergencyNumbers()
     d->m_phoneBook->getEntries( "EN" );    // No tr
 }
 
-void CellModemManager::fetchCallHistory()
-{
-    if ( d->m_phoneBook ) {
-        connect( d->m_phoneBook, SIGNAL(entries(QString,QList<QPhoneBookEntry>)),
-            this, SLOT(callHistoryEntriesFetched(QString,QList<QPhoneBookEntry>)) );
-        d->m_phoneBook->getEntries( "DC" ); // Dialed calls
-        d->m_phoneBook->getEntries( "LD" ); // Last dialed numbers
-        d->m_phoneBook->getEntries( "MC" ); // Missed calls
-        d->m_phoneBook->getEntries( "RC" ); // Received calls
-    }
-}
-
 void CellModemManager::emergencyNumbersFetched
     ( const QString& store, const QList<QPhoneBookEntry>& list )
 {
@@ -629,39 +601,6 @@ void CellModemManager::emergencyNumbersFetched
             if ( !number.isEmpty() && !en->contains( number ) )
                 en->append( number );
         }
-    }
-}
-
-void CellModemManager::callHistoryEntriesFetched
-    ( const QString& store, const QList<QPhoneBookEntry>& list )
-{
-    QCallListItem::CallType type;
-    if ( store == "DC" || store == "LD" )
-        type = QCallListItem::Dialed;
-    else if ( store == "MC" )
-        type = QCallListItem::Missed;
-    else if ( store == "RC" )
-        type = QCallListItem::Received;
-    else
-        return;
-
-    QCallList &callList = DialerControl::instance()->callList();
-
-    QStringList numberList;
-    foreach ( QPhoneBookEntry entry, list ) {
-        if ( !numberList.contains( entry.number() ) )
-            numberList.append( entry.number() );
-    }
-
-    foreach ( QString number, numberList ) {
-        QContact contact = ServerContactModel::instance()->matchPhoneNumber( number );
-        QCallListItem item( type, number );
-        callList.record( item );
-    }
-
-    if ( store == "RC" ) { // no need to read phone books anymore.
-        disconnect( d->m_phoneBook, SIGNAL(entries(QString,QList<QPhoneBookEntry>)),
-            this, SLOT(callHistoryEntriesFetched(QString,QList<QPhoneBookEntry>)) );
     }
 }
 
@@ -762,21 +701,6 @@ void CellModemManager::readPhoneBooks()
 {
     // Arrange for the emergency number phone book to be read when SIM is ready.
     fetchEmergencyNumbers();
-
-    QSimInfo simInfo( "modem", this );
-    // if it is not a new sim. do not need to read SIM phone books for call history.
-    if ( simInfo.identity() == d->m_simIdentity )
-        return;
-
-    d->m_simIdentity = simInfo.identity();
-
-    // record new sim identity
-    QSettings cfg("Trolltech", "Phone");
-    cfg.beginGroup("SIM");
-    cfg.setValue("Identity", d->m_simIdentity);
-
-    // Read SIM phone books for last dialed, missed, received calls
-    fetchCallHistory();
 }
 
 void CellModemManager::simRemoved()
@@ -835,6 +759,7 @@ void CellModemManager::updateStatus()
     d->m_status->setAttribute("CallDivert", callForwardingEnabled());
     d->m_status->setAttribute("PlaneModeAvailable", planeModeSupported()?"Yes":"No");
     d->m_status->setAttribute("CellModem/Available", cellModemAvailable());
+    d->m_status->setAttribute("ModemStatus", stateToString(state()));
 }
 
 void CellModemManager::autoRegisterTimeout()
@@ -1252,8 +1177,6 @@ void CellModemManager::setCallerIdRestriction()
         callSettings.setCallerIdRestriction( (QCallSettings::CallerIdRestriction)choice );
     }
     cfg.endGroup();
-    cfg.beginGroup("SIM");
-    d->m_simIdentity = cfg.value("Identity").toString();
 }
 
 void CellModemManager::doStateChanged(State newState)
@@ -1261,8 +1184,6 @@ void CellModemManager::doStateChanged(State newState)
     qLog(QtopiaServer) << "CellModemManager: State changed from"
                        << stateToString(state()) << "to"
                        << stateToString(newState);
-    QPerformanceLog("QtopiaServer") << "CellModemManager: State changed from"
-                      << stateToString(state()) << "to" << stateToString(newState);
 
     // We assert on an impossible state transition
     Q_ASSERT(state() != Initializing ||
@@ -1330,7 +1251,30 @@ void CellModemManager::doStateChanged(State newState)
     emit stateChanged(newState, oldState);
 }
 
+/*!
+    \reimp
+*/
+bool CellModemManager::supportsPresence() const
+{
+    return false;
+}
+
+/*!
+    \reimp
+*/
+bool CellModemManager::doDnd()
+{
+    return false;
+}
+
+/*!
+    \reimp
+*/
+void CellModemManager::updateOnThePhonePresence( bool /*isOnThePhone*/ )
+{
+    //nothing to do
+}
+
 QTOPIA_TASK(CellModem, CellModemManager);
-QTOPIA_TASK_PROVIDES(CellModem, CellModemManager);
 QTOPIA_TASK_PROVIDES(CellModem, QAbstractCallPolicyManager);
 

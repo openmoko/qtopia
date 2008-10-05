@@ -1,24 +1,22 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <qtopia/pim/qappointmentmodel.h>
+#include <qappointmentmodel.h>
 #include "qappointmentsqlio_p.h"
 #if defined(GOOGLE_CALENDAR_CONTEXT) && !defined(QT_NO_OPENSSL)
 #include "qgooglecontext_p.h"
@@ -34,16 +32,15 @@
 
 #include <QDebug>
 
-#include "qrecordiomerge_p.h"
-
 class QAppointmentModelData
 {
 public:
-    QAppointmentModelData() : durationType(QAppointmentModel::AnyDuration) {}
+    QAppointmentModelData() : durationType(QAppointmentModel::AnyDuration) , defaultio(0) {}
 
     QDateTime rStart;
     QDateTime rEnd;
     QAppointmentModel::DurationType durationType;
+    QAppointmentSqlIO *defaultio;
 
     static QIcon getCachedIcon(const QString& str);
     static QHash<QString, QIcon> cachedIcons;
@@ -167,8 +164,11 @@ QAppointmentModel::Field QAppointmentModel::identifierField(const QString &ident
 
 /*!
   \class QAppointmentModel
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QAppointmentModel class provides access to the Calendar data.
 
@@ -203,7 +203,8 @@ QAppointmentModel::QAppointmentModel(QObject *parent)
     QAppointmentSqlIO *access = new QAppointmentSqlIO(this);
     QAppointmentContext *context = new QAppointmentDefaultContext(this, access);
 
-    addAccess(access);
+    setAccess(access);
+    d->defaultio = access;
     addContext(context);
 
 #if defined(GOOGLE_CALENDAR_CONTEXT) && !defined(QT_NO_OPENSSL)
@@ -295,10 +296,7 @@ QStringList QAppointmentModel::mimeTypes() const
 */
 QVariant QAppointmentModel::data(const QModelIndex &index, int role) const
 {
-    const QAppointmentIO *model = qobject_cast<const QAppointmentIO *>(access(index.row()));
-    int r = accessRow(index.row());
-    if (!model)
-        return QVariant();
+    int r = index.row();
 
     switch(index.column()) {
         case Description:
@@ -308,12 +306,12 @@ QVariant QAppointmentModel::data(const QModelIndex &index, int role) const
                     default:
                         break;
                     case Qt::DisplayRole:
-                        return model->appointmentField(r, Description);
+                        return d->defaultio->appointmentField(r, Description);
                     case Qt::EditRole:
-                        return model->appointmentField(r, Identifier).toByteArray();
+                        return d->defaultio->appointmentField(r, Identifier).toByteArray();
                     case LabelRole:
                         {
-                            QString l = model->appointmentField(r, Description).toString();
+                            QString l = d->defaultio->appointmentField(r, Description).toString();
                             return "<b>" + l + "</b>";
                         }
                         break;
@@ -322,7 +320,7 @@ QVariant QAppointmentModel::data(const QModelIndex &index, int role) const
             break;
         default:
             if (index.column() > 0 && index.column() < columnCount())
-                return model->appointmentField(r, (QAppointmentModel::Field)index.column());
+                return d->defaultio->appointmentField(r, (QAppointmentModel::Field)index.column());
             break;
     }
     return QVariant();
@@ -360,17 +358,18 @@ bool QAppointmentModel::setData(const QModelIndex &index, const QVariant &value,
     return updateAppointment(a);
 
 #if 0
-    /* disabled due to 'notifyUpdated' require whole record.
-       While writing whole record is less efficient than partial - at 
-       this stage it was the easiest way of fixing the bug where setData
-       did not result in cross-model data change from being propogated properly
+    /*
+        disabled due to 'notifyUpdated' require whole record.
+        While writing whole record is less efficient than partial - at
+        this stage it was the easiest way of fixing the bug where setData
+        did not result in cross-model data change from being propagated properly
    */
 
     int i = index.row();
-    const QAppointmentIO *model = qobject_cast<const QAppointmentIO*>(d->mio->model(i));
+    const QAppointmentIO *model = qobject_cast<const QAppointmentSqlIO*>(d->mio->model(i));
     int r = d->mio->row(i);
     if (model)
-        return ((QAppointmentIO *)model)->setAppointmentField(r, (Field)index.column(), value);
+        return ((QAppointmentSqlIO *)model)->setAppointmentField(r, (Field)index.column(), value);
     return false;
 #endif
 }
@@ -435,11 +434,7 @@ QAppointment QAppointmentModel::appointment(const QModelIndex &index) const
 */
 QAppointment QAppointmentModel::appointment(int row) const
 {
-    const QAppointmentIO *model = qobject_cast<const QAppointmentIO*>(access(row));
-    int r = accessRow(row);
-    if (model)
-        return model->appointment(r);
-    return QAppointment();
+    return d->defaultio->appointment(row);
 }
 
 /*!
@@ -448,10 +443,7 @@ QAppointment QAppointmentModel::appointment(int row) const
 */
 QAppointment QAppointmentModel::appointment(const QUniqueId & identifier) const
 {
-    const QAppointmentIO *model = qobject_cast<const QAppointmentIO*>(access(identifier));
-    if (model)
-        return model->appointment(identifier);
-    return QAppointment();
+    return d->defaultio->appointment(identifier);
 }
 
 /*!
@@ -888,10 +880,7 @@ void QAppointmentModel::setDurationType(DurationType type)
         return;
     d->durationType = type;
 
-    foreach(QRecordIO *model, accessModels()) {
-        QAppointmentIO *appointmentModel = qobject_cast<QAppointmentIO *>(model);
-        appointmentModel->setDurationType(type);
-    }
+    d->defaultio->setDurationType(type);
 }
 
 /*!
@@ -915,10 +904,7 @@ void QAppointmentModel::setRange(const QDateTime &start, const QDateTime &end)
     d->rStart = start;
     d->rEnd = end;
 
-    foreach(QRecordIO *model, accessModels()) {
-        QAppointmentIO *appointmentModel = qobject_cast<QAppointmentIO *>(model);
-        appointmentModel->setRangeFilter(start, end);
-    }
+    d->defaultio->setRangeFilter(start, end);
 }
 
 /*!
@@ -971,8 +957,11 @@ public:
 
 /*!
   \class QOccurrenceModel
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QOccurrenceModel class provides access to the Calendar data.
 
@@ -1591,7 +1580,7 @@ void QOccurrenceModel::rebuildCache() const
 
 
         // ASSUMPTION, one model and its an SqlIO
-        QAppointmentSqlIO *access = qobject_cast<QAppointmentSqlIO *>(od->appointmentModel->accessModels()[0]);
+        QAppointmentSqlIO *access = od->appointmentModel->d->defaultio;
         if (!access) {
             qWarning("Invalid access class retrieved by Occurrence Model");
             return;

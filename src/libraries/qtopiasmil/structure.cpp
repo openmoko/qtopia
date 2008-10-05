@@ -1,43 +1,41 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "structure.h"
 #include "element.h"
 #include "system.h"
+#include <QXmlStreamAttributes>
 
-
-Smil::Smil(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+Smil::Smil(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts)
 {
     currentState = Active;
 }
 
-SmilHead::SmilHead(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilHead::SmilHead(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts)
 {
     currentState = Active;
     vis = true;
 }
 
-SmilBody::SmilBody(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilBody::SmilBody(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilSeq(sys, p, n, atts)
 {
 }
@@ -50,13 +48,11 @@ void SmilBody::setState(State s)
     }
 }
 
-//===========================================================================
-
 SmilStructureModule::SmilStructureModule() : SmilModule()
 {
 }
 
-SmilElement *SmilStructureModule::beginParseElement(SmilSystem *sys, SmilElement *parent, const QString &qName, const QXmlAttributes &atts)
+SmilElement *SmilStructureModule::beginParseElement(SmilSystem *sys, SmilElement *parent, const QString &qName, const QXmlStreamAttributes &atts)
 {
     if (qName == "smil") {
         if (parent) {
@@ -73,7 +69,7 @@ SmilElement *SmilStructureModule::beginParseElement(SmilSystem *sys, SmilElement
     return 0;
 }
 
-bool SmilStructureModule::parseAttributes(SmilSystem *, SmilElement *, const QXmlAttributes &)
+bool SmilStructureModule::parseAttributes(SmilSystem *, SmilElement *, const QXmlStreamAttributes &)
 {
     return false;
 }
@@ -82,7 +78,7 @@ void SmilStructureModule::endParseElement(SmilElement *, const QString &)
 {
 }
 
-QStringList SmilStructureModule::elements() const
+QStringList SmilStructureModule::elementNames() const
 {
     QStringList l;
     l.append("smil");
@@ -90,5 +86,4 @@ QStringList SmilStructureModule::elements() const
     l.append("body");
     return l;
 }
-
 

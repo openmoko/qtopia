@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <center.h>
@@ -280,8 +278,8 @@ void QCopConnection::process( const QString &message )
 
     if ( message.startsWith( "220" ) ) {
         // 1.0-1.5 - 220 Qtopia QCop bridge ready!
-        // 1.6-2.x - 220 Qtopia 2.1.1;challenge={96020319-e076-954f-bf78-25b615c682c5};loginname=lramsay;displayname=;
-        // 4.x     - 220 Qtopia 4.x.x;challenge={96020319-e076-954f-bf78-25b615c682c5};loginname=lramsay;displayname=;protocol=2;system=Qtopia;model=Greenphone Device;hexversion=0x040300
+        // 1.6-2.x - 220 Qtopia 2.1.1;challenge={96020319-e076-954f-bf78-25b615c682c5};loginname=user;displayname=;
+        // 4.x     - 220 Qtopia 4.x.x;challenge={96020319-e076-954f-bf78-25b615c682c5};loginname=user;displayname=;protocol=2;system=Qtopia;model=Greenphone Device;hexversion=0x040300
         properties["protocol"] = "1";
 
         int afterSystem = message.indexOf(' ',5);

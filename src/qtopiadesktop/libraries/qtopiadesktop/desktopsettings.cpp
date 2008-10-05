@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <desktopsettings.h>
@@ -67,10 +65,10 @@ static QString checkLanguage( const QString &language )
   The DesktopSettings class has a number of global options. It is also used as a replacement
   for QSettings, providing various helper functions.
 
-  DesktopSettings will cause settings to be located in Trolltech/Qtopia Sync Agent/...
-  On Windows, this can be found in the registry: HKCU\\Software\\Trolltech\\Qtopia Sync Agent\\...
-  On Mac OS X, this can be found in $HOME/Library/Preferences/Qtopia Sync Agent.plist
-  On Unix, this can be found in $HOME/.config/Trolltech/Qtopia Sync Agent/...
+  DesktopSettings will cause settings to be located in Trolltech/Qt Extended Sync Agent/...
+  On Windows, this can be found in the registry: HKCU\\Software\\Trolltech\\Qt Extended Sync Agent\\...
+  On Mac OS X, this can be found in $HOME/Library/Preferences/Qt Extended Sync Agent.plist
+  On Unix, this can be found in $HOME/.config/Trolltech/Qt Extended Sync Agent/...
 */
 
 /*!
@@ -178,7 +176,7 @@ void DesktopSettings::setInstalledDir( const QString &dir )
 }
 
 /*!
-  Return the location that Qtopia Sync Agent has been installed to.
+  Return the location that Qt Extended Sync Agent has been installed to.
 */
 QString DesktopSettings::installedDir()
 {
@@ -238,7 +236,7 @@ QStringList DesktopSettings::languages()
 }
 
 /*!
-  Return the location that Qtopia Sync Agent can write files to.
+  Return the location that Qt Extended Sync Agent can write files to.
   This function exists because the location varies for different platforms.
 */
 QString DesktopSettings::homePath()

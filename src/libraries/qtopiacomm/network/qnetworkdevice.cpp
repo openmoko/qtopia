@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -96,9 +94,12 @@ private:
 
 /*!
   \class QNetworkDevice
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QNetworkDevice class provides information about the connectivity state of
   a network device.
+
+  \section1 Architecture
 
   Network devices are always associated with a configuration file which serves as an 
   identifier/handle for a particular device. The configuration file is device specific 
@@ -106,15 +107,14 @@ private:
   The user can start start/stop/configure network devices via the Internet application. 
   Network related application can start and stop the device via 
   \l QtopiaNetwork::startInterface() and \l QtopiaNetwork::stopInterface() respectively. 
-  If the Qtopia device has more than one device online at a time the default gateway 
+  If the Qt Extended device has more than one device online at a time the default gateway 
   can be set via \l QtopiaNetwork::setDefaultGateway().
 
-  The following UML class diagram displays the general interaction of Qtopia's
-  network API.
+  The following UML class diagram displays the general interaction of the Qt Extended network API.
 
   \image NetworkAPI.png
   
-  Qtopia keeps track of network devices with the help of a session manager. 
+  Qt Extended keeps track of network devices with the help of a session manager. 
   If an application starts a device the session manager records the identity of the 
   application and will close the device if the application doesn't stop the device 
   before it quits. If several applications requested the same device the device 

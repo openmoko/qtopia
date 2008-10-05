@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -30,11 +28,10 @@
 #include <QSizePolicy>
 #include <QTimer>
 #include "dialercontrol.h"
-#include <qtopia/pim/qcontactmodel.h>
-#include <qtopia/pim/qcontact.h>
+#include <qcontactmodel.h>
+#include <qcontact.h>
 #include <QPalette>
 #include "e1_error.h"
-#include "cellmodemmanager.h"
 #include <QPainter>
 
 E1Callscreen::E1Callscreen(E1Button *b, QWidget *parent)
@@ -285,12 +282,12 @@ void E1Callscreen::end()
 
 void E1Callscreen::sendNumber(const QString &number)
 {
+    Q_UNUSED(number)
     if(!m_hasCall.isEmpty())
         return;
 
-    CellModemManager* cellModemManager = qtopiaTask<CellModemManager>();
-    if(cellModemManager->registrationState() != QTelephony::RegistrationHome &&
-       cellModemManager->registrationState() != QTelephony::RegistrationRoaming) {
+    QValueSpaceItem item("/Telephony/Status");
+    if ( !item.value("NetworkRegistered").toBool() ) {
         E1Error::error("Not registered.");
         return;
     }

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -789,8 +787,9 @@ void QDSDataPrivate::shiftToStore()
 
 /*!
     \class QDSData
-    \mainclass
-    \brief The QDSData class encapsulates data shared by Qtopia Data Sharing (QDS)
+    \inpublicgroup QtBaseModule
+
+    \brief The QDSData class encapsulates data shared by Qt Extended Data Sharing (QDS)
     services.
 
     The QDSData class is used by QDS services as an efficient means of
@@ -799,7 +798,7 @@ void QDSDataPrivate::shiftToStore()
 
     For larger data sizes, methods which use QFile and QIODevice are recommended.
 
-    \sa QDSAction, QDSActionRequest, {Qtopia Data Sharing (QDS)}
+    \sa QDSAction, QDSActionRequest, {Qt Extended Data Sharing (QDS)}
 
     \ingroup ipc
 */

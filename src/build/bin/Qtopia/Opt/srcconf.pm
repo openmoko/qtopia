@@ -314,10 +314,3 @@ sub extract_desc_help
 
 # Make this file require()able.
 1;
-__END__
-
-=head1 NAME
-
-Qtopia::Opt::srcconf - srcconf engine for the Qtopia::Opt system.
-
-=cut

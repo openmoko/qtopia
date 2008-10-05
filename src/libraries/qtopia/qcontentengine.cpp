@@ -1,28 +1,26 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/private/qcontentengine_p.h>
-#include <qtopia/private/qcontentstore_p.h>
-#include <qtopia/private/contentpluginmanager_p.h>
-#include <qtopiabase/qtopianamespace.h>
+#include "qcontentengine_p.h"
+#include "qcontentstore_p.h"
+#include "contentpluginmanager_p.h"
+#include <qtopianamespace.h>
 #include <QMutex>
 #include <QMimeType>
 #include <QFileSystem>
@@ -47,7 +45,8 @@ Q_GLOBAL_STATIC(QContentEngineHandlerList, contentEngineHandlers)
 
 /*!
     \class QContentEngine
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QContentEngine class is an abstract base class which represents an item of content in the documents system.
 
     \internal
@@ -55,7 +54,8 @@ Q_GLOBAL_STATIC(QContentEngineHandlerList, contentEngineHandlers)
 
 /*!
     \class QContentEngineData
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QContentEngineData class is the base data class for QContentEngine.
 
     \internal
@@ -63,7 +63,8 @@ Q_GLOBAL_STATIC(QContentEngineHandlerList, contentEngineHandlers)
 
 /*!
     \class QContentEnginePrivate
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QContentEnginePrivate class is the private class for QContentEngine.
 
     \internal
@@ -566,6 +567,12 @@ qint64 QContentEngine::size( bool force ) const
 */
 
 /*!
+    \fn QContentEngine::rename(const QString &name)
+
+    Changes the \a name of the content and renames the associated file accordingly.
+*/
+
+/*!
     \fn QContentEngine::execute( const QStringList &arguments ) const
 
     If the content engine refers to an application executes the application with the given \a arguments.
@@ -917,11 +924,40 @@ QDataStream &operator >>( QDataStream &stream, QContentEngine &engine )
     return stream;
 }
 
+#if defined(QTOPIA_DBUS_IPC) && !defined(QTOPIA_HOST)
+
+/*!
+    Serializes a content \a engine to a data \a stream.
+
+    \internal
+*/
+QDBusArgument &operator <<( QDBusArgument &stream, const QContentEngine &engine )
+{
+    engine.serialize( stream );
+
+    return stream;
+}
+
+/*!
+    Deserializes a content \a engine from a data \a stream.
+
+    \internal
+*/
+const QDBusArgument &operator >>( const QDBusArgument &stream, QContentEngine &engine )
+{
+    engine.deserialize( stream );
+
+    return stream;
+}
+
+#endif
+
 Q_IMPLEMENT_USER_METATYPE_ENUM(QContentEngine::Attributes);
 
 /*!
     \class QContentEngineHandler
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QContentEngineHandler class is the base class for classes that create QContentEngine instance.
 
     \sa QContentEngine

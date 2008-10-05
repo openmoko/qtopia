@@ -1,37 +1,30 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "e2_launcher.h"
 #include "e2_telephonybar.h"
-#include "phone/phonelock.h"
 #include "qtopiaserverapplication.h"
 #include <QDesktopWidget>
 #include <QEvent>
-#include "cellmodemmanager.h"
-#include "ringcontrol.h"
-#include "phone/phonelock.h"
 #include <QFontMetrics>
 #include "applicationlauncher.h"
 #include "dialercontrol.h"
-#include "messagecontrol.h"
 #include <QResizeEvent>
 #include <QSize>
 #include <QPainter>
@@ -75,26 +68,12 @@ static QWidget *e2_callhistory()
 E2ServerInterface::E2ServerInterface(QWidget *parent, Qt::WFlags flags)
 : QAbstractServerInterface(parent, flags),
   m_ringProf(":image/profileedit/Note"),
-  m_browser(0), operatorItem(0),
-  datebook(":image/datebook/DateBook_16"),
+  m_browser(0), m_wallpaper(":image/themes/qtopia/ladybug.png"), 
+  operatorItem(0), datebook(":image/datebook/DateBook_16"),
   m_model(0), m_appointment(0)
 {
     // XXX - remove me
     DialerControl::instance();
-    MessageControl::instance();
-#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
-    QDesktopWidget *desktop = QApplication::desktop();
-    QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
-    QExportedBackground::initExportedBackground(desktopRect.width(),
-                                                desktopRect.height());
-    QExportedBackground::setExportedBackgroundTint(0);
-
-    m_background = new QExportedBackground(this);
-    QObject::connect(m_background, SIGNAL(wallpaperChanged()),
-                     this, SLOT(wallpaperChanged()));
-#endif
-
-    wallpaperChanged();
 
     // XXX - hack to make exported backgrounds work - weird
     qApp->processEvents();
@@ -163,19 +142,6 @@ void E2ServerInterface::operatorChanged()
 {
     operatorName = operatorItem->value().toString();
     update();
-}
-
-void E2ServerInterface::wallpaperChanged()
-{
-#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
-    m_wallpaper = m_background->wallpaper();
-    QDesktopWidget *desktop = QApplication::desktop();
-    QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
-    if (m_wallpaper.size() != desktopRect.size()) {
-        m_wallpaper = m_wallpaper.scaled(desktopRect.size());
-        QExportedBackground::setExportedBackground(m_wallpaper);
-    }
-#endif
 }
 
 void E2ServerInterface::resizeEvent(QResizeEvent *e)

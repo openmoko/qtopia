@@ -1,25 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "hierarchicaldocumentview.h"
+#include "uifactory.h"
 #include <QMimeType>
 #include <QKeyEvent>
 #include <QtopiaApplication>
@@ -147,12 +146,42 @@ void CategoryFilterListModel::reload()
     }
 }
 
-////////////////////////////////////////////////////////////////
-//
-// HierarchicalDocumentLauncherView implementation
+/*!
+  \internal
+  \class HierarchicalDocumentLauncherView
+  \inpublicgroup QtUiModule
+  \ingroup QtopiaServer::GeneralUI
+  \brief The HierarchicalDocumentLauncherView class provides an hierarchical viwe of the
+  user documents. 
 
-HierarchicalDocumentLauncherView::HierarchicalDocumentLauncherView(QWidget* parent, Qt::WFlags fl)
-    : DocumentLauncherView(parent, fl)
+  This document launcher is a replacement for the DocumentLauncherView. It distiniguishes itself from 
+  the standard DocumentLauncherView by ordering documents according to their categories and (mime) types.
+  This may provide a faster way of finding a document.
+
+  This document launcher view can be enabled by setting the 
+  
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+  \sa LauncherView, DocumentLauncherView
+  */
+
+/*!
+  \enum HierarchicalDocumentLauncherView::FilterNavigation
+  \internal
+  */
+
+/*!
+  Creates a new HierarchicalDocumentLauncherView class with the given \a parent and \a flags. To increase 
+  the component separation an instance of this class should be created via LauncherView::createLauncherView().
+
+  \code
+    LauncherView* view = LauncherView::createLauncherView("HierarchicalDocumentLauncherView", p, fl);
+  \endcode
+
+  \sa LauncherView::createLauncherView()
+*/ 
+HierarchicalDocumentLauncherView::HierarchicalDocumentLauncherView(QWidget* parent, Qt::WFlags flags)
+    : DocumentLauncherView(parent, flags)
     , modelTypes(NULL)
     , modelCategories(NULL)
     , categoryManager(NULL) 
@@ -185,7 +214,10 @@ void HierarchicalDocumentLauncherView::init()
     icons->installEventFilter(this);
 }
 
+/*!
+  \internal
 // performs the navigation i.e. goes from mime type view to category view to document view and back
+*/
 void HierarchicalDocumentLauncherView::filterNavigate(FilterNavigation navigation, QModelIndex selectedItem) 
 {
     QContentFilter lastFilter;
@@ -238,7 +270,8 @@ void HierarchicalDocumentLauncherView::filterNavigate(FilterNavigation navigatio
             contentSet->setCriteria(newFilter);
             
             // show filtered docs
-            icons->setModel(bpModel);
+            if ( model )
+                icons->setModel(model);
             
             exitNavigationMode();
             break;
@@ -248,7 +281,10 @@ void HierarchicalDocumentLauncherView::filterNavigate(FilterNavigation navigatio
     setCurrentItem(lastFilter);
 }
 
+/*!
+  \internal
 // highlights a list view item with a certain filter
+*/
 void HierarchicalDocumentLauncherView::setCurrentItem(const QContentFilter& pFilter) 
 {
     // get current model, if not AbstractContentFilterPropertyListModel, do nothing
@@ -264,6 +300,9 @@ void HierarchicalDocumentLauncherView::setCurrentItem(const QContentFilter& pFil
     icons->setCurrentIndex(index);
 }
 
+/*!
+  \reimp
+  */
 bool HierarchicalDocumentLauncherView::eventFilter(QObject *obj, QEvent *event) 
 {
     Q_UNUSED(obj);
@@ -283,10 +322,16 @@ bool HierarchicalDocumentLauncherView::eventFilter(QObject *obj, QEvent *event)
     return false;
 }
 
+/*!
+  Destroys the HierarchicalDocumentLauncherView instance.
+  */
 HierarchicalDocumentLauncherView::~HierarchicalDocumentLauncherView() 
 {
 }
 
+/*!
+  \reimp
+  */
 void HierarchicalDocumentLauncherView::handleReturnPressed(const QModelIndex &item) 
 {
     if (selectedFilters.count()<2)
@@ -296,6 +341,9 @@ void HierarchicalDocumentLauncherView::handleReturnPressed(const QModelIndex &it
     	LauncherView::handleReturnPressed(item);
 }
 
+/*!
+  \reimp
+  */
 void HierarchicalDocumentLauncherView::handleItemClicked(const QModelIndex & item, bool setCurrentIndex) 
 {
     Q_UNUSED(setCurrentIndex);
@@ -309,6 +357,9 @@ void HierarchicalDocumentLauncherView::handleItemClicked(const QModelIndex & ite
     }
 }
 
+/*!
+  \reimp
+  */
 void HierarchicalDocumentLauncherView::resetSelection() 
 {
     if (icons && model && icons->model()->rowCount()) {
@@ -321,17 +372,24 @@ void HierarchicalDocumentLauncherView::resetSelection()
     }
 }
 
-// enters navigation mode i.e. activates the dummy menu
+/*! \internal
+    enters navigation mode i.e. activates the dummy menu
+    */
 void HierarchicalDocumentLauncherView::enterNavigationMode() 
 {
    QSoftMenuBar::removeMenuFrom(this, softMenu);
    QSoftMenuBar::addMenuTo(this, dummyMenu); 
 }
 
+/*!
+  \internal
 // exits navi mode i.e. it gets called when the document list is shown
 // and activates the normal menu
+*/
 void HierarchicalDocumentLauncherView::exitNavigationMode() 
 {
    QSoftMenuBar::removeMenuFrom(this, dummyMenu);
    QSoftMenuBar::addMenuTo(this, softMenu);
 }
+
+UIFACTORY_REGISTER_WIDGET(HierarchicalDocumentLauncherView);

@@ -1,23 +1,34 @@
+!qbuild {
 qtopia_project(qtopia core lib)
 TARGET=qtopia
-
 VERSION=4.0.0
 UI_HEADERS_DIR=$$QPEDIR/include/qtopia/private
 
 DEFINES+=QTOPIA_PAGE_SIZE=$$LITERAL_SQUOTE$$QTOPIA_PAGE_SIZE$$LITERAL_SQUOTE
 DEFINES+=QTOPIA_PAGE_MASK=$$LITERAL_SQUOTE$$QTOPIA_PAGE_MASK$$LITERAL_SQUOTE
-QTOPIA_FORMS+=passwordbase_p.ui
 
-#DEFINES+=EZX_A780
+depends(3rdparty/libraries/zlib)
+depends(3rdparty/libraries/md5)
+depends(3rdparty/libraries/sqlite)
+depends(libraries/qtopiagfx)
 
-APPS_PATH=../../applications
+CONFIG += qtopia_visibility
 
-QTOPIA_HEADERS+=\
+enable_sxe:depends(libraries/qtopiasecurity)
+}
+
+# Needed for includes from qtextengine_p.h
+INCLUDEPATH+=$$QT_DEPOT_PATH/src/3rdparty/harfbuzz/src
+
+FORMS+=passwordbase_p.ui
+
+HEADERS+=\
     qmimetype.h\
     qdocumentselector.h\
     qtopiaapplication.h\
     qterminationhandler.h\
     qtimezoneselector.h\
+    qworldmapdialog.h\
     qworldmap.h\
     qpassworddialog.h\
     qtimestring.h\
@@ -56,6 +67,7 @@ QTOPIA_HEADERS+=\
     qphonestyle.h\
     qsoftmenubar.h\
     qspeeddial.h\
+    qfavoriteservicesmodel.h\
     qstoragedeviceselector.h\
     qconstcstring.h\
     qtopiafeatures.h\
@@ -68,10 +80,9 @@ QTOPIA_HEADERS+=\
     qbootsourceaccessory.h\
     qvibrateaccessory.h\
     qkeypadlightaccessory.h\
+    qscreeninformation.h\
     qtopiasendvia.h\
     qsignalsource.h \
-    qanalogclock.h \
-    qformlayout.h \
     qanalogclock.h \
     qcontentsortcriteria.h \
     qsoftkeylabelhelper.h \
@@ -90,9 +101,14 @@ QTOPIA_HEADERS+=\
     qcontentfilterselector.h\
     qperformancelog.h \
     qdocumentselectorservice.h \
-    qtopiaitemdelegate.h
+    qtopiaitemdelegate.h\
+    qtopiaservicehistorymodel.h\
+    qexifimageheader.h \
+    servertaskplugin.h\
+    qsmoothlist.h\
+    qcontentproperties.h\
 
-QTOPIA_PRIVATE_HEADERS+=\
+PRIVATE_HEADERS+=\
     ezxphonestyle_p.h\
     qimagedocumentselector_p.h\
     thumbnailview_p.h\
@@ -104,12 +120,8 @@ QTOPIA_PRIVATE_HEADERS+=\
     qds_p.h\
     qdsserviceinfo_p.h\
     qdsactionrequest_p.h\
-    themedviewinterface_p.h\
     qdsaction_p.h\
     qdsdata_p.h\
-    contextkeymanager_p.h\
-    qterminationhandler_p.h \
-    qcontent_p.h\
     qhardwareinterface_p.h\
     qworldmap_sun_p.h\
     qworldmap_stylusnorm_p.h \
@@ -132,30 +144,37 @@ QTOPIA_PRIVATE_HEADERS+=\
     qdocumentservercontentengine_p.h \
     qsqlcontentstore_p.h \
     qsoftkeylabelhelper_p.h \
-    qalarmserver_p.h \
     resourcesourceselector_p.h \
-    contentserverinterface_p.h \
     drmcontent_p.h \
-    contentpluginmanager_p.h \
     qdocumentselectorsocketserver_p.h \
     qcontentfilterselector_p.h \
     qsparselist_p.h \
-    qperformancelog_p.h \
-    motionpath_p.h \
-    qthumbstyle_p.h \
-    testslaveinterface_p.h \
+    qtopiamessagehandler_p.h \
+    qtopiaservicehistorymodel_p.h\
     qtagmap_p.h \
+    keyboard_p.h
+
+SEMI_PRIVATE_HEADERS+=\
+    qterminationhandler_p.h\
+    themedviewinterface_p.h\
+    qcontent_p.h\
+    contextkeymanager_p.h\
+    contentpluginmanager_p.h \
+    qsmoothlistwidget_p.h\
+    qthumbstyle_p.h\
+    pred_p.h\
+    qtopiainputdialog_p.h\
     qtopiasqlmigrateplugin_p.h
 
-QTOPIA_SOURCES+=\
+SOURCES+=\
     qmimetype.cpp\
     qdocumentselector.cpp\
     qterminationhandler.cpp\
     qtopiaapplication.cpp\
     qtimezoneselector.cpp\
+    qworldmapdialog.cpp\
     qworldmap.cpp\
     qworldmap_sun.cpp\
-    qalarmserver.cpp\
     qpassworddialog.cpp\
     qtimestring.cpp\
     qcategoryselector.cpp\
@@ -176,6 +195,8 @@ QTOPIA_SOURCES+=\
     qiconselector.cpp\
     qtopiaresource.cpp\
     qtopiaserviceselector.cpp\
+    qtopiaservicehistorymodel.cpp\
+    qtopiaservicehistorymodel_p.cpp\
     qcolorselector.cpp\
     qdocumentproperties.cpp\
     qstoragedeviceselector.cpp\
@@ -194,6 +215,7 @@ QTOPIA_SOURCES+=\
     qdsserviceinfo.cpp\
     qdsactionrequest.cpp\
     qdsdata.cpp\
+    qtopiamessagehandler.cpp\
     qtopianetwork.cpp\
     qtopianetworkinterfaceimpl.cpp\
     qtopiafeatures.cpp\
@@ -206,12 +228,11 @@ QTOPIA_SOURCES+=\
     qbootsourceaccessory.cpp\
     qvibrateaccessory.cpp\
     qkeypadlightaccessory.cpp\
+    qscreeninformation.cpp\
     qtopiasendvia.cpp\
     qanalogclock.cpp\
     qsignalsource.cpp \
     qtopiasql_p.cpp\
-    qformlayout.cpp \
-    qtopiasql_p.cpp \
     qcontentengine.cpp \
     qcontentstore.cpp \
     qsqlcontentstore.cpp \
@@ -240,7 +261,6 @@ QTOPIA_SOURCES+=\
     themedviewinterface.cpp \
     qcontent.cpp \
     qcontentset.cpp \
-    contentserverinterface_p.cpp \
     qdrmcontent.cpp \
     drmcontent_p.cpp \
     qcontentplugin.cpp \
@@ -250,79 +270,79 @@ QTOPIA_SOURCES+=\
     qdrmrights.cpp \
     qcontentfiltermodel.cpp \
     qcontentfilterselector.cpp \
+    qcontentproperties.cpp \
     contextkeymanager.cpp \
     qsoftmenubar.cpp \
     qphonestyle.cpp\
     ezxphonestyle.cpp\
     qspeeddial.cpp\
+    qfavoriteservicesmodel.cpp\
     qperformancelog.cpp \
     qdocumentselectorservice.cpp \
     qdocumentselectorsocketserver.cpp \
     qtopiaitemdelegate.cpp \
-    motionpath_p.cpp \
     qthumbstyle_p.cpp \
+    servertaskplugin.cpp \
+    qexifimageheader.cpp \
+    qsmoothlist.cpp \
+    qsmoothlistwidget_p.cpp \
+    qtopiainputdialog_p.cpp\
+    pred_p.cpp\
+    keyboard_p.cpp\
     qtopiasqlmigrateplugin.cpp
 
-    QTOPIA_HEADERS+=\
-        qexportedbackground.h
-
+HEADERS+=\
+    qexportedbackground.h
 !x11 {
-    QTOPIA_PRIVATE_HEADERS+=\
+    PRIVATE_HEADERS+=\
         qpedecoration_p.h\
         phonedecoration_p.h
-    QTOPIA_SOURCES+=\
+    SOURCES+=\
         qpedecoration_qws.cpp\
         qexportedbackground.cpp\
         phonedecoration.cpp
 } else {
-    QTOPIA_SOURCES+=\
+    SOURCES+=\
         qexportedbackground_x11.cpp
 }
 
-depends(3rdparty/libraries/zlib)
-depends(3rdparty/libraries/md5)
-depends(3rdparty/libraries/sqlite)
-
 RESOURCES=qtopia.qrc
 
-enable_greenphone_effects {
-    INCLUDEPATH += ../../../include
-    LIBS += -L../../../lib -lblend
-    idep(LIBS+=-lblend)
-    QTOPIA_PRIVATE_HEADERS+=\
-        qsmoothlist_p.h
-    QTOPIA_SOURCES+=\
-        qsmoothlist_p.cpp
+pkg.desc=Base Qtopia library.
+pkg.domain=trusted
+
+!qbuild{
+headers.files=$$HEADERS
+headers.path=/include/qtopia
+headers.hint=sdk headers
+INSTALLS+=headers
+pheaders.files=$$SEMI_PRIVATE_HEADERS
+pheaders.path=/include/qtopia/private
+pheaders.hint=sdk headers
+INSTALLS+=pheaders
+
+idep(LIBS+=-l$$TARGET)
+qt_inc($$TARGET)
+
+# for clock_gettime
+LIBS+=-lrt
+idep(LIBS+=-lrt)
 }
 
-PREFIX=QTOPIA
-resolve_include()
-
-CONFIG += qtopia_visibility
-
-enable_sxe:depends(libraries/qtopiasecurity)
-
-
-sdk_qtopia_headers.files=$${QTOPIA_HEADERS}
-sdk_qtopia_headers.path=/include/qtopia
-sdk_qtopia_headers.hint=sdk headers
-
-sdk_qtopia_private_headers.files=$${QTOPIA_PRIVATE_HEADERS}
-sdk_qtopia_private_headers.path=/include/qtopia/private
-sdk_qtopia_private_headers.hint=sdk headers
-
-INSTALLS+=\
-    sdk_qtopia_headers sdk_qtopia_private_headers
-
-etc.files =\
-    $$QTOPIA_DEPOT_PATH/etc/colors\
-    $$QTOPIA_DEPOT_PATH/etc/mime.types
+etc.files=$$QTOPIA_DEPOT_PATH/etc/mime.types
 etc.path=/etc
-bins.files=\
-    $$QPEDIR/bin/qtopia-addmimetype
+INSTALLS+=etc
+
+colors.files=$$QTOPIA_DEPOT_PATH/etc/colors/*
+colors.path=/etc/colors
+INSTALLS+=colors
+
+bins.files=$$QTOPIA_DEPOT_PATH/bin/qtopia-addmimetype
 bins.path=/bin
 bins.hint=script
-!phone {
+INSTALLS+=bins
+
+equals(QTOPIA_UI,platform) {
     quitdesktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/quit.desktop
     quitdesktop.path=/apps/Settings
     quitdesktop.hint=desktop
@@ -339,38 +359,22 @@ drmpics.path=/pics/drm
 drmpics.hint=pics
 INSTALLS+=drmpics
 
+worldtimepics.files=$$QTOPIA_DEPOT_PATH/pics/worldtime/*
+worldtimepics.path=/pics/worldtime
+worldtimepics.hint=pics
+INSTALLS+=worldtimepics
+
 # WorldTime conf is used by qtimezoneselector.
-defaults.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/presstick.conf\
-               $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/SpeedDial.conf\
-               $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/WorldTime.conf\
-               $$QTOPIA_DEPOT_PATH/etc/default/Trolltech/Log.conf
-defaults.path=/etc/default/Trolltech
-INSTALLS+=\
-    etc bins defaults
+settings.files=$$device_overrides(/etc/default/Trolltech/presstick.conf)\
+               $$device_overrides(/etc/default/Trolltech/SpeedDial.conf)\
+               $$device_overrides(/etc/default/Trolltech/WorldTime.conf)\
+               $$device_overrides(/etc/default/Trolltech/Log.conf)\
+               $$device_overrides(/etc/default/Trolltech/Log2.conf)\
+               $$device_overrides(/etc/default/Trolltech/Storage.conf)\
+               $$device_overrides(/etc/default/Trolltech/PhoneProfile.conf)
+settings.path=/etc/default/Trolltech
+INSTALLS+=settings
 
-!enable_singleexec {
-    textcodecs.files=$$QTOPIA_DEPOT_PATH/plugins/textcodecs/.directory
-    textcodecs.path=/plugins/textcodecs/
-    INSTALLS+=textcodecs
-
-    imagecodecs.files=$$QTOPIA_DEPOT_PATH/plugins/imagecodecs/.directory
-    imagecodecs.path=/plugins/imagecodecs/
-    INSTALLS+=imagecodecs
-
-    decorations.files=$$QTOPIA_DEPOT_PATH/plugins/decorations/.directory
-    decorations.path=/plugins/decorations/
-    INSTALLS+=decorations
-
-    styles.files=$$QTOPIA_DEPOT_PATH/plugins/styles/.directory
-    styles.path=/plugins/styles/
-    INSTALLS+=styles
-}
-
-!isEmpty(STORAGE_CONF_FILE) {
-    storage_conf.files=$$STORAGE_CONF_FILE
-    storage_conf.path=/etc/default/Trolltech
-    INSTALLS+=storage_conf
-}
 zonetab.files=$$QTOPIA_DEPOT_PATH/etc/zoneinfo/zone.tab
 zonetab.trtarget=timezone
 # don't automatically install this
@@ -382,36 +386,40 @@ INSTALLS+=zonetab
 # This is here so that these get installed before any .desktop files
 mainapps_category.files=$$QTOPIA_DEPOT_PATH/apps/MainApplications/.directory
 mainapps_category.path=/apps/MainApplications
-mainapps_category.hint=desktop
+mainapps_category.hint=desktop prep_db
 
 app_categories.files=$$QTOPIA_DEPOT_PATH/apps/Applications/.directory
 app_categories.path=/apps/Applications
-app_categories.hint=desktop
+app_categories.hint=desktop prep_db
 app_categories.depends=install_docapi_mainapps_category
 
 settings_category.files=$$QTOPIA_DEPOT_PATH/apps/Settings/.directory
 settings_category.path=/apps/Settings
-settings_category.hint=desktop
+settings_category.hint=desktop prep_db
 settings_category.depends=install_docapi_mainapps_category
 
 INSTALLS+=mainapps_category app_categories settings_category
 
+equals(QTOPIA_UI,home) {
+    deskphonepics.files=$$QTOPIA_DEPOT_PATH/pics/qpe/deskphone/*
+    deskphonepics.path=/pics/deskphone
+    deskphonepics.hint=pics
+    INSTALLS+=deskphonepics
+
+    deskphonelauncher_category.files=$$QTOPIA_DEPOT_PATH/apps/DeskphoneLauncher/.directory
+    deskphonelauncher_category.path=/apps/DeskphoneLauncher
+    deskphonelauncher_category.hint=desktop prep_db
+    INSTALLS+=deskphonelauncher_category
+}
+
 !platform {
     games_category.files=$$QTOPIA_DEPOT_PATH/apps/Games/.directory
     games_category.path=/apps/Games
-    games_category.hint=desktop
+    games_category.hint=desktop prep_db
     games_category.depends=install_docapi_mainapps_category
     INSTALLS+=games_category
 }
 
-# FIXME THIS IS EVIL!!!!!
-INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/server
-
 pkg.desc =Base Qtopia library.
 pkg.domain=trusted
 
-idep(LIBS+=-l$$TARGET)
-qt_inc($$TARGET)
-
-# Needed for includes from qtextengine_p.h
-INCLUDEPATH+=$$QT_DEPOT_PATH/src/3rdparty/harfbuzz/src

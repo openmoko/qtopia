@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "longstream_p.h"
@@ -29,9 +27,10 @@
 LongStream::LongStream()
 {
     lastLine = QString::null;
-    QString tmpName( LongStream::tempDir() + QLatin1String( "/qtmail" ) );
+    QString tmpName( LongStream::tempDir() + QLatin1String( "/qtopiamail" ) );
     tmpFile = new QTemporaryFile( tmpName + QLatin1String( ".XXXXXX" ));
     tmpFile->open(); // todo error checking
+    tmpFile->setPermissions(QFile::ReadOwner | QFile::WriteOwner);
     ts = new QTextStream( tmpFile );
     ts->setCodec( "UTF-8" ); // Mail should be 7bit ascii
     len = 0;
@@ -179,9 +178,9 @@ QString LongStream::errorMessage( const QString &prefix )
     return str;
 }
 
-QString LongStream::tempDir()
+static QString tempDirPath()
 {
-    QString path( QDir::homePath() + "/Applications/qtmail/temp/" );
+    QString path = Qtopia::applicationFileName("qtopiamail", "temp");
     if (path.isEmpty())
         path = Qtopia::tempDir();
     QDir dir;
@@ -190,9 +189,15 @@ QString LongStream::tempDir()
     return path;
 }
 
+QString LongStream::tempDir()
+{
+    static QString path(tempDirPath());
+    return path;
+}
+
 void LongStream::cleanupTempFiles()
 {
-    QDir dir( LongStream::tempDir(), "qtmail.*" );
+    QDir dir( LongStream::tempDir(), "qtopiamail.*" );
     QStringList list = dir.entryList();
     for (int i = 0; i < list.size(); ++i) {
         QFile file( LongStream::tempDir() + list.at(i) );

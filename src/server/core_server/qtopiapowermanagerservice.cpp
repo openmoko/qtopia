@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,10 +24,11 @@
 
 /*!
     \service QtopiaPowerManagerService QtopiaPowerManager
-    \brief Provides the QtopiaPowerManager service.
+    \inpublicgroup QtBaseModule
+    \brief The QtopiaPowerManagerService class provides the QtopiaPowerManager service.
 
-    The \c QtopiaPowerManager service enables applications to control the
-    behavior of the Qtopia power manager.  Normally an application will use
+    The \i QtopiaPowerManager service enables applications to control the
+    behavior of the Qt Extended power manager.  Normally an application will use
     QtopiaApplication::setPowerConstraint() for this,
     but finer control is available for settings applications.
 */
@@ -96,9 +95,6 @@ void QtopiaPowerManagerService::setDefaultIntervals()
 void QtopiaPowerManagerService::setBacklight( int brightness )
 {
     m_powerManager->setBacklight( brightness );
-
-    QtopiaIpcEnvelope e( "Qtopia/PowerStatus", "brightnessChanged(int)" );
-    e << m_powerManager->backlight();
 }
 
 /*!
@@ -114,8 +110,7 @@ void QtopiaPowerManagerService::setActive( bool on )
 
 /*!
     Apply the power management constraint \a constraint for the application \a app.
-    The \a constraint value is one of the values from
-    QtopiaApplication::PowerConstraint.
+    The \a constraint value is one of the values from QtopiaApplication::PowerConstraint.
 
     Normally client applications will use
     QtopiaApplication::setPowerConstraint().
@@ -125,9 +120,9 @@ void QtopiaPowerManagerService::setActive( bool on )
 
     \sa QtopiaApplication::setPowerConstraint()
 */
-void QtopiaPowerManagerService::setConstraint( int constraint, QString app )
+void QtopiaPowerManagerService::setConstraint(int constraint, const QString &app)
 {
     QtopiaPowerConstraintManager *man = QtopiaPowerConstraintManager::instance();
     if ( man )
-        man->setConstraint( (QtopiaApplication::PowerConstraint) constraint, app );
+        man->setConstraint((QtopiaApplication::PowerConstraint) constraint, app);
 }

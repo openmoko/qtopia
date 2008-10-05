@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/pim/qcontact.h>
-#include <qtopia/pim/qcontactmodel.h>
+#include <qcontact.h>
+#include <qcontactmodel.h>
 
 #include <qtopianamespace.h>
 #include <qtimestring.h>
@@ -48,7 +46,9 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "qcontactio_p.h"
+#include "qcontactsqlio_p.h"
+
+//#define PRINT_UNRECOGNIZED_VCARD_DATA
 
 const int PortraitWidth = 60;
 const int PortraitHeight = 75;
@@ -108,17 +108,35 @@ public:
         if (address[l].isEmpty())
             address.remove(l);
     }
+
 };
 
 extern QTOPIAPIM_EXPORT int q_DontDecodeBase64Photo;
 
 QString emailSeparator() { return " "; }
 
+/* Return an absolute path (or qrc path) for a contacts portraitfile */
+static QString resolvePortraitPath(QString portraitFile)
+{
+    if (portraitFile.isEmpty())
+        return QString();
+    // This would be handy, but too prone to abuse
+//    if (portraitFile.startsWith('/'))
+//        return portraitFile;
+    if (portraitFile.startsWith(':'))
+        return portraitFile;
+
+    QString baseDir = Qtopia::applicationFileName( "addressbook", "contactimages/" );
+    return baseDir + portraitFile;
+}
 
 /*!
   \class QContact
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QContact class holds the data of an address book entry.
 
@@ -526,6 +544,11 @@ QMap<QContact::Location, QContactAddress> QContact::addresses() const
 void QContact::setPhoneNumbers(const QMap<PhoneType, QString> &numbers)
 {
     d->phoneNumbers = numbers;
+    if (!d->phoneNumbers.isEmpty()
+        && !d->phoneNumbers.keys().contains(d->defaultPhoneNumber))
+    {
+        d->defaultPhoneNumber = d->phoneNumbers.keys().first();
+    }
 }
 
 /*!
@@ -743,7 +766,7 @@ void QContact::clearEmailList()
 
 void QContact::setLabelFormat(const QString &f)
 {
-    QContactIO::setFormat(f);
+    ContactSqlIO::setFormat(f);
 }
 
 /*!
@@ -761,7 +784,7 @@ void QContact::setLabelFormat(const QString &f)
 */
 QString QContact::labelFormat()
 {
-    return QContactIO::format();
+    return ContactSqlIO::format();
 }
 
 /*!
@@ -772,7 +795,7 @@ QString QContact::labelFormat()
 */
 QStringList QContact::labelFields()
 {
-    return QContactIO::labelIdentifiers();
+    return ContactSqlIO::labelIdentifiers();
 }
 
 /*!
@@ -784,7 +807,7 @@ QStringList QContact::labelFields()
 */
 QString QContact::label() const
 {
-    return QContactIO::formattedLabel(*this);
+    return ContactSqlIO::formattedLabel(*this);
 }
 
 /*!
@@ -897,8 +920,7 @@ QPixmap QContact::thumbnail() const
             result = *cached;
         } else {
             QSize tsize = thumbnailSize();
-            QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
-            QString pPath( pFile.startsWith(QChar(':')) ? pFile : baseDirStr + pFile );
+            QString pPath = resolvePortraitPath(pFile);
             QThumbnail thumbnail( pPath );
             result = thumbnail.pixmap( tsize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             if (tsize != result.size()) {
@@ -953,9 +975,7 @@ QIcon QContact::icon() const
 {
 
     if( !portraitFile().isEmpty() ) {
-        QString pFile = portraitFile();
-        QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
-        QString pPath( pFile.startsWith(QChar(':')) ? pFile : baseDirStr + pFile );
+        QString pPath = resolvePortraitPath(portraitFile());
         QIcon i(pPath);
         if (!i.isNull())
             return i;
@@ -972,30 +992,24 @@ QIcon QContact::icon() const
     }
 }
 
+Q_GLOBAL_STATIC_WITH_ARGS(QIcon, cIcon, (QLatin1String(":icon/addressbook/generic-corporation-contact")));
+Q_GLOBAL_STATIC_WITH_ARGS(QIcon, gIcon, (QLatin1String(":icon/addressbook/generic-contact")));
+Q_GLOBAL_STATIC_WITH_ARGS(QIcon, pIcon, (QLatin1String(":icon/addressbook/generic-personal-contact")));
+
 QIcon &QContact::corporationIcon()
 {
-    if (cIcon.isNull())
-        cIcon = QIcon(QLatin1String(":icon/addressbook/generic-corporation-contact"));
-    return cIcon;
+    return *cIcon();
 }
 
 QIcon &QContact::genericIcon()
 {
-    if (gIcon.isNull())
-        gIcon = QIcon(QLatin1String(":icon/addressbook/generic-contact"));
-    return gIcon;
+    return *gIcon();
 }
 
 QIcon &QContact::personalIcon()
 {
-    if (pIcon.isNull())
-        pIcon = QIcon(QLatin1String(":icon/addressbook/generic-personal-contact"));
-    return pIcon;
+    return *pIcon();
 }
-
-QIcon QContact::cIcon;
-QIcon QContact::gIcon;
-QIcon QContact::pIcon;
 
 /*!
   Returns the size of the thumbnail of a contact's portrait.
@@ -1037,9 +1051,7 @@ QPixmap QContact::portrait() const
         if( cached ) {
             result = *cached;
         } else {
-            QString pFile = portraitFile();
-            QString baseDirStr = Qtopia::applicationFileName( "addressbook", "contactimages/" );
-            QString pPath( pFile.startsWith(QChar(':')) ? pFile : baseDirStr + pFile );
+            QString pPath = resolvePortraitPath(portraitFile());
             result.load( pPath );
             if (!result.isNull())
                 QPixmapCache::insert( "pimcontact" + uid().toString() + "-cfl", result );
@@ -1210,35 +1222,36 @@ VObject *QContact::createVObject() const
     safeAddPropValue( vcard, "X-Qtopia-CSOUND", companyPronunciation() );
 
     //photo
-    QString pfn = customField("photofile");
+    QString pfn = portraitFile();
     if ( !pfn.isEmpty() ) {
+        pfn = resolvePortraitPath(pfn);
+
         const char* format = "JPEG";
 
-#if 0 // load-and-save (allows non-JPEG images)
-        QImage sp;
-        if( !sp.load( pfn ) ) {
-            qWarning("QContact::createVObject - Unable to load contact photo");
+        QByteArray buf;
+        if (QImageReader(pfn, format).canRead()) {
+            // In correct format so copy file losslessly.
+            QFile f(pfn);
+            if (f.open(QIODevice::ReadOnly))
+                buf = f.readAll();
         } else {
-            QBuffer buffer;
-            buffer.open(QIODevice::WriteOnly);
-            QImageIO iio(&buffer,format);
-            iio.setImage(sp);
-            QString prettyEncPhoto;
-            if ( iio.write() ) {
-                QByteArray buf = buffer.buffer();
-#else // Just use the file (avoid compounding JPEG lossiness)
-        QFile f(pfn);
-        if ( f.open(QIODevice::ReadOnly) ) {
-            QByteArray buf = f.readAll();
-            if ( buf.size() ) {
-#endif
-
-                VObject *po = addPropSizedValue( vcard, VCPhotoProp, buf.data(), buf.size() );
-                safeAddPropValue( po, "TYPE", format );
-                // should really be done by vobject.cpp, since it decides to use base64
-                // XXX The correct value may be "b", not "BASE64".
-                safeAddPropValue( po, VCEncodingProp, "BASE64" );
+            // load-and-save (allows non-JPEG images)
+            QImage sp;
+            if( !sp.load( pfn ) ) {
+                qWarning("QContact::createVObject - Unable to load contact photo %s", pfn.toLatin1().data());
+            } else {
+                QBuffer buffer;
+                buffer.open(QIODevice::WriteOnly);
+                if (sp.save(&buffer,format))
+                    buf = buffer.buffer();
             }
+        }
+        if ( buf.size() ) {
+            VObject *po = addPropSizedValue( vcard, VCPhotoProp, buf.data(), buf.size() );
+            safeAddPropValue( po, "TYPE", format );
+            // should really be done by vobject.cpp, since it decides to use base64
+            // XXX The correct value may be "b", not "BASE64".
+            safeAddPropValue( po, VCEncodingProp, "BASE64" );
         }
     }
 
@@ -1546,8 +1559,7 @@ static QContact parseVObject( VObject *obj )
             qpe_setVObjectProperty(name,value,"Address Book",&c); // No tr
         }
 
-
-#if 0
+#ifdef PRINT_UNRECOGNIZED_VCARD_DATA
         else {
             printf("Name: %s, value=%s\n", name.data(), vObjectStringZValue( o ) );
             VObjectIterator nit;
@@ -1901,7 +1913,14 @@ QMap<QString, QString> &QContact::customFieldsRef() { return d->customMap; }
 const QMap<QString, QString> &QContact::customFieldsRef() const { return d->customMap; }
 
 /*!
-  Sets the path for the portrait file of the contact to \a str.
+    Sets the path for the portrait file of the contact to \a str.
+
+    The string is interpreted as follows:
+    - if the path starts with a ':' character, it is interpreted as a
+    Qt Resource system path
+    - otherwise, the string will be interpreted as a path relative to
+    the "contactimages" subdirectory of the "addressbook" application
+    storage directory (retrieved using Qtopia::applicationFileName).
 */
 void QContact::setPortraitFile( const QString &str )
 {
@@ -1922,6 +1941,8 @@ void QContact::removeExistingPortrait()
     if( !dir.exists() )
         dir.mkdir( baseDir );
 
+    // We don't delete files that don't live under our base directory..
+    // so we don't go through resolvePortraitFile
     if( !photoFile.isEmpty()  && !photoFile.startsWith(QChar(':'))) {
         QFile pFile( baseDir + photoFile );
         if( pFile.exists() )
@@ -1981,7 +2002,8 @@ void QContact::saveScaledPortrait(const QImage &scaled)
   storage directory, and removes the file previously used as the contact's
   portrait.  The corresponding filename will be set as the \c Portrait field of this contact.
 
-  Note: the previous image is removed immediately, but the database will not
+  Note: the previous image is removed immediately if it is in the "addressbook"
+  application data storage area, but the database will not
   be updated until \c QContactModel::updateContact is called.
 */
 void QContact::changePortrait( const QPixmap &p )
@@ -1995,7 +2017,8 @@ void QContact::changePortrait( const QPixmap &p )
   storage directory, and removes the file previously used as the contact's
   portrait.  The corresponding filename will be set as the \c Portrait field of this contact.
 
-  Note: the previous image is removed immediately, but the database will not
+  Note: the previous image is removed immediately if it is in the "addressbook"
+  application data storage area, but the database will not
   be updated until \c QContactModel::updateContact is called.
 */
 void QContact::changePortrait( const QImage &image )
@@ -2022,7 +2045,8 @@ void QContact::changePortrait( const QImage &image )
   portrait is removed.  The corresponding filename will be set as
   the \c Portrait field of this contact.
 
-  Note: the previous image is removed immediately, but the database will not
+  Note: the previous image is removed immediately if it is in the "addressbook"
+  application data storage area, but the database will not
   be updated until \c QContactModel::updateContact is called.
 */
 void QContact::changePortrait( const QString &imageLocation, const QRect &rect )
@@ -2051,7 +2075,7 @@ void QContact::changePortrait( const QString &imageLocation, const QRect &rect )
 }
 
 /*!
-  Parses the the \a text using contact name formatting rules and merges the
+  Parses the given \a text using contact name formatting rules and merges the
   information with \a contact.  Returns the merged contact.
 
   Formatting rules include using () for the nick name, "" for pronunciation,
@@ -2649,8 +2673,8 @@ void QContact::setNotes( const QString &str )
 /*! \fn QString QContact::portraitFile() const
   Returns the path for the portrait file of the contact.
   This is either a resource file path (e.g. \c ":icon/happyface") or
-  the name of a file that is stored in the "addressbook/contactimages"
-  directory in the Qtopia application data storage directory.
+  the name of a file that is stored in the \c "addressbook/contactimages"
+  directory in the Qt Extended application data storage directory.
 */
 
 /*! \fn QString QContact::notes() const
@@ -2659,8 +2683,11 @@ void QContact::setNotes( const QString &str )
 
 /*!
    \class QContactAddress
-  \mainclass
-   \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
    \ingroup pim
    \brief The QContactAddress class contains an address of a QContact.
 

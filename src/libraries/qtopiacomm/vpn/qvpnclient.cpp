@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -30,34 +28,34 @@
 
 /*!
   \class QVPNClient
-  \mainclass
+
   \brief The QVPNClient class abstracts data and state of a virtual private network.
 
-  An instance of a QVPNClient can be created by using \l QVPNFactory. Qtopia currently 
+  An instance of a QVPNClient can be created by using \l QVPNFactory. Qt Extended currently
   supports OpenVPN only. New VPN implementations must subclass this abstract class.
-  
+
   Each VPNClient instance operates in one of the follwoing two modes:
   \list
-    \o Client mode - 
-        This mode is the most common way of using a QVPNClient object. Any Qtopia application
+    \o Client mode -
+        This mode is the most common way of using a QVPNClient object. Any Qt Extended application
         that obtains a QVPNClient instance via QVPNFactory::create() will create such an object.
         Essentially the return instance acts as a thin wrapper that forwards the VPN requests
         to the QtopiaVpnManager.
-    \o Server mode - 
+    \o Server mode -
         Only the QtopiaVpnManager can create such a QVPNObject instance. It performs the actual
         VPN operations by making the appropriate calls to the root file system.
   \endlist
 
   Every VPN can be identified via a unique identifier returned by id(), has a name() and a type().
-  The VPN configuration can be changed via configure(). connect() will establish 
+  The VPN configuration can be changed via configure(). connect() will establish
   the VPN connection. Once the VPN has been started its
-  state() will change from \c{QVPNCLient::Disconnected} to \c{QVPNClient::Pending} 
-  and eventually to \c{QVPNClient::Connected}. Each state change is indicated via the 
-  connectionStateChanged() signal. If an error occurs during the startup period the user 
+  state() will change from \c{QVPNCLient::Disconnected} to \c{QVPNClient::Pending}
+  and eventually to \c{QVPNClient::Connected}. Each state change is indicated via the
+  connectionStateChanged() signal. If an error occurs during the startup period the user
   can obtain a human-readable string describing the nature of the error.
 
   If the user decides to delete a VPN connection cleanup() should be called to remove any
-  configuration file that has been created previously. By default Qtopia saves VPN
+  configuration file that has been created previously. By default Qt Extended saves VPN
   configuration files in \c{$HOME/Applications/Netork/vpn}.
 
   \sa QVPNFactory
@@ -71,7 +69,7 @@
 
   \value OpenVPN VPN solution based on OpenVPN (for details see \l http://openvpn.net)
   \value IPSec VPN solution based on IPSec (not yet implemented in
-                Qtopia and serves as place holder for future implementation)
+                Qt Extended and serves as place holder for future implementation)
 */
 
 /*!
@@ -87,13 +85,13 @@
 
 
 /*!
-  Creates a new QVPNClient instance with the given \a parent. QVPNClient instances 
+  Creates a new QVPNClient instance with the given \a parent. QVPNClient instances
   can only be created via QVPNFactory::create().
 
   \a serverMode determines whether this VPN object operates in server mode.
-  Qtopia applications usually obtain client mode instances of QVPNClient. In this mode
+  Qt Extended applications usually obtain client mode instances of QVPNClient. In this mode
   all request are forwarded to the QtopiaVpnManager which keeps a reference to a
-  VPNClient instance running in server mode. This allows the synchronization of 
+  VPNClient instance running in server mode. This allows the synchronization of
   multiple VPN requests to the same VPN.
 
   This constructor is used internally by QVPNFactory whenever the user creates a new
@@ -111,17 +109,17 @@ QVPNClient::QVPNClient( bool serverMode, QObject* parent )
 }
 
 /*!
-  Creates a new QVPNClient instance with the given \a parent. QVPNClient instances 
+  Creates a new QVPNClient instance with the given \a parent. QVPNClient instances
   can only be created via QVPNFactory::create().
 
   \a serverMode determines whether this VPN object operates in server mode.
-  Qtopia applications usually obtain client mode instances of QVPNClient. In this mode
+  Qt Extended applications usually obtain client mode instances of QVPNClient. In this mode
   all request are forwarded to the QtopiaVpnManager which keeps a reference to a
-  VPNClient instance running in server mode. This allows the synchronization of 
+  VPNClient instance running in server mode. This allows the synchronization of
   multiple VPN requests to the same VPN.
 
-  \a vpnID acts as an identifier for a particular VPN. 
-    
+  \a vpnID acts as an identifier for a particular VPN.
+
   \sa QtopiaVpnManager, QVPNFactory
   */
 QVPNClient::QVPNClient( bool serverMode, uint vpnID, QObject* parent )
@@ -231,7 +229,7 @@ QString QVPNClient::errorString() const
 
   This signal is emitted when the state of the VPN connection changes.
 
-  \a error will be set to \c TRUE if an error occurred during the last state transition.
+  \a error will be set to \c true if an error occurred during the last state transition.
   A human-readable string of the error can be obtained via errorString()
 
   This signal must be emitted by subclasses of QVPNClient when state transitions occur.

@@ -1,5 +1,9 @@
+qbuild {
+SOURCEPATH+=ir
+} else {
 PREFIX=IR
 VPATH+=ir
+}
 
 IR_HEADERS+=\
     qiriasdatabase.h\
@@ -24,17 +28,20 @@ IR_SOURCES+=\
     qirserver.cpp \
     qirsocket.cpp
 
-unix {
-    IR_SOURCES += qirsocketengine_unix.cpp
-}
+IR_UNIX.TYPE=CONDITIONAL_SOURCES
+IR_UNIX.CONDITION=unix
+IR_UNIX.SOURCES=qirsocketengine_unix.cpp
+!qbuild:IR_UNIX.PREFIX=IR
+!qbuild:CONDITIONAL_SOURCES(IR_UNIX)
 
+qbuild {
+HEADERS+=$$IR_HEADERS
+SOURCES+=$$IR_SOURCES
+PRIVATE_HEADERS+=$$IR_PRIVATE_HEADERS
+} else {
 sdk_ir_headers.files=$$IR_HEADERS
 sdk_ir_headers.path=/include/qtopia/comm
 sdk_ir_headers.hint=sdk headers
 INSTALLS+=sdk_ir_headers
-
-sdk_ir_private_headers.files=$$IR_PRIVATE_HEADERS
-sdk_ir_private_headers.path=/include/qtopiacomm/private
-sdk_ir_private_headers.hint=sdk headers
-INSTALLS+=sdk_ir_private_headers
+}
 

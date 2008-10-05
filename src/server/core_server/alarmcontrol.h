@@ -1,52 +1,63 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _ALARMCONTROL_H_
-#define _ALARMCONTROL_H_
+#ifndef ALARMCONTROL_H
+#define ALARMCONTROL_H
 
 #include <QObject>
 #include <qvaluespace.h>
-#include <qtopiaipcenvelope.h>
+#include <QtopiaIpcAdaptor>
+#include <QDateTime>
 
 class AlarmControl : public QObject
 {
 Q_OBJECT
 public:
-    static AlarmControl *instance();
-
+    AlarmControl(QObject* parent = 0);
     bool alarmState() const;
+    void alarmEnabled(bool);
 
 signals:
     void alarmStateChanged(bool);
 
-private slots:
-    void alarmMessage(const QString& message, const QByteArray&);
-
 private:
-    void alarmEnabled(bool);
     bool alarmOn;
     QValueSpaceObject alarmValueSpace;
-    QtopiaChannel alarmChannel;
-    AlarmControl();
 };
 
-#endif // _ALARMCONTROL_H_
+class AlarmServerService : public QtopiaIpcAdaptor
+{
+    Q_OBJECT
+public:
+    ~AlarmServerService();
 
+public slots:
+    void addAlarm( QDateTime when, const QString& channel,
+                   const QString& msg, int data );
+    void deleteAlarm( QDateTime when, const QString& channel,
+                      const QString& msg, int data );
+    void dailyAlarmEnabled( bool flag );
+private:
+    AlarmServerService( QObject *parent = 0 );
+    AlarmControl* ctrl;
+    friend class AlarmControl;
+    void initAlarmServer();
+};
+
+#endif

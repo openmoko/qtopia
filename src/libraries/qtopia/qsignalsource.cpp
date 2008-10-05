@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -34,7 +32,8 @@ static const int QSIGNALPROVIDER_UPDATE_FREQUENCY = 5000;
 
 /*!
   \class QSignalSource 
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QSignalSource class provides access to information about signal sources on devices.
 
   Signal sources are accessories that provide radio signal details to Qtopia. A 
@@ -44,7 +43,7 @@ static const int QSIGNALPROVIDER_UPDATE_FREQUENCY = 5000;
   the signal level through signalStrength() and emits signals availabilityChanged() and
   signalStrengthChanged() when those values change.
 
-  In addition to the above hardware related signal sources Qtopia provides a virtual 
+  In addition to the above hardware related signal sources Qt Extended provides a virtual 
   default signal source. This default source is selected from the list of available 
   QSignalSource providers. The selection may be configured
   in the \c{Trolltech/HardwareAccessories} configuration file. The following keys apply:
@@ -91,7 +90,7 @@ static const int QSIGNALPROVIDER_UPDATE_FREQUENCY = 5000;
         }
   \endcode
 
-  New signal sources can be added to Qtopia via the QSignalSourceProvider class.
+  New signal sources can be added to Qt Extended via the QSignalSourceProvider class.
   
   \sa QSignalSourceProvider, QHardwareManager, DefaultSignal
 
@@ -135,16 +134,14 @@ static const int QSIGNALPROVIDER_UPDATE_FREQUENCY = 5000;
 QSignalSource::QSignalSource( const QString& id, QObject* parent )
     : QHardwareInterface( QSIGNALPROVIDER_NAME, id.isEmpty() ? QLatin1String("DefaultSignal"): id, parent, Client )
 {
-    proxy( SIGNAL(availabilityChanged(QSignalSource::Availability)) );
-    proxy( SIGNAL(signalStrengthChanged(int)) );
+    proxyAll( staticMetaObject );
 }
 
 QSignalSource::QSignalSource( const QString& id, QObject* parent,
                             QAbstractIpcInterface::Mode mode )
     : QHardwareInterface( QSIGNALPROVIDER_NAME, id, parent, mode )
 {
-    proxy( SIGNAL(availabilityChanged(QSignalSource::Availability)) );
-    proxy( SIGNAL(signalStrengthChanged(int)) );
+    proxyAll( staticMetaObject );
 }
 
 /*!
@@ -196,7 +193,8 @@ struct QSignalSourceProviderPrivate
 
 /*!
   \class QSignalSourceProvider
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QSignalSourceProvider class provides an interface for signal sources to 
   integrate into Qtopia.
 
@@ -206,8 +204,7 @@ struct QSignalSourceProviderPrivate
   allows applications to query the status of such signals.
 
   Every device wanting to publish a new signal source should create a 
-  QSignalSourceProvider instance. This will create a new signal source in Qtopia 
-  which can be accessed via the QSignalSource class. The setAvailability() function 
+  QSignalSourceProvider instance. This will create a new signal source in Qt Extended which can be accessed via the QSignalSource class. The setAvailability() function 
   should be used to determine the general availability and setSignalStrength() should
   be called when indicating the exact strength of the signal as a percentage of the 
   maximum strength.
@@ -227,7 +224,7 @@ struct QSignalSourceProviderPrivate
 
 /*!
   Creates a new QSignalSourceProvider with the given \a type, \a id and \a parent.
-  The constructed provider immediately becomes visible to Qtopia as \c NotAvailable signal
+  The constructed provider immediately becomes visible to Qt Extended as \c NotAvailable signal
   source.
 
   \sa QSignalSource

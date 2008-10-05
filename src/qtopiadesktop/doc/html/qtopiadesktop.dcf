@@ -1,5 +1,5 @@
 <!DOCTYPE DCF>
-<DCF ref="index.html" icon="qtopiadesktop.png" imagedir="../../gif" title="Qtopia Sync Agent Documentation">
+<DCF ref="index.html" icon="qtopiadesktop.png" imagedir="../../gif" title="Qt Extended Sync Agent Documentation">
 <section ref="classes.html" title="Classes">
     <section ref="centerinterface.html" title="CenterInterface Class Reference">
         <keyword ref="centerinterface.html">CenterInterface</keyword>
@@ -307,8 +307,8 @@
     <section ref="task-add-a-new-device-plugin-1.html" title="Add a new device plugin">
         <keyword ref="task-add-a-new-device-plugin-1.html">Add a new device plugin</keyword>
     </section>
-    <section ref="over-building-qtopia-sync-agent-1.html" title="Building Qtopia Sync Agent">
-        <keyword ref="over-building-qtopia-sync-agent-1.html">Building Qtopia Sync Agent</keyword>
+    <section ref="over-building-qt-extended-sync-agent-1.html" title="Building Qt Extended Sync Agent">
+        <keyword ref="over-building-qt-extended-sync-agent-1.html">Building Qt Extended Sync Agent</keyword>
     </section>
     <section ref="dataset-calendar-1.html" title="calendar Dataset">
         <keyword ref="dataset-calendar-1.html">calendar Dataset</keyword>
@@ -364,6 +364,9 @@
     <section ref="qdsync-commands.html" title="qdsync Protocol">
         <keyword ref="qdsync-commands.html">qdsync Protocol</keyword>
     </section>
+    <section ref="index.html" title="Qt Extended Sync Agent Documentation">
+        <keyword ref="index.html">Qt Extended Sync Agent Documentation</keyword>
+    </section>
     <section ref="chlog-4-3-0-1.html" title="Qtopia Sync Agent changes for 4.3&#x2e;0">
         <keyword ref="chlog-4-3-0-1.html">Qtopia Sync Agent changes for 4.3&#x2e;0</keyword>
     </section>
@@ -373,8 +376,8 @@
     <section ref="chlog-4-3-2-1.html" title="Qtopia Sync Agent changes for 4.3&#x2e;2">
         <keyword ref="chlog-4-3-2-1.html">Qtopia Sync Agent changes for 4.3&#x2e;2</keyword>
     </section>
-    <section ref="index.html" title="Qtopia Sync Agent Documentation">
-        <keyword ref="index.html">Qtopia Sync Agent Documentation</keyword>
+    <section ref="chlog-4-3-3-1.html" title="Qtopia Sync Agent changes for 4.3&#x2e;3">
+        <keyword ref="chlog-4-3-3-1.html">Qtopia Sync Agent changes for 4.3&#x2e;3</keyword>
     </section>
     <section ref="qdsync-quit-1.html" title="QUIT">
         <keyword ref="qdsync-quit-1.html">QUIT</keyword>

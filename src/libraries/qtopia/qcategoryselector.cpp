@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -66,6 +64,9 @@ public:
     void setName(const QString &name);
     void setGlobal(bool global);
 
+    void setCategoryId(const QString &id);
+    QString categoryId() const;
+
 public slots:
     void accept();
 
@@ -81,10 +82,12 @@ public:
 
     QLineEdit *nameField;
     QCheckBox *globalCheck;
+    QString categoryId;
 };
 
 /*
   \class QCategoryEditor
+    \inpublicgroup QtBaseModule
   \internal
   \ingroup categories
   \brief The QCategoryEditor class allows the user to change a user category.
@@ -124,7 +127,7 @@ QCategoryEditor::QCategoryEditor(QWidget *parent)
     d->globalCheck = new QCheckBox(tr("Global"));
     layout->addWidget(d->globalCheck);
 
-    setModal(true);
+    setWindowModality(Qt::WindowModal);
 }
 
 /*
@@ -180,6 +183,26 @@ void QCategoryEditor::setName(const QString &name)
 void QCategoryEditor::setGlobal(bool global)
 {
     d->globalCheck->setChecked(global);
+}
+
+/*
+    Sets the \a id of the category being edited.
+
+    For new categories the id will be an empty string.
+*/
+void QCategoryEditor::setCategoryId(const QString &id)
+{
+    d->categoryId = id;
+}
+
+/*
+    Return the id of the category being edited.
+
+    For new categories the id will be an empty string.
+*/
+QString QCategoryEditor::categoryId() const
+{
+    return d->categoryId;
 }
 
 // For combo box, filters or sets..
@@ -307,7 +330,7 @@ void CategoryItemList::generateList(bool includeUnfiled, bool includeAll, bool i
         {
             if(list[j].id == selections[i])
             {
-                list[j].isChecked = TRUE;
+                list[j].isChecked = true;
                 break;
             }
         }
@@ -619,6 +642,9 @@ public:
     QString idToSelect;
     int rowToSelect;
 
+    QCategoryDialog *selectorDialog;
+    QCategoryEditor *editorDialog;
+
 public slots:
     void rowChanged(int row);
     void newCategory();
@@ -626,6 +652,7 @@ public slots:
     void deleteCategory();
     void categoriesChanged();
     void selectUnfiled();
+    void editorAccepted();
 
 signals:
     void categoriesSelected(const QList<QString> &);
@@ -635,6 +662,7 @@ signals:
 QCategorySelectData::QCategorySelectData( const QString &s,
         QCategorySelector::ContentFlags f, QCategorySelector *parent )
     : QObject(parent), model(0), listView(0), comboBox(0), dialogButton(0), flags(f)
+    , selectorDialog(0), editorDialog(0)
 {
     manuallyUpdating = false;
     scope = s;
@@ -797,45 +825,59 @@ void QCategorySelectData::categoriesChanged()
 
 void QCategorySelectData::newCategory()
 {
-    QCategoryEditor dlg((QWidget*)parent());
-    dlg.setWindowTitle(tr("New Category"));
+    if (!editorDialog) {
+        editorDialog = new QCategoryEditor(static_cast<QWidget *>(parent()));
 
-    if(QtopiaApplication::execDialog(&dlg) == QDialog::Accepted) {
-        if(!cats->containsLabel(dlg.name(), dlg.global())) {
-            // Add it and store the id for selecting later
-            idToSelect = cats->add(dlg.name(), QString(), dlg.global());
-            rowToSelect = -1;
-        }
+        connect(editorDialog, SIGNAL(accepted()), this, SLOT(editorAccepted()));
+        connect(editorDialog, SIGNAL(finished(int)), listView, SLOT(setFocus()));
     }
-    listView->setFocus();
+
+    editorDialog->setWindowTitle(tr("New Category"));
+    editorDialog->setCategoryId(QString());
+
+    QtopiaApplication::showDialog(editorDialog);
 }
 
 void QCategorySelectData::editCategory()
 {
     int currentRow = listView->currentIndex().row();
 
-    if(model->isEditable(currentRow))
-    {
-        QCategoryEditor dlg((QWidget*)parent());
-        dlg.setWindowTitle(tr("Edit Category"));
+    if (model->isEditable(currentRow)) {
+        if (!editorDialog) {
+            editorDialog = new QCategoryEditor(static_cast<QWidget *>(parent()));
 
-        QString name = model->itemText(currentRow);
-        bool isGlobal = model->isGlobal(currentRow);
-
-        dlg.setName(name);
-        dlg.setGlobal(isGlobal);
-
-        if(QtopiaApplication::execDialog(&dlg) == QDialog::Accepted)
-        {
-            if(name != dlg.name() || isGlobal != dlg.global())
-            {
-                cats->setLabel(model->itemId(currentRow), dlg.name());
-                cats->setGlobal(model->itemId(currentRow), dlg.global());
-                idToSelect = model->itemId(currentRow);
-                rowToSelect = -1;
-            }
+            connect(editorDialog, SIGNAL(accepted()), this, SLOT(editorAccepted()));
+            connect(editorDialog, SIGNAL(finished(int)), listView, SLOT(setFocus()));
         }
-        listView->setFocus();
+
+        editorDialog->setWindowTitle(tr("Edit Category"));
+        editorDialog->setCategoryId(model->itemId(currentRow));
+        editorDialog->setName(model->itemText(currentRow));
+        editorDialog->setGlobal(model->isGlobal(currentRow));
+
+        QtopiaApplication::showDialog(editorDialog);
+    }
+}
+
+void QCategorySelectData::editorAccepted()
+{
+    QString categoryId = editorDialog->categoryId();
+    QString name = editorDialog->name();
+    bool isGlobal = editorDialog->global();
+
+    if (categoryId.isNull()) {
+        if(!cats->containsLabel(name, isGlobal)) {
+            // Add it and store the id for selecting later
+            idToSelect = cats->add(name, QString(), isGlobal);
+            rowToSelect = -1;
+        }
+    } else {
+        if (cats->label(categoryId) != name || cats->isGlobal(categoryId) != isGlobal) {
+            cats->setLabel(categoryId, name);
+            cats->setGlobal(categoryId, isGlobal);
+            idToSelect = categoryId;
+            rowToSelect = -1;
+        }
     }
 }
 
@@ -945,7 +987,8 @@ QCategoryFilter::FilterType QCategorySelectData::selectedFilterType() const
 
 /*!
   \class QCategorySelector
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \ingroup categories
   \brief The QCategorySelector widget allows users to select categories for
   filtering or for applying to an item.
@@ -1319,33 +1362,38 @@ void QCategorySelector::selectUnfiled()
 */
 void QCategorySelector::showDialog()
 {
-    QCategoryDialog dlg(d->scope, QCategoryDialog::Editor, (QWidget*)parent());
-    dlg.setModal(true);
-    dlg.showMaximized();
+    if (!d->selectorDialog) {
+        d->selectorDialog = new QCategoryDialog(d->scope, QCategoryDialog::Editor, this);
+        d->selectorDialog->setWindowModality(Qt::WindowModal);
 
-    // XXX not enough.  need to select all and unfiled appropriately as well
+        connect(d->selectorDialog, SIGNAL(accepted()), this, SLOT(dialogAccepted()));
+    }
 
-    switch( d->selectedFilterType() )
-    {
+    switch (d->selectedFilterType()) {
     case QCategoryFilter::All:
-        dlg.selectAll();
+        d->selectorDialog->selectAll();
         break;
     case QCategoryFilter::List:
         {
             QStringList catids = selectedCategories();
-            if( !catids.isEmpty() )
-            {
-                dlg.selectCategories( catids );
+            if (!catids.isEmpty()) {
+                d->selectorDialog->selectCategories(catids);
                 break;
             }
         }
     default:
-        dlg.selectUnfiled();
-
+        d->selectorDialog->selectUnfiled();
     }
 
-    if( QtopiaApplication::execDialog(&dlg) == QDialog::Accepted )
-        selectCategories(dlg.selectedCategories());
+    QtopiaApplication::showDialog(d->selectorDialog);
+}
+
+/*!
+    \internal
+*/
+void QCategorySelector::dialogAccepted()
+{
+    selectCategories(d->selectorDialog->selectedCategories());
 }
 
 //////////////////////////////////////////////
@@ -1383,7 +1431,8 @@ QCategoryDialogData::QCategoryDialogData(const QString &s,
 
 /*!
   \class QCategoryDialog
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \ingroup categories
   \brief The QCategoryDialog widget allows users to select Categories with a
   dialog interface.

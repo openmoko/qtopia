@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,26 +22,18 @@
 #include <qtopialog.h>
 #include <QByteArray>
 
-#if defined(QTOPIA_DBUS_IPC)
-#include <qdbusconnection.h>
-#include <qdbusabstractadaptor.h>
-#include <qdbuserror.h>
-#include <qdbusconnectioninterface.h>
-#include "dbusipccommon_p.h"
-#else
 #include <qtopiaipcadaptor.h>
 #include <qtopiaservices.h>
-#endif
 
 /*!
     \class QtopiaAbstractService
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QtopiaAbstractService class provides an interface to messages on a QCop service
     which simplifies remote slot invocations
 
-    Service messages in Qtopia are sent with QtopiaServiceRequest.  They consist
-    of a service name, a message name, and a list of parameter values.  Qtopia
-    dispatches service messages to the applications associated with the service
+    Service messages in Qt Extended are sent with QtopiaServiceRequest.  They consist
+    of a service name, a message name, and a list of parameter values.  Qt Extended dispatches service messages to the applications associated with the service
     name, on the application's \c{QPE/Application/appname} channel, where
     \c{appname} is the application's name.
 
@@ -51,7 +41,7 @@
     channel directly, using QtopiaChannel, but it is cleaner and less error-prone
     to create an instance of QtopiaAbstractService instead.
 
-    The use of QtopiaAbstractService will be demonstrated using the Qtopia \c{Time}
+    The use of QtopiaAbstractService will be demonstrated using the \c{Time}
     service.  This has a single message called \c{editTime()} which asks
     the service to pop up a dialog allowing the user to edit the current time.
 
@@ -90,29 +80,6 @@
     \ingroup ipc
 */
 
-#if defined(QTOPIA_DBUS_IPC)
-class QtopiaDBusAdaptor : public QDBusAbstractAdaptor
-{
-    Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "com.trolltech.qtopia")
-
-public:
-    QtopiaDBusAdaptor(QObject *parent);
-    ~QtopiaDBusAdaptor();
-};
-
-QtopiaDBusAdaptor::QtopiaDBusAdaptor(QObject *parent) : QDBusAbstractAdaptor(parent)
-{
-
-}
-
-QtopiaDBusAdaptor::~QtopiaDBusAdaptor()
-{
-
-}
-#endif
-
-#if !defined(QTOPIA_DBUS_IPC)
 class ServiceQtopiaIpcAdaptorProxy : public QtopiaIpcAdaptor
 {
     Q_OBJECT
@@ -147,31 +114,24 @@ QString ServiceQtopiaIpcAdaptorProxy::receiveChannel( const QString& )
 {
     return QString();
 }
-#endif
 
 class QtopiaAbstractService_Private
 {
 public:
     QtopiaAbstractService_Private(const QString &service);
 
-#if !defined(QTOPIA_DBUS_IPC)
     QtopiaIpcAdaptor *m_copobject;
-#endif
 
     QString m_service;
     bool m_publishAllCalled;
 };
 
 QtopiaAbstractService_Private::QtopiaAbstractService_Private(const QString &service) :
-#if !defined(QTOPIA_DBUS_IPC)
         m_copobject(NULL),
-#endif
         m_service(service),
         m_publishAllCalled(false)
 {
-#if !defined(QTOPIA_DBUS_IPC)
     m_copobject = new ServiceQtopiaIpcAdaptorProxy(service);
-#endif
 }
 
 /*!
@@ -188,27 +148,6 @@ QtopiaAbstractService::QtopiaAbstractService( const QString& service, QObject *p
 */
 QtopiaAbstractService::~QtopiaAbstractService()
 {
-#if defined(QTOPIA_DBUS_IPC)
-    QDBusConnection dbc = QDBus::sessionBus();
-    if (!dbc.isConnected()) {
-        qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
-        return;
-    }
-
-    qLog(Services) << "Unregistering service" << m_data->m_service;
-
-    QString path = dbusPathBase;
-    path.append(m_data->m_service);
-    dbc.unregisterObject(path);
-
-    QDBusConnectionInterface *iface = dbc.interface();
-    QString service = dbusInterface;
-    service.append(".");
-    service.append(m_data->m_service);
-
-    iface->unregisterService(service);
-#endif
-
     if (m_data)
         delete m_data;
 }
@@ -219,29 +158,6 @@ QtopiaAbstractService::~QtopiaAbstractService()
 */
 void QtopiaAbstractService::publishAll()
 {
-#if defined(QTOPIA_DBUS_IPC)
-    QDBusConnection dbc = QDBus::sessionBus();
-    if (!dbc.isConnected()) {
-        qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
-        return;
-    }
-
-    qLog(Services) << "Registering service" << m_data->m_service;
-
-    QDBusConnectionInterface *iface = dbc.interface();
-    QString service = dbusInterface;
-    service.append(".");
-    service.append(m_data->m_service);
-    if (iface->registerService(service) == QDBusConnectionInterface::ServiceNotRegistered) {
-        qWarning() << "WARNING: could not request name" << service;
-        return;
-    }
-
-    new QtopiaDBusAdaptor(this);
-    QString path = dbusPathBase;
-    path.append(m_data->m_service);
-    dbc.registerObject(path, this, QDBusConnection::ExportNonScriptableSlots);
-#else
     const QMetaObject *meta = metaObject();
     if ( !m_data->m_publishAllCalled ) {
         int count = meta->methodCount();
@@ -256,7 +172,6 @@ void QtopiaAbstractService::publishAll()
         }
         m_data->m_publishAllCalled = true;
     }
-#endif
 }
 
 #include "qtopiaabstractservice.moc"

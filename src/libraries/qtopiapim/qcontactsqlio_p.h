@@ -1,32 +1,30 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef ADDRESSBOOK_SQLIO_PRIVATE_H
-#define ADDRESSBOOK_SQLIO_PRIVATE_H
+#ifndef QCONTACTSQLIO_P_H
+#define QCONTACTSQLIO_P_H
 
 //
 //  W A R N I N G
 //  -------------
 //
-// This file is not part of the Qtopia API.  It exists purely as an
+// This file is not part of the Qt Extended API.  It exists purely as an
 // implementation detail.  This header file may change from version to
 // version without notice, or even be removed.
 //
@@ -40,12 +38,15 @@
 #include <qhash.h>
 #include <qlist.h>
 #include <qcache.h>
+#include <qset.h>
+#include <qstring.h>
 
-#include <qtopia/pim/qcontact.h>
+#include <qcontact.h>
 
-#include "qcontactio_p.h"
+#include "qcontactmodel.h"
 #include "qpimsqlio_p.h"
 #include "qpimsource.h"
+#include "qcollectivepresenceinfo.h"
 
 class QContactDefaultContextData;
 class QTOPIAPIM_EXPORT QContactDefaultContext : public QContactContext
@@ -84,37 +85,13 @@ public:
     QList<QContact> exportContacts(const QPimSource &, bool &) const;
     QContact exportContact(const QUniqueId &id, bool &) const;
 
-
-    void startSync();
-    bool syncing() const;
-    void syncProgress(int &amount, int &total) const;
-
-    enum Status {
-        NotStarted,
-        InProgress,
-        Completed,
-        BadAuthentication,
-        ServiceUnavailable,
-        ParseError,
-        DataAccessError,
-        UnknownError
-    };
-
-    Status status() const;
-    static QString statusMessage(Status status);
-
-signals:
-    void syncProgressChanged(int, int);
-    void syncStatusChanged(const QString &account, Status);
-    void finishedSyncing();
-
 private:
     QContactDefaultContextData *d;
 };
 
 class QSqlPimTableModel;
 class ContactSimpleQueryCache;
-class ContactSqlIO : public QContactIO, public QPimSqlIO {
+class QTOPIA_AUTOTEST_EXPORT ContactSqlIO : public QPimSqlIO {
 
     Q_OBJECT
 
@@ -123,45 +100,41 @@ public:
 
     ~ContactSqlIO();
 
+    static QList<QContactModel::Field> labelKeys();
+    static QStringList labelIdentifiers();
+
+    static void setFormat(const QString &);
+    static QString format();
+    static QList<QContactModel::Field> formatFieldOrder();
+
+    static int formatCount();
+    static QList<QVariant> format(int);
+
+    static QString formattedLabel(const QContact &);
+
+    virtual QUniqueId matchEmailAddress(const QString &, int &) const;
+    virtual QUniqueId matchPhoneNumber(const QString &, int &) const;
+    virtual QList<QUniqueId> matchChatAddress(const QString &, const QString&) const;
+
+    static QMap<QChar, QString> phoneButtonText();
+    static QList<QContactModel::Field> labelSearchFields();
+    static QList<QContactModel::Field> phoneNumberSearchFields();
     QUuid contextId() const;
 
-    int count() const { return QPimSqlIO::count(); }
-
-    bool editableByRow() const { return true; }
-    bool editableByField() const { return true; }
-
-    QVariant key(const QUniqueId &) const;
-
-    void setSortKey(QContactModel::Field k);
-    QContactModel::Field sortKey() const;
-
-    void setCategoryFilter(const QCategoryFilter &f);
-    QCategoryFilter categoryFilter() const { return QPimSqlIO::categoryFilter(); }
-
-    void setContextFilter(const QSet<int> &, ContextFilterType = ExcludeContexts );
-
-    bool startSyncTransaction(const QSet<QPimSource> &sources, const QDateTime &syncTime) { return QPimSqlIO::startSync(sources, syncTime); }
-    bool abortSyncTransaction() { return QPimSqlIO::abortSync(); }
-    bool commitSyncTransaction() { return QPimSqlIO::commitSync(); }
-
-    QList<QUniqueId> removed(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
-    { return QPimSqlIO::removed(sources, timestamp); }
-
-    QList<QUniqueId> added(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
-    { return QPimSqlIO::added(sources, timestamp); }
-
-    QList<QUniqueId> modified(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
-    { return QPimSqlIO::modified(sources, timestamp); }
-
-    QVariant contactField(int row, QContactModel::Field k) const;
     QContact simpleContact(int row) const;
+
+    static QPresenceTypeMap presenceStatus(const QUniqueId& id);
+    static QPresenceStringMap presenceStatusString(const QUniqueId& id);
+    static QPresenceStringMap presenceDisplayName(const QUniqueId& id);
+    static QPresenceStringMap presenceMessage(const QUniqueId& id);
+    static QPresenceStringMap presenceAvatar(const QUniqueId& id);
+    static QPresenceCapabilityMap presenceCapabilities(const QUniqueId& id);
+    static QPresenceDateTimeMap presenceUpdateTime(const QUniqueId& id);
+
+    QList<QUniqueId> match(QContactModel::Field field, const QVariant& value, Qt::MatchFlags flags) const;
 
     QContact contact(const QUniqueId &) const;
     QContact contact(int row) const;
-    QUniqueId id(int row) const { return QPimSqlIO::recordId(row); }
-    QVariant key(int row) const;
-    int row(const QUniqueId & id) const { return QPimSqlIO::row(id); }
-    int predictedRow(const QVariant &k, const QUniqueId &i) const;
 
     bool removeContact(int row);
     bool removeContact(const QUniqueId & id);
@@ -174,25 +147,32 @@ public:
     { return addContact(contact, s, true); }
     QUniqueId addContact(const QContact &contact, const QPimSource &, bool);
 
-    bool exists(const QUniqueId & id) const { return !contact(id).uid().isNull(); }
-    bool contains(const QUniqueId & id) const { return QPimSqlIO::contains(id); }
+    QVariant contactField(int row, QContactModel::Field k) const;
+    bool setContactField(int row, QContactModel::Field k,  const QVariant &);
 
     void setFilter(const QString &, int);
     void clearFilter();
 
-#ifdef QTOPIA_PHONE
-    QUniqueId matchPhoneNumber(const QString &, int &) const;
-#endif
+    void setPresenceFilter(QList<QCollectivePresenceInfo::PresenceType> types);
+    void clearPresenceFilter();
+
     void invalidateCache();
+
+    void setOrderBy(QList<QContactModel::SortField> list);
 
     void checkAdded(const QUniqueId &) { invalidateCache(); }
     void checkRemoved(const QUniqueId &) { invalidateCache(); }
     void checkRemoved(const QList<QUniqueId> &) { invalidateCache(); }
     void checkUpdated(const QUniqueId &) { invalidateCache(); }
+
+signals:
+    void labelFormatChanged();
+
 protected:
     void bindFields(const QPimRecord &, QPreparedSqlQuery &) const;
-    QStringList sortColumns() const;
-    QString sqlColumn(QContactModel::Field k) const;
+    QList<QContactModel::SortField> labelSortColumns() const;
+
+    static QString sqlColumn(QContactModel::Field k);
 
     bool updateExtraTables(uint, const QPimRecord &);
     bool insertExtraTables(uint, const QPimRecord &);
@@ -202,13 +182,14 @@ private slots:
     void updateSqlLabel();
 
 private:
-    QContactModel::Field orderKey;
-
-    QString sqlLabel() const;
+    static QString sqlLabel();
+    static void updateLabelField();
     QString sqlField(QContactModel::Field) const;
     bool canUpdate(QContactModel::Field) const;
     QContact::PhoneType fieldToPhoneType(QContactModel::Field) const;
     void initMaps();
+
+    void updateFilters();
 
     mutable bool contactByRowValid;
     mutable QContact lastContact;
@@ -234,10 +215,31 @@ private:
     mutable QPreparedSqlQuery insertEmailsQuery;
     mutable QPreparedSqlQuery insertAddressesQuery;
     mutable QPreparedSqlQuery insertPhoneQuery;
+    mutable QPreparedSqlQuery insertPresenceQuery;
     mutable QPreparedSqlQuery removeEmailsQuery;
     mutable QPreparedSqlQuery removeAddressesQuery;
     mutable QPreparedSqlQuery removePhoneQuery;
+    mutable QPreparedSqlQuery removePresenceQuery;
     mutable ContactSimpleQueryCache *simpleCache;
+
+    void emitLabelFormatChanged();
+
+    QList<QContactModel::SortField> mSortList;
+
+    // Saved conditions & joins for setFilter & setPresenceFilter
+    QString mPresenceFilter;
+    QStringList mPresenceJoins;
+    QString mTextFilter;
+    QStringList mTextJoins;
+
+    static void initFormat();
+
+    static QSet<ContactSqlIO*> allIos;
+
+    static QList< QList<QVariant> > mFormat;
+    static QList< QContactModel::Field > mFormatFieldOrder;
+    static bool mPhoneButtonTextRead;
+    static QMap<QChar, QString> mPhoneButtonText;
 };
 
 #endif

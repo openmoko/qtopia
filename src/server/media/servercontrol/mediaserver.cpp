@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -41,18 +39,19 @@ public:
 
 /*!
     \class MediaServerControlTask
+    \inpublicgroup QtMediaModule
+    \inpublicgroup QtMediaModule
     \ingroup QtopiaServer::Task
 
     \brief The MediaServerControlTask class provides a launcher for the Media Server.
 
-    This task launches QSS or Qtopia's Media Server process and maintains this
+    This task launches QSS or the Media Server process and maintains this
     process throughout the life of Qtopia. If the media process exists
     prematurely it will be restarted. QSS is launched using QProcess and
-    Qtopia's mediaserver is launched by sending an application channel message
+    the Media Server is launched by sending an application channel message
     to the mediaserver.
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia
-    applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 */
 
 
@@ -151,11 +150,13 @@ void MediaServerControlTask::killtimeout()
 
     if (!d->shutdownCompleted)
     {
+#ifndef MEDIA_SERVER
         qLog(Media) << "Sound server process did not terminate during shutdown.";
 
         d->soundserver->disconnect();
         d->soundserver->deleteLater();
         d->soundserver = 0;
+#endif
         d->shutdownCompleted = true;
 
         emit proceed();
@@ -182,6 +183,7 @@ bool MediaServerControlTask::doShutdown()
 
 #ifdef MEDIA_SERVER
     d->appLauncher->kill(MEDIASERVER_IMAGE);
+    QTimer::singleShot(1000, this, SLOT(killtimeout()));
     return false;
 #else
     if (d->soundserver)

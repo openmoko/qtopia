@@ -1,50 +1,44 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "qpimmodel.h"
-#include "qrecordio_p.h"
 #include <QPainter>
 #include <QIcon>
 #include <QDebug>
 
-#include "qrecordiomerge_p.h"
-#include "qrecordio_p.h"
+#include "qpimsqlio_p.h"
 #include "quniqueid.h"
 
 class QPimModelData
 {
 public:
-    QPimModelData() : mio(0), defaultContext(0), defaultModel(0), searchModel(0), filterFlags(0) {}
+    QPimModelData() : defaultContext(0), defaultModel(0), searchModel(0), filterFlags(0) {}
     ~QPimModelData() {
         if (searchModel)
             delete searchModel;
     }
 
-    QBiasedRecordIOMerge *mio;
-
     QPimContext *defaultContext;
-    QRecordIO *defaultModel;
+    QPimSqlIO *defaultModel;
+
     QPimSource defaultSource;
     QList<QPimContext *> contexts;
     QHash<uint, QPimContext* > mappedContexts;
-    QList<QRecordIO*> models;
 
     mutable QPimModel *searchModel;
     mutable QString filterText;
@@ -53,8 +47,11 @@ public:
 
 /*!
   \class QPimModel
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QPimModel class provides an abstract interface to the PIM model classes.
 
@@ -123,9 +120,6 @@ QPimModel::QPimModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
     d = new QPimModelData();
-    d->mio = new QBiasedRecordIOMerge(this);
-
-    connect(d->mio, SIGNAL(reset()), this, SLOT(voidCache()));
 }
 
 /*!
@@ -134,21 +128,6 @@ QPimModel::QPimModel(QObject *parent)
 QPimModel::~QPimModel()
 {
     delete d;
-}
-
-/*!
-  \internal
-
-  Adds the record \a accessModel to the QPimModel.  If no access models have
-  been added previously the \a accessModel is set to be the default model.
-*/
-void QPimModel::addAccess(QRecordIO *accessModel)
-{
-    if (!d->defaultModel) {
-        d->defaultModel = accessModel;
-        d->mio->setPrimaryModel(d->defaultModel);
-    }
-    d->models.append(accessModel);
 }
 
 /*!
@@ -166,46 +145,19 @@ void QPimModel::addContext(QPimContext *context)
         d->defaultSource = context->defaultSource();
     }
     d->contexts.append(context);
-    d->mappedContexts.insert(QUniqueIdGenerator::mappedContext(context->id()), context);
+    QSet<QPimSource> sources = context->sources();
+    foreach(QPimSource s, sources)
+        d->mappedContexts.insert(QPimSqlIO::sourceContext(s), context);
 }
 
 /*!
   \internal
-  Returns the list of access models added to the model
+  Sets the access to records for the model to the given \a accessModel
 */
-QList<QRecordIO*> &QPimModel::accessModels() const
-{ return d->models; }
-
-/*!
-  \internal
-  Returns the access model that provides data for specified \a identifier.
-*/
-QRecordIO *QPimModel::access(const QUniqueId &identifier) const
+void QPimModel::setAccess(QPimSqlIO *accessModel)
 {
-    foreach(QRecordIO *model, d->models) {
-        if (model->exists(identifier))
-            return model;
-    }
-    return 0;
-}
-
-/*!
-  \internal
-  Returns the access model that holds for the specified \a row.
-*/
-QRecordIO *QPimModel::access(int row) const
-{
-    QRecordIO *model = d->mio->model(row);
-    return model;
-}
-
-/*!
-  \internal
-  Returns the row in the access model that holds data for the specified \a row in the model.
-*/
-int QPimModel::accessRow(int row) const
-{
-    return d->mio->row(row);
+    d->defaultModel = accessModel;
+    connect(d->defaultModel, SIGNAL(recordsUpdated()), this, SLOT(voidCache()));
 }
 
 /*!
@@ -288,12 +240,7 @@ QPimSource QPimModel::defaultSource() const
 */
 QPimSource QPimModel::source(const QUniqueId &identifier) const
 {
-    if (!identifier.isNull()) {
-        QPimContext *pc = d->mappedContexts.value(identifier.mappedContext());
-        if (pc)
-            return pc->source(identifier);
-    }
-    return QPimSource();
+    return d->defaultModel->source(identifier);
 }
 
 /*!
@@ -310,7 +257,7 @@ QPimSource QPimModel::source(const QUniqueId &identifier) const
 */
 QPimContext *QPimModel::context(const QUniqueId &identifier) const
 {
-    return d->mappedContexts.value(identifier.mappedContext());
+    return d->mappedContexts.value(d->defaultModel->context(identifier));
 }
 
 /*!
@@ -330,55 +277,71 @@ QPimContext *QPimModel::context(const QUniqueId &identifier) const
 */
 bool QPimModel::startSyncTransaction(const QDateTime &timestamp)
 {
-    bool succeeded = true;
-    foreach(QRecordIO *io, accessModels()) {
-        if (!io->startSyncTransaction(visibleSources(), timestamp)) {
-            succeeded = false;
-            break;
-        }
-    }
-    return succeeded;
+    return d->defaultModel->startSyncTransaction(visibleSources(), timestamp);
 }
 
 /*!
-  Aborts the current synchronization transaction.
+    Starts an SQL transaction on the database.  Allows for calling multiple
+    functions that may modify the database as an atomic operation.
 
-  Returns true if transaction successfully aborted.
+    Note that the database will be locked for the current model only.  Do
+    not modify any other PIM model instance until either committing or
+    aborting the transaction.
 
-  \sa startSyncTransaction(), commitSyncTransaction()
+    Returns true if transaction successfully initiated.
+
+    \sa commitTransaction(), abortTransaction()
+*/
+bool QPimModel::startTransaction()
+{
+    return d->defaultModel->startTransaction();
+}
+
+/*!
+    Aborts the current synchronization transaction.
+
+    Returns true if transaction successfully aborted.
+
+    \sa startSyncTransaction(), commitSyncTransaction()
 */
 bool QPimModel::abortSyncTransaction()
 {
-    bool succeeded = true;
-    foreach(QRecordIO *io, accessModels()) {
-        if (!io->abortSyncTransaction()) {
-            succeeded = false;
-            break;
-        }
-    }
-    return succeeded;
+    return d->defaultModel->abortSyncTransaction();
 }
 
 /*!
-  Commits the current synchronization transaction.
+    Commits the current synchronization transaction.
 
-  Returns true if transaction successfully committed.
+    Returns true if transaction successfully committed.
 
-  Does not abort transaction if unsuccessfully committed.
+    Does not abort transaction if unsuccessfully committed.
 
-  \sa startSyncTransaction(), abortSyncTransaction()
+    \sa startSyncTransaction(), abortSyncTransaction()
 */
 bool QPimModel::commitSyncTransaction()
 {
-    bool succeeded = true;
-    foreach(QRecordIO *io, accessModels()) {
-        if (!io->commitSyncTransaction()) {
-            succeeded = false;
-            break;
-        }
-    }
-    return succeeded;
+    return d->defaultModel->commitSyncTransaction();
 }
+
+/*!
+    \fn bool QPimModel::abortTransaction();
+    Aborts the current transaction.
+
+    Returns true if transaction successfully aborted.
+
+    \sa startTransaction(), commitTransaction()
+*/
+
+/*!
+    \fn bool QPimModel::commitTransaction();
+    Commits the current transaction.
+
+    Returns true if transaction successfully committed.
+
+    Does not abort transaction if unsuccessfully committed.
+
+    \sa startTransaction(), abortTransaction()
+*/
 
 /*!
   Returns the list of identifiers for records removed from the current set of visible sources
@@ -391,11 +354,7 @@ bool QPimModel::commitSyncTransaction()
 */
 QList<QUniqueId> QPimModel::removed(const QDateTime &timestamp) const
 {
-    QList<QUniqueId> result;
-    foreach(QRecordIO *io, accessModels()) {
-        result += io->removed(visibleSources(), timestamp);
-    }
-    return result;
+    return d->defaultModel->removed(visibleSources(), timestamp);
 }
 
 /*!
@@ -409,11 +368,7 @@ QList<QUniqueId> QPimModel::removed(const QDateTime &timestamp) const
 */
 QList<QUniqueId> QPimModel::added(const QDateTime &timestamp) const
 {
-    QList<QUniqueId> result;
-    foreach(QRecordIO *io, accessModels()) {
-        result += io->added(visibleSources(), timestamp);
-    }
-    return result;
+    return d->defaultModel->added(visibleSources(), timestamp);
 }
 
 /*!
@@ -427,11 +382,7 @@ QList<QUniqueId> QPimModel::added(const QDateTime &timestamp) const
 */
 QList<QUniqueId> QPimModel::modified(const QDateTime &timestamp) const
 {
-    QList<QUniqueId> result;
-    foreach(QRecordIO *io, accessModels()) {
-        result += io->modified(visibleSources(), timestamp);
-    }
-    return result;
+    return d->defaultModel->modified(visibleSources(), timestamp);
 }
 
 /*!
@@ -439,7 +390,7 @@ QList<QUniqueId> QPimModel::modified(const QDateTime &timestamp) const
 */
 int QPimModel::count() const
 {
-    return d->mio->count();
+    return d->defaultModel->count();
 }
 
 /*!
@@ -480,11 +431,7 @@ bool QPimModel::contains(const QUniqueId & identifier) const
 */
 bool QPimModel::exists(const QUniqueId &identifier) const
 {
-    foreach(const QRecordIO *model, d->models) {
-        if (model->exists(identifier))
-            return true;
-    }
-    return false;
+    return d->defaultModel->exists(identifier);
 }
 
 /*!
@@ -530,7 +477,7 @@ bool QPimModel::sourceExists(const QPimSource &source, const QUniqueId &identifi
 */
 QModelIndex QPimModel::index(const QUniqueId & identifier) const
 {
-    int i = d->mio->index(identifier);
+    int i = d->defaultModel->row(identifier);
     if (i == -1)
         return QModelIndex();
     return createIndex(i, 0);
@@ -572,7 +519,6 @@ bool QPimModel::flush() {
   Returns true upon success.
 */
 bool QPimModel::refresh() {
-    d->mio->rebuildCache();
     return true;
 }
 
@@ -591,11 +537,7 @@ QUniqueId QPimModel::id(const QModelIndex &index) const
 */
 QUniqueId QPimModel::id(int row) const
 {
-    const QRecordIO *model = qobject_cast<const QRecordIO *>(d->mio->model(row));
-    int r = d->mio->row(row);
-    if (model)
-        return model->id(r);
-    return QUniqueId();
+    return d->defaultModel->id(row);
 }
 
 /*!
@@ -642,9 +584,7 @@ void QPimModel::setCategoryFilter(const QCategoryFilter &filter)
     if (filter == categoryFilter())
         return;
 
-    foreach(QRecordIO *model, d->models)
-        model->setCategoryFilter(filter);
-    d->mio->rebuildCache();
+    d->defaultModel->setCategoryFilter(filter);
 }
 
 /*!

@@ -18,8 +18,8 @@ if ( $isWindows ) {
 
 use constant DEBUG => 0;
 
-my $DQTDIR = shift(@ARGV);
 my @LANGS = split(/\s+/,shift(@ARGV));
+my $STRING_LANGUAGE = shift(@ARGV);
 
 my $themecfg = shift(@ARGV) || usage();
 my $themedir = dirname($themecfg);
@@ -55,7 +55,7 @@ my %trMapping = ();
 my $index=0;
 for my $page (@themePages) {
     $index=0;
-    parseFile ("$themedir/$page");
+    parseFile($themedir, $page);
 }
 
 #write content to cpp file
@@ -68,23 +68,44 @@ for my $entry ( keys %trMapping ) {
 close CPP;
 
 my $tsfile = "Theme-$themename";
+my @output;
+push(@output, "SOURCES += $tmp");
+
 open CPP, ">$tmp.pro" or die "Can't write $tmp.pro";
-print CPP "SOURCES += $tmp\n";
+print CPP join("\n", @output)."\n";
 for my $lang ( @LANGS ) {
+    next if ( $lang eq $STRING_LANGUAGE );
     my $filename = $tsfile."-".$lang.".ts";
     print CPP "TRANSLATIONS += $filename\n";
 }
 close CPP;
-my $cmd = "$DQTDIR/bin/lupdate $tmp.pro";
-DEBUG and print "$cmd\n";
+my $cmd = "$HOST_QT_BINS/lupdate -silent $tmp.pro";
+print "$cmd\n";
 system($cmd);
+
+if ( $STRING_LANGUAGE ) {
+    # Now strip out the languages and re-run lupdate for the string language with -pluralonly
+    open CPP, ">$tmp.pro" or die "Can't write $tmp.pro";
+    print CPP join("\n", @output)."\n";
+    my $filename = $tsfile."-".$STRING_LANGUAGE.".ts";
+    print CPP "TRANSLATIONS += $filename\n";
+    close CPP;
+    $cmd = "$HOST_QT_BINS/lupdate -silent -pluralonly $tmp.pro";
+    print "$cmd\n";
+    system($cmd);
+}
+
 unlink $tmp;
 unlink "$tmp.pro";
 
 my $pageName = undef;
 sub parseFile
 {
-    (my $filename) = $_[0];
+    my ( $themedir, $page ) = @_;
+    my $filename = "$themedir/".basename($page);
+    if ( ! -f $filename ) {
+        $filename = "$themedir/$page";
+    }
     $pageName = undef;
     DEBUG and print "Parsing $filename\n";
     my $parser = new XML::Parser(ErrorContext => 2);
@@ -121,7 +142,7 @@ sub char_handler
 
 sub usage
 {
-    print "\nUsage: theme_lupdate DQTDIR \"lang1 lang2 ... langn\" theme.conf\n";
+    print "\nUsage: theme_lupdate \"lang1 lang2 ... langn\" theme.conf\n";
     exit
 }
 

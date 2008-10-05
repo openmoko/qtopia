@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -31,6 +29,7 @@
 #include <QSoftMenuBar>
 #include <QStyle>
 #include <QKeyEvent>
+#include "uifactory.h"
 
 class Icon : public QLabel
 {
@@ -66,8 +65,26 @@ private:
     qreal mOpacity;
 };
 
-DelayedWaitDialog::DelayedWaitDialog( QWidget *parent, Qt::WFlags fl )
-    : QDialog( parent, fl | Qt::FramelessWindowHint ), mDelay(0), mTid(0)
+/*!
+  \class DelayedWaitDialog
+    \inpublicgroup QtBaseModule
+  \brief The DelayedWaitDialog class provides a small dialog that can be used to notify the user 
+  that the system is busy.
+  \ingroup QtopiaServer::GeneralUI
+
+  While the user is waiting the dialog shows an icon animation. 
+
+  This class is part of the Qt Extended server and cannot be used by other applications. Any server 
+  component that uses this dialog should create an instance via UIFactory::createDialog().
+
+  \sa UIFactory
+  */
+
+/*!
+  Constructs a DelayedWaitDialog instance with the given \a parent and \a flags.
+  */
+DelayedWaitDialog::DelayedWaitDialog( QWidget *parent, Qt::WFlags flags )
+    : QDialog( parent, flags | Qt::FramelessWindowHint ), mDelay(0), mTid(0)
 {
     QVBoxLayout *vl = new QVBoxLayout( this );
     vl->setMargin( 0 );
@@ -99,55 +116,76 @@ DelayedWaitDialog::DelayedWaitDialog( QWidget *parent, Qt::WFlags fl )
     mTimer = new QTimer( this );
     // two seconds to complete each round
     mTimer->setInterval( 2000 / NUMBEROFICON );
-    connect( mTimer, SIGNAL(timeout()), this, SLOT(update()) );
+    connect( mTimer, SIGNAL(timeout()), this, SLOT(updateIcon()) );
     QSoftMenuBar::setLabel( this, QSoftMenuBar::Back, QSoftMenuBar::NoLabel );
 }
 
+/*!
+  Destroys the DelayedWaitDialog instance.
+  */
 DelayedWaitDialog::~DelayedWaitDialog()
 {
 }
 
-void DelayedWaitDialog::setText( const QString &str )
+/*!
+  \reimp
+*/
+void DelayedWaitDialog::setVisible( bool visible ) 
 {
-    text->setText( str );
+    if ( visible ) {
+        //somebody called show()
+        if ( mDelay )
+            mTid = startTimer( mDelay );
+        else
+            QDialog::setVisible(visible);
+    } else {
+        //somebody called hide()
+        if ( mTid )
+            killTimer( mTid );
+        mTid = 0;
+        QDialog::setVisible(visible);
+    }
+}
+/*!
+  In addition to an icon animation the dialog will show \a text. This function is marked 
+  as invokable and can be called via QMetaObject::invokeMethod().
+  */
+void DelayedWaitDialog::setText( const QString &text )
+{
+    this->text->setText( text );
 }
 
 /*!
-    The dialog will appear after \a ms milliseconds delay.
+    Once show() was called the dialog will appear after \a ms milliseconds delay.
+    The default delay is zero ms. This function is marked as invokable and can be called via 
+    QMetaObject::invokeMethod().
 */
 void DelayedWaitDialog::setDelay( int ms )
 {
     mDelay = ms;
 }
 
-void DelayedWaitDialog::show()
-{
-    if ( mDelay )
-        mTid = startTimer( mDelay );
-    else
-        QDialog::show();
-}
-
-void DelayedWaitDialog::hide()
-{
-    if ( mTid )
-        killTimer( mTid );
-    mTid = 0;
-    QDialog::hide();
-}
-
+/*!
+  \reimp
+  */
 void DelayedWaitDialog::showEvent( QShowEvent *se )
 {
     QDialog::showEvent( se );
     mTimer->start();
 }
 
+/*!
+  \reimp
+  */
 void DelayedWaitDialog::hideEvent( QHideEvent *he )
 {
     QDialog::hideEvent( he );
     mTimer->stop();
 }
 
+/*!
+  \reimp
+  */
 void DelayedWaitDialog::keyReleaseEvent( QKeyEvent *ke )
 {
     if ( ke->key() == Qt::Key_Hangup
@@ -157,17 +195,23 @@ void DelayedWaitDialog::keyReleaseEvent( QKeyEvent *ke )
         ke->ignore();
 }
 
+/*!
+  \reimp
+  */
 void DelayedWaitDialog::timerEvent( QTimerEvent *te )
 {
     // display wait widget, new command might take time to arrive
     if ( te->timerId() == mTid ) {
-        QDialog::show();
+        QDialog::setVisible(true);
         killTimer( mTid );
         mTid = 0;
     }
 }
 
-void DelayedWaitDialog::update()
+/*!
+  \internal
+  */
+void DelayedWaitDialog::updateIcon()
 {
     static int highlightIndex = 0;
     int stepsToHighlightIndex = 0;
@@ -182,3 +226,4 @@ void DelayedWaitDialog::update()
         highlightIndex = 0;
 }
 
+UIFACTORY_REGISTER_WIDGET( DelayedWaitDialog );

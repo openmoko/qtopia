@@ -1,37 +1,34 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "content.h"
+#include <QXmlStreamAttributes>
 
-SmilPrefetch::SmilPrefetch(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilPrefetch::SmilPrefetch(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts)
 {
 }
 
-SmilSwitch::SmilSwitch(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilSwitch::SmilSwitch(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts)
 {
 }
-
-//===========================================================================
 
 SmilContentModule::SmilContentModule()
     : SmilModule()
@@ -42,7 +39,7 @@ SmilContentModule::~SmilContentModule()
 {
 }
 
-SmilElement *SmilContentModule::beginParseElement(SmilSystem *sys, SmilElement *e, const QString &qName, const QXmlAttributes &atts)
+SmilElement *SmilContentModule::beginParseElement(SmilSystem *sys, SmilElement *e, const QString &qName, const QXmlStreamAttributes &atts)
 {
     if (qName == "switch") {
         return new SmilSwitch(sys, e, qName, atts);
@@ -53,7 +50,7 @@ SmilElement *SmilContentModule::beginParseElement(SmilSystem *sys, SmilElement *
     return 0;
 }
 
-bool SmilContentModule::parseAttributes(SmilSystem *, SmilElement *, const QXmlAttributes &)
+bool SmilContentModule::parseAttributes(SmilSystem *, SmilElement *, const QXmlStreamAttributes &)
 {
     return false;
 }
@@ -63,7 +60,7 @@ void SmilContentModule::endParseElement(SmilElement *, const QString &)
     //### we need to process now, and remove element where necessary.
 }
 
-QStringList SmilContentModule::elements() const
+QStringList SmilContentModule::elementNames() const
 {
     QStringList l;
     l.append("switch");

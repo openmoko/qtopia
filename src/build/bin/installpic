@@ -117,13 +117,13 @@ my @SIZEDIRS = ();
 
 # Turn "en_US ja" into a hash map with each language as a key (easy lookup later)
 my %languages = ();
-$_ = shift(@ARGV) or usage();
+defined($_ = shift(@ARGV)) or usage();
 s/^\s+//;
 s/\s+$//;
 map { $languages{$_}++ } split;
 # We MUST install en_US resources because they are used as a fallback
 $languages{"en_US"}++;
-# Handle non-underscored languages to (eg. 'en')
+# Handle non-underscored languages too (eg. 'en')
 for my $lang ( keys %languages ) {
     if ( $lang =~ s/_.*// ) {
         $languages{$lang}++;
@@ -154,10 +154,10 @@ processFiles( @ARGV );
 for my $key ( keys(%pngscale_files) ) {
     my $data = $pngscale_files{$key};
     my @list = @$data;
-    system("$QPEDIR/bin/pngscale", split(/\s+/, $key), @list) == 0 or exit 1;
+    system("$SDKROOT/bin/pngscale", split(/\s+/, $key), @list) == 0 or exit 1;
 }
 if ( @svgtopicture_files ) {
-    system("$QPEDIR/bin/svgtopicture", @svgtopicture_files) == 0 or exit 1;
+    system("$SDKROOT/bin/svgtopicture", @svgtopicture_files) == 0 or exit 1;
 }
 
 exit 0;

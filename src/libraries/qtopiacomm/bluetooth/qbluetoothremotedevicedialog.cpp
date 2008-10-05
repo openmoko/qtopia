@@ -1,28 +1,26 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <qtopiacomm/private/qbluetoothremotedevicedialog_p.h>
+#include "qbluetoothremotedevicedialog_p.h"
 
 #include <qbluetoothremotedevice.h>
 #include <qbluetoothsdpuuid.h>
-#include <qtopiacomm/private/qbluetoothremotedeviceselector_p.h>
+#include "qbluetoothremotedeviceselector_p.h"
 
 #include <qtopiaapplication.h>
 #include <qwaitwidget.h>
@@ -35,15 +33,49 @@
 #include <QMenu>
 #include <QSoftMenuBar>
 #include <QMenuBar>
-#include <QToolBar>
 #include <QTimer>
 #include <QActionEvent>
-#include <QTableWidgetItem>
+#include <QAbstractListModel>
+
+
+class DeviceFilterModel : public QAbstractListModel
+{
+    Q_OBJECT
+public:
+    DeviceFilterModel(const QList<QBluetoothRemoteDeviceDialogFilter *> &filters, QObject *parent = 0);
+
+    virtual int rowCount(const QModelIndex &index) const;
+    virtual QVariant data(const QModelIndex &index, int role) const;
+
+    const QList<QBluetoothRemoteDeviceDialogFilter *> &m_filters;
+};
+
+DeviceFilterModel::DeviceFilterModel(const QList<QBluetoothRemoteDeviceDialogFilter *> &filters, QObject *parent)
+    : QAbstractListModel(parent),
+      m_filters(filters)
+{
+}
+
+int DeviceFilterModel::rowCount(const QModelIndex &) const
+{
+    return m_filters.count();
+}
+
+QVariant DeviceFilterModel::data(const QModelIndex &index, int role) const
+{
+    if (role == Qt::DisplayRole) {
+        QBluetoothRemoteDeviceDialogFilter *filter = m_filters.value(index.row(), 0);
+        if (filter)
+            return filter->title();
+    }
+    return QVariant();
+}
 
 
 /*!
     \class QBluetoothRemoteDeviceDialogFilter
-    \mainclass
+    \inpublicgroup QtBluetoothModule
+
     \brief The QBluetoothRemoteDeviceDialogFilter class provides a filter on the devices that are displayed by a QBluetoothRemoteDeviceDialog.
 
     This clss allows the programmer to control whether particular devices
@@ -73,12 +105,33 @@
     \sa QBluetoothRemoteDeviceDialog
  */
 
+struct QBluetoothRemoteDeviceDialogFilterPrivate
+{
+    QSet<QBluetooth::DeviceMajor> deviceMajors;
+    QBluetooth::ServiceClasses serviceClasses;
+    QString title;
+};
+
 /*!
     Constructs a QBluetoothRemoteDeviceDialogFilter that will accept all devices.
+    The title is set to "Default".
  */
 QBluetoothRemoteDeviceDialogFilter::QBluetoothRemoteDeviceDialogFilter()
-    : m_serviceClasses(QBluetooth::AllServiceClasses)
+    : d(new QBluetoothRemoteDeviceDialogFilterPrivate)
 {
+    d->serviceClasses = QBluetooth::AllServiceClasses;
+    d->title = QObject::tr("Default");
+}
+
+/*!
+    Constructs a QBluetoothRemoteDeviceDialogFilter with \a title, that will
+    accept all devices.
+ */
+QBluetoothRemoteDeviceDialogFilter::QBluetoothRemoteDeviceDialogFilter(const QString &title)
+    : d(new QBluetoothRemoteDeviceDialogFilterPrivate)
+{
+    d->serviceClasses = QBluetooth::AllServiceClasses;
+    d->title = title;
 }
 
 /*!
@@ -86,6 +139,15 @@ QBluetoothRemoteDeviceDialogFilter::QBluetoothRemoteDeviceDialogFilter()
  */
 QBluetoothRemoteDeviceDialogFilter::~QBluetoothRemoteDeviceDialogFilter()
 {
+    delete d;
+}
+
+/*!
+    Returns the title for this filter.
+*/
+QString QBluetoothRemoteDeviceDialogFilter::title() const
+{
+    return d->title;
 }
 
 /*!
@@ -110,7 +172,7 @@ QBluetoothRemoteDeviceDialogFilter::~QBluetoothRemoteDeviceDialogFilter()
  */
 void QBluetoothRemoteDeviceDialogFilter::setAcceptedDeviceMajors(const QSet<QBluetooth::DeviceMajor> &deviceMajors)
 {
-    m_deviceMajors = deviceMajors;
+    d->deviceMajors = deviceMajors;
 }
 
 /*!
@@ -122,7 +184,7 @@ void QBluetoothRemoteDeviceDialogFilter::setAcceptedDeviceMajors(const QSet<QBlu
  */
 QSet<QBluetooth::DeviceMajor> QBluetoothRemoteDeviceDialogFilter::acceptedDeviceMajors() const
 {
-    return m_deviceMajors;
+    return d->deviceMajors;
 }
 
 /*!
@@ -143,7 +205,7 @@ QSet<QBluetooth::DeviceMajor> QBluetoothRemoteDeviceDialogFilter::acceptedDevice
  */
 void QBluetoothRemoteDeviceDialogFilter::setAcceptedServiceClasses(QBluetooth::ServiceClasses serviceClasses)
 {
-    m_serviceClasses = serviceClasses;
+    d->serviceClasses = serviceClasses;
 }
 
 /*!
@@ -155,7 +217,7 @@ void QBluetoothRemoteDeviceDialogFilter::setAcceptedServiceClasses(QBluetooth::S
  */
 QBluetooth::ServiceClasses QBluetoothRemoteDeviceDialogFilter::acceptedServiceClasses() const
 {
-    return m_serviceClasses;
+    return d->serviceClasses;
 }
 
 /*!
@@ -168,15 +230,15 @@ QBluetooth::ServiceClasses QBluetoothRemoteDeviceDialogFilter::acceptedServiceCl
  */
 bool QBluetoothRemoteDeviceDialogFilter::filterAcceptsDevice(const QBluetoothRemoteDevice &device)
 {
-    if (m_deviceMajors.size() > 0) {
-        if (!m_deviceMajors.contains(device.deviceMajor()))
+    if (d->deviceMajors.size() > 0) {
+        if (!d->deviceMajors.contains(device.deviceMajor()))
             return false;
     }
 
     // only do the & operation if the filter value is not AllServiceClasses,
     // otherwise you miss e.g. devices that have service class of 0
-    if (m_serviceClasses != QBluetooth::AllServiceClasses) {
-        if (!(m_serviceClasses & device.serviceClasses()))
+    if (d->serviceClasses != QBluetooth::AllServiceClasses) {
+        if (!(d->serviceClasses & device.serviceClasses()))
             return false;
     }
 
@@ -249,11 +311,12 @@ void DiscoveryStatusIcon::toggleIconImage()
 
 QBluetoothRemoteDeviceDialogPrivate::QBluetoothRemoteDeviceDialogPrivate(QBluetoothLocalDevice *local, QBluetoothRemoteDeviceDialog *parent)
     : QWidget(parent),
-      m_filter(0),
+      m_filterSelectorEnabled(true),
       TEXT_DISCOVERY_CANCEL( tr("Stop searching") ),
       m_parent(parent),
       m_local(local),
-      m_triedAutoDiscovery(false)
+      m_firstShow(true),
+      m_currFilterIndex(-1)
 {
     if (!m_local)
         m_local = new QBluetoothLocalDevice(this);
@@ -294,6 +357,139 @@ void QBluetoothRemoteDeviceDialogPrivate::cleanUp()
         cancelDiscovery();
 }
 
+
+void QBluetoothRemoteDeviceDialogPrivate::addFilter(QBluetoothRemoteDeviceDialogFilter *filter)
+{
+    if (m_filters.isEmpty())
+        m_filters.append(new QBluetoothRemoteDeviceDialogFilter(tr("All")));
+
+    int index = m_filters.size() - 1;
+    m_filters.insert(index, filter);
+    setCurrentFilter(index);
+
+    // if not visible, don't enable the selector until showEvent()
+    if (m_filterSelectorEnabled && isVisible())
+        enableFilterSelector();
+}
+
+void QBluetoothRemoteDeviceDialogPrivate::removeFilter(QBluetoothRemoteDeviceDialogFilter *filter)
+{
+    int index = m_filters.indexOf(filter);
+    if (index == -1)
+        return;
+
+    m_filters.removeAt(index);
+    if (m_filterCombo)
+        m_filterCombo->removeItem(index);
+
+    if (m_filters.size() == 1) {    // only "All" filter left
+        if (isVisible())
+            disableFilterSelector();
+        setCurrentFilter(0);
+    } else {
+        if (m_currFilterIndex == index)     // removing current filter
+            setCurrentFilter(m_currFilterIndex - 1);
+    }
+}
+
+void QBluetoothRemoteDeviceDialogPrivate::clearFilters()
+{
+    qDeleteAll(m_filters.begin(), m_filters.end());
+    m_filters.clear();
+    m_currFilterIndex = -1;
+
+    disableFilterSelector();
+}
+
+void QBluetoothRemoteDeviceDialogPrivate::setCurrentFilter(int index)
+{
+    if (index >= 0 && index < m_filters.size()) {
+        m_currFilterIndex = index;
+        if (m_filterCombo)
+            m_filterCombo->setCurrentIndex(index);
+    }
+}
+
+void QBluetoothRemoteDeviceDialogPrivate::setCurrentFilter(QBluetoothRemoteDeviceDialogFilter *filter)
+{
+    if (filter)
+        setCurrentFilter(m_filters.indexOf(filter));
+}
+
+QBluetoothRemoteDeviceDialogFilter *QBluetoothRemoteDeviceDialogPrivate::currentFilter() const
+{
+    return m_filters.value(m_currFilterIndex, 0);
+}
+
+void QBluetoothRemoteDeviceDialogPrivate::filterIndexChanged(int index)
+{
+    QBluetoothRemoteDeviceDialogFilter *filter = m_filters.value(index, 0);
+    if (!filter)
+        return;
+
+    for (int i=0; i<m_discoveredDevices.size(); i++) {
+        if (filter->filterAcceptsDevice(m_discoveredDevices[i])) {
+            m_browser->showDevice(m_discoveredDevices[i].address());
+        } else {
+            m_browser->hideDevice(m_discoveredDevices[i].address());
+            qLog(Bluetooth) << "QBluetoothRemoteDeviceDialog: not displaying"
+                << m_discoveredDevices[i].address().toString() << ", device rejected by filter";
+        }
+    }
+
+    if (!m_discovering)
+        m_statusLabel->setText(describeDiscoveryResults());
+}
+
+void QBluetoothRemoteDeviceDialogPrivate::showFilterDialog()
+{
+    QtopiaApplication::execDialog(m_filterDialog);
+}
+
+void QBluetoothRemoteDeviceDialogPrivate::enableFilterSelector()
+{
+    if (!m_filterCombo) {
+        m_filterCombo = new QComboBox;
+        m_filterCombo->setModel(new DeviceFilterModel(m_filters, this));
+        connect(m_filterCombo, SIGNAL(currentIndexChanged(int)),
+                SLOT(filterIndexChanged(int)));
+        m_filterCombo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        QHBoxLayout *layout = new QHBoxLayout;
+        layout->addWidget(new QLabel(tr("Show:")));
+        layout->addWidget(m_filterCombo);
+
+        if (Qtopia::mousePreferred()) {
+            m_mainLayout->addLayout(layout);
+        } else {
+            m_filterDialog = new QDialog;
+            m_filterDialog->setWindowTitle(tr("Choose view option"));
+            m_filterDialog->setLayout(layout);
+
+            m_chooseFilterAction = m_menu->addAction(tr("Show..."), this,
+                    SLOT(showFilterDialog()));
+        }
+    }
+
+    if (Qtopia::mousePreferred()) {
+        m_filterCombo->show();
+    } else {
+        m_chooseFilterAction->setVisible(true);
+    }
+}
+
+void QBluetoothRemoteDeviceDialogPrivate::disableFilterSelector()
+{
+    if (Qtopia::mousePreferred()) {
+        if (m_filterCombo)
+            m_filterCombo->hide();
+    } else {
+        if (m_chooseFilterAction)
+            m_chooseFilterAction->setVisible(false);
+    }
+}
+
+
 QBluetoothAddress QBluetoothRemoteDeviceDialogPrivate::selectedDevice() const
 {
     if (m_local && m_local->isValid())
@@ -307,6 +503,23 @@ void QBluetoothRemoteDeviceDialogPrivate::triggeredDiscoveryAction()
         cancelDiscovery();
     } else {    // start/restart
         startDiscovery();
+    }
+}
+
+QString QBluetoothRemoteDeviceDialogPrivate::describeDiscoveryResults()
+{
+    int count = 0;
+    for (int i=0; i<m_discoveredDevices.count(); i++) {
+        if (!m_browser->isDeviceHidden(m_discoveredDevices[i].address()))
+            count++;
+    }
+
+    if (count == 0) {
+        return tr("No devices found");
+    } else if (count == 1) {
+        return tr("Found 1 device");
+    } else {
+        return tr("Found %1 devices", "%1 = number (#>1) of devices").arg(count);
     }
 }
 
@@ -326,6 +539,7 @@ void QBluetoothRemoteDeviceDialogPrivate::startDiscovery()
 
     // remove all devices from the list
     m_browser->clear();
+    m_discoveredDevices.clear();
     setDeviceActionsEnabled(false);
 
     m_statusLabel->setText(tr("Searching for devices..."));
@@ -375,17 +589,7 @@ bool QBluetoothRemoteDeviceDialogPrivate::cancelDiscovery()
 
 void QBluetoothRemoteDeviceDialogPrivate::discoveryCompleted()
 {
-    // set ui elements
-    int count = m_browser->count();
-    if (count == 0) {
-        m_statusLabel->setText(tr("No devices found"));
-    } else if (count == 1) {
-        m_statusLabel->setText(tr("Found 1 device"));
-    } else {
-        m_statusLabel->setText(
-                tr("Found %1 devices", "%1 = number (#>1) of devices")
-                        .arg(count));
-    }
+    m_statusLabel->setText(describeDiscoveryResults());
     m_statusIcon->setState(DiscoveryStatusIcon::Inactive);
     m_discoveryAction->setText(tr("Search again"));
     m_discoveryAction->setIcon(m_discoveryStartIcon);
@@ -396,8 +600,22 @@ void QBluetoothRemoteDeviceDialogPrivate::discoveryCompleted()
 
 void QBluetoothRemoteDeviceDialogPrivate::discoveredDevice(const QBluetoothRemoteDevice &device)
 {
-    if (m_discovering)
-        addDeviceToDisplay(device);
+    if (!m_discovering)
+        return;
+
+    m_discoveredDevices << device;
+    m_browser->insert(device);
+
+    QBluetoothRemoteDeviceDialogFilter *filter = m_filters.value(m_currFilterIndex, 0);
+    if (filter && !filter->filterAcceptsDevice(device)) {
+        m_browser->hideDevice(device.address());
+        qLog(Bluetooth) << "QBluetoothRemoteDeviceDialog: not displaying"
+            << device.address().toString() << ", device rejected by filter";
+    } else {
+        m_browser->showDevice(device.address());
+        if (m_browser->count() == 1)
+            m_browser->selectDevice(device.address());
+    }
 }
 
 void QBluetoothRemoteDeviceDialogPrivate::deviceSelectionChanged()
@@ -573,18 +791,6 @@ void QBluetoothRemoteDeviceDialogPrivate::setDeviceActionsEnabled(bool enabled)
         m_deviceActions[i]->setEnabled(enabled);
 }
 
-void QBluetoothRemoteDeviceDialogPrivate::addDeviceToDisplay(const QBluetoothRemoteDevice &device)
-{
-    if (!m_filter || m_filter->filterAcceptsDevice(device)) {
-        m_browser->insert(device);
-        if (m_browser->count() == 1) {
-            m_browser->selectDevice(device.address());
-        }
-    } else {
-        qLog(Bluetooth) << "QBluetoothRemoteDeviceDialog: not displaying"
-            << device.address().toString() << ", device rejected by filter";
-    }
-}
 
 //------------------------
 
@@ -612,11 +818,14 @@ void QBluetoothRemoteDeviceDialogPrivate::initWidgets()
     m_validationWaitWidget->setCancelEnabled(true);
     connect(m_validationWaitWidget, SIGNAL(cancelled()),
             SLOT(serviceSearchCancelled()));
+
+    m_filterCombo = 0;
+    m_filterDialog = 0;
 }
 
 void QBluetoothRemoteDeviceDialogPrivate::initLayout()
 {
-    QVBoxLayout *mainLayout = new QVBoxLayout;
+    m_mainLayout = new QVBoxLayout;
 
     // top bar with text "Searching..." and the bluetooth icon
     QHBoxLayout *statusBar = new QHBoxLayout;
@@ -624,17 +833,19 @@ void QBluetoothRemoteDeviceDialogPrivate::initLayout()
     statusBar->addWidget(m_statusLabel);
     statusBar->addWidget(m_statusIcon->iconLabel());
 
-    mainLayout->addLayout(statusBar);
-    mainLayout->addWidget(m_browser);
+    m_mainLayout->addLayout(statusBar);
+    m_mainLayout->addWidget(m_browser);
 
-    mainLayout->setSpacing(3);
-    mainLayout->setMargin(0);
+    m_mainLayout->setSpacing(3);
+    m_mainLayout->setMargin(0);
 
-    setLayout(mainLayout);
+    setLayout(m_mainLayout);
 }
 
 void QBluetoothRemoteDeviceDialogPrivate::initActions()
 {
+    m_chooseFilterAction = 0;
+
     m_discoveryStartIcon = QIcon(":icon/find");
     m_discoveryCancelIcon = QIcon(":icon/reset");
     m_discoveryAction = new QAction(m_discoveryStartIcon,
@@ -654,10 +865,20 @@ void QBluetoothRemoteDeviceDialogPrivate::initActions()
 
 void QBluetoothRemoteDeviceDialogPrivate::showEvent(QShowEvent *e)
 {
-    if (!m_triedAutoDiscovery) {
+    if (m_firstShow) {
         QTimer::singleShot(0, this, SLOT(triggeredDiscoveryAction()));
-        m_triedAutoDiscovery = true;
+        m_firstShow = false;
     }
+
+    if (m_filterSelectorEnabled) {
+        if (m_filters.size() > 1) // has more than just 'All' filter
+            enableFilterSelector();
+        else
+            disableFilterSelector();
+    } else {
+        disableFilterSelector();
+    }
+
     QWidget::showEvent(e);
 }
 
@@ -666,7 +887,8 @@ void QBluetoothRemoteDeviceDialogPrivate::showEvent(QShowEvent *e)
 
 /*!
     \class QBluetoothRemoteDeviceDialog
-    \mainclass
+    \inpublicgroup QtBluetoothModule
+
     \brief The QBluetoothRemoteDeviceDialog class allows the user to perform a bluetooth device discovery and select a particular device.
 
     When a remote device dialog is first displayed, it automatically
@@ -825,25 +1047,114 @@ QSet<QBluetooth::SDPProfile> QBluetoothRemoteDeviceDialog::validationProfiles() 
 }
 
 /*!
-    Sets the filter that is used to filter displayed devices to \a filter.
+    \obsolete
 
-    If \a filter is 0, the dialog will not filter the device display.
-
-    \sa filter()
+    Use addFilter() and removeFilter() instead.
  */
 void QBluetoothRemoteDeviceDialog::setFilter(QBluetoothRemoteDeviceDialogFilter *filter)
 {
-    m_data->m_filter = filter;
+    m_data->removeFilter(currentFilter());
+    if (filter)
+        m_data->addFilter(filter);
 }
 
 /*!
-    Returns the filter that is currently used to filter displayed devices.
+    \obsolete
 
-    \sa setFilter()
+    Use currentFilter() instead.
  */
 QBluetoothRemoteDeviceDialogFilter *QBluetoothRemoteDeviceDialog::filter() const
 {
-    return m_data->m_filter;
+    return m_data->currentFilter();
+}
+
+/*!
+    Adds \a filter to the group of filters to be used for this dialog.
+
+    This dialog takes ownership of the filter.
+
+    \sa setFilterSelectionEnabled()
+*/
+void QBluetoothRemoteDeviceDialog::addFilter(QBluetoothRemoteDeviceDialogFilter *filter)
+{
+    m_data->addFilter(filter);
+}
+
+/*!
+    Removes \a filter from the group of filters for this dialog.
+
+    Ownership of the filter is passed to the caller.
+
+    \sa addFilter(), clearFilters()
+*/
+void QBluetoothRemoteDeviceDialog::removeFilter(QBluetoothRemoteDeviceDialogFilter *filter)
+{
+    m_data->removeFilter(filter);
+}
+
+/*!
+    Removes and deletes all filters that have been added to this dialog.
+
+    \sa removeFilter()
+*/
+void QBluetoothRemoteDeviceDialog::clearFilters()
+{
+    m_data->clearFilters();
+}
+
+/*!
+    Sets \a filter to be the current filter. It must have been already added
+    using addFilter().
+
+    \sa currentFilter()
+*/
+void QBluetoothRemoteDeviceDialog::setCurrentFilter( QBluetoothRemoteDeviceDialogFilter *filter )
+{
+    m_data->setCurrentFilter(filter);
+}
+
+/*!
+    Returns the current filter.
+
+    \sa setCurrentFilter()
+ */
+QBluetoothRemoteDeviceDialogFilter *QBluetoothRemoteDeviceDialog::currentFilter() const
+{
+    return m_data->currentFilter();
+}
+
+/*!
+    If \a enabled is \c true, the dialog enables the end user to change between
+    filters that have been added to this display. This is useful, for example,
+    if the current filter is too restrictive and has excluded the device that
+    the user wants to select; in this case, the user can change to a less
+    restrictive filter, and locate the desired device.
+
+    An "All" filter is automatically added that allows the user to view all
+    discovered devices.
+
+    By default, filter selection is enabled.
+
+    \sa filterSelectionEnabled()
+*/
+void QBluetoothRemoteDeviceDialog::setFilterSelectionEnabled(bool enabled)
+{
+    m_data->m_filterSelectorEnabled = enabled;
+    if (enabled)
+        m_data->enableFilterSelector();
+    else
+        m_data->disableFilterSelector();
+}
+
+/*!
+    Returns whether the dialog enables the end user to change between the
+    added filters.
+
+    \sa setFilterSelectionEnabled()
+*/
+bool QBluetoothRemoteDeviceDialog::filterSelectionEnabled() const
+{
+    return m_data->m_filterSelectorEnabled;
 }
 
 /*!
@@ -890,3 +1201,5 @@ void QBluetoothRemoteDeviceDialog::actionEvent(QActionEvent *event)
             break;
     }
 }
+
+#include "qbluetoothremotedevicedialog.moc"

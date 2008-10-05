@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,11 +23,11 @@
 #include <QtDebug>
 #include <qcategorymanager.h>
 
-
 /*!
     \class QContentPlugin
-    \mainclass
-    \brief The QContentPlugin class provide an interface for the Qtopia Document System to discover detailed information about a file.
+    \inpublicgroup QtBaseModule
+
+    \brief The QContentPlugin class provides an interface for the Qt Extended Document System to discover detailed information about a file.
 
     Content plug-ins are used by the document system to read meta-data from files that may be used to index the content or better
     describe it to the user.  When a new file is first discovered by the document system its extension is used to identify
@@ -80,3 +78,66 @@ bool QContentPlugin::updateContent( QContent *content )
 
     return false;
 }
+
+/*!
+    Initializes the content plug-in manager.
+
+    This should not normally not be necessary as the plug-in manager is loaded on demand.
+*/
+void QContentPlugin::preloadPlugins()
+{
+    QContentFactory::loadPlugins();
+}
+
+/*!
+    \class QContentPropertiesPlugin
+    \inpublicgroup QtBaseModule
+
+    \brief The QContentPropertiesPlugin class provides an interface for accessing properties and thumbnails embedded in content.
+
+    The QContent class uses QContentPropertiesPlugin to provide thumbnails of content.
+
+    The QContentProperties class uses QContentPropertiesPlugin to create instances of
+    QContentPropertiesEngine for accessing properties embedded in content.
+
+    A plug-in which implements the QContentPropertiesPlugin interface should typically also
+    implement the QContentPlugin interface to ensure content is assigned the correct type and so
+    that any searchable properties are written to the database.
+
+    \sa QContent, QContentProperties, QContentPropertiesEngine
+
+    \ingroup content
+    \ingroup plugins
+*/
+
+/*!
+    Destroys a QContentPropertiesPlugin.
+*/
+QContentPropertiesPlugin::~QContentPropertiesPlugin()
+{
+}
+
+/*!
+    \fn QContentPropertiesPlugin::mimeTypes() const
+
+    Returns a list of the mime types a content properties plug-in supports.
+*/
+
+/*!
+    \fn QContentPropertiesPlugin::thumbnail( const QContent &content, const QSize &size, Qt::AspectRatioMode mode )
+
+    Returns a thumbnail representive of \a content.  If \a size is not null the thumbnail will be resized to fit those dimensions
+    according to the given aspect ratio \a mode.
+
+    \sa QContent::thumbnail()
+*/
+
+/*!
+    \fn QContentPropertiesPlugin::createPropertiesEngine( const QContent &content )
+
+    Returns a new instance of a QContentPropertiesEngine for viewing and editing the meta-data embedded in \a content.
+
+    If the plug-in is unable to read \a content then a null pointer will be returned instead.
+
+    \sa QContentProperties
+*/

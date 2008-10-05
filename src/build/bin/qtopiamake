@@ -14,6 +14,7 @@ use Qtopia::Vars;
 use Qtopia::Opt;
 use Qtopia::File;
 use Qtopia::BlackMagic;
+use Hash::Ordered;
 
 # This script works even if configure has not been run (but only for displaying -help)
 eval { Qtopia::Paths::get_paths(); };
@@ -43,8 +44,21 @@ Qtopia::Opt::read_config_cache();
 
 use constant DEBUG => 0;
 
+if ( @ARGV && $ARGV[0] eq "-clean" ) {
+    opt("qbuild") = 0;
+}
+
+if ( opt("qbuild") ) {
+    if ( ! $ENV{RUNNING_CONFIGURE} ) {
+        print "qtopiamake is deprecated. Please teach your fingers to type qbuild.\n";
+    } 
+    # Create wrapper Makefiles that call qbuild
+    qbuild_prep_tree($cwd);
+    exit 0;
+}
+
 # Ugly hack used to let helix have it's .pro file built before we have Qtopia Core.
-if ( exists($ENV{HOST_QMAKE}) && $ENV{HOST_QMAKE} ) {
+if ( exists($ENV{USE_HOST_QMAKE}) && $ENV{USE_HOST_QMAKE} ) {
     $TARGET_QMAKE = $HOST_QMAKE;
 }
 
@@ -199,7 +213,7 @@ if ( !@projectRoots ) {
     my $dir = fixpath(getcwd());
     # relocate it to the build tree
     $dir =~ s,\Q$depotpath\E,$QPEDIR,;
-    
+
     if ( $QPEDIR eq $dir || index($dir, fixpath("$QPEDIR/")) == 0 ) {
         # Running qtopiamake inside the Qtopia tree will create new Makefiles but
         # it will not clean up buildsystem files or create .qmake.cache files.
@@ -396,7 +410,7 @@ sub prep_tree
     if ( $topProFile ) {
         push(@proFiles, $topProFile);
     } elsif ( ! -f "$srcdir/".basename($srcdir).".pro" ) {
-        my @options = glob("$srcdir/*.pro");
+        my @options = grep { basename($_) ne "qbuild.pro" } glob("$srcdir/*.pro");
         if ( @options ) {
             push(@proFiles, $options[0]);
             if ( scalar(@options) > 1 ) {
@@ -497,7 +511,7 @@ sub processProFile
     my $qmake;
     my $spec;
     my $CONFIG = $proFileInfo{$projectRoot}->{$proFile}->{CONFIG};
-    if ( !opt("edition") or $$CONFIG{part_of_qtopiadesktop} || $$CONFIG{desktop} ) {
+    if ( !opt("qtopia_ui") or $$CONFIG{part_of_qtopiadesktop} || $$CONFIG{desktop} ) {
         $spec = opt("platform", "absolute");
         $qmake = $HOST_QMAKE;
         $qtdir = $DQTDIR;
@@ -670,10 +684,17 @@ sub makeMakefile
         $MAKE_F      = "/f";
         $PRINT_DIR   = "\n\t";
     } else {
+        # NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+        #
+        # The DEVICE_ setting logic is duplicated in configure
+        #
+        # NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
         $make_prefix = fixpath("$QPEDIR/src/build/bin/runwithvars.sh")." ".
-                       (opt("device")?"DEVICE_CONFIG_PATH=".opt("device", "config_path")." ".
-                                      "DEFAULT_DEVICE_PATH=".opt("device", "default_path")." ".
-                                      "DEVICE_BIN=".opt("device", "device_bin")." ":"").
+                       (opt("device")?("DEVICE_CONFIG_PATH=".opt("device", "config_path")." ".
+                                       "DEFAULT_DEVICE_PATH=".opt("device", "default_path")." ".
+                                       "DEVICE_BIN=".opt("device", "device_bin")." ".
+                                       "DEVICE_BUILDING_FOR_DESKTOP=".opt("device", "building_for_desktop")." ")
+                                     :"").
                        "QMAKEFEATURES=".join(":", @QMAKEFEATURES)." ".
                        "QTDIR=$qtdir ".
                        "MKSPECS=$qt_depot_path/mkspecs ".
@@ -839,17 +860,16 @@ if [ -z "\$\$QPEDIR" ]; then\\
     exit 1;\\
 fi;\\
 QPEDIR=`cd \$\$QPEDIR; /bin/pwd | sed 's/\\/\$\$//'`;\\
-PWD=`/bin/pwd`;\\
-shadowdir=`echo \$\$PWD | perl -ne 's,$depotpath,'\$\$QPEDIR',;\\
+shadowdir=`/bin/pwd | perl -ne 's,$depotpath,'\$\$QPEDIR',;\\
                                     print'`;\\
-if [ "\$\$shadowdir" != "\$\$PWD" -a -d "\$\$shadowdir" ]; then\\
+if [ "\$\$shadowdir" != "\$\$(/bin/pwd)" -a -d "\$\$shadowdir" ]; then\\
     cd "\$\$shadowdir";\\
     $MAKE \$\@;\\
 else\\
     echo "ERROR: Can't resolve shadowdir.";\\
     echo "       SOURCE tree = '$depotpath'";\\
     echo "       BUILD  tree = '\$\$QPEDIR'";\\
-    echo "       PWD         = '\$\$PWD'";\\
+    echo "       PWD         = '\$\$(/bin/pwd)'";\\
     echo "       shadowdir   = '\$\$shadowdir'";\\
     exit 1;\\
 fi
@@ -1018,5 +1038,143 @@ symlinked into multi-build/<id>.
 
 END
     exit 2;
+}
+
+# Create wrapper Makefiles that call qbuild
+sub qbuild_prep_tree
+{
+    my ( $dir ) = @_;
+
+    # .pro files are found in the source tree, not the build tree
+    my $srcdir = $dir;
+    if ( $depotpath ) {
+        $srcdir =~ s,\Q$QPEDIR\E,$depotpath,;
+    }
+
+    my %dirs;
+
+    my @ignore_files;
+    my @allow_files;
+    if ( $depotpath ) {
+        push(@ignore_files,  "$depotpath/qtopiacore", "$depotpath/config\.tests",
+                             "$depotpath/src/server", "$depotpath/devices", "$depotpath/etc",
+                             "$depotpath/qbuild" );
+        push(@allow_files,   "$depotpath/etc/themes", "$depotpath/src/server/qbuild.pro" );
+        if (opt("device")) {
+            push(@allow_files, "$depotpath/devices/".opt("device"));
+        }
+    }
+
+    my $func = sub {
+        my $file = $File::Find::name;
+        my $force = 0;
+        # Allow files (override ignore files)
+        for my $ign_file ( @allow_files ) {
+            if ( index($file, $ign_file) == 0 ) {
+                $force = 1;
+                last;
+            }
+        }
+        if (!$force) {
+            # Ignore files
+            for my $ign_file ( @ignore_files ) {
+                if ( index($file, $ign_file) == 0 ) {
+                    return;
+                }
+            }
+        }
+        # We want to find qbuild.pro files
+        if ( $file =~ /qbuild\.pro$/ ) {
+            my $dir = dirname($file);
+            $dirs{$dir}++;
+            # Add every directory between here and $srcdir
+            while ( $dir ne "$srcdir" ) {
+                $dir = dirname($dir);
+                # Ignore files
+                for my $ign_file ( @ignore_files ) {
+                    if ( index($dir, $ign_file) == 0 ) {
+                        if ($dir eq $ign_file) {
+                            return;
+                        }
+                    }
+                }
+                $dirs{$dir}++;
+            }
+        }
+    };
+
+    print "Finding Projects...\n";
+    find( $func, $srcdir );
+    print "Writing ".scalar(keys %dirs)." Makefiles...\n";
+
+    # The default targets for our wrapper Makefiles
+    my @targets = qw(default target image regenerate qmake);
+    my %remap;
+    tie %remap, 'Hash::Ordered';
+    %remap = (
+        "all" => "default",
+        "install" => "image",
+        "cleaninstall" => "image",
+        "append_install" => "append_image",
+    );
+    # Get additional targets from here
+    open IN, "$SDKROOT/bin/extensions/subdirs.js" or die "Can't read $SDKROOT/bin/extensions/subdirs.js";
+    my @data = <IN>;
+    close IN;
+    @data = grep /SUBDIRS_RULES=/, @data;
+    $_ = $data[0];
+    s/SUBDIRS_RULES=//;
+    @data = split;
+    my %tmp;
+    for ( @targets, @data ) {
+        $tmp{$_}++;
+    }
+    @targets = ();
+    # These go first (and point to different targets)
+    for ( keys %remap ) {
+        delete $tmp{$_};
+        push(@targets, $_);
+    }
+    push(@targets, keys %tmp);
+
+    for my $dir (keys %dirs) {
+        my $targetDir = $dir;
+        if ( $depotpath ) {
+            $targetDir =~ s,\Q$depotpath\E,$QPEDIR,;
+        }
+        my $redmake = fixpath("$targetDir/Makefile");
+
+        # Construct the Makefile
+        my $contents = "";
+
+        # The "regular" targets
+        for my $target ( @targets ) {
+            $contents .= "$target:\n\t\@echo make is deprecated. Please teach your fingers to type qbuild.\n";
+            if ( $target eq "regenerate" || $target eq "qmake" ) {
+                $contents .= "\t\@$SDKROOT/bin/qtopiamake\n";
+            } else {
+                $contents .= "\t\@$SDKROOT/bin/qbuild -from-make \$(MAKE) ".
+                             (exists($remap{$target})?$remap{$target}:$target)."\n";
+            }
+        }
+
+        # Some gmake stuff
+        if ( !$isWindows ) {
+            $contents .= ".PHONY: ".join(" ", @targets)."\n";
+        } else {
+            # nmake can do this... just not as elegantly
+            $contents .= join(" ", @targets).": FORCE\nFORCE:";
+        }
+
+        # We have the contents, now write it
+        mkpath($targetDir);
+        if ( -f $redmake ) {
+            unlink $redmake or die "I can't unlink $redmake: $!";
+        }
+        open REDMAKE, ">".$redmake or die "Unable to write to $redmake: $!";
+        print REDMAKE $contents;
+        close REDMAKE;
+    }
+
 }
 

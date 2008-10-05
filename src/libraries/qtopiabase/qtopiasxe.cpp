@@ -1,29 +1,28 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qtopiasxe.h"
 
 #include <qtopialog.h>
-
-#include <private/qtransportauth_qws_p.h>
+#ifndef SXE_INSTALLER
+#include <qtransportauth_qws.h>
+#endif
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -43,7 +42,8 @@ struct SxeProgramInfoPrivate
 
 /*!
   \class SxeProgramInfo
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The SxeProgramInfo class is a data transfer object that models a program on disk.
 
   Used for registration of binaries with the SXE system.
@@ -403,7 +403,6 @@ void SxeProgramInfo::suid()
 
 #endif
 
-#ifndef SINGLE_EXEC
 /*!
   \relates SxeProgramInfo
 
@@ -415,8 +414,7 @@ void SxeProgramInfo::suid()
   A check is made that the binary has been keyed, and if not then the method
   will qFatal, with the message "SXE key has not been set".
 
-  (This function is stubbed out with an empty implementation if Qtopia
-  is configured without SXE.)
+  (This function is stubbed out with an empty implementation if Qt Extended is configured without SXE.)
 */
 void checkAndSetProcessKey( const char *key, const char *app )
 {
@@ -440,4 +438,4 @@ void checkAndSetProcessKey( const char *key, const char *app )
         Q_UNUSED(app);
 #endif
 }
-#endif
+

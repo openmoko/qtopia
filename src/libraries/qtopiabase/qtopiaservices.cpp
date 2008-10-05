@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,14 +24,6 @@
 #include <qtopialog.h>
 #include <qtopianamespace.h>
 #include <qsettings.h>
-
-#if defined(QTOPIA_DBUS_IPC)
-#include <qtdbus/qdbusmessage.h>
-#include <qtdbus/qdbusconnection.h>
-#include <qtdbus/qdbusargument.h>
-#include <qtdbus/qdbusinterface.h>
-#include "dbusipccommon_p.h"
-#endif
 
 static QStringList serviceList_p(const QString& d, const QString n)
 {
@@ -49,13 +39,14 @@ static QStringList serviceList_p(const QString& d, const QString n)
 
 /*!
   \class QtopiaService
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The QtopiaService class allows applications to query the services provided by other applications.
 
     \ingroup ipc
 
-  A Qtopia service is a named collection of features that an application
+  A Qt Extended service is a named collection of features that an application
   may choose to provide. For example, web browsers providing
   the feature of displaying a web page given a URL will implement the \c WebAccess
   service; telephony programs providing phone call dialing support will implement
@@ -68,13 +59,14 @@ static QStringList serviceList_p(const QString& d, const QString n)
 
 /*!
   \class QtopiaServiceRequest
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The QtopiaServiceRequest class allows applications to request services from other applications.
 
     \ingroup ipc
 
-  A QtopiaServiceRequest encapsulates a Qtopia service name and the message to be sent to
+  A QtopiaServiceRequest encapsulates a Qt Extended service name and the message to be sent to
   that service. It is similar to QtopiaIpcEnvelope, but uses service names
   rather than direct channel names.  The following example sends the \c{editTime()}
   request to the \c Time service:
@@ -89,7 +81,7 @@ static QStringList serviceList_p(const QString& d, const QString n)
 
   \code
   QtopiaServiceRequest req("WebAccess", "openURL(QString)");
-  req << "http://www.trolltech.com/";
+  req << "http://www.example.com/";
   req.send();
   \endcode
 
@@ -247,6 +239,24 @@ QString QtopiaService::channel(const QString& service, const QString& appname)
     return r.isEmpty() ? QString() : "QPE/Application/"+r;
 }
 
+/*!
+  Returns the the list of services supported by \a appname.
+
+  \sa list()
+*/
+QStringList QtopiaService::services(const QString& appname)
+{
+    QStringList all;
+
+    foreach (QString service, list()) {
+        QDir dir(Qtopia::qtopiaDir()+"services/"+service, appname, QDir::Unsorted, QDir::Files);
+        if (dir.count())
+            all << service;
+    }
+
+    return all;
+}
+
 #include <qtopiaipcenvelope.h>
 
 /*!
@@ -323,43 +333,7 @@ bool QtopiaServiceRequest::send() const
     if (isNull())
         return false;
 
-#if defined(QTOPIA_DBUS_IPC)
-    QDBusConnection dbc = QDBus::sessionBus();
-    QString service = dbusInterface;
-    service.append(".");
-    service.append(m_Service);
-    QString path = dbusPathBase;
-    path.append(m_Service);
-
-    qLog(Services) << "Sending service request on" << service << path << dbusInterface;
-    /*
-    QDBusInterface *iface = new QDBusInterface(service,
-                                               path,
-                                               dbusInterface, dbc);
-    if (!iface) {
-        qWarning("No interface registered!!");
-        return false;
-    }
-    */
-
-    int idx = m_Message.indexOf('(');
-    QString dbusMethod = m_Message.left(idx);
-
-    qLog(DBUS) << "Calling method" << dbusMethod;
-
-    QDBusMessage msg = QDBusMessage::methodCall(service,
-            path, dbusInterface, dbusMethod, dbc);
-    msg.setArguments(m_arguments);
-    dbc.call(msg, QDBus::NoBlock);
-
-    /*
-    iface->callWithArgumentList(QDBus::NoBlock,
-                                dbusMethod, m_arguments);
-    */
-    qLog(DBUS) << "Calling method finished...";
-
-    return true;
-#elif !defined(QT_NO_COP) || defined(Q_WS_X11)
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
     QString ch;
     bool rawMessage = false;
 

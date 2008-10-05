@@ -1,33 +1,36 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qexportedbackground.h"
 #include <QtopiaApplication>
+#include <QDesktopWidget>
 #include <QSettings>
 #include <QtopiaChannel>
 #include <QPainter>
-#include <private/qpixmap_p.h>
+#include <private/qpixmap_x11_p.h>
 #include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <custom.h>
+
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
+static void colorize(QPixmap &, const QPixmap &, const QColor &);
 
 class QExportedBackgroundServerPrivate
 {
@@ -98,10 +101,12 @@ void QExportedBackgroundPrivate::clearBg()
 {
     if (!bg.isNull()) {
         // Prevent Qt from destroying the foreign pixmap and picture handles.
-        QPixmapData *pd = QX11PaintEngine::getPixmapData(bg);
-        pd->hd = 0;
-        pd->picture = 0;
-        pd->deref();  // Remove extra reference added in getPixmaps().
+        // FIXME private
+//         QX11PixmapData *pd = static_cast<QX11PixmapData*>(QX11PaintEngine::getPixmapData(bg));
+//         pd->hd = 0;
+//         pd->picture = 0;
+//         pd->deref();
+        // Remove extra reference added in getPixmaps().
     }
     bg = QPixmap();
 }
@@ -144,6 +149,11 @@ const QPixmap &QExportedBackground::background() const
 bool QExportedBackground::isAvailable() const
 {
     return !d->bg.isNull();
+}
+
+QSize QExportedBackground::exportedBackgroundSize(int screen)
+{
+    return QApplication::desktop()->screenGeometry(screen).size();
 }
 
 void QExportedBackground::initExportedBackground(int, int, int screen)
@@ -246,18 +256,20 @@ void QExportedBackground::getPixmaps()
             if (XGetGeometry(QX11Info::display(), rawPixmap, &rootReturn,
                              &xReturn, &yReturn, &widthReturn, &heightReturn,
                              &borderWidthReturn, &depthReturn)) {
-                QPixmapData *pd = QX11PaintEngine::getPixmapData(d->bg);
-                pd->w = (int)widthReturn;
-                pd->h = (int)heightReturn;
-                pd->d = (short)depthReturn;
-                pd->hd = rawPixmap;
-                pd->picture = rawPicture;
 
-                // Artificially inflate the reference count so that Qt
-                // will not destroy the foreign pixmap and picture handles.
-                // We will clear the handles in clearBg() before releasing
-                // the last reference to the pixmap data.
-                pd->ref();
+// FIXME private
+//                QX11PixmapData *pd = static_cast<QX11PixmapData*>(QX11PaintEngine::getPixmapData(d->bg));
+//                 pd->w = (int)widthReturn;
+//                 pd->h = (int)heightReturn;
+//                 pd->d = (short)depthReturn;
+//                 pd->hd = rawPixmap;
+//                 pd->picture = rawPicture;
+
+//                 // Artificially inflate the reference count so that Qt
+//                 // will not destroy the foreign pixmap and picture handles.
+//                 // We will clear the handles in clearBg() before releasing
+//                 // the last reference to the pixmap data.
+//                 pd->ref();
             }
             d->rawPixmap = rawPixmap;
         }
@@ -273,10 +285,80 @@ void QExportedBackground::getPixmaps()
     emit wallpaperChanged();
 }
 
-void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src, const QColor &color)
+static void colorize(QPixmap &dest, const QPixmap &src, const QColor &color)
 {
     dest.fill(Qt::black);
     QPainter painter(&dest);
     painter.setOpacity(((qreal)color.alpha())/ 255.0);
     painter.drawPixmap(0, 0, src);
 }
+
+#else // !QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
+
+QExportedBackground::QExportedBackground(QObject *parent)
+    : QObject(parent)
+{
+}
+
+QExportedBackground::QExportedBackground(int screen, QObject *parent)
+    : QObject(parent)
+{
+    Q_UNUSED(screen);
+}
+
+QExportedBackground::~QExportedBackground()
+{
+}
+
+QPixmap QExportedBackground::wallpaper() const
+{
+    return QPixmap();
+}
+
+const QPixmap &QExportedBackground::background() const
+{
+    static QPixmap bg;
+    return bg;
+}
+
+bool QExportedBackground::isAvailable() const
+{
+    return false;
+}
+
+QSize QExportedBackground::exportedBackgroundSize(int screen)
+{
+    return QApplication::desktop()->screenGeometry(screen).size();
+}
+
+void QExportedBackground::initExportedBackground(int width, int height, int screen )
+{
+    Q_UNUSED(width);
+    Q_UNUSED(height);
+    Q_UNUSED(screen);
+}
+
+void QExportedBackground::clearExportedBackground(int screen)
+{
+    Q_UNUSED(screen);
+}
+
+void QExportedBackground::setExportedBackgroundTint(int)
+{
+}
+
+void QExportedBackground::setExportedBackground(const QPixmap &image, int screen)
+{
+    Q_UNUSED(image);
+    Q_UNUSED(screen);
+}
+
+void QExportedBackground::sysMessage(const QString&,const QByteArray&)
+{
+}
+
+void QExportedBackground::getPixmaps()
+{
+}
+
+#endif // !QTOPIA_ENABLE_EXPORTED_BACKGROUNDS

@@ -1,32 +1,33 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/smil/element.h>
-#include <qtopia/smil/module.h>
+#ifndef SMILLAYOUT_H
+#define SMILLAYOUT_H
+
+#include <element.h>
+#include <module.h>
 #include <qmap.h>
 
 class SmilRootLayout : public SmilElement
 {
 public:
-    SmilRootLayout(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilRootLayout(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
 
     void process();
     void paint(QPainter *p);
@@ -38,7 +39,7 @@ private:
 class SmilRegion : public SmilElement
 {
 public:
-    SmilRegion(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilRegion(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
 
     void process();
     void setRect(const QRect &r);
@@ -74,7 +75,7 @@ public:
 class SmilLayout : public SmilElement
 {
 public:
-    SmilLayout(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilLayout(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
     virtual ~SmilLayout();
 };
 
@@ -86,11 +87,11 @@ public:
     SmilLayoutModule();
     virtual ~SmilLayoutModule();
 
-    virtual SmilElement *beginParseElement(SmilSystem *, SmilElement *, const QString &qName, const QXmlAttributes &atts);
-    virtual bool parseAttributes(SmilSystem *sys, SmilElement *e, const QXmlAttributes &atts);
+    virtual SmilElement *beginParseElement(SmilSystem *, SmilElement *, const QString &qName, const QXmlStreamAttributes &atts);
+    virtual bool parseAttributes(SmilSystem *sys, SmilElement *e, const QXmlStreamAttributes &atts);
     virtual void endParseElement(SmilElement *, const QString &qName);
-    virtual QStringList elements() const;
-    virtual QStringList attributes() const;
+    virtual QStringList elementNames() const;
+    virtual QStringList attributeNames() const;
 
     SmilRegion *findRegion(const QString &id);
 
@@ -103,7 +104,7 @@ protected:
 class RegionAttribute : public SmilModuleAttribute
 {
 public:
-    RegionAttribute(SmilLayoutModule *m, SmilElement *e, const QXmlAttributes &atts);
+    RegionAttribute(SmilLayoutModule *m, SmilElement *e, const QXmlStreamAttributes &atts);
 
     void process();
 
@@ -112,3 +113,4 @@ private:
     SmilLayoutModule *layoutModule;
 };
 
+#endif

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/test1/tmp/qtopia/qtopia-opensource-4.3.2/src/qtopiadesktop/libraries/qtopiadesktop/desktopsettings.cpp -->
+<!-- /home/qt/tmp/mksrcpackage_12819/qt-extended-4.4.1/src/qtopiadesktop/libraries/qtopiadesktop/desktopsettings.cpp -->
 <head>
   <title>DesktopSettings Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -11,8 +11,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
-<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Index</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">Classes</font></a>&nbsp;&middot; <a href="headers.html"><font color="#004faf">Headers</font></a>&nbsp;&middot; <a href="overviews.html"><font color="#004faf">Overviews</font></a> </td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">DesktopSettings Class Reference</h1>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qt Extended Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Index</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">Classes</font></a>&nbsp;&middot; <a href="headers.html"><font color="#004faf">Headers</font></a>&nbsp;&middot; <a href="overviews.html"><font color="#004faf">Overviews</font></a> </td>
+<td align="right" valign="top"><img src="images/codeless.png" align="right" border="0" /></td></tr></table><h1 class="title">DesktopSettings Class Reference</h1>
 <p>The DesktopSettings class maintains settings. <a href="#details">More...</a></p>
 <pre>    #include &lt;DesktopSettings&gt;</pre><p>Inherits <a href="qsettings.html">QSettings</a>.</p>
 <ul>
@@ -25,7 +25,7 @@
 <li><div class="fn"/>virtual <b><a href="desktopsettings.html#dtor.DesktopSettings">~DesktopSettings</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>21 public functions inherited from <a href="qsettings.html#public-functions">QSettings</a></li>
+<li><div class="fn"/>25 public functions inherited from <a href="qsettings.html#public-functions">QSettings</a></li>
 <li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
@@ -43,7 +43,7 @@
 <li><div class="fn"/>QString <b><a href="desktopsettings.html#systemLanguage">systemLanguage</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>2 static public members inherited from <a href="qsettings.html#static-public-members">QSettings</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qsettings.html#static-public-members">QSettings</a></li>
 <li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
@@ -60,7 +60,7 @@
 <h2>Detailed Description</h2>
 <p>The DesktopSettings class maintains settings.</p>
 <p>The DesktopSettings class has a number of global options. It is also used as a replacement for <a href="qsettings.html">QSettings</a>, providing various helper functions.</p>
-<p>DesktopSettings will cause settings to be located in Trolltech/Qtopia Sync Agent/..&#x2e; On Windows, this can be found in the registry: HKCU\Software\Trolltech\Qtopia Sync Agent\..&#x2e; On Mac OS X, this can be found in $HOME/Library/Preferences/Qtopia Sync Agent.plist On Unix, this can be found in $HOME/.config/Trolltech/Qtopia Sync Agent/..&#x2e;</p>
+<p>DesktopSettings will cause settings to be located in Trolltech/Qt Extended Sync Agent/..&#x2e; On Windows, this can be found in the registry: HKCU\Software\Trolltech\Qt Extended Sync Agent\..&#x2e; On Mac OS X, this can be found in $HOME/Library/Preferences/Qt Extended Sync Agent.plist On Unix, this can be found in $HOME/.config/Trolltech/Qt Extended Sync Agent/..&#x2e;</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="DesktopSettings"></a>DesktopSettings::DesktopSettings ( const <a href="qstring.html">QString</a> &amp; <i>section</i> = QString() )</h3>
@@ -76,9 +76,9 @@
 <h3 class="fn"><a name="deviceId"></a><a href="qstring.html">QString</a> DesktopSettings::deviceId ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a unique string for this device.</p>
 <h3 class="fn"><a name="homePath"></a><a href="qstring.html">QString</a> DesktopSettings::homePath ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Return the location that Qtopia Sync Agent can write files to. This function exists because the location varies for different platforms.</p>
+<p>Return the location that Qt Extended Sync Agent can write files to. This function exists because the location varies for different platforms.</p>
 <h3 class="fn"><a name="installedDir"></a><a href="qstring.html">QString</a> DesktopSettings::installedDir ()&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Return the location that Qtopia Sync Agent has been installed to.</p>
+<p>Return the location that Qt Extended Sync Agent has been installed to.</p>
 <h3 class="fn"><a name="languages"></a><a href="qstringlist.html">QStringList</a> DesktopSettings::languages ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return a bunch of related languages. For example: en_US, en.</p>
 <h3 class="fn"><a name="loadTranslations"></a>void DesktopSettings::loadTranslations ( const <a href="qstring.html">QString</a> &amp; <i>file</i>, <a href="qobject.html">QObject</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -89,7 +89,7 @@
 <p>Return the system language (or a derivitave that exists, falling back to english)</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td align="left">Copyright &copy; 2007 Trolltech</td>
-<td align="right">Qtopia Sync Agent Documentation</td>
+<td align="left">Copyright &copy; 2008 Trolltech</td>
+<td align="right"><div align="right">Qt Extended Sync Agent Documentation</div></td>
 </tr></table></div></address></body>
 </html>

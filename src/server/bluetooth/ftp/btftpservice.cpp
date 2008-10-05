@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -351,11 +349,8 @@ private:
     int generateConnectionId() const;
     QObex::ResponseCode listDirectory(const QString &name);
 
-#if QT_VERSION < 0x040400
-    static QBasicAtomic nextConnectionId;
-#else
     static QAtomicInt nextConnectionId;
-#endif
+
     BtFtpContentManager *m_manager;
     QString m_currentPath;
     QByteArray m_currentListing;
@@ -367,11 +362,7 @@ private:
     char m_buf[4096];
 };
 
-#if QT_VERSION < 0x040400
-QBasicAtomic BtFtpSession::nextConnectionId = Q_ATOMIC_INIT(1);
-#else
 QAtomicInt BtFtpSession::nextConnectionId(1);
-#endif
 
 BtFtpSession::BtFtpSession(QIODevice *device, BtFtpContentManager *manager, QObject *parent)
     : QObexServerSession(device, parent), m_manager(manager)
@@ -390,15 +381,6 @@ BtFtpSession::~BtFtpSession()
 
 int BtFtpSession::generateConnectionId() const
 {
-#if QT_VERSION < 0x040400
-    register int id;
-    for (;;) {
-        id = nextConnectionId;
-        if (nextConnectionId.testAndSet(id, id + 1))
-            break;
-    }
-    return id;
-#else
     register int id;
     for (;;) {
         id = nextConnectionId;
@@ -406,7 +388,6 @@ int BtFtpSession::generateConnectionId() const
             break;
     }
     return id;
-#endif
 }
 
 void BtFtpSession::error(QObexServerSession::Error error, const QString &)
@@ -488,6 +469,8 @@ QObex::ResponseCode BtFtpSession::provideData(const char **data, qint64 *size)
 
 QObex::ResponseCode BtFtpSession::connect(const QObexHeader &header)
 {
+    qLog(Bluetooth) << "BtFtpSession: CONNECT request:" << header;
+
     if (header.target().isEmpty() || header.target() != QByteArray(target_uuid, sizeof(target_uuid)))
         return QObex::ServiceUnavailable;
 
@@ -505,8 +488,10 @@ QObex::ResponseCode BtFtpSession::connect(const QObexHeader &header)
     return QObex::Success;
 }
 
-QObex::ResponseCode BtFtpSession::disconnect(const QObexHeader &)
+QObex::ResponseCode BtFtpSession::disconnect(const QObexHeader &header)
 {
+    qLog(Bluetooth) << "BtFtpSession: DISCONNECT request:" << header;
+
     QTimer::singleShot(0, this, SIGNAL(disconnected()));
 
     return QObex::Success;
@@ -514,6 +499,8 @@ QObex::ResponseCode BtFtpSession::disconnect(const QObexHeader &)
 
 QObex::ResponseCode BtFtpSession::put(const QObexHeader &header)
 {
+    qLog(Bluetooth) << "BtFtpSession: PUT request:" << header;
+
     if (header.type() == "x-obex/folder-listing") {
         //TODO:
         // Clients can send this to customize their listing
@@ -588,6 +575,8 @@ QObex::ResponseCode BtFtpSession::put(const QObexHeader &header)
 
 QObex::ResponseCode BtFtpSession::putDelete(const QObexHeader &header)
 {
+    qLog(Bluetooth) << "BtFtpSession: PUT-DELETE request:" << header;
+
     if (header.name().isEmpty())
         return QObex::BadRequest;
 
@@ -679,6 +668,8 @@ QObex::ResponseCode BtFtpSession::listDirectory(const QString &name)
 
 QObex::ResponseCode BtFtpSession::get(const QObexHeader &header)
 {
+    qLog(Bluetooth) << "BtFtpSession: GET request:" << header;
+
     if (header.type() == "x-obex/folder-listing") {
         return listDirectory(header.name());
     }
@@ -704,8 +695,10 @@ QObex::ResponseCode BtFtpSession::get(const QObexHeader &header)
 
     QContent content = set->findFileName(stripPath);
 
-    if (!content.isValid())
+    if (!content.isValid()) {
+        qLog(Bluetooth) << "Cannot find requested file:" << stripPath;
         return QObex::NotFound;
+    }
 
     if (!(content.permissions() & QDrmRights::Distribute))
         return QObex::Unauthorized;
@@ -731,6 +724,8 @@ QObex::ResponseCode BtFtpSession::get(const QObexHeader &header)
 QObex::ResponseCode BtFtpSession::setPath(const QObexHeader &header,
                                           QObex::SetPathFlags flags)
 {
+    qLog(Bluetooth) << "BtFtpSession: SETPATH request:" << header << flags;
+
     if (header.name().isEmpty() &&
         (flags & QObex::NoPathCreation) &&
         !(flags & QObex::BackUpOneLevel)) {
@@ -742,6 +737,7 @@ QObex::ResponseCode BtFtpSession::setPath(const QObexHeader &header,
                (flags & QObex::BackUpOneLevel) &&
                (flags & QObex::NoPathCreation) ) {
         if (m_currentPath.isEmpty()) {
+            qLog(Bluetooth) << "BtFtpSession: cannot change to parent dir, already at root";
             return QObex::NotFound;
         }
 
@@ -754,13 +750,16 @@ QObex::ResponseCode BtFtpSession::setPath(const QObexHeader &header,
                !(flags & QObex::BackUpOneLevel) ) {
 
         if (!m_currentPath.isEmpty()) {
+            qLog(Bluetooth) << "BtFtpSession: cannot find path" << header.name();
             return QObex::NotFound;
         }
 
         BtFtpDirectoryInfo *info = m_manager->info(header.name());
 
-        if (!info)
+        if (!info) {
+            qLog(Bluetooth) << "BtFtpSession: cannot find dir info";
             return QObex::NotFound;
+        }
 
         m_currentPath = header.name();
 
@@ -770,9 +769,11 @@ QObex::ResponseCode BtFtpSession::setPath(const QObexHeader &header,
     else if ( !header.name().isEmpty() &&
                 !(flags & QObex::NoPathCreation) &&
                 !(flags & QObex::BackUpOneLevel) ) {
+        qLog(Bluetooth) << "BtFtpSession: no directory name provided";
         return QObex::Unauthorized;
     }
 
+    qLog(Bluetooth) << "BtFtpSession: bad SETPATH request";
     return QObex::BadRequest;
 }
 
@@ -874,7 +875,7 @@ BtFtpService::~BtFtpService()
 
 void BtFtpService::close()
 {
-    qLog(Bluetooth) << "ObexPushServiceProvider close";
+    qLog(Bluetooth) << "BtFtpService close";
 
     if (m_server) {
         m_server->close();
@@ -888,7 +889,7 @@ void BtFtpService::close()
 
 void BtFtpService::start()
 {
-    qLog(Bluetooth) << "ObexPushServiceProvider start";
+    qLog(Bluetooth) << "BtFtpService start";
     if (m_server)
         close();
 
@@ -967,9 +968,9 @@ void BtFtpService::sessionEnded()
     qLog(Bluetooth) << "Bluetooth FTP session finished, m_numBtSessions: " << m_numBtSessions;
 
     if (m_numBtSessions == 0) {
-        qLog(Bluetooth) << "Ending Bluetooth FTP session";
+        qLog(Bluetooth) << "BtFtpService: Ending Bluetooth FTP session";
         m_session->endSession();
-        qLog(Bluetooth) << "Session ended";
+        qLog(Bluetooth) << "BtFtpService: Session ended";
     }
 }
 
@@ -996,6 +997,7 @@ void BtFtpService::setSecurityOptions(QBluetooth::SecurityOptions options)
 
 /*!
   \class BtFtpServiceTask
+    \inpublicgroup QtBluetoothModule
   \brief The BtFtpServiceTask class provides server side support for the Bluetooth
   FTP profile.
   \ingroup QtopiaServer::Task::Bluetooth
@@ -1003,7 +1005,7 @@ void BtFtpService::setSecurityOptions(QBluetooth::SecurityOptions options)
   This task listens for incoming Bluetooth FTP connections and handles them.
 
   The BtFtpServiceTask class provides the \c {BtFtpServiceTask} task.
-  This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
+  This class is part of the Qt Extended server and cannot be used by other QtopiaApplications.
   */
 
 /*!
@@ -1012,7 +1014,7 @@ void BtFtpService::setSecurityOptions(QBluetooth::SecurityOptions options)
 BtFtpServiceTask::BtFtpServiceTask( QObject* parent )
     : QObject( parent )
 {
-    qLog(Bluetooth) << "Initializing Bluetooth FTP";
+    qLog(Bluetooth) << "BtFtpService: initializing";
     m_service = new BtFtpService(this);
 }
 

@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _QPHONEPROFILE_H_
-#define _QPHONEPROFILE_H_
+#ifndef QPHONEPROFILE_H
+#define QPHONEPROFILE_H
 
 #include <QSharedDataPointer>
 #include <QString>
@@ -98,6 +96,13 @@ public:
         Ascending
     };
 
+    enum VideoOption {
+        AlwaysOff,
+        OnForIncoming,
+        OnForOutgoing,
+        AlwaysOn
+    };
+
     QPhoneProfile();
     explicit QPhoneProfile(int id);
     QPhoneProfile(const QPhoneProfile &);
@@ -115,6 +120,7 @@ public:
     bool vibrate() const;
     AlertType callAlert() const;
     AlertType msgAlert() const;
+    VideoOption videoOption() const;
     int msgAlertDuration() const;
     bool autoAnswer() const;
     QContent callTone() const;
@@ -129,7 +135,9 @@ public:
     Schedule schedule() const;
     int id() const;
     QString audioProfile() const;
+#ifdef QTOPIA_TELEPHONY
     QString speedDialInput() const;
+#endif
 
     void setId(int id);
     void setIcon(const QString &);
@@ -139,6 +147,7 @@ public:
     void setVibrate(bool);
     void setCallAlert(AlertType);
     void setMsgAlert(AlertType );
+    void setVideoOption(VideoOption);
     void setMsgAlertDuration(int);
     void setAutoAnswer(bool);
     void setPlaneMode(bool);
@@ -149,7 +158,9 @@ public:
     void setVideoTone(const QContent &);
     void setMessageTone(const QContent &);
     void setAudioProfile(const QString &);
+#ifdef QTOPIA_TELEPHONY
     void setSpeedDialInput(const QString &);
+#endif
 
 private:
     QSharedDataPointer<QPhoneProfilePrivate> d;
@@ -207,7 +218,6 @@ private:
                          const QPhoneProfile &oldProfile);
     void activateSettings(const QPhoneProfile::Settings &current,
                           const QPhoneProfile::Settings &previous);
-
 };
 
-#endif // _QPHONEPROFILE_H_
+#endif

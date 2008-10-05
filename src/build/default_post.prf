@@ -65,6 +65,9 @@ QMAKE_EXTRA_TARGETS*=lupdate packages syncqtopia first_syncqtopia
         }
         echo("$$self: No LICENSE specified. Assuming $${QTOPIA_LICENSE}.")
     }
+
+    # Ensure that all headers are seen by the build system
+    HEADERS*=$$PRIVATE_HEADERS $$SEMI_PRIVATE_HEADERS
 }
 
 # We want these items processed as early as possible

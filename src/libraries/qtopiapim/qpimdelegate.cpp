@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -35,9 +33,12 @@ public:
 
 /*!
   \class QPimDelegate
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
   \preliminary
-  \mainclass
-  \module qpepim
+
   \ingroup pim
   \brief The QPimDelegate class provides an abstract delegate for
          rendering multiple lines of text for a PIM record.
@@ -95,7 +96,7 @@ QString QPimDelegate::mainText(const QStyleOptionViewItem &option,
 {
     Q_UNUSED(option);
 
-    return index.model()->data(index, Qt::DisplayRole).toString();
+    return index.data(Qt::DisplayRole).toString();
 }
 
 /*!
@@ -378,6 +379,16 @@ void QPimDelegate::drawBackground(QPainter *p,
                 p->drawRoundRect(rr, 800/rr.width(),800/rr.height());
             p->setRenderHints(rh);
         }
+#ifdef QTOPIA_HOMEUI
+        else {
+            QColor bg = option.palette.color(QPalette::Base);
+            QLinearGradient bgg(option.rect.x(), option.rect.y(),
+                    option.rect.x(), option.rect.bottom());
+            bgg.setColorAt(0.0f, bg.lighter(200));
+            bgg.setColorAt(1.0f, bg);
+            p->fillRect(option.rect, bgg);
+        }
+#endif
     }
 }
 
@@ -477,6 +488,7 @@ void QPimDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             y += (height - (fmainM.lineSpacing() + (subTexts.count() * (fsubheaderM.lineSpacing() + 1)))) / 2;
 
         space = textRectangle(option.rect, leftFloats, rightFloats, y, fmainM.lineSpacing());
+
         painter->drawText(space, Qt::AlignLeading, fmainM.elidedText(mainText(option, index), option.textElideMode, space.width()));
         y += fmainM.lineSpacing();
 
@@ -623,16 +635,56 @@ QFont QPimDelegate::differentFont(const QFont& start, int step) const
  */
 QSize QPimDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    int subTextsCount = subTextsCountHint(option, index);
-
     QFont main = mainFont(option, index);
     QFont shfont = secondaryHeaderFont(option, index);
+    QFont subfont = secondaryFont(option, index);
 
     QFontMetrics fm(main);
-    QFontMetrics sfm(shfont);
+    QFontMetrics shfm(shfont);
+    QFontMetrics sfm(subfont);
 
-    // This is the text size
-    QSize sh(fm.width("M") * 10,1 + fm.lineSpacing() + 1 + ( subTextsCount * (sfm.lineSpacing() + 1)) + 1);
+    // Get the text sizes..
+    QSize mainSize(fm.width(mainText(option, index)), fm.lineSpacing());
+
+    // Need to measure the subtexts properly
+    QSize subSizes;
+
+    QList<StringPair> subTexts = this->subTexts(option, index);
+    SubTextAlignment subAlign = subTextAlignment(option, index);
+    int headerWidth = 0;
+    StringPair subLine;
+
+    /* First, calculate the width of all the header sections, if the style is cuddly */
+    if (subAlign == CuddledPerItem) {
+        foreach(subLine, subTexts) {
+            if (!subLine.first.isEmpty() && !subLine.second.isNull()) {
+                int w = shfm.boundingRect(subLine.first).width();
+                if (w > headerWidth)
+                    headerWidth = w;
+            }
+        }
+    }
+
+    /* Now get the width of each item */
+    QList<StringPair>::const_iterator it = subTexts.begin();
+    while (it != subTexts.end()) {
+        subLine = *it++;
+        if (!subLine.first.isNull()) {
+            if (!subLine.second.isEmpty()) {
+                if (subAlign == Independent)
+                    headerWidth = shfm.width(subLine.first);
+                int lineWidth = headerWidth + sfm.width(subLine.second);
+                subSizes.rwidth() = qMax(subSizes.width(), lineWidth);
+            } else
+                subSizes.rwidth() = qMax(subSizes.width(), shfm.width(subLine.first));
+        } else {
+            if (!subLine.second.isEmpty())
+                subSizes.rwidth() = qMax(subSizes.width(), sfm.width(subLine.second));
+        }
+
+        subSizes.rheight() += shfm.lineSpacing();
+    }
+    QSize sh(qMax(mainSize.width(), subSizes.width()), 1 + mainSize.height() + 1 + subSizes.height() + 1);
 
     // allow the decoration size hint to be included
     return decorationsSizeHint(option, index, sh);

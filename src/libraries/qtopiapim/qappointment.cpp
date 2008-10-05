@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,7 +22,7 @@
 #include <qtopianamespace.h>
 
 #include "vobject_p.h"
-#include "qappointmentio_p.h"
+#include "qappointmentsqlio_p.h"
 
 #include <qbuffer.h>
 #include <qtextcodec.h>
@@ -83,8 +81,11 @@ static QDateTime trimSeconds( const QDateTime &dt )
 
 /*!
   \class QAppointment
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QAppointment class holds the data of a calendar appointment.
 
@@ -103,8 +104,7 @@ static QDateTime trimSeconds( const QDateTime &dt )
   example if the start date of the appointment is the 16th of April,
   then for the purposes of the repeat MonthlyDate rule, the Instance is
   16.  This differs from some other systems that explicitly store the
-  Instance information separate from the start information.  In Qtopia
-  the start of an appointment must always be a valid occurrence for the
+  Instance information separate from the start information.  In Qt Extended the start of an appointment must always be a valid occurrence for the
   appointments repetition behavior.
 
   \sa {Pim Library}
@@ -1148,7 +1148,7 @@ static VObject *createVObject( const QAppointment &e )
                 break;
             case QAppointment::MonthlyDay:
                 /* vCal can't handle the type of week masked monthly
-                   rules Outlook and Qtopia support.
+                   rules Outlook and Qt Extended support.
                    Do best match instead.
                 */
                 repeat_format = "MP%3 %1 %2%4";
@@ -1980,8 +1980,11 @@ QDate QAppointment::repeatUntilInCurrentTZ() const
 
 /*!
   \class QOccurrence
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QOccurrence class holds the data of an occurrence of a calendar appointment.
 
@@ -2351,7 +2354,14 @@ Q_IMPLEMENT_USER_METATYPE(QAppointment)
 
 /*!
   \class QAppointment::Exception
-  \mainclass
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+  \inpublicgroup QtPimModule
+
+  \ingroup pim
+
+  \brief The Exception class provides information about exceptions to appointment related repeat rules. 
 
   This structure has the following fields:
 

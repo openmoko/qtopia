@@ -1,0 +1,144 @@
+#include "../common.h"
+
+class addressbook: public QObject
+{
+    Q_OBJECT
+    COMMON_CLASS_DATA
+private slots:
+    void initTestCase()
+    {
+        INIT_TEST_CASE_BODY(
+                "com.trolltech.plugin.outlook.sync.contacts", // plugin
+                false, // TRACE/LOG enabled
+                false  // wait for debugger
+                )
+    }
+
+    void prepareForSync()
+    {
+        PREPARE_FOR_SYNC_BODY()
+    }
+
+    COMMON_TEST_CASES
+
+    void cleanupTestCase()
+    {
+        CLEANUP_TEST_CASE_BODY()
+    }
+
+private:
+#undef QVERIFY
+#define QVERIFY(x) if ( !(x) ) return false
+    bool cleanOutTable()
+    {
+        QSignalSpy spyCreateServerRecord( thePlugin, SIGNAL(createServerRecord(QByteArray)) );
+        QSignalSpy spyRemoveServerRecord( thePlugin, SIGNAL(removeServerRecord(QString)) );
+        QSignalSpy spyReplaceServerRecord( thePlugin, SIGNAL(replaceServerRecord(QByteArray)) );
+        QSignalSpy spyServerChangesCompleted( thePlugin, SIGNAL(serverChangesCompleted()) );
+
+        thePlugin->fetchChangesSince( QDateTime() ); // force a slow sync
+        // Async reply... just idle the event loop while we wait
+        //qDebug() << "waiting for serverChangesCompleted" << __LINE__;
+        while ( spyServerChangesCompleted.count() == 0 )
+            qApp->processEvents();
+        //qDebug() << "got serverChangesCompleted" << __LINE__;
+
+        // There should not be any edit or remove events
+        QVERIFY(spyRemoveServerRecord.count() == 0);
+        QVERIFY(spyReplaceServerRecord.count() == 0);
+
+        // There may have been new events...
+        while ( spyCreateServerRecord.count() ) {
+            QByteArray record = spyCreateServerRecord.takeFirst().at(0).toByteArray();
+            QString id;
+            bool mapped;
+            bool ok = thePlugin->getIdentifier( record, id, mapped );
+            QVERIFY(ok);
+            QVERIFY(mapped);
+            // We want to clear out the addressbook so just remove every identifier we see.
+            //qDebug() << "Remove record" << id;
+            thePlugin->removeClientRecord( id );
+        }
+        return true;
+    }
+
+    bool checkForEmptyTable()
+    {
+        QSignalSpy spyCreateServerRecord( thePlugin, SIGNAL(createServerRecord(QByteArray)) );
+        QSignalSpy spyRemoveServerRecord( thePlugin, SIGNAL(removeServerRecord(QString)) );
+        QSignalSpy spyReplaceServerRecord( thePlugin, SIGNAL(replaceServerRecord(QByteArray)) );
+        QSignalSpy spyServerChangesCompleted( thePlugin, SIGNAL(serverChangesCompleted()) );
+
+        thePlugin->fetchChangesSince( QDateTime() ); // force a slow sync
+        // Async reply... just idle the event loop while we wait
+        //qDebug() << "waiting for serverChangesCompleted" << __LINE__;
+        while ( spyServerChangesCompleted.count() == 0 )
+            qApp->processEvents();
+        //qDebug() << "got serverChangesCompleted" << __LINE__;
+
+        // There should not be any edit or remove events
+        QVERIFY(spyRemoveServerRecord.count() == 0);
+        QVERIFY(spyReplaceServerRecord.count() == 0);
+
+        // Unless something went wrong there should not be any new events
+        QVERIFY(spyCreateServerRecord.count() == 0);
+
+        return true;
+    }
+
+    bool addClientRecord( QByteArray newRecord )
+    {
+        QSignalSpy spyMappedId( thePlugin, SIGNAL(mappedId(QString,QString)) );
+        thePlugin->createClientRecord( newRecord );
+        // Async reply... just idle the event loop while we wait
+        //qDebug() << "waiting for mappedId" << __LINE__;
+        while ( spyMappedId.count() == 0 )
+            qApp->processEvents();
+        //qDebug() << "got mappedId" << __LINE__;
+        QVERIFY(spyMappedId.count() == 1);
+        QList<QVariant> args = spyMappedId.takeFirst();
+        QString serverId = args.at(0).toString();
+        QString clientId = args.at(1).toString();
+        idMap[serverId] = clientId;
+        return true;
+    }
+
+    bool checkForAddedItem( QByteArray expected )
+    {
+        QSignalSpy spyCreateServerRecord( thePlugin, SIGNAL(createServerRecord(QByteArray)) );
+        QSignalSpy spyRemoveServerRecord( thePlugin, SIGNAL(removeServerRecord(QString)) );
+        QSignalSpy spyReplaceServerRecord( thePlugin, SIGNAL(replaceServerRecord(QByteArray)) );
+        QSignalSpy spyServerChangesCompleted( thePlugin, SIGNAL(serverChangesCompleted()) );
+
+        // We're going to assume it takes less than 1 minute to run any particular step of the test
+        thePlugin->fetchChangesSince( QDateTime::currentDateTime().addSecs(-60) );
+        // Async reply... just idle the event loop while we wait
+        //qDebug() << "waiting for serverChangesCompleted" << __LINE__;
+        while ( spyServerChangesCompleted.count() == 0 )
+            qApp->processEvents();
+        //qDebug() << "got serverChangesCompleted" << __LINE__;
+
+        // There should not be any new or remove events
+        QVERIFY(spyRemoveServerRecord.count() == 0);
+        QVERIFY(spyCreateServerRecord.count() == 0);
+        QVERIFY(spyReplaceServerRecord.count() == 1);
+        QByteArray data = spyReplaceServerRecord.takeFirst().at(0).toByteArray();
+        QString id;
+        bool local;
+        bool ok = thePlugin->getIdentifier( data, id, local );
+        QVERIFY(ok);
+        QVERIFY(local);
+        data.replace(id.toLocal8Bit(), idMap[id].toLocal8Bit());
+        data = SANITIZE(data);
+        expected = SANITIZE(expected);
+        if ( data != expected ) {
+            qDebug() << "expected" << endl << expected;
+            qDebug() << "got" << endl << data;
+        }
+        QVERIFY(data == expected);
+        return true;
+    }
+};
+QTEST_MAIN(addressbook)
+
+#include "main.moc"

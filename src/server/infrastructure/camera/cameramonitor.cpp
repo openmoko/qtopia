@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -50,11 +48,12 @@ static const char* const CAMERA_MONITOR_CAMERA_FEATURE  =   "Camera";
   \ingroup QtopiaServer::Task
   \brief The CameraMonitor class updates the camera feature
 
-  The default implementation checks the camera availablity at startup and
-  exports the "Camera" QtopiaFeature, if the camera can added and removed
-  during device operation then update() should be called when this occurs.
-  
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  The camera monitor detects when camera are available on the device and
+  advertises them using the QtopiaFeatures API as the "Camera" feature.
+
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+  \sa QtopiaFeatures, StandardDeviceFeatures
 */
 
 /*!
@@ -66,7 +65,7 @@ CameraMonitor::CameraMonitor( QObject* parent )
     //delay the update to minimize startup time
     serverWidgetVsi = new QValueSpaceItem("/System/ServerWidgets/Initialized", this);
     connect( serverWidgetVsi, SIGNAL(contentsChanged()), this, SLOT(delayedUpdate()) );
-    delayedUpdate(); //in case its visible already
+    delayedUpdate(); //in case main widget is already visible
 }
 
 /*!
@@ -104,3 +103,4 @@ void CameraMonitor::update()
     close( fd );
 }
 
+QTOPIA_TASK(CameraMonitor,CameraMonitor)

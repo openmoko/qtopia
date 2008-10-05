@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -31,7 +29,7 @@
 
 /*!
   \class QVPNFactory
-  \mainclass
+
   \brief The QVPNFactory class creates QVPNClient instances.
 
   \ingroup io
@@ -41,8 +39,7 @@
   should be used to obtain a reference to an already existing VPN connection.
   
   In addition QVPNFactory provides functionality to lookup and resolve VPN identifier.
-  vpnIDs() returns a list of all known virtual private network connections known to Qtopia
-  and name() returns the human-readable name of a given connection.
+  vpnIDs() returns a list of all known virtual private network connections known to Qt Extended and name() returns the human-readable name of a given connection.
 
   QVPNFactory follows the factory pattern and creates QVPNClient instances. types() should
   be used to determine what types of VPN's are supported by a particular build of Qtopia.

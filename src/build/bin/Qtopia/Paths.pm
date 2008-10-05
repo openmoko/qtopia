@@ -29,6 +29,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
     $QPEDIR
+    $SDKROOT
     $depotpath
     $QTEDIR
     $DQTDIR
@@ -55,6 +56,7 @@ use constant DEBUG => 0;
 
 # PATH variables
 our $QPEDIR;
+our $SDKROOT;
 our $depotpath;
 our $QTEDIR;
 our $DQTDIR;
@@ -70,15 +72,16 @@ our $qbs_bin;
 our %cache_vars = (
     "QTOPIA_DEPOT_PATH" => \$depotpath,
     "QPEDIR" => \$QPEDIR,
-    "QT_DEPOT_PATH" => \$qt_depot_path,
+    "SDKROOT" => \$SDKROOT,
+    #"QT_DEPOT_PATH" => \$qt_depot_path,
     "QTEDIR" => \$QTEDIR,
-    "DQTDIR" => \$DQTDIR,
+    #"DQTDIR" => \$DQTDIR,
     "HOST_QT" => \$HOST_QT,
     "HOST_QT_LIBS" => \$HOST_QT_LIBS,
     "HOST_QT_BINS" => \$HOST_QT_BINS,
     "HOST_QMAKE" => \$HOST_QMAKE,
     "TARGET_QMAKE" => \$TARGET_QMAKE,
-    "QBS_BIN" => \$qbs_bin,
+    #"QBS_BIN" => \$qbs_bin,
 );
 
 sub get_paths()
@@ -112,6 +115,10 @@ sub get_paths()
                 $_ = Qtopia::File::fixpath(getcwd());
             }
         }
+
+        # The SDK defaults to $QPEDIR (but it can be changed)
+        $SDKROOT = $QPEDIR;
+        $shadow = ( $QPEDIR ne $depotpath );
     } else {
 
         ###
@@ -147,6 +154,8 @@ sub get_paths()
                 $check = dirname($check);
             }
         }
+        # The SDK defaults to $QPEDIR (but it can be changed)
+        $SDKROOT = $QPEDIR;
         if ( !defined($QPEDIR) ) {
             my $msg = "ERROR: Could not locate the Qtopia build tree.\n";
             $msg .=   "       Did you run configure?\n";
@@ -175,13 +184,13 @@ sub get_paths()
                 }
             }
         }
+        $shadow = 1;
     }
 
-    $shadow = ( $QPEDIR ne $depotpath );
     if ( $isWindows ) {
-        $qbs_bin = "$QPEDIR/bin";
+        $qbs_bin = "$SDKROOT/bin";
     } else {
-        $qbs_bin = "$QPEDIR/src/build/bin";
+        $qbs_bin = "$SDKROOT/src/build/bin";
     }
 }
 
@@ -202,29 +211,3 @@ sub write_config_cache()
 
 # Make this file require()able.
 1;
-__END__
-
-=head1 NAME
-
-Qtopia::Paths - Path variables for Qtopia
-
-=head1 SYNOPSIS
-
-    use Qtopia::Paths;
-    Qtopia::Paths::get_paths();
-    print "QPEDIR is $QPEDIR\n";
-
-=head1 DESCRIPTION
-
-This module determines the paths to various locations in the Qtopia build system.
-If config.cache exists, it will be the primary source of information.
-
-=head1 AUTHOR
-
-Trolltech AS
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2006 TROLLTECH ASA. All rights reserved.
-
-=cut

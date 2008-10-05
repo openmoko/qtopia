@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -67,7 +65,6 @@ QTOPIA_LOG_OPTION(SxeMonitor)
 QTOPIA_LOG_OPTION(Hardware)
 QTOPIA_LOG_OPTION(Camera)
 QTOPIA_LOG_OPTION(CleanupWizard)
-QTOPIA_LOG_OPTION(DBUS)
 QTOPIA_LOG_OPTION(Services)
 QTOPIA_LOG_OPTION(ApplicationLayer)
 QTOPIA_LOG_OPTION(IniLayer)
@@ -82,5 +79,9 @@ QTOPIA_LOG_OPTION(QAudioInput)
 QTOPIA_LOG_OPTION(QAudioOutput)
 QTOPIA_LOG_OPTION(AudioState)
 QTOPIA_LOG_OPTION(Synchronization)
-QTOPIA_LOG_OPTION(Qtopiatest)
-QTOPIA_LOG_OPTION(QtopiatestWidgets)
+QTOPIA_LOG_OPTION(QtUitest)
+QTOPIA_LOG_OPTION(QtUitestWidgets)
+QTOPIA_LOG_OPTION(Component)
+QTOPIA_LOG_OPTION(Telepathy)
+QTOPIA_LOG_OPTION(USB)
+QTOPIA_LOG_OPTION(SimPhoneBook)

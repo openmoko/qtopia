@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -448,7 +446,17 @@ void QAbstractCommDeviceManager_Private::doUp()
             qWarning("QAbstractCommDeviceManager::doUp - The queue should not be empty!");
             return;
         }
-        m_events.dequeue();
+
+        CommManagerEvent ev = m_events.dequeue();
+
+        if (ev.type == CommManagerEvent::DEVICE_UP_TIMED)
+            setState(OnMinutes);
+        else if ((ev.type == CommManagerEvent::DEVICE_UP_ONE_ITEM) ||
+                 (ev.type == CommManagerEvent::DEVICE_UP_SESSION))
+            setState(OnOneItem);
+        else
+            setState(On);
+
         QTimer::singleShot(0, this, SLOT(doPending()));
         return;
     }
@@ -817,6 +825,7 @@ bool QAbstractCommDeviceManager_Private::start()
     p.append(m_devId);
     m_valueSpace = new QValueSpaceObject(p);
     m_valueSpace->setAttribute("Path", QVariant(m_path));
+    m_valueSpace->setAttribute("ActiveSessions", QVariant(false));
 
     QTimer::singleShot(0, this, SLOT(updateState()));
 
@@ -867,6 +876,8 @@ void QAbstractCommDeviceManager_Private::closeAllSessions()
 
 /*!
     \class QAbstractCommDeviceManager
+    \inpublicgroup QtInfraredModule
+    \inpublicgroup QtBluetoothModule
     \ingroup QtopiaServer
     \brief The QAbstractCommDeviceManager class manages power state of a communications device.
 
@@ -881,14 +892,14 @@ void QAbstractCommDeviceManager_Private::closeAllSessions()
     the device is brought up automatically.  Once all sessions are closed, the device
     can be brought down automatically if required to conserve power.
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
     \sa QCommDeviceSession, QCommDeviceController
  */
 
 /*!
     Constructs a QAbstractCommDeviceManager.  The \a path argument contains
     the UNIX socket path for the manager to listen on.  This should usually be
-    in Qtopia temp directory.  The \a devId contains the unique device identifier,
+    in Qt Extended temp directory.  The \a devId contains the unique device identifier,
     e.g. irda0 or hci0.  The \a parent contains the QObject parent.
 
     \sa serverPath(), deviceId()
@@ -965,7 +976,7 @@ const QByteArray &QAbstractCommDeviceManager::deviceId() const
     utilizing the device.  The \a socket parameter holds the socket of
     the peer.
 
-    The default implementation returns false if Qtopia is in plane mode;
+    The default implementation returns false if Qt Extended is in plane mode;
     otherwise, it returns true.
 
     \sa QPhoneProfileManager::planeMode()

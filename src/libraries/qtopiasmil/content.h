@@ -1,37 +1,37 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+#ifndef SMILCONTENT_H
+#define SMILCONTENT_H
 
-#include <qtopia/smil/element.h>
-#include <qtopia/smil/module.h>
+#include <element.h>
+#include <module.h>
 
 class SmilPrefetch : public SmilElement
 {
 public:
-    SmilPrefetch(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilPrefetch(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
 };
 
 class SmilSwitch : public SmilElement
 {
 public:
-    SmilSwitch(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilSwitch(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
 };
 
 //===========================================================================
@@ -42,9 +42,10 @@ public:
     SmilContentModule();
     virtual ~SmilContentModule();
 
-    virtual SmilElement *beginParseElement(SmilSystem *, SmilElement *, const QString &qName, const QXmlAttributes &atts);
-    virtual bool parseAttributes(SmilSystem *sys, SmilElement *e, const QXmlAttributes &atts);
+    virtual SmilElement *beginParseElement(SmilSystem *, SmilElement *, const QString &qName, const QXmlStreamAttributes &atts);
+    virtual bool parseAttributes(SmilSystem *sys, SmilElement *e, const QXmlStreamAttributes &atts);
     virtual void endParseElement(SmilElement *, const QString &qName);
-    virtual QStringList elements() const;
+    virtual QStringList elementNames() const;
 };
 
+#endif

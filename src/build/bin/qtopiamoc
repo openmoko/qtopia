@@ -15,6 +15,9 @@ if ( $isWindows ) {
 }
 
 use constant DEBUG => 0;
+
+DEBUG and print join(" ", @ARGV)."\n";
+
 my $file = $ARGV[$#ARGV-2];
 my $output = $ARGV[$#ARGV];
 open IN, "$file" or die "Can't read $file";
@@ -22,7 +25,7 @@ my @data = <IN>;
 close IN;
 my @tmp = grep /Q_OBJECT/, @data;
 if ( @tmp ) {
-    DEBUG and print join(" ", @ARGV)."\n";
+    #DEBUG and print join(" ", @ARGV)."\n";
     system(@ARGV) == 0 and exit 0;
 } else {
     DEBUG and print "Skipping\n";

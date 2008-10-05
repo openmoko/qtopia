@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "qtopiaserverapplication.h"
@@ -24,7 +22,6 @@
 QTOPIA_LOG_OPTION(QDSync)
 #include <private/qcopenvelope_p.h>
 #include "applicationlauncher.h"
-#include "systemsuspend.h"
 #include <time.h>
 #include <unistd.h>
 #include <custom.h>
@@ -43,16 +40,12 @@ private slots:
     void waitnewproc();
     void newproc();
     void applicationStateChanged( const QString &application, ApplicationTypeLauncher::ApplicationState state );
-    void systemSuspending();
-    void systemWaking();
 
 private:
     bool systemRestart();
     bool systemShutdown();
-    QString gadget();
 
     ApplicationLauncher *launcher;
-    SystemSuspend *suspend;
     bool shutdown;
     time_t curTime;
     bool running;
@@ -68,11 +61,6 @@ QDSyncTask::QDSyncTask()
     Q_ASSERT(launcher);
     connect( launcher, SIGNAL(applicationStateChanged(QString,ApplicationTypeLauncher::ApplicationState)),
              this, SLOT(applicationStateChanged(QString,ApplicationTypeLauncher::ApplicationState)) );
-
-    suspend = qtopiaTask<SystemSuspend>();
-    Q_ASSERT(suspend);
-    connect( suspend, SIGNAL(systemSuspending()), this, SLOT(systemSuspending()) );
-    connect( suspend, SIGNAL(systemActive()), this, SLOT(systemWaking()) );
 
     shutdown = false;
     running = false;
@@ -101,7 +89,7 @@ void QDSyncTask::waitnewproc()
 void QDSyncTask::newproc()
 {
     qLog(QDSync) << "QDSyncTask::newproc";
-    QCopEnvelope e("QPE/Application/qdsync", "startDaemons()");
+    QCopEnvelope e("QPE/Application/qdsync", "startup()");
 }
 
 bool QDSyncTask::systemRestart()
@@ -140,37 +128,6 @@ void QDSyncTask::applicationStateChanged( const QString &application, Applicatio
             newproc();
         }
     }
-}
-
-void QDSyncTask::systemSuspending()
-{
-    qLog(QDSync) << "QDSyncTask::systemSuspending";
-    // This is setup for the Greenphone which must unload the usb gadget kernel module
-    // when it suspends. QDSync must release the serial device or it will trigger a kernel panic.
-    if ( launcher->canLaunch( "qdsync" ) && running && gadget() == "winserial" ) {
-        qLog(QDSync) << "Stopping QDSync daemons";
-        QCopEnvelope e("QPE/Application/qdsync", "stopDaemons()");
-    }
-    ::sleep(1);
-}
-
-void QDSyncTask::systemWaking()
-{
-    qLog(QDSync) << "QDSyncTask::systemWaking";
-    if ( launcher->canLaunch( "qdsync" ) && running )
-        QCopEnvelope e("QPE/Application/qdsync", "startDaemons()");
-}
-
-QString QDSyncTask::gadget()
-{
-    // This is setup for the Greenphone which writes the current gadget to /etc/gadget
-    QFile f( "/etc/gadget" );
-    if ( f.exists() && f.open(QIODevice::ReadOnly) ) {
-        QByteArray gadget = f.readAll();
-        f.close();
-        return QString(gadget.trimmed());
-    }
-    return QString();
 }
 
 #include "qdsynctask.moc"

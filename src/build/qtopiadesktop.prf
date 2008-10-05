@@ -5,8 +5,8 @@ exists($$QPEDIR/src/build/trace_on):message(qtopiadesktop.prf)
 VERSION=
 
 # Qtopia Sync Agent has it's own includes
-INCLUDEPATH-=$$QPEDIR/include
-INCLUDEPATH+=$$QPEDIR/include/qtopiadesktop
+!depotProject:INCLUDEPATH-=$$QPEDIR/include
+!depotProject:INCLUDEPATH+=$$QPEDIR/include/qtopiadesktop
 
 # The 'edition' define
 DEFINES+=QTOPIA_DESKTOP

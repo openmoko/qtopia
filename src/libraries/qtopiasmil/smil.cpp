@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -27,26 +25,25 @@
 #include "timing.h"
 #include "media.h"
 #include "transfer.h"
-#include <qxml.h>
 #include <qstack.h>
 #include <qmap.h>
 #include <qfile.h>
 #include <qpainter.h>
+#include <QXmlStreamReader>
 
-
-class SmilParser : public QXmlDefaultHandler
+class SmilParser
 {
 public:
     SmilParser(SmilSystem *s);
 
-    bool endDocument();
-    bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts);
-    bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName);
-    bool characters(const QString &ch);
-    bool error(const QXmlParseException &exception);
-    bool fatalError(const QXmlParseException &exception);
+    bool parse(QXmlStreamReader& xml);
 
 private:
+    bool endDocument();
+    bool startElement(const QStringRef& namespaceURI, const QStringRef& localName, const QStringRef& qName, const QXmlStreamAttributes& atts);
+    bool endElement(const QStringRef& namespaceURI, const QStringRef& localName, const QStringRef& qName);
+    bool characters(const QStringRef& ch);
+
     SmilSystem *sys;
     QStack<SmilElement*> parseStack;
     SmilElement *root;
@@ -55,8 +52,7 @@ private:
 };
 
 SmilParser::SmilParser(SmilSystem *s)
-    : QXmlDefaultHandler(), sys(s), root(0), current(0),
-        ignore(0)
+    : sys(s), root(0), current(0), ignore(0)
 {
     sys->addModule("Structure", new SmilStructureModule());
     sys->addModule("Content", new SmilContentModule());
@@ -75,12 +71,14 @@ bool SmilParser::endDocument()
     return false;
 }
 
-bool SmilParser::startElement(const QString &/*namespaceURI*/, const QString &/*localName*/, const QString &qName, const QXmlAttributes &atts)
+bool SmilParser::startElement(const QStringRef&/*namespaceURI*/, const QStringRef&/*localName*/, const QStringRef& qName, const QXmlStreamAttributes& atts)
 {
+    QString elementName(qName.toString());
+
     SmilElement *e = 0;
     QMap<QString, SmilModule *>::ConstIterator it;
     for (it = sys->modules().begin(); it != sys->modules().end(); ++it) {
-        e = (*it)->beginParseElement(sys, current, qName, atts);
+        e = (*it)->beginParseElement(sys, current, elementName, atts);
         if (e) {
             if (current)
                 current->addChild(e);
@@ -103,14 +101,16 @@ bool SmilParser::startElement(const QString &/*namespaceURI*/, const QString &/*
     return true;
 }
 
-bool SmilParser::endElement(const QString &/*namespaceURI*/, const QString &/*localName*/, const QString &qName)
+bool SmilParser::endElement(const QStringRef&/*namespaceURI*/, const QStringRef&/*localName*/, const QStringRef& qName)
 {
+    QString elementName(qName.toString());
+
     if (ignore) {
         ignore--;
     } else {
         QMap<QString, SmilModule *>::ConstIterator it;
         for (it = sys->modules().begin(); it != sys->modules().end(); ++it) {
-            (*it)->endParseElement(current, qName);
+            (*it)->endParseElement(current, elementName);
         }
         if (parseStack.top() != root)
             parseStack.pop();
@@ -120,28 +120,37 @@ bool SmilParser::endElement(const QString &/*namespaceURI*/, const QString &/*lo
     return true;
 }
 
-bool SmilParser::characters(const QString &ch)
+bool SmilParser::characters(const QStringRef& ch)
 {
     if (current && !ignore) {
-        current->addCharacters(ch);
+        current->addCharacters(ch.toString());
     }
 
     return true;
 }
 
-bool SmilParser::error(const QXmlParseException &exception)
+bool SmilParser::parse(QXmlStreamReader& xml)
 {
-    qWarning("%s (line %d)", exception.message().toLatin1().constData(), exception.lineNumber());
-    return true;
-}
+    while (!xml.atEnd()) {
+        xml.readNext();
 
-bool SmilParser::fatalError(const QXmlParseException &exception)
-{
-    qWarning("%s (line %d)", exception.message().toLatin1().constData(), exception.lineNumber());
-    return true;
-}
+        if (xml.isStartElement()) {
+            startElement(xml.namespaceUri(), xml.name(), xml.qualifiedName(), xml.attributes());
+        } else if (xml.isEndElement()) {
+            endElement(xml.namespaceUri(), xml.name(), xml.qualifiedName());
+        } else if (xml.isCharacters()) {
+            characters(xml.text());
+        }
+    }
 
-//===========================================================================
+    if (xml.hasError()) {
+        qWarning("%s (line %lld:%lld)", qPrintable(xml.errorString()), xml.lineNumber(), xml.columnNumber());
+        return false;
+    } else {
+        endDocument();
+        return true;
+    }
+}
 
 class SmilViewPrivate
 {
@@ -176,12 +185,9 @@ bool SmilView::setSource(const QString &str)
             this, SIGNAL(transferCancelled(SmilDataSource*,QString)));
     connect(d->sys, SIGNAL(finished()), this, SIGNAL(finished()));
     d->parser = new SmilParser(d->sys);
-    QXmlInputSource source;
-    source.setData(str);
-    QXmlSimpleReader reader;
-    reader.setContentHandler(d->parser);
-    reader.setErrorHandler(d->parser);
-    if (!reader.parse( source )){
+    QXmlStreamReader reader;
+    reader.addData(str);
+    if (!d->parser->parse( reader )){
         qWarning("Unable to parse SMIL file");
         clear();
         return false;
@@ -222,6 +228,11 @@ void SmilView::paintEvent(QPaintEvent *)
         d->sys->paint(&p);
         d->sys->setDirty(QRect());
     }
+}
+
+void SmilView::hideEvent(QHideEvent* /*e*/)
+{
+    reset();
 }
 
 void SmilView::clear()

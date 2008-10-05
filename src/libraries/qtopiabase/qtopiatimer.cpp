@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -49,7 +47,8 @@ struct QtopiaTimerPrivate
 
 /*!
   \class QtopiaTimer
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QtopiaTimer class provides timers that can pause automatically when the screen
   is off.
 
@@ -225,7 +224,7 @@ void QtopiaTimer::disable(bool forceReset)
     Q_ASSERT(PauseWhenInactive == type() && isActive());
     if(d->timerId || forceReset) {
         if (d->timerId) {
-            d->elapsedInterval = d->pTime.elapsed();
+            d->elapsedInterval += d->pTime.elapsed();
             killTimer(d->timerId);
         }
         d->timerId = 0;
@@ -247,8 +246,9 @@ void QtopiaTimer::enable()
     Q_ASSERT(PauseWhenInactive == type() && isActive() && !d->timerId);
 
     // Do we need an immediate emit?
+    int pausedTime = d->pTime.elapsed();
     if (d->pDate != QDate::currentDate() ||
-        d->pTime.elapsed() + d->elapsedInterval >= d->interval) {
+        pausedTime + d->elapsedInterval >= d->interval) {
         // Yes!
         d->timerId = startTimer(d->interval);
         d->pTime.start();
@@ -257,12 +257,13 @@ void QtopiaTimer::enable()
         emit timeout();
     } else {
         // No
-        int interval = d->interval - d->pTime.elapsed() - d->elapsedInterval;
+        d->elapsedInterval += pausedTime;
+
+        int interval = d->interval - d->elapsedInterval;
         Q_ASSERT(interval > 0);
 
         d->timerId = startTimer(interval);
         d->pTime.start();
-        d->elapsedInterval = 0;
         d->runningInterval = interval;
     }
 }
@@ -276,7 +277,7 @@ void QtopiaTimer::activeChanged()
     if(type() == PauseWhenInactive && isActive()) {
 
         Q_ASSERT(d->item);
-        bool backlight = (d->item->value().toInt() >= 1);
+        bool backlight = (d->item->value(QByteArray(), 1).toInt() >= 1);
 
         if(backlight)
             enable();

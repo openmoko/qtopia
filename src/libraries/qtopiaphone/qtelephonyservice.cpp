@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -33,7 +31,8 @@
 
 /*!
     \class QTelephonyService
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QTelephonyService class provides a convenient wrapper to create telephony services and the interfaces that they support.
     \ingroup telephony
 
@@ -66,8 +65,8 @@
         if ( !supports<QNetworkRegistration>() )
             addInterface( new VoIPNetworkRegistration( this ) );
 
-        if ( !supports<QPresence>() )
-            addInterface( new VoIPPresence( this ) );
+        if ( !supports<QCollectivePresence>() )
+            addInterface( new VoIPPresenceProvider( this ) );
 
         if ( !callProvider() )
             setCallProvider( new VoIPCallProvider( this ) );
@@ -85,7 +84,7 @@
     \endcode
 
     During initialize(), the three telephony interfaces corresponding to
-    QNetworkRegistration, QPresence, and QPhoneCallProvider, are created.
+    QNetworkRegistration, QCollectivePresence, and QPhoneCallProvider, are created.
     We first check to see if there is an existing implementation using
     supports() or callProvider(), which allows the VoIP telephony service
     to be inherited by another VoIP service that provides greater functionality
@@ -98,7 +97,7 @@
     notification of when telephony services enter and leave the system.
 
     \sa QAbstractIpcInterfaceGroup, QCommServiceManager, QCommInterface, QNetworkRegistration
-    \sa QPresence, QPhoneCallProvider
+    \sa QCollectivePresence, QPhoneCallProvider
 */
 
 /*!

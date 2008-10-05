@@ -17,8 +17,7 @@ DEFINES+=QTOPIA_TRTARGET=$$LITERAL_ESCAPED_QUOTE$$TRTARGET$$LITERAL_ESCAPED_QUOT
 linstall_template=$$COMMAND_HEADER\
     $$fixpath($$QBS_BIN/linstall)\
         $${LITERAL_QUOTE}TRTARGET$$LITERAL_QUOTE\
-        $$LITERAL_QUOTE$$TRANSLATIONS$$LITERAL_QUOTE\
-        $$LITERAL_QUOTE$$DQTDIR$$LITERAL_QUOTE\
+        $$LITERAL_QUOTE$$STRING_LANGUAGE $$TRANSLATIONS$$LITERAL_QUOTE\
         $$LITERAL_QUOTE$$fixpath($(INSTALL_ROOT)$$resdir/i18n)$$LITERAL_QUOTE\
         $${LITERAL_QUOTE}SRCDIR$$LITERAL_QUOTE
 
@@ -53,7 +52,11 @@ linstall_template=$$COMMAND_HEADER\
             "echo \"TRANSLATIONS += $$SRCDIR/$$TRTARGET-$${lang}.ts\" >>translatables.pro"
     }
     commands+=$$LINE_SEP\
-        $$fixpath($$DQTDIR/bin/lupdate) translatables.pro
+        $$fixpath($$DQTDIR/bin/lupdate) translatables.pro $$LINE_SEP_VERBOSE@\
+        # Now strip out the languages and re-run lupdate for the string language with -pluralonly
+        "grep -v '^TRANSLATIONS' translatables.pro >translatables2.pro" $$LINE_SEP_VERBOSE@\
+        "echo \"TRANSLATIONS += $$SRCDIR/$$TRTARGET-$${STRING_LANGUAGE}.ts\" >>translatables2.pro" $$LINE_SEP\
+        $$fixpath($$DQTDIR/bin/lupdate) -pluralonly translatables2.pro
     translatables.commands=$$commands
     QMAKE_EXTRA_TARGETS+=translatables
     lupdate.depends+=translatables
@@ -92,8 +95,8 @@ for(it,INSTALLS) {
                 -content $$trtarget
         }
         commands+=\
-                $$DQTDIR\
                 $$LITERAL_QUOTE$$ALL_TRANSLATIONS$$LITERAL_QUOTE\
+                $$LITERAL_QUOTE$$STRING_LANGUAGE$$LITERAL_QUOTE\
                 ${QMAKE_FILE_IN}
         eval(nct_lupdate_$${it}.commands=\$$commands)
         eval(nct_lupdate_$${it}.input=$${it}.files)
@@ -109,7 +112,7 @@ for(it,INSTALLS) {
             commands~=s/^"//
             commands~=s/"$//
         }
-        commands~=s,TRTARGET,Theme-$$eval($${it}.trtarget),gq
+        commands~=s,TRTARGET,$$eval($${it}.trtarget),gq
         outdir=$$eval($${it}.outdir)
         isEmpty(outdir):outdir=$$SRCDIR
         commands~=s,SRCDIR,$$outdir,gq
@@ -123,8 +126,8 @@ for(it,INSTALLS) {
         !isEmpty(outdir):commands+=cd $$outdir $$COMMAND_SEP
         commands+=\
             $$fixpath($$QBS_BIN/theme_lupdate)\
-                $$DQTDIR\
                 $$LITERAL_QUOTE$$ALL_TRANSLATIONS$$LITERAL_QUOTE\
+                $$LITERAL_QUOTE$$STRING_LANGUAGE$$LITERAL_QUOTE\
                 ${QMAKE_FILE_IN}
         eval(theme_lupdate_$${it}.commands=\$$commands)
         eval(theme_lupdate_$${it}.input=$${it}.files)
@@ -146,7 +149,8 @@ for(it,INSTALLS) {
             mkdir -p $(INSTALL_ROOT)$$resdir/i18n/$$lang
         for(pkg,EXTRA_TS_FILES) {
             exists($$QTOPIA_DEPOT_PATH/i18n/$$lang/$${pkg}.ts):commands+=$$LINE_SEP\
-                $$fixpath($$DQTDIR/bin/lrelease) $$fixpath($$QTOPIA_DEPOT_PATH/i18n/$$lang/$${pkg}.ts) \
+                $$fixpath($$DQTDIR/bin/lrelease) -compress -nounfinished -removeidentical\
+                    $$fixpath($$QTOPIA_DEPOT_PATH/i18n/$$lang/$${pkg}.ts) \
                     -qm $$fixpath($(INSTALL_ROOT)$$resdir/i18n/$$lang/$${pkg}.qm)
             else:commands+=$$LINE_SEP\
                 echo "WARNING: $$QTOPIA_DEPOT_PATH/i18n/$$lang/$${pkg}.ts is missing and cannot be installed."

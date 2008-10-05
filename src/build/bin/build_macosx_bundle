@@ -231,6 +231,7 @@ sub pexec
 	print "+ ".join(" ", @args)."\n";
     }
     my $status = system(@args);
+    $status = $status >> 8;
     return $status;
 }
 

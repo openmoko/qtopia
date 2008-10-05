@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <qcontentfilterselector.h>
-#include <qtopia/private/qcontentfilterselector_p.h>
+#include "qcontentfilterselector_p.h"
 #include <QKeyEvent>
 #include <QVBoxLayout>
 #include <QPainter>
@@ -59,7 +57,8 @@ public:
 
 /*!
     \class QTreePageProxyModel
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \internal
 
     Proxy model for navigating a tree model as a flat list.  The proxy model lists the immediate children of an index
@@ -591,7 +590,8 @@ static QRect textLayoutBounds(const QStyleOptionViewItemV2 &option)
 
 /*!
     \class QTreePageItemDelegate
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \internal
 
     Item delegate which expands on the basic QItemDelegate by displaying arrows indicating if an item
@@ -863,7 +863,8 @@ void QTreePageItemDelegate::drawArrow(QPainter *painter,
 
 /*!
     \class QContentFilterView
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \internal
 
     Provides a view for navigating QContentFilterModels.  Selecting items in the model will
@@ -1070,7 +1071,8 @@ public:
 
 /*!
     \class QContentFilterSelector
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QContentFilterSelector widget allows the user to select filters to refine the visible selection of content on a device.
 
     QContentFilterDialog is based on \l QContentFilterModel and its contents are defined using a \l QContentFilterModel::Template.
@@ -1267,7 +1269,8 @@ public:
 
 /*!
     \class QContentFilterDialog
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QContentFilterDialog widget provides a dialog box for selecting content filters.
 
     QContentFilterDialog is based on \l QContentFilterModel and its contents are defined using a \l QContentFilterModel::Template.

@@ -88,6 +88,9 @@ for(l,forever) {
         } else:equals(lic,FREEWARE) {
             # Freeware projects are implicitly GPL-compatible
             QTOPIA_LICENSE*=GPL_COMPATIBLE
+        } else:equals(lic,MIT) {
+            # The MIT license is GPL-compatible
+            QTOPIA_LICENSE*=GPL_COMPATIBLE
         } else {
             error($$self: Unknown LICENSE $$lic)
         }

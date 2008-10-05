@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "qcategorymanager.h"
@@ -27,7 +25,7 @@
 #include <qtopiasql.h>
 #include <qtopiaipcenvelope.h>
 #include <qtopianamespace.h>
-#include <qtopia/private/qcategorystore_p.h>
+#include "qcategorystore_p.h"
 
 #include <QSettings>
 #include <QMap>
@@ -48,7 +46,8 @@ public:
 
 /*!
   \class QCategoryFilter
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \ingroup categories
   \brief The QCategoryFilter class allows consistent filtering of records or objects
   that have a set of categories assigned.
@@ -345,7 +344,8 @@ public:
 
 /*!
   \class QCategoryManager
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \ingroup categories
   \brief The QCategoryManager class provides a set of functions to create, modify, and remove categories.
 
@@ -554,23 +554,22 @@ QString QCategoryManager::add( const QString &trLabel, const QString &icon, bool
     // Prepend user. to the id to avoid conflicts with system category ids
     id = QString("user.%1").arg(id);
 
-    if ( !contains(id) ) {
+    if ( !QCategoryStore::instance()->categoryExists(id) )
         if ( addCategory(id, trLabel, icon, forceGlobal) )
             return id;
         else
             return QString();
-    }
 
     // The id is already in use... try to generate a new one
     QString key;
     for ( int i = 0; i < INT_MAX; i++ ) {
         key = QString("%1_%2").arg(id).arg(i);
-        if ( !contains(key) ) {
+        if ( !QCategoryStore::instance()->categoryExists(key) ) {
             if ( addCategory(key, trLabel, icon, forceGlobal) )
                 return key;
             else
                 return QString();
-    }
+        }
     }
 
     return QString();

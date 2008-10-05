@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -39,11 +37,11 @@
 /*!
   \internal
   \class SelectedItem
+    \inpublicgroup QtBaseModule
 
   \brief   SelectedItem is a graphical object which highlights the currently selected GridItem
   object in the PhoneLauncherView's grid.
 
-  \mainclass
   The SelectedItem maintains pointers to all of the GridItem objects in the grid, stored in
   a GridItemTable. This enables the SelectedItem to accept certain keyboard events which
   enable it to move across from the current item to its neighbours in the indicated Direction
@@ -56,7 +54,7 @@
   Since SelectedItem does not inherit from QObject, it contains a SelectedItemConnector to
   handle callbacks, thus avoiding multiple inheritance.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   \sa SelectedItemConnector
   \sa GridItem
 */
@@ -524,6 +522,8 @@ void SelectedItem::updateImages()
 void SelectedItem::resize()
 {
     mSelectedSize = QSize(-1,-1);
+    delete background;
+    background = 0;
 
     if ( currentItem ) {
         // Position this object over currentItem.

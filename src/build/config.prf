@@ -4,6 +4,11 @@ exists($$QPEDIR/src/build/trace_on):message(config.prf)
 # Load the configure-generated file
 exists($$QPEDIR/src/config.pri):include($$QPEDIR/src/config.pri)
 else:error(Missing $$fixpath($$QPEDIR/src/config.pri). Please configure Qtopia.)
+!isEmpty(QTOPIA_EDITION) {
+    # Load the edition-specific config file
+    exists($$QTOPIA_DEPOT_PATH/editions/$$QTOPIA_EDITION/config.pri):include($$QTOPIA_DEPOT_PATH/editions/$$QTOPIA_EDITION/config.pri)
+    else:error(Missing $$fixpath($$QTOPIA_DEPOT_PATH/editions/$$QTOPIA_EDITION/config.pri))
+}
 # Load a device-specific config file (if it exists)
 !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/config.pri):include($$DEVICE_CONFIG_PATH/config.pri)
 
@@ -88,11 +93,15 @@ OBJECTS_DIR=.obj/$$RELEASE_BIN_TYPE
 UI_HEADERS_DIR=.ui/$$RELEASE_BIN_TYPE
 CONFIG-=depend_prl
 CONFIG+=link_prl create_prl no_install_prl no_mocdepend
-INCLUDEPATH+=$$QPEDIR/include $$QPEDIR/include/classic
+!isEmpty(DEVICE_CONFIG_PATH):INCLUDEPATH+=$$DEVICE_CONFIG_PATH/include
+!depotProject:INCLUDEPATH+=$$QPEDIR/include
 LIBS=-L$$QPEDIR/lib $$LIBS
+!isEmpty(DEVICE_CONFIG_PATH):LIBS=-L$$DEVICE_CONFIG_PATH/lib $$LIBS
 CONFIG+=common depends installs
 TARGET=$$tail($$OUT_PWD)
 DEFINES+=BUILDER=$$LITERAL_ESCAPED_QUOTE$$BUILDER$$LITERAL_ESCAPED_QUOTE
+!isEmpty(QT_CHANGE):DEFINES+=QT_CHANGE=$$LITERAL_ESCAPED_QUOTE$$QT_CHANGE$$LITERAL_ESCAPED_QUOTE
+!isEmpty(QTOPIA_CHANGE):DEFINES+=QTOPIA_CHANGE=$$LITERAL_ESCAPED_QUOTE$$QTOPIA_CHANGE$$LITERAL_ESCAPED_QUOTE
 
 # The location of packages
 depotProject:PKG_PATH=$$QPEDIR/pkg
@@ -100,16 +109,14 @@ else:PKG_PATH=$$PROJECT_ROOT/pkg
 
 self=$$tail($$OUT_PWD).pro
 
-# Enable the "edition" config (phone/pda/platform)
-CONFIG+=$$QTOPIA_EDITION
-# FIXME hack
-platform:CONFIG+=phone
-
 equals(LAUNCH_METHOD,normal):CONFIG+=no_singleexec
 
 # Use Qtopia's projects.pri if projects.pri is not in your project root
 exists($$PROJECT_ROOT/projects.pri):include($$PROJECT_ROOT/projects.pri)
 else:include($$QTOPIA_PROJECT_ROOT/projects.pri)
+
+isEmpty(QMAKE_CFLAGS_WARN_OFF):QMAKE_CFLAGS_WARN_OFF=-w
+isEmpty(QMAKE_CXXFLAGS_WARN_OFF):QMAKE_CXXFLAGS_WARN_OFF=-w
 
 depotProject {
     containsre($$QTOPIA_ID,^3rdparty) {

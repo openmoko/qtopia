@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -34,6 +32,8 @@
 #include <QDebug>
 #include <qvaluespace.h>
 #include <qtopialog.h>
+
+#include <QWSDisplay>
 
 // declare ServerLayoutManager
 class ServerLayoutManager : public QObject
@@ -56,6 +56,7 @@ class ServerLayoutManager : public QObject
   private slots:
     void removeWidget();
     void updateGeometries(int screen=-1);
+    void desktopResized(int);
 
   private:
     struct Item {
@@ -82,6 +83,7 @@ ServerLayoutManager::ServerLayoutManager()
     : docked(QApplication::desktop()->numScreens())
 {
     QDesktopWidget *desktop = QApplication::desktop();
+    connect(desktop, SIGNAL(resized(int)), this, SLOT(desktopResized(int)));
     availableGeom.resize(desktop->numScreens());
     for (int screen=0; screen < desktop->numScreens(); ++screen)
         availableGeom[screen] = desktop->availableGeometry(screen);
@@ -294,6 +296,23 @@ void ServerLayoutManager::dolayout(int screen, bool deferUpdate)
     }
 }
 
+/*
+    Called after dynamic screen rotation.
+*/
+void ServerLayoutManager::desktopResized(int s)
+{
+    dolayout(s, true);
+
+    QWidgetList list = QApplication::topLevelWidgets();
+    foreach (QWidget* widget, list) {
+        if ((widget->inherits("QAbstractServerInterface") && s == 0) ||
+            (widget->inherits("QAbstractSecondaryDisplay") && s == 1)) {
+                widget->setGeometry( QApplication::desktop()->screenGeometry(s) );
+                break;
+        }
+    }
+}
+
 ServerLayoutManager::Item*
 ServerLayoutManager::findWidget(const QWidget* w) const
 {
@@ -401,14 +420,22 @@ void WindowManagementPrivate::windowEvent(QWSWindow* w,
             // else FALL THROUGH
         case QWSServer::Show:
             {
-                // check if it is the full screen window
                 QWidget *widget = QWidget::find( w->winId() );
                 static bool fullscreen = false;
                 if ( widget && ( widget->windowState() & Qt::WindowFullScreen ) )
                     fullscreen = true;
+#ifdef QTOPIA_HOMEUI
+                bool isServer = widget && widget->inherits("QAbstractServerInterface");
+#endif
 
-                if (!known && !fullscreen
-                        && w->caption() != QLatin1String("_allow_on_top_")) {
+                /*
+                 Check for "reserved" caption is added to allow
+                 full screen QDirectPainter, since we can't set "_allow_on_top_" to it.
+                */
+                if ( !known && !fullscreen
+                        && w->caption() != QLatin1String("_allow_on_top_")
+                        && w->caption() != QLatin1String("reserved")
+                     ) {
                     QRect req = w->requestedRegion().boundingRect();
                     QSize s(qt_screen->deviceWidth(),
                             qt_screen->deviceHeight());
@@ -416,11 +443,25 @@ void WindowManagementPrivate::windowEvent(QWSWindow* w,
 
                     for(QSet<QWidget *>::ConstIterator iter = m_widgets.begin();
                             !known && m_widgets.end() != iter;
-                            ++iter)
+                            ++iter) {
+#ifndef QTOPIA_HOMEUI
+                        // Keep known windows on top.
                         if ((*iter)->isVisible() &&
                                 req.intersects((*iter)->geometry())) {
                             QTimer::singleShot(0, *iter, SLOT(raise()));
                         }
+#else
+                        // Qtopia Home ensures the context bar is visible
+                        // only if the top window is not fullscreen or
+                        // the top window is the server (homescreen).
+                        QRect avail = QApplication::desktop()->availableGeometry();
+                        if (w->caption() != QLatin1String("_ignore_")
+                            && (isServer || ((*iter)->isVisible() &&
+                                req == avail))) {
+                            QTimer::singleShot(0, *iter, SLOT(raise()));
+                        }
+#endif
+                    }
                 }
             }
             // FALL THROUGH
@@ -433,9 +474,6 @@ void WindowManagementPrivate::windowEvent(QWSWindow* w,
 
             if (active == w->winId() && !known) {
                 QRect req = w->requestedRegion().boundingRect();
-                QSize s(qt_screen->deviceWidth(), qt_screen->deviceHeight());
-                req = qt_screen->mapFromDevice(req, s);
-
                 doWindowActive(w->caption(), req, w);
             }
             break;
@@ -446,22 +484,33 @@ void WindowManagementPrivate::windowEvent(QWSWindow* w,
 
 void WindowManagementPrivate::doWindowActive(const QString& caption,
                                              const QRect& rect,
-					     QWSWindow* win)
+                                             QWSWindow* win)
 {
     static QString currCaption;
     static QRect currRect;
     static int currWinId = 0;
+
+    m_activeAppName = win->client()->identity();
+    if (m_activeAppName == "qpe") {
+        foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+            if (widget->winId() == (WId)win->winId()) {
+                m_wmValueSpace.setAttribute("ProcessName", widget->objectName());
+            }
+        }
+    } else {
+        m_wmValueSpace.setAttribute("ProcessName", m_activeAppName);
+    }
 
     if (currCaption != caption || currRect != rect || currWinId != win->winId()) {
         emit windowActive(caption, rect, win->winId());
         currWinId = win->winId();
     }
 
-    m_activeAppName = win->client()->identity();
     if (currCaption != caption || currRect != rect) {
-        if(rect.top() <= qt_screen->deviceHeight()/3 &&
-                rect.bottom() > qt_screen->deviceHeight()/2 &&
-                rect.width() >= qt_screen->deviceWidth()-4) {
+        QRect sRect(QApplication::desktop()->screenGeometry());
+        if(rect.top() <= sRect.height()/3 &&
+                rect.bottom() > sRect.height()/2 &&
+                rect.width() >= sRect.width()-4) {
             m_wmValueSpace.setAttribute("Caption", caption);
             QString iconName;
             QContentId cid = QContent::execToContent(m_activeAppName);
@@ -494,6 +543,7 @@ void WindowManagementPrivate::destroyed(QObject *obj)
 // define WindowManagement
 /*!
   \class WindowManagement
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer
   \brief The WindowManagement class allows you to monitor and control the
          application windows in the system.
@@ -514,7 +564,7 @@ void WindowManagementPrivate::destroyed(QObject *obj)
   running, or at least one instance of the WindowManagement class has been
   instantiated.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 /*!
@@ -674,12 +724,12 @@ QString WindowManagement::activeAppName()
 }
 
 /*!
-  Returns true if \a winId supports the Qtopia soft menu bar via the
+  Returns true if \a winId supports the Qt Extended soft menu bar via the
   QSoftMenuBar class; false otherwise.
 
   Under QWS, this function always returns true.  Under X11, it will
-  return false if the application uses a foreign widget toolkit
-  other than Qtopia's.  The soft menu bar changes its behavior so
+  return false if the application uses a widget toolkit
+  other than that of Qtopia.  The soft menu bar changes its behavior so
   that the "back" button will send a close message to the foreign
   application using closeWindow().
 
@@ -693,7 +743,7 @@ bool WindowManagement::supportsSoftMenus(WId winId)
 
 /*!
  Sends a close message to the window \a winId.  This is used for
- applications that do not support Qtopia's soft menu bar.
+ applications that do not support the Qt Extended soft menu bar.
 
  \sa supportsSoftMenus()
 */

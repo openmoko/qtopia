@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _E3LAUNCHER_H_
-#define _E3LAUNCHER_H_
+#ifndef E3_LAUNCHER_H
+#define E3_LAUNCHER_H
 
 #include "qabstractserverinterface.h"
 #include <QContent>
@@ -34,7 +32,6 @@
 #include "themebackground_p.h"
 
 class LauncherView;
-class PhoneHeader;
 class ContextLabel;
 class QExportedBackground;
 class QSettings;
@@ -43,15 +40,20 @@ class E3Today;
 class ThemedView;
 class QAbstractDialerScreen;
 class QPhoneCall;
-class CallScreen;
+class QAbstractCallScreen;
 class QUniqueId;
-class CellModemManager;
+class QAbstractCallPolicyManager;
+class ThemeControl;
+class QAbstractHeader;
+class QAbstractContextLabel;
+
 class E3ServerInterface : public QAbstractServerInterface
 {
 Q_OBJECT
 public:
     E3ServerInterface(QWidget *parent, Qt::WFlags flags);
-
+signals:
+    void themeLoaded();
 protected:
     virtual void keyPressEvent(QKeyEvent *);
     virtual bool event(QEvent *);
@@ -80,22 +82,23 @@ private:
     ButtonBinding buttonBinding(QSettings &) const;
 
     LauncherView *m_view;
-    PhoneHeader *m_header;
-    ContextLabel *m_context;
+    QAbstractHeader *m_header;
+    QAbstractContextLabel *m_context;
     QContentSet m_idleApps;
     QAbstractBrowserScreen *m_browser;
     QAbstractDialerScreen *dialer();
     QAbstractDialerScreen *m_dialer;
-    CallScreen *callscreen();
-    CallScreen *m_callscreen;
+    QAbstractCallScreen *callscreen();
+    QAbstractCallScreen *m_callscreen;
     E3Today *m_today;
     ThemedView *m_theme;
     ThemeBackground *m_tbackground;
     QWidget *m_titleSpacer;
-    CellModemManager *m_cell;
+    QAbstractCallPolicyManager *m_cell;
 
     typedef QHash<int, QtopiaServiceRequest> IdleKeys;
     IdleKeys m_idleKeys;
+    ThemeControl *themeCtrl;
 };
 
-#endif // _E3LAUNCHER_H_
+#endif

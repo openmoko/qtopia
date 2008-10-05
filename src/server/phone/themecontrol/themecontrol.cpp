@@ -1,56 +1,88 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "themecontrol.h"
+#include "themebackground_p.h"
 #include "qabstractthemewidgetfactory.h"
+
+#include <QtopiaChannel>
 #include <QSettings>
+#include <QValueSpace>
+#include <QWaitWidget>
 #include <QDebug>
 #include <themedview.h>
+#include <QThemedView>
+#include <QThemeItemFactory>
 #include <qtopianamespace.h>
 #include <qtopialog.h>
+#include <custom.h>
+#include <QExportedBackground>
 
 /*!
   \class ThemeControl
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \brief The ThemeControl class manages the registered theme views.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
-/*!
-  Returns the ThemeControl instance.
-  */
-ThemeControl *ThemeControl::instance()
+/*! \internal */
+ThemeControl::ThemeControl(QObject* parent)
+: QObject(parent), m_exportBackground(false), m_widgetFactory(0)
 {
-    static ThemeControl *control = 0;
-    if(!control)
-        control = new ThemeControl;
-    return control;
+    // Listen to system channel
+    QtopiaChannel* sysChannel = new QtopiaChannel( "QPE/System", this );
+    connect( sysChannel, SIGNAL(received(QString,QByteArray)),
+             this, SLOT(sysMessage(QString,QByteArray)) );
+    
+    refresh();
 }
 
-/*! \internal */
-ThemeControl::ThemeControl()
-: m_exportBackground(false), m_widgetFactory(0)
+void ThemeControl::sysMessage(const QString& message, const QByteArray &data)
 {
-    refresh();
+    QDataStream stream( data );
+    if ( message == "applyStyleSplash()" ) {
+        QWaitWidget *waitWidget = new QWaitWidget();
+        waitWidget->setWindowFlags( Qt::WindowStaysOnTopHint | Qt::SplashScreen );
+        waitWidget->show();
+        qApp->processEvents();
+        refresh();
+        polishWindows();
+        delete waitWidget;
+    } else if ( message == "applyStyleNoSplash()" ) {
+        qApp->processEvents();
+        refresh();
+        polishWindows();
+    }
+}
+
+void ThemeControl::polishWindows()
+{
+#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
+    QExportedBackground::polishWindows(0);
+    //only polish secondary display if we have one
+    QValueSpaceItem item("/System/ServerWidgets/QAbstractSecondaryDisplay");
+    if ( !item.value().toString().isEmpty() ) {
+        QExportedBackground::polishWindows(1);
+    }
+#endif
 }
 
 /*!
@@ -60,6 +92,16 @@ void ThemeControl::registerThemedView(ThemedView *view,
                                       const QString &name)
 {
     m_themes.append(qMakePair(view, name));
+    doTheme(view, name);
+}
+
+/*!
+  Register a theme \a view with the given \a name.
+  */
+void ThemeControl::registerThemedView(QThemedView *view,
+                                      const QString &name)
+{
+    m_qthemes.append(qMakePair(view, name));
     doTheme(view, name);
 }
 
@@ -95,11 +137,15 @@ void ThemeControl::refresh()
     QStringList keys = cfg.childKeys();
 
     m_themeFiles.clear();
+    QThemeItemFactory::clear();
     foreach(QString screen, keys)
         m_themeFiles.insert(screen, cfg.value(screen).toString());
 
     for(int ii = 0; ii < m_themes.count(); ++ii) {
         doTheme(m_themes.at(ii).first, m_themes.at(ii).second);
+    }
+    for(int ii = 0; ii < m_qthemes.count(); ++ii) {
+        doTheme(m_qthemes.at(ii).first, m_qthemes.at(ii).second);
     }
 
     emit themeChanged();
@@ -154,6 +200,17 @@ void ThemeControl::doTheme(ThemedView *view, const QString &name)
     }
 }
 
+void ThemeControl::doTheme(QThemedView *view, const QString &name)
+{
+    QString path = m_themeFiles[name + "Config"];
+    if(!path.isEmpty()) {
+        view->setThemePrefix(m_themeName);
+        view->load(findFile(path));
+    } else {
+        qWarning("Invalid %s theme.", name.toAscii().constData());
+    }
+}
+
 void ThemeControl::doThemeWidgets(ThemedView *view)
 {
     if (m_widgetFactory) {
@@ -164,3 +221,5 @@ void ThemeControl::doThemeWidgets(ThemedView *view)
     }
 }
 
+QTOPIA_TASK(ThemeControl,ThemeControl);
+QTOPIA_TASK_PROVIDES(ThemeControl,ThemeControl);

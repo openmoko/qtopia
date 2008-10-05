@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef __QMAILFOLDER_H
-#define __QMAILFOLDER_H
+#ifndef QMAILFOLDER_H
+#define QMAILFOLDER_H
 
 #include "qmailid.h"
 #include <QString>
@@ -33,37 +31,67 @@ class QMailFolderPrivate;
 class QTOPIAMAIL_EXPORT QMailFolder
 {
 public:
-    QMailFolder(const QMailId& id);
-    QMailFolder(const QString& name, const QMailId& parentFolderId = QMailId());
+    enum StandardFolder
+    {
+        InboxFolder = 1,
+        OutboxFolder = 2,
+        DraftsFolder = 3,
+        SentFolder = 4,
+        TrashFolder = 5
+    };
+
+    static const quint64 &SynchronizationEnabled;
+    static const quint64 &Synchronized;
+
+    QMailFolder();
+
+    QMailFolder(const QString& name,
+                const QMailFolderId& parentFolderId = QMailFolderId(),
+                const QMailAccountId& parentAccountId = QMailAccountId());
+
+    explicit QMailFolder(const StandardFolder& sf);
+
+    explicit QMailFolder(const QMailFolderId& id);
+
     QMailFolder(const QMailFolder& other);
+
     virtual ~QMailFolder();
 
-    QMailId id() const;
+    QMailFolder& operator=(const QMailFolder& other);
+
+    QMailFolderId id() const;
+    void setId(const QMailFolderId& id);
 
     QString name() const;
     void setName(const QString& name);
 
-    QMailId parentId() const;
-    void setParentId(const QMailId& id);
+    QString displayName() const;
+    void setDisplayName(const QString& name);
+
+    QMailFolderId parentId() const;
+    void setParentId(const QMailFolderId& id);
+
+    QMailAccountId parentAccountId() const;
+    void setParentAccountId(const QMailAccountId& id);
+
+    quint64 status() const;
+    void setStatus(quint64 newStatus);
+    void setStatus(quint64 mask, bool set);
 
     bool isRoot() const;
 
-    QMailFolder& operator=(const QMailFolder& other);
-
-private:
-    QMailFolder();
-    void setId(const QMailId& id);
+    static quint64 statusMask(const QString &flagName);
 
 private:
     friend class QMailStore;
     friend class QMailStorePrivate;
 
+    static void initStore();
+
 private:
     QSharedDataPointer<QMailFolderPrivate> d;
-
 };
 
 typedef QList<QMailFolder> QMailFolderList;
 
-#endif //QMAILFOLDER_H
-
+#endif

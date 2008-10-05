@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -29,8 +27,9 @@
 
 /*!
     \class ExternalAccess
+    \inpublicgroup QtTelephonyModule
     \brief The ExternalAccess class starts the modem emulator on a serial port to allow external access via a serial cable.
-    \ingroup QtopiaServer::Task
+    \ingroup QtopiaServer::Telephony
 
     Many modern phones have an external serial interface, which is used to
     connect to a computer for the purposes of data calls, FAX transmissions,
@@ -55,7 +54,7 @@
     when other components in the system request it (for example,
     Bluetooth hands-free kits).
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
     \sa {Modem Emulator}
 */
 
@@ -97,13 +96,10 @@ void ExternalAccess::servicesChanged()
     // the most important service for the modem emulator to use.
     if ( manager->services().contains( "modem" ) )  // No tr
         start();
-
-#ifndef QTOPIA_MODEM
-    // If we don't have a modem, then start it when we get any
-    // telephony service (usually it is the "voip" service).
-    if ( manager->supports<QNetworkRegistration>().size() > 0 )
+    else if ( manager->supports<QNetworkRegistration>().size() > 0 )
+        // If we don't have a modem, then start it when we get any
+        // telephony service (usually it is the "voip" service).
         start();
-#endif
 }
 
 void ExternalAccess::start()

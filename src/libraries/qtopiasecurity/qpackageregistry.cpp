@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 Trolltech AS. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -62,12 +60,11 @@ const int QPackageRegistry::maxProgId = 2;
 /////  Data transfer objects
 /////
 
-/* IdBlock is now defined in qtransportauth_qws_p.h */
-
 /**
   \internal
   \class ProgramInfo
-  \mainclass
+    \inpublicgroup QtPkgManagementModule
+
   \ingroup installedsoftware
   Track data records from the manifest file.  This file contains one
   record for each installed binary in a program.
@@ -91,7 +88,8 @@ struct ProgramInfo
 
 /*!
   \class QPackageRegistry
-  \mainclass
+    \inpublicgroup QtPkgManagementModule
+
   \brief The QPackageRegistry class provides a mechanism for managing software installed on the qtopia device
 
   QPackageRegistry provides several methods for managing the database
@@ -115,14 +113,14 @@ struct ProgramInfo
   The program id is always written into the binary at install time, along
   with a secret key.
 
-  For \underline {Qtopia programs} when the image is created the sxe_installer is run which
+  For \underline {Qt Extended programs} when the image is created the sxe_installer is run which
   calls the packageRegistry in bootstrap mode to setup the database files and
-  install the program id, and keys for those Qtopia programs.  This occurs prior
-  to shipping & delivery of the Qtopia device.
+  install the program id, and keys for those Qt Extended programs.  This occurs prior
+  to shipping & delivery of the Qt Extended device.
 
   For \underline {downloaded programs} the package installer will call the registerBinary()
   method to install the program id.  This occurs during normal runtime of the
-  Qtopia device.
+  Qt Extended device.
 
   When the program id and key is created and installed, these are recorded
   in the \bold{Keyfile}, and the \bold {Sequence} file is used to track issue of new program ids.
@@ -176,9 +174,9 @@ struct ProgramInfo
     \row
         \o {4, 1}
             Pseudo-code for binary file data record formats: See
-            \c $QT_SOURCE_PATH/src/gui/embedded/qtransportauth_qws_p.h for
+            \c $QT_SOURCE_PATH/src/gui/embedded/qtransportauthdefs_qws.h for
             concrete details.  \c usr_key_entry is from the kernel file
-            include/linux/lidsext.h and is duplicated in the qtransportauth_qws_p.h
+            include/linux/lidsext.h and is duplicated in the qtransportauthdefs_qws.h
     \row
         \o
             \code
@@ -215,7 +213,7 @@ struct ProgramInfo
         \o
             Contains the mapping between keys and files on disk.
 
-            When the kernel contains the LIDS MAC Trolltech patch the key file
+            When the kernel contains the LIDS MAC Qt Extended patch the key file
             is implemented as the kernel /proc pseudo-file /proc/lids/keys.
 
             In this case this keyfile on disk storage is ignored.
@@ -275,7 +273,7 @@ struct ProgramInfo
       In the development and testing case, the embedded key is used by the
       binary to authenticate itself to the server.
 
-      When the kernel contains the LIDS MAC Trolltech patch the binary
+      When the kernel contains the LIDS MAC Qt Extended patch the binary
       reads its key from the /proc pseudo-file /proc/self/lids_key.
 
 */
@@ -1372,7 +1370,7 @@ const unsigned char *QPackageRegistry::getClientKey( unsigned char progId )
     QFile kf( sxeConfPath() + "/" QSXE_KEYFILE ".sequence" );
     if ( !kf.open( QIODevice::ReadOnly ))
         qFatal( "Couldnt open key file %s", qPrintable(kf.fileName()));
-    while ( kf.read( (char*)&recbuf, sizeof(struct AuthRecord) ))
+    while ( kf.read( (char*)&recbuf, sizeof(struct AuthRecord) ) > 0)
         if ( recbuf.auth.progId == progId )
             break;
     if ( recbuf.auth.progId == progId )

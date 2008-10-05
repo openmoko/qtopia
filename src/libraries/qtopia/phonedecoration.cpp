@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -419,6 +417,8 @@ int PhoneDecoration::metric( Metric m, const WindowData *wd ) const
     return d->data(wd).metrics[m];
 }
 
+QTOPIA_EXPORT int qtopia_background_brush_rotation(int screen);
+
 void PhoneDecoration::drawArea( Area a, QPainter *p, const WindowData *wd ) const
 {
     int th = metric( TitleHeight, wd );
@@ -432,6 +432,13 @@ void PhoneDecoration::drawArea( Area a, QPainter *p, const WindowData *wd ) cons
         if (!bgPm.isNull()) {
             paintBg = true;
             bgBrush = QBrush(wd->palette.color(QPalette::Background), bgPm);
+            int screen = QApplication::desktop()->screenNumber(wd->window);
+            int rotation = qtopia_background_brush_rotation(screen);
+            if (rotation != 0) {
+                QTransform transform = bgBrush.transform();
+                transform.rotate(rotation);
+                bgBrush.setTransform(transform);
+            }
         }
     }
 #endif

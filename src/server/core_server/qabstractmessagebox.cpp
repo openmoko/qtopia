@@ -1,33 +1,32 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qabstractmessagebox.h"
-#include "qtopiaserverapplication.h"
 
 #include <QBasicTimer>
 
-#ifndef Q_WS_X11
-#  include <qtopia/private/testslaveinterface_p.h>
-#  define QTOPIA_USE_TEST_SLAVE 1
+#ifdef QTOPIA_USE_TEST_SLAVE
+#  include <private/testslaveinterface_p.h>
 #endif
+
+#define QABSTRACTMESSAGEBOX_MISSING_COMPONENT \
+    "Can't create messagebox, no server component provides QAbstractMessageBox!"
 
 // declare QAbstractMessageBoxPrivate
 class QAbstractMessageBoxPrivate : public QObject
@@ -78,13 +77,13 @@ private:
 
 /*!
   \class QAbstractMessageBox
-  \brief The QAbstractMessageBox class allows developers to replace the message box portion of the Qtopia server UI.
-  \ingroup QtopiaServer
-  \ingroup QtopiaServer::PhoneUI::TTSmartPhone
+    \inpublicgroup QtBaseModule
+  \brief The QAbstractMessageBox class allows developers to replace the message box portion of the Qt Extended server UI.
+    \ingroup QtopiaServer::PhoneUI::TTSmartPhone
 
   The abstract message box is part of the 
-  \l {QtopiaServerApplication#qtopia-server-widgets}{server widgets framework}
-  and represents the portion of the Qtopia server UI that is shown to users 
+  \l {QtopiaServerApplication#qt-extended-server-widgets}{server widgets framework}
+  and represents the portion of the Qt Extended server UI that is shown to users 
   when a message box is needed.
   
   A small tutorial on how to develop new server widgets using one of the 
@@ -94,7 +93,7 @@ private:
   The QAbstractMessageBox API is intentionally designed to be similar to the 
   QMessageBox API to facilitate easily replacing one with the other.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   */
 
 /*!
@@ -158,7 +157,8 @@ private:
 /*!
   \fn QAbstractMessageBox::Icon QAbstractMessageBox::icon() const
 
-  Returns the message box icon.
+  Returns the message box icon. If the icon was set via setIconPixmap()
+  this function returns QAbstractMessageBox::NoIcon.
   */
 
 /*!
@@ -166,6 +166,13 @@ private:
 
   Sets the message box \a icon.
   */
+
+/*!
+  \fn void QAbstractMessageBox::setIconPixmap(const QPixmap& pixmap)
+
+  Sets the icon to be used by the message box to \a pixmap.
+  \sa icon()
+ */
 
 /*!
   \fn QString QAbstractMessageBox::text() const
@@ -192,13 +199,18 @@ QAbstractMessageBox::QAbstractMessageBox(QWidget *parent,
 static int QAbstractMessageBox_exec(QWidget *parent, QAbstractMessageBox::Icon icon, const QString &title, const QString &text, QAbstractMessageBox::Button button1, QAbstractMessageBox::Button button2)
 {
     QAbstractMessageBox *box = qtopiaWidget<QAbstractMessageBox>(parent);
-    box->setIcon(icon);
-    box->setTitle(title);
-    box->setText(text);
-    box->setButtons(button1, button2);
-    int rv = QtopiaApplication::execDialog(box);
-    delete box;
-    return rv;
+    if (box) {
+        box->setIcon(icon);
+        box->setTitle(title);
+        box->setText(text);
+        box->setButtons(button1, button2);
+        int rv = QtopiaApplication::execDialog(box);
+        delete box;
+        return rv;
+    }
+    qCritical() << QABSTRACTMESSAGEBOX_MISSING_COMPONENT
+        << "\n" << title << ":" << text;
+    return 0;
 }
 
 /*!
@@ -268,10 +280,15 @@ int QAbstractMessageBox::question(QWidget *parent, const QString &title, const Q
 QAbstractMessageBox *QAbstractMessageBox::messageBox(QWidget *parent, const QString &title, const QString &text, Icon icon, Button button0, Button button1)
 {
     QAbstractMessageBox *box = qtopiaWidget<QAbstractMessageBox>(parent);
-    box->setIcon(icon);
-    box->setTitle(title);
-    box->setText(text);
-    box->setButtons(button0, button1);
+    if (box) {
+        box->setIcon(icon);
+        box->setTitle(title);
+        box->setText(text);
+        box->setButtons(button0, button1);
+    } else {
+        qCritical() << QABSTRACTMESSAGEBOX_MISSING_COMPONENT
+            << "\n" << title << ":" << text;
+    }
     return box;
 }
 
@@ -293,10 +310,15 @@ QAbstractMessageBox *QAbstractMessageBox::messageBoxCustomButton(QWidget *parent
             const QString &button2Text, int defaultButtonNumber, int escapeButtonNumber)
 {
     QAbstractMessageBox *box = qtopiaWidget<QAbstractMessageBox>(parent);
-    box->setIcon(icon);
-    box->setTitle(title);
-    box->setText(text);
-    box->setButtons(button0Text, button1Text, button2Text, defaultButtonNumber, escapeButtonNumber);
+    if (box) {
+        box->setIcon(icon);
+        box->setTitle(title);
+        box->setText(text);
+        box->setButtons(button0Text, button1Text, button2Text, defaultButtonNumber, escapeButtonNumber);
+    } else {
+        qCritical() << QABSTRACTMESSAGEBOX_MISSING_COMPONENT
+            << "\n" << title << ":" << text;
+    }
     return box;
 }
 

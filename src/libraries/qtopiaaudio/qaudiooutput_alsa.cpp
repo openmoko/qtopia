@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -47,7 +45,7 @@ public:
         access = SND_PCM_ACCESS_RW_INTERLEAVED;
         format = SND_PCM_FORMAT_S16;
         period_time=0;
-        buffer_time=500000;
+        buffer_time=100000;
     }
     ~QAudioOutputPrivate()
     {
@@ -71,11 +69,18 @@ public:
     bool open()
     {
         // Open the Alsa playback device.
-        int err;
+        int err=-1,count=0;
         unsigned int        freakuency = frequency;
 
-        if ( ( err = snd_pcm_open
-               ( &handle, m_device.constData(), SND_PCM_STREAM_PLAYBACK, 0 ) ) < 0 ) {
+        while((count < 5) && (err < 0)) {
+            err = snd_pcm_open
+                  ( &handle,  m_device.constData(),/*"plughw:0,0",*/SND_PCM_STREAM_PLAYBACK, 0 );
+            if(err < 0) {
+                count++;
+                qWarning()<<"QAudioOutput::open() err="<<err<<", count="<<count;
+            }
+        }
+        if (( err < 0)||(handle == 0)) {
             qWarning( "QAudioOuput: snd_pcm_open: error %d", err );
             return false;
         }
@@ -130,7 +135,7 @@ public:
         if ( err < 0 ) {
             qWarning( "QAudioOutput: snd_pcm_hw_params_set_buffer_time_near: err %d",err);
         }
-        period_time = 1000000 * 256 / frequency;
+        period_time = buffer_time/4;
         err = snd_pcm_hw_params_set_period_time_near(handle, hwparams, &period_time, 0);
         if ( err < 0 ) {
             qWarning( "QAudioOutput: snd_pcm_hw_params_set_period_time_near: err %d",err);
@@ -248,7 +253,7 @@ public:
         }
 
         // Prepare for audio output.
-        //snd_pcm_prepare( handle );
+        snd_pcm_prepare( handle );
 
         return true;
     }
@@ -256,7 +261,7 @@ public:
     void close()
     {
         if ( handle ) {
-            snd_pcm_drain( handle );
+            snd_pcm_drop( handle );
             snd_pcm_close( handle );
             handle = 0;
         }
@@ -275,16 +280,25 @@ public:
 
         while ( len > 0 ) {
             if(count > 5) break;
+            int err=0;
             int frames = snd_pcm_bytes_to_frames( handle, (int)len );
-            int err = snd_pcm_writei( handle, data, frames );
+#if defined(MIN_ALSA_BUFFER)
+            if(frames > (int)buffer_size) {
+                err = snd_pcm_writei( handle, data, buffer_size );
+            } else {
+                err = snd_pcm_writei( handle, data, frames );
+            }
+#else
+            err = snd_pcm_writei( handle, data, frames );
+#endif
             if ( err >= 0 ) {
+                if(err == 0) count++;
                 int bytes = snd_pcm_frames_to_bytes( handle, err );
                 qLog(QAudioOutput) << QString("write out = %1 (f=%2)").arg(bytes).arg(frames).toLatin1().constData();
                 data += bytes;
                 len -= bytes;
-                count++;
-                //break;
             } else {
+                count++;
                 if((err == -EAGAIN)||(err == -EINTR)) {
                     qLog(QAudioOutput) << "snd_pcm_writei failed with EAGAIN or EINTR";
                     err=0;
@@ -294,7 +308,7 @@ public:
                     err = 0;
                 } else if(err == -ESTRPIPE) {
                     while((err = snd_pcm_resume(handle)) == -EAGAIN)
-                        sleep(1);
+                        usleep(100);
                     if(err < 0) {
                         qLog(QAudioOutput) << "ALSA: Unable to wake up pcm device, restart it!!!";
                         err = snd_pcm_prepare(handle);

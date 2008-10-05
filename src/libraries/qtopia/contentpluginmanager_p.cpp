@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -106,7 +104,7 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
 
         QString target = settings.value( QLatin1String("File") ).toString();
 
-        if( !target.isEmpty() && target[0] != QDir::separator() )
+        if( role != "Application" && !target.isEmpty() && target[0] != QDir::separator() )
             content->setFile( dir.filePath( target ) );
         else
             content->setFile( target );
@@ -246,35 +244,15 @@ bool DotDesktopContentPlugin::updateContent( QContent *content )
 
 /*!
     \class ContentPluginManager
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \internal
 
     Loader of QContentPlugins.
 */
 ContentPluginManager::ContentPluginManager()
-    : manager( QLatin1String("content") )
+    : manager( 0 )
 {
-    QStringList pluginNames = manager.list();
-
-    static DotDesktopContentPlugin dotDesktopPlugin;
-
-    foreach( QString key, dotDesktopPlugin.keys() )
-        typePluginMap.insert( key, &dotDesktopPlugin );
-
-    foreach( QString pluginName, pluginNames )
-    {
-        QContentPlugin *plugin = qobject_cast< QContentPlugin * >( manager.instance( pluginName ) );
-
-        if( plugin )
-        {
-            QStringList keys = plugin->keys();
-
-            foreach( QString key, keys )
-                typePluginMap.insert( key, plugin );
-
-            plugins.append( plugin );
-        }
-    }
 }
 
 ContentPluginManager::~ContentPluginManager()
@@ -283,11 +261,56 @@ ContentPluginManager::~ContentPluginManager()
 
 QList< QContentPlugin * > ContentPluginManager::findPlugins( const QString &filePath )
 {
+    if( !manager )
+        loadPlugins();
+
     return typePluginMap.values( QFileInfo( filePath ).suffix().toLower() );
+}
+
+QList< QContentPropertiesPlugin * > ContentPluginManager::findPropertiesPlugins(const QString &mimeType)
+{
+    if( !manager )
+        loadPlugins();
+
+    return typePropertiesPluginMap.values(mimeType);
+}
+
+void ContentPluginManager::loadPlugins()
+{
+    QMutexLocker lock(&loadMutex);
+
+    if (manager)
+        return;
+
+    manager = new QPluginManager("content");
+
+    QStringList pluginNames = manager->list();
+
+    foreach (QString key, dotDesktopPlugin.keys())
+        typePluginMap.insert(key, &dotDesktopPlugin);
+
+    foreach (QString pluginName, pluginNames) {
+        QObject *object = manager->instance( pluginName );
+
+        if (QContentPropertiesPlugin *plugin = qobject_cast<QContentPropertiesPlugin *>(object)) {
+            QStringList mimeTypes = plugin->mimeTypes();
+
+            foreach (QString mimeType, mimeTypes)
+                typePropertiesPluginMap.insert(mimeType, plugin);
+        }
+
+        if (QContentPlugin *plugin = qobject_cast<QContentPlugin *>(object)) {
+            QStringList keys = plugin->keys();
+
+            foreach (QString key, keys)
+                typePluginMap.insert( key, plugin );
+        }
+    }
 }
 
 /*!
     \class QContentFactory
+    \inpublicgroup QtBaseModule
     \brief The QContentFactory class manages instances of QContentPlugin.
 
     \internal
@@ -295,6 +318,14 @@ QList< QContentPlugin * > ContentPluginManager::findPlugins( const QString &file
 
 
 Q_GLOBAL_STATIC( ContentPluginManager, pluginManager );
+
+/*!
+    Initializes the content plug-in manager.
+*/
+void QContentFactory::loadPlugins()
+{
+    pluginManager()->loadPlugins();
+}
 
 /*!
     Populates \a content with data from the file with the file name \a fileName.  Returns true if the content
@@ -331,4 +362,37 @@ bool QContentFactory::updateContent( QContent *content )
     return false;
 }
 
+/*!
+    Constructs a thumbnail representitive of \a content.
+
+    If \a size is not null the thumbnail will be resized to fit according to the given aspect ratio \a mode.
+*/
+QImage QContentFactory::thumbnail( const QContent &content, const QSize &size, Qt::AspectRatioMode mode )
+{
+    QList< QContentPropertiesPlugin * > plugins = pluginManager()->findPropertiesPlugins(content.type());
+
+    QImage thumbnail;
+
+    foreach( QContentPropertiesPlugin *p, plugins )
+        if( !(thumbnail = p->thumbnail( content, size, mode )).isNull() )
+            return thumbnail;
+
+    return thumbnail;
+}
+
+/*!
+    Constructs a new instance of a QContentPropertiesEngine for viewing and editing the meta-data embedded in \a content.
+*/
+QContentPropertiesEngine *QContentFactory::createPropertiesEngine( const QContent &content )
+{
+    QList< QContentPropertiesPlugin * > plugins = pluginManager()->findPropertiesPlugins(content.type());
+
+    QContentPropertiesEngine *engine = 0;
+
+    foreach( QContentPropertiesPlugin *p, plugins )
+        if( (engine = p->createPropertiesEngine( content )) != 0 )
+            return engine;
+
+    return engine;
+}
 

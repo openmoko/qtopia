@@ -1,29 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "qobexsocket_p.h"
 #include <qobexnamespace.h>
 #include <qobexheader.h>
-#include <private/qobexheader_p.h>
-#include <private/qobexclientsession_p.h>
-#include <private/qobexserversession_p.h>
+#include "qobexheader_p.h"
+#include "qobexclientsession_p.h"
+#include "qobexserversession_p.h"
 
 #ifdef QTOPIA_INFRARED
 #include <qirsocket.h>
@@ -193,6 +191,9 @@ QObexSocket::QObexSocket(QIODevice *device, QObject *parent)
     m_handle = self;
 
     QObject::connect(device, SIGNAL(readyRead()), this, SLOT(processInput()));
+
+    if (device->bytesAvailable() > 0)
+        processInput();
 
     // This socket shouldn't be valid if the QIODevice becomes closed.
     QObject::connect(device, SIGNAL(aboutToClose()), this, SLOT(prepareToClose()));

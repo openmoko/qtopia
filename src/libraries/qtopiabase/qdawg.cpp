@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #define QTOPIA_INTERNAL_QDAWG_TRIE
@@ -40,7 +38,7 @@ typedef QHash<int, TrieClub *> TrieClubDirectory;
 class TriePtr {
 public:
     QChar letter;
-    int val; // see QDawg::createTrieFromWords
+    int val;
     QTrie* p;
     int operator <(const TriePtr& o) const;
     int operator >(const TriePtr& o) const;
@@ -470,14 +468,15 @@ private:
 
 /*!
   \class QDawg
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QDawg class provides storage of words in a Directed Acyclic Word Graph.
 
   A DAWG provides very fast look-up of words in a word list given incomplete or
   ambiguous letters in those words.
 
   In Qtopia, global DAWGs are maintained for the current locale. See
-  Qtopia::dawg(). Various Qtopia components use these DAWGs, most notably
+  Qtopia::dawg(). Various Qt Extended components use these DAWGs, most notably
   input methods, such as handwriting recognition that use the word lists
   to choose among the likely interpretations of the user input.
 
@@ -540,6 +539,9 @@ private:
   is a list of letter in decreasing order of likelihood, an efficient algorithm could
   be written for finding the best word by traversing the QDawg just once.
 
+  The QDawg graph can have a value() stored at each node. This can be used
+  for example for tagging words with frequency information.
+
   \ingroup userinput
 */
 
@@ -563,29 +565,20 @@ QDawg::~QDawg()
 /*!
     \overload
     Replaces all the words in the QDawg with words read by QIODevice::readLine() from \a dev.
-
-    \internal
-    In addition to single words on a line, QDawg also allows prefixes and node values.
-
-    Prefixes are words with a trailing "*"; any necessary nodes are added to the QDawg,
-    but the final node is not marks as isWord().
-
-    Node values are integers appended to the word (or prefix) following a space. The values
-    are accessible via the value() function. Note that storing a wide range of values will
-    increase the size of the generated dawg since suffixes with different values cannot
-    be merged.
+    The text in \a dev must be in UTF8 format.
 */
 bool QDawg::createFromWords(QIODevice* dev)
 {
     delete d;
 
     QTextStream i(dev);
+    i.setCodec("UTF8");
     QTrie* trie = new QTrie;
     int n=0;
     while (!i.atEnd()) {
         QString line = i.readLine();
         QStringList t = line.split(QChar(' '));
-        int value = t.count() > 1 ? t[1].toUInt() : 0;
+        int value = t.count() > 1 ? (t[1].toUInt()&QDawg::Node::MaxValue) : 0;
         line = t[0];
         trie->insertWord(line,0,value);
         n++;
@@ -599,29 +592,19 @@ bool QDawg::createFromWords(QIODevice* dev)
 }
 
 /*!
-  \fn  bool QDawg::Node::setIsWord(bool isWord)
-  \internal
-*/
+    Replaces all the words in the QDawg with the words in the \a list.
 
-/*!
-  \fn QDawg::Node::setIsLast(bool isLast)
-  \internal
-*/
+    In addition to single words, QDawg also allows prefixes and node values.
 
+    Prefixes are described by words with a trailing "*"; any necessary nodes are added
+    to the QDawg, but the final node is not marks as isWord().
 
-/*XXX
-  \fn int QDawg::Node::value() const
+    Node values are integers appended to the word (or prefix) following a space. The values
+    are accessible via the value() function. The value must be in the range 0 to QDawg::Node::MaxValue.
 
-  \internal
-
-  Not yet supported.
-
-  Returns the value stored at the node.
-  \sa QDawg::createTrieFromWords
-*/
-
-/*!
-  Replaces all the words in the QDawg with the words in the \a list.
+    Note that storing a wide range of values will
+    increase the size of the generated dawg since suffixes with different values cannot
+    be merged.
 */
 void QDawg::createFromWords(const QStringList& list)
 {
@@ -630,7 +613,11 @@ void QDawg::createFromWords(const QStringList& list)
     if ( list.count() ) {
         QTrie* trie = new QTrie;
         for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
-            trie->insertWord(*it,0,0);
+            QString line = *it;
+            QStringList t = line.split(QChar(' '));
+            int value = t.count() > 1 ? (t[1].toUInt()&QDawg::Node::MaxValue) : 0;
+            line = t[0];
+            trie->insertWord(line,0,value);
         }
         d = new QDawgPrivate(trie);
     } else {
@@ -760,7 +747,8 @@ void QDawg::dump() const
 
 /*!
   \class QDawg::Node
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The Node class of the QDawg class is one node of a QDawg.
 
   Each Node in a QDawg represents a letter().
@@ -807,3 +795,12 @@ void QDawg::dump() const
 
   \sa next()
 */
+
+/*!
+  \fn int QDawg::Node::value() const
+
+  Returns the value stored at the node.
+
+  These values can be loaded using QDawg::createFromWords().
+*/
+

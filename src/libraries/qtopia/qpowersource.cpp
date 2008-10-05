@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -33,11 +31,12 @@ static const char* const QPOWERSOURCE_TIMEREMAINING = "TimeRemaining";
 
 /*!
   \class QPowerSource
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QPowerSource class provides access to information about power sources on the device.
 
   Power sources are components, either external or internal, such as batteries
-  or wall sockets that provide power to a Qtopia device.  The QPowerSource API
+  or wall sockets that provide power to a Qt Extended device.  The QPowerSource API
   allows applications to query the status of such components.
 
   To access a list of QPowerSource instances, applications can use the 
@@ -132,18 +131,13 @@ static const char* const QPOWERSOURCE_TIMEREMAINING = "TimeRemaining";
 /*!
   Construct a new power source object for \a id with the specified \a parent.
 
-  If \a id is empty, this class will use the default accessory that supports
+  If \a id is empty, this class will use the default provider that supports
   the power source interface.
  */
 QPowerSource::QPowerSource(const QString &id, QObject *parent)
 : QHardwareInterface(QPOWERSOURCE_NAME, id, parent, Client)
 {
-
-    proxy( SIGNAL(availabilityChanged(QPowerSource::Availability)) );
-    proxy( SIGNAL(chargingChanged(bool)) );
-    proxy( SIGNAL(chargeChanged(int)) );
-    proxy( SIGNAL(capacityChanged(int)) );
-    proxy( SIGNAL(timeRemainingChanged(int)) );
+    proxyAll( staticMetaObject );
 }
 
 /*! \internal */
@@ -151,11 +145,7 @@ QPowerSource::QPowerSource(const QString &id, QObject *parent,
                            QAbstractIpcInterface::Mode mode)
 : QHardwareInterface(QPOWERSOURCE_NAME, id, parent, mode)
 {
-    proxy( SIGNAL(availabilityChanged(QPowerSource::Availability)) );
-    proxy( SIGNAL(chargingChanged(bool)) );
-    proxy( SIGNAL(chargeChanged(int)) );
-    proxy( SIGNAL(capacityChanged(int)) );
-    proxy( SIGNAL(timeRemainingChanged(int)) );
+    proxyAll( staticMetaObject );
 }
 
 /*!
@@ -230,11 +220,12 @@ int QPowerSource::timeRemaining() const
 
 /*!
   \class QPowerSourceProvider
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QPowerSourceProvider class provides an interface for power sources to integrate into Qtopia.
 
   Power sources are components, either external or internal, such as batteries
-  or wall sockets that provide power to a Qtopia device.  The 
+  or wall sockets that provide power to a Qt Extended device.  The 
   QPowerSourceProvider API allows the addition of information about new power
   sources into Qtopia.
 
@@ -395,7 +386,8 @@ struct QPowerStatusPrivate
 
 /*!
   \class QPowerStatus
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QPowerStatus class provides a simplified interface to the device's primary power sources.
 
   Applications may use the QPowerStatus class to obtain a simplified view of the

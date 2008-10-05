@@ -1,28 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _QABSTRACTMESSAGEBOX_H_
-#define _QABSTRACTMESSAGEBOX_H_
+#ifndef QABSTRACTMESSAGEBOX_H
+#define QABSTRACTMESSAGEBOX_H
 
 #include <QDialog>
+#include <QPixmap>
 #include "qtopiaserverapplication.h"
 
 class QAbstractMessageBoxPrivate;
@@ -44,6 +43,7 @@ public:
 
     virtual Icon icon() const = 0;
     virtual void setIcon(Icon) = 0;
+    virtual void setIconPixmap(const QPixmap&) = 0;
 
     virtual QString text() const = 0;
     virtual void setText(const QString &) = 0;
@@ -57,8 +57,8 @@ public:
 
     static QAbstractMessageBox * messageBox(QWidget *parent, const QString &title, const QString &text, Icon icon, Button button0=QAbstractMessageBox::Ok, Button button1=QAbstractMessageBox::NoButton);
     static QAbstractMessageBox * messageBoxCustomButton(QWidget *parent, const QString &title, const QString &text, Icon icon,
-            const QString & button0Text = QString(), const QString &button1Text = QString(),
-            const QString &button2Text = QString(), int defaultButtonNumber = 0, int escapeButtonNumber = -1 );
+    const QString & button0Text = QString(), const QString &button1Text = QString(),
+    const QString &button2Text = QString(), int defaultButtonNumber = 0, int escapeButtonNumber = -1 );
 
 protected:
     virtual void hideEvent(QHideEvent *);
@@ -68,4 +68,4 @@ private:
     QAbstractMessageBoxPrivate *d;
 };
 
-#endif // _QABSTRACTMESSAGEBOX_H_
+#endif

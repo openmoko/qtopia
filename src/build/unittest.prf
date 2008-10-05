@@ -39,7 +39,9 @@ DEFINES+=QTOPIA_TEST
         test.commands=$$COMMAND_HEADER\
             export QPEHOME=\$\$(mktemp -d /tmp/qtopia_maketest_XXXXXX);\
             $$QPEDIR/bin/runqtopia -exec $$LITERAL_SQUOTE$(INSTALL_ROOT)/tests/$$QTOPIA_ID/$$TARGET -qws $(ARGS)$$LITERAL_SQUOTE;\
-            rm -rf \$\$QPEHOME
+            ret=\$$?;\
+            rm -rf \$\$QPEHOME;\
+            exit \$$ret
     }
     test.depends+=install
     QMAKE_EXTRA_TARGETS+=test

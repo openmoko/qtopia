@@ -1,6 +1,6 @@
 CREATE TABLE simcardidmap (
     sqlid INTEGER,
     cardid VARCHAR(255),
+    storage CHAR(2),
     cardindex INTEGER,
-    PRIMARY KEY(sqlid),
-    UNIQUE(cardid, cardindex));
+    UNIQUE(cardid, cardindex, storage));

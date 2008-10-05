@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -78,13 +76,14 @@ struct QSoftMenuBarProvider::MenuButtonPrivate : public QSharedData
 
 /*!
   \class QSoftMenuBarProvider::MenuButton
+    \inpublicgroup QtUiModule
   \brief The MenuButton class encapsulates the current information for a configured soft button.
   \ingroup QtopiaServer
 
   QSoftMenuBarProvider::MenuButton instances can only be created and returned
   from a QSoftMenuBarProvider instance.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 // define QSoftMenuBarProvider::MenuButton
 
@@ -190,6 +189,7 @@ QString QSoftMenuBarProvider::MenuButton::pixmapName() const
 
 /*!
   \class QSoftMenuBarProvider
+    \inpublicgroup QtUiModule
   \brief The QSoftMenuBarProvider class provides the backend for the QSoftMenuBar API.
   \ingroup QtopiaServer
 
@@ -248,7 +248,7 @@ QString QSoftMenuBarProvider::MenuButton::pixmapName() const
   Valid key entries are those understood by the QKeySequence class.  The
   QSoftMenuBarProvider class will only respond to keys configured in this way.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 // define QSoftMenuBarProvider
@@ -290,10 +290,6 @@ QSoftMenuBarProvider::QSoftMenuBarProvider(QObject *parent)
         d->buttons[backIdx].d->index = menuIdx;
         d->buttons[menuIdx].d->index = backIdx;
         d->buttons.swap( backIdx, menuIdx );
-    }
-
-    // setup override buttons
-    for(int ii = 0; ii < buttonCount; ++ii) {
     }
 
     WindowManagement *man = new WindowManagement(this);

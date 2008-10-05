@@ -1,32 +1,28 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qpimsource.h"
-#include "qrecordio_p.h"
 #include <QIcon>
 
 /*!
   \fn uint qHash(const QPimSource &s)
   \ingroup pim
-  \module qpepim
   \relates QPimSource
 
   Returns a hash value for the source \a s.
@@ -39,8 +35,11 @@ QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
 
 /*!
   \class QPimSource
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QPimSource class holds identifying information for a storage source of PIM data.
 
@@ -88,13 +87,16 @@ QTOPIAPIM_EXPORT uint qHash(const QPimSource &s)
 
 /*!
   \class QPimContext
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QPimContext class represents a storage context of PIM data.
 
   This includes storage such as SIM Card contacts or data stored on the
-  device in Qtopia's native format.  The class can be used to perform
+  device in the system PIM database.  The class can be used to perform
   operations that relate to a specific context of PIM data.
 
   QPimContext should not be instantiated directly.  Instead, one of the data type
@@ -242,13 +244,16 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 
 /*!
   \class QContactContext
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QContactContext class represents a storage context of contact data.
 
   This includes storage contexts such as SIM Card contacts or contacts stored
-  on the phone in Qtopia's native format.  The class can be used to perform
+  on the phone in the system PIM database.  The class can be used to perform
   operations that relate to a specific context of PIM data.
 
   Currently there is no way for applications to implement their own contexts.
@@ -330,14 +335,16 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 
 /*!
   \class QAppointmentContext
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QAppointmentContext class represents a storage context of appointment data.
 
   The class can be used to perform operations that relate to a specific context
-  of PIM data, such as appointments stored on a device in the native Qtopia
-  format, or appointments stored in an on-line calendaring service.
+  of PIM data, such as appointments stored on a device in the native Qt Extended format, or appointments stored in an on-line calendaring service.
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.
@@ -456,13 +463,16 @@ template <typename Stream> void QPimSource::deserialize(Stream &in)
 
 /*!
   \class QTaskContext
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QTaskContext class represents a storage context of task data.
 
   The class can be used to perform operations that relate to a specific context
-  of PIM data, such as tasks stored on a device in the native Qtopia format.
+  of PIM data, such as tasks stored on a device in the native Qt Extended format.
 
   Currently there is no way for applications to implement their own contexts.
   This feature is being considered for future versions of Qtopia.

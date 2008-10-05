@@ -1,24 +1,22 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <qtopia/private/qtopiaresource_p.h>
+#include "qtopiaresource_p.h"
 #include <qtopianamespace.h>
 #include <qtopiaservices.h>
 #include <qtopialog.h>
@@ -30,7 +28,7 @@
 #include <QCache>
 
 #include <QResource>
-#include "private/qresource_p.h"
+#include <private/qresource_p.h>
 //#define ENABLE_RESOURCEFILEENGINE
 
 #include <QDebug>
@@ -45,11 +43,20 @@
 
 static bool fileExists(const QByteArray &filename)
 {
+    // assumes that filename is not a resource path.
+    if(filename[0]==':')
+        return false;
     struct stat statbuf;
     int rv = stat(filename, &statbuf);
     if (rv == 0 && statbuf.st_mode & S_IRUSR)
         return true;
-
+    if(filename.contains('*') || filename.contains('?'))
+    {
+        QFileInfo fi(filename);
+        QDir dir(fi.absolutePath(), fi.fileName());
+        if(dir.entryList().count() > 0)
+            return true;
+    }
     return false;
 }
 
@@ -106,6 +113,32 @@ void QFileResourceFileEngineHandler::setIconPath(const QStringList& p)
     sounddirs.clear();
 }
 
+class QIODeviceFileEngine : public QAbstractFileEngine {
+public:
+    QIODeviceFileEngine(QIODevice *d) : dev(d) {}
+
+    bool open(QIODevice::OpenMode openMode) { return dev->open(openMode); }
+    bool close() { dev->close(); return true; }
+    qint64 size() const { return dev->size(); }
+    qint64 pos() const { return dev->pos(); }
+    bool seek(qint64 pos) { return dev->seek(pos); }
+    bool isSequential() const { return dev->isSequential(); }
+
+    qint64 read(char *data, qint64 maxlen) { return dev->read(data,maxlen); }
+    qint64 readLine(char *data, qint64 maxlen) { return dev->readLine(data,maxlen); }
+    qint64 write(const char *data, qint64 len) { return dev->write(data,len); }
+
+protected:
+    QIODevice* dev; // not owned by QIODeviceFileEngine
+};
+
+class QDataFileEngine : public QIODeviceFileEngine {
+public:
+    QDataFileEngine(QByteArray data) : QIODeviceFileEngine(new QBuffer())
+        { ((QBuffer*)dev)->setData(data); }
+    ~QDataFileEngine() { delete dev; } // owned by QDataFileEngine
+};
+
 QAbstractFileEngine *QFileResourceFileEngineHandler::create(const QString &path) const
 {
     if ( path.length() > 0 && path[0] == ':' ) {
@@ -127,6 +160,10 @@ QAbstractFileEngine *QFileResourceFileEngineHandler::create(const QString &path)
         QString p = findDiskResourceFile(path);
         if (!p.isNull())
             return new QFSFileEngine(p);
+        if (path[0] == ':') {
+            if ( path.left(6) == ":data/" )
+                return new QDataFileEngine(QByteArray::fromBase64(path.mid(6).toLatin1()));
+        }
     }
     return 0;
 }
@@ -141,12 +178,12 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
 
 /*!
   \page qtopia_resource_system.html
-  \title Qtopia Resource System
+  \title Qt Extended Resource System
 
-  The Qtopia resource system allows application programmers to access common
+  The Qt Extended resource system allows application programmers to access common
   application resources such as images, icons and sounds without having to
   concern themselves with the exact installation location or file types.  The
-  Qtopia resource system is built on top of the Qtopia Core resource model.
+  Qt Extended resource system is built on top of the Qt for Embedded Linux resource model.
 
   Rather than accessing resource files directly from disk, applications should
   use resource syntax inplace of a regular file name.  For example, the
@@ -158,17 +195,17 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
   QPixmap pix2(":image/service/Contacts/email");
   \endcode
 
-  When Qtopia detects the use of the special ":" prefix, searches in various
+  When Qt Extended detects the use of the special ":" prefix, searches in various
   locations - depending on the resource type - and for various file types
   to locate the actual resource.  In addition to improving the efficiency of
-  reference for the programmer, the Qtopia resource system improves the
+  reference for the programmer, the Qt Extended resource system improves the
   efficiency of access for the system.  Using a special file, known as a
-  resource database, Qtopia can bundle many separate images and icons into a
+  resource database, Qt Extended can bundle many separate images and icons into a
   single archive that is both quick to access and efficiently shared across
   processes.
 
-  A resource database is created using the Qtopia Core \c {rcc} tool in binary
-  mode.  Any type of Qtopia supported image and icon can be added to a resource
+  A resource database is created using the Qt for Embedded Linux \c {rcc} tool in binary
+  mode.  Any type of Qt Extended supported image and icon can be added to a resource
   database.  A special image type, known as a \i {QRAW} image, is also
   exclusively supported in resource databases.  A \i {QRAW} image is an
   uncompressed raw image that can be mmap'ed directly from disk and efficiently
@@ -197,8 +234,8 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
   When requesting an image, applications use a "filename" of the form
   \c {<path> := :image/[i18n/][<app name>/]<image>}.
   For each search directory
-  listed in the $QTOPIA_PATHS environment variable as well as Qtopia's install
-  location, the following sub-locations are tried:
+  listed in the $QTOPIA_PATHS environment variable,
+  the following sub-locations are tried:
 
   \c {pics/<QApplication::applicationName()>/qtopia.rdb#<app name>/<image>}
 
@@ -224,8 +261,8 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
 
   \c {pics/<app name>/<image>.<image extension>}
 
-  In the listing above, \c {<language>} corresponds to Qtopia's configured
-  language and \c {<locale>} its configured locale.  The supported
+  In the listing above, \c {<language>} and \c {<locale>} correspond to the current language
+  and locale selections.  The supported
   <image extensions> are currently "pic", "svg", "png", "jpg", "mng" and no
   extension.
 
@@ -250,7 +287,7 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
   QPixmap pix(":image/email");
   \endcode
 
-  More information on image translation can be found in Qtopia's \l{Internationalization#image-translation}{Internationalization} guide.
+  More information on image translation can be found in the \l{Internationalization#image-translation}{Internationalization} guide.
 
   Themes can override images by specifying an \c{IconPath}. See
   \l{Images and Icons#installing-custom-icons}.
@@ -261,8 +298,8 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
 
   When requesting an icon, applications use a "filename" of the form
   \c {<path> := :icon/[i18n/][<app name>/]<icon>}.  For each search directory
-  listed in the $QTOPIA_PATHS environment variable as well as Qtopia's install
-  location, the following sub-locations are tried:
+  listed in the $QTOPIA_PATHS environment variable,
+  the following sub-locations are tried:
 
   \c {pics/<QApplication::applicationName()>/qtopia.rdb#<app name>/icons/<icon>}
 
@@ -290,11 +327,11 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
 
   \i {If none found, search for :image/[i18n/][<app name>/]<icon> as though the icon was requested as an image}
 
-  In the listing above, \c {<language>} corresponds to Qtopia's configured
-  language and \c {<locale>} its configured locale.  The supported
+  In the listing above, \c {<language>} and \c {<locale>} correspond to the current
+  language and locale.  The supported
   <icon extensions> are currently "pic", "svg", "png", "jpg", "mng" and no extension.
 
-  More information on icon translation can be found in Qtopia's \l{Internationalization#image-translation}{Internationalization} guide.
+  More information on icon translation can be found in the \l{Internationalization#image-translation}{Internationalization} guide.
 
   Themes can override images by specifying an \c{IconPath}. See
   \l{Images and Icons#installing-custom-icons}.
@@ -305,8 +342,7 @@ void QFileResourceFileEngineHandler::appendSearchDirs(QList<QByteArray>& dirs,
 
   When requesting a sound, applications use a "filename" of the form
   \c {<path> := :sound/<sound>}.  For each search directory listed in the
-  $QTOPIA_PATHS environment variable as well as Qtopia's install location, the
-  following sub-locations are tried:
+  $QTOPIA_PATHS environment variable, the following sub-locations are tried:
 
   \c {sounds/<QApplication::applicationName()>/<sound>.wav}
 

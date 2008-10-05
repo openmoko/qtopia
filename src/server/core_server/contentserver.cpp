@@ -1,26 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "contentserver.h"
-#include "qtopiaserverapplication.h"
 
 #include <qstorage.h>
 #include <qtopiaapplication.h>
@@ -31,7 +28,6 @@
 #include <qcategorymanager.h>
 #include <qtopiasql.h>
 #include <qdrmcontentplugin.h>
-#include "qperformancelog.h"
 
 
 #include <QTimer>
@@ -39,10 +35,9 @@
 #include <QStyle>
 #include <QSemaphore>
 #include <QValueSpaceObject>
-
-// Making this larger will more greatly paralellize scanning at a cost
-// of creating lots of threads
-static const int MaxDirThreads = 2;
+#include <QCryptographicHash>
+#include <QDirIterator>
+#include <QContentPlugin>
 
 // Making this larger will cause the scanner to go more deeply into
 // subdirectories
@@ -54,53 +49,34 @@ static const int MaxSearchDepth = 10;
   not be needed unless undertaking advanced customization.
  */
 
-class DirectoryScanner : public QThread
+class DirectoryScanner : public QObject
 {
     Q_OBJECT
 public:
-    DirectoryScanner( int pr );
+    DirectoryScanner();
     ~DirectoryScanner();
-    virtual void run();
 
 public slots:
-    void startScan(const QString& path, int depth);
-    
+    void scan(const QString &path, int priority);
+
 signals:
-    void scanFinished();
-
-private:
-    QContentList adds;
-    int priority;
-};
-
-/*
-  Manager for recursive threaded background directory scanner.
-  This class is used behind the scenes in the ContentServer and should
-  not be needed unless undertaking advanced customization.
-
-  See also: DirectoryScanner
- */
-
-class DirectoryScannerManager : public QObject
-{
-    Q_OBJECT
-public:
-    DirectoryScannerManager(QObject *parent = 0);
-
-    static void scan(const QString &path, int priority);
-
-    void addPath(const QString &path, int priority, int depth);
-
-    bool isScanning();
+    void scanning(bool scanning);
 
 private slots:
-    void scannerDone();
-    void scannerCleanup();
+    void scan();
 
 private:
-    void startScanner(DirectoryScanner *scanner = NULL);
+    void addPath(const QString &path, int depth, int priority);
+    void scanPath(const QString& path, int depth, int priority);
+    void cleanupThumbnails(const QDateTime &threshold);
+    QString thumbnailDir(const QString &path) const;
+    QString thumbnailPath(const QString &thumbnailDir, const QString &fileName) const;
 
-private:
+    void install(const QFileInfo &fi);
+    void uninstall(QContentId id);
+    void flushInstalls();
+    void flushUninstalls();
+
     struct PendingPath {
         QString path;
         int priority;
@@ -110,27 +86,21 @@ private:
             return priority < pp.priority;
         }
     };
-    QList<PendingPath> pendingPaths;
-    QList<DirectoryScanner*> scanners;
-    QSemaphore threadCount;
-    QMutex mutex;
-};
+    QList<PendingPath> m_pendingPaths;
+    QDateTime m_startTime;
+    QFileInfoList m_pendingInstalls;
+    QContentIdList m_pendingUninstalls;
 
-Q_GLOBAL_STATIC(DirectoryScannerManager, scannerManager);
-
-class ContentProcessor : public QThread
-{
-public:
-    ContentProcessor() : QThread() {}
-    virtual ~ContentProcessor() {}
-    virtual void run();
+    bool m_scanning;
 };
 
 // This value controls how many doclinks are processed at one go before firing off a single shot timer to yield processing
 // before continuing processing
-const int docsPerShot = 100;
+const int docsPerShot = 200;
+
 /*!
   \class ContentServer
+    \inpublicgroup QtBaseModule
   \brief The ContentServer class provides the Documents API.
   \internal
 
@@ -138,7 +108,7 @@ const int docsPerShot = 100;
   a separate thread.  Handles updating ContentSet objects in reponse
   to database updates.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 */
 
 ////////////////////////////////////////////////////////////////////////
@@ -146,40 +116,25 @@ const int docsPerShot = 100;
 /////  ContentServer implementation
 
 ContentServer::ContentServer( QObject *parent )
-    : ContentServerInterface( parent ), guardMutex(QMutex::Recursive)
+    : QThread(parent)
 {
     qLog(DocAPI) << "content server constructed";
-    QPerformanceLog("DocAPI") << "content server constructed";
-    connect(&contentTimer, SIGNAL(timeout()), this, SLOT(processContent()));
-    contentTimer.setSingleShot(true);
+
+    requestQueue = new QtopiaIpcAdaptor(QLatin1String("QPE/DocAPI"), this);
+
+    QtopiaIpcAdaptor::connect(requestQueue, MESSAGE(scanPath(QString,int)), this, SIGNAL(scan(QString,int)));
+
     scannerVSObject = new QValueSpaceObject("/Documents", this);
+
     // force early initialisation of QMimeType to remove the chance of issues later on when we're in threads.
+    QContentPlugin::preloadPlugins();
     QDrmContentPlugin::initialize();
     QMimeType::updateApplications();
 }
 
 ContentServer::~ContentServer()
 {
-    if(scannerVSObject)
-        delete scannerVSObject;
 }
-
-/*!
-  \internal
-  Return a pointer to the instance of the ContentServer object.
-  There can be only one.
-  NEVER call this from outside the Qtopia server
-*/
-ContentServer *ContentServer::getInstance()
-{
-    static ContentServer theInstance;
-
-    if ( ContentServerInterface::serverInstance == 0 )
-        ContentServerInterface::serverInstance = &theInstance;
-
-    return &theInstance;
-}
-
 
 /*!
   \internal
@@ -195,326 +150,46 @@ ContentServer *ContentServer::getInstance()
 */
 void ContentServer::run()
 {
-    RequestQueue rq;
+    DirectoryScanner scanner;
 
-    rq.publish(SLOT(scanPath(QString,int)));
-    rq.publish(SLOT(registerCLS(QString,QContentFilterSet,int)));
-    rq.publish(SLOT(unregisterCLS(QString,int)));
+    connect(this, SIGNAL(scan(QString,int)), &scanner, SLOT(scan(QString,int)));
 
-    QTimer::singleShot(4000, this, SLOT(initDocScan()));
+    connect(&scanner, SIGNAL(scanning(bool)), this, SLOT(scanning(bool)));
 
     exec();
 }
 
-void ContentServer::initDocScan()
+void ContentServer::scanAll()
 {
-    // Scan all locations that can hold Documents but only if they're connected
-    QStorageMetaInfo *storage=QStorageMetaInfo::instance();
-    QFileSystemFilter fsf;
-    fsf.documents = QFileSystemFilter::Set;
-    foreach ( QFileSystem *fs, storage->fileSystems( &fsf, true )) {
-        DirectoryScannerManager::scan(fs->documentsPath(), 0);
-    }
+    emit scan(QLatin1String("all"), 0);
 }
 
-void ContentServer::removeContent(QContentIdList cids)
+void ContentServer::scanning(bool scanning)
 {
-    QMutexLocker guard(&guardMutex);
-    if (removeList.isEmpty())
-        QMetaObject::invokeMethod(&contentTimer, "start", Qt::QueuedConnection, Q_ARG(int,10));
-    removeList += cids;
+    scannerVSObject->setAttribute(QLatin1String("Scanning"), scanning);
 }
 
-void ContentServer::addContent(const QFileInfo &fi)
+static bool binaryStringLessThan(const QString &string1, const QString &string2)
 {
-    QMutexLocker guard(&guardMutex);
-    if (addList.isEmpty())
-        QMetaObject::invokeMethod(&contentTimer, "start", Qt::QueuedConnection, Q_ARG(int,10));
-    addList.append(fi);
-}
+  int length = qMin(string1.length(), string2.length()) * 2;
 
-void ContentServer::processContent()
-{
-    QMutexLocker guard(&guardMutex);
-    if (removeList.count() || addList.count())
-    {
-        int processed = 0;
-        QList<QContentId> deletes;
-        QList<QFileInfo> installs;
+  int c = memcmp(string1.unicode(), string2.unicode(), length);
 
-        while (removeList.count() && ++processed < docsPerShot)
-            deletes.append(removeList.takeFirst());
-
-        while (addList.count() && ++processed < docsPerShot)
-            installs.append(addList.takeFirst());
-
-        if(!deletes.isEmpty())
-            QContent::uninstallBatch(deletes);
-        if(!installs.isEmpty())
-            QContent::installBatch(installs);
-        contentTimer.start(10);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////
-/////
-/////  RequestQueue Implementation
-
-
-RequestQueue::RequestQueue()
-    : QtopiaIpcAdaptor(QLatin1String("QPE/DocAPI"))
-{
-}
-
-RequestQueue::~RequestQueue()
-{
-}
-
-
-/*!
-  The server works by keeping a mirror of each QContentSet object
-  created.  The mirror is registered during construction, and
-  deregistered when destructed.  Changes to the filter expression
-  cause the mirror to be deregistered and recreated with the new
-  expression.  When the QContentSet mirror is changed, it propagates
-  the change out to the original.
-
-  This way changes to the database are only notified if an application
-  is interested in them, and only those applications are notified.
-*/
-
-void RequestQueue::scanPath(const QString &newPath, int priority)
-{
-    DirectoryScannerManager::scan(newPath, priority);
-}
-
-void RequestQueue::registerCLS(const QString& CLSid, const QContentFilter& filters, int index)
-{
-    Q_UNUSED(CLSid);
-    Q_UNUSED(filters);
-    Q_UNUSED(index);
-/*
-    QContentSet *mirror = new QContentSet( filters );
-    QString mkey = QString( "%1-%2" ).arg( CLSid ).arg( index );
-    mirrors[ mkey ] = mirror;
-    mirrorsByPtr[ mirror ] = CLSid;
-    connect( mirror, SIGNAL(changed(QContentId,QContent::ChangeType)),
-             this, SLOT(reflectMirror(QContentId,QContent::ChangeType)), Qt::QueuedConnection);
-*/
-}
-
-void RequestQueue::unregisterCLS(const QString& CLSid, int index)
-{
-    QString mkey = QString( "%1-%2" ).arg( CLSid ).arg( index );
-    if ( !mirrors.contains( mkey )) 
-        return;
-    QContentSet *mirror = mirrors[ mkey ];
-    mirrorsByPtr.remove( mirror );
-    delete mirrors.take( mkey );
-}
-
-
-void RequestQueue::receiveUpdate()
-{
-
-}
-
-/*!
-  \internal
-  Send out an update message reflecting the fact that the
-  cid has changed - this is picked up by the app that is interested
-  in it, which in turn fetches the fresh data from the database.
-
-  TODO - Optimise for case of a large number of updates, eg
-  when scanning large directories of files.  Suggest on sending an
-  update, set a timer for 50 milliseconds.  If the next update is
-  due to be sent before the timer expires, instead batch it up and
-  reset the timer.  Keep accumulating batched updates until either
-  the timer times out (no updates for 50 ms) or 50 updates
-  occur.  Maybe also a "mass update" message is required.
-*/
-void RequestQueue::reflectMirror( QContentId cid, QContent::ChangeType ctype )
-{
-    QContentSet *m = static_cast<QContentSet *>( sender() );
-    //Q_ASSERT( mirrorsByPtr.contains( m ));    // things are badly broken if not
-    qLog(DocAPI) << "RequestQueue::reflectMirror" << mirrorsByPtr[m] << cid;
-    QtopiaIpcEnvelope e( mirrorsByPtr[m].prepend( QLatin1String("QPE/Application/") ), QLatin1String("updateContent(QContentId,QContent::ChangeType)") );
-    e << cid;
-    e << ctype;
-}
-
-////////////////////////////////////////////////////////////////
-//
-// DirectoryScanner threaded directory scanner implementation
-
-
-DirectoryScannerManager::DirectoryScannerManager(QObject *parent)
-    : QObject(parent), threadCount(MaxDirThreads), mutex(QMutex::Recursive)
-{
-    QMetaObject::invokeMethod(ContentServer::getInstance()->scannerVSObject, "setAttribute", Q_ARG(QString, QLatin1String("Scanning")), Q_ARG(QVariant, isScanning()));
-}
-
-void DirectoryScannerManager::scan(const QString &path, int priority)
-{
-    if(path == QLatin1String("all"))
-    {
-        QTimer::singleShot(0, ContentServer::getInstance(), SLOT(initDocScan()));
-    }
-    else
-        scannerManager()->addPath(path, priority, 0);
-}
-
-void DirectoryScannerManager::addPath(const QString &path, int priority, int depth)
-{
-    QMutexLocker lock(&mutex);
-    qLog(DocAPI) << "Adding path to scan:" << path << ", priority:" << priority << "depth" << depth;
-
-    PendingPath pp;
-    pp.path = path;
-    pp.priority = priority;
-    pp.depth = depth;
-    for (int i = 0; i < pendingPaths.count(); ++i) {
-        if (pendingPaths.at(i).path == path) {
-            pendingPaths.removeAt(i);
-            break;
-        }
-    }
-    pendingPaths.append(pp);
-    qSort(pendingPaths);
-    startScanner();
-}
-
-void DirectoryScannerManager::scannerDone()
-{
-    QMutexLocker lock(&mutex);
-    int s = scanners.indexOf((DirectoryScanner*)(sender()));
-    if (s < 0) {
-        // this would be a programmer error...
-        qWarning() << "signalled by an unknown scanner!!";
-        return;
-    }
-    DirectoryScanner *ds = scanners.at(s);
-    //qLog(DocAPI) << "finished scanning" << ds->path() << ", thread count" << threadCount.available();
-
-    if(pendingPaths.count() == 0) {
-        QMetaObject::invokeMethod(ds, "quit", Qt::QueuedConnection);
-        QPerformanceLog("DocAPI") << "finished scanning";
-    }
-    else
-        startScanner(ds);
-}
-
-void DirectoryScannerManager::scannerCleanup()
-{
-    int s=scanners.indexOf((DirectoryScanner*)(sender()));
-    if(s >= 0)
-        scanners.takeAt(s);
-    delete (DirectoryScanner*)(sender());
-    threadCount.release();
-    QMetaObject::invokeMethod(ContentServer::getInstance()->scannerVSObject, "setAttribute", Q_ARG(QString, QLatin1String("Scanning")), Q_ARG(QVariant, isScanning()));
-}
-
-
-void DirectoryScannerManager::startScanner(DirectoryScanner *scanner)
-{
-    QMutexLocker lock(&mutex);
-    if (pendingPaths.count()) {
-        DirectoryScanner *scan=scanner;
-        PendingPath pp = pendingPaths.takeLast();
-        qLog(DocAPI) << "preparing to scan" << pp.path << "priority" << pp.priority << ", thread count" << threadCount.available();
-        if(scan == NULL)
-        {
-            if(threadCount.tryAcquire())
-            {
-                scan = new DirectoryScanner(pp.priority);
-
-                connect(scan, SIGNAL(scanFinished()), this, SLOT(scannerDone()), Qt::QueuedConnection);
-                connect(scan, SIGNAL(finished()), this, SLOT(scannerCleanup()), Qt::QueuedConnection);
-                connect(scan, SIGNAL(terminated()), this, SLOT(scannerCleanup()), Qt::QueuedConnection);
-
-                scanners.append(scan);
-
-                scan->start(QThread::LowestPriority);
-
-                QMetaObject::invokeMethod(ContentServer::getInstance()->scannerVSObject, "setAttribute", Q_ARG(QString, QLatin1String("Scanning")), Q_ARG(QVariant, isScanning()));
-            }
-            else
-            {
-                pendingPaths.append( pp );
-                return;
-            }
-        }
-
-        QMetaObject::invokeMethod(scan, "startScan", Qt::QueuedConnection, Q_ARG(QString, pp.path), Q_ARG(int, pp.depth));
-    }
-    else if(scanner!=NULL)
-        QMetaObject::invokeMethod(scanner, "quit", Qt::QueuedConnection);
-}
-
-bool DirectoryScannerManager::isScanning()
-{
-    qLog(DocAPI) << __PRETTY_FUNCTION__ << "threadCount.available() =" << threadCount.available();
-    qLog(DocAPI) << __PRETTY_FUNCTION__ << "returning" << (threadCount.available() != MaxDirThreads);
-    return threadCount.available() != MaxDirThreads;
-}
-
-static void installContent( QFileInfoList *installs, const QFileInfo &fi )
-{
-    if( !QtopiaSql::instance()->isDatabase( fi.absoluteFilePath() ) )
-    {
-        installs->append( fi );
-
-        if( installs->count() == 20 )
-        {
-            foreach( QFileInfo f, *installs )
-                ContentServer::getInstance()->addContent( f );
-
-            installs->clear();
-        }
-    }
-}
-
-static void flushInstalls( QFileInfoList *installs )
-{
-    if( !installs->isEmpty() )
-    {
-        foreach( QFileInfo f, *installs )
-            ContentServer::getInstance()->addContent( f );
-
-        installs->clear();
-    }
-}
-
-static void removeContent( QContentIdList *removes, QContentId id )
-{
-    removes->append( id );
-
-    if( removes->count() == 20 )
-    {
-        ContentServer::getInstance()->removeContent( *removes );
-
-        removes->clear();
-    }
-}
-
-static void flushRemoves( QContentIdList *removes )
-{
-    if( !removes->isEmpty() )
-    {
-        ContentServer::getInstance()->removeContent( *removes );
-
-        removes->clear();
-    }
+  if (c < 0)
+      return true;
+  else if (c == 0)
+      return string1.length() - string2.length() < 0;
+  else
+      return false;
 }
 
 /*!
    Construct a directory scanner object representing one thread scanning
    one directory
 */
-DirectoryScanner::DirectoryScanner( int pr )
-    : priority(pr)
+DirectoryScanner::DirectoryScanner()
+    : m_scanning(false)
 {
-    moveToThread(this);
 }
 
 /*!
@@ -526,127 +201,257 @@ DirectoryScanner::~DirectoryScanner()
 {
 }
 
-/*!
-  \internal
-  Do a breadth first scan of this DirectoryScanners dirPath, starting a new DirectoryScanner
-  for any directories encountered during the search.  If there are already
-  MaxDirThreads scanner threads running, block until one finishes.
-
-  The finished/terminate signals from the sub-DirectoryScanners will be delivered
-  immediately because those objects live in the same thread as this one.  quit()
-  however will not be received unless running in the event loop.
-*/
-void DirectoryScanner::run()
+void DirectoryScanner::scan(const QString &path, int priority)
 {
-    exec();
+    if (path == QLatin1String("all")) {
+        QFileSystemFilter fsf;
+        fsf.documents = QFileSystemFilter::Set;
+        foreach (QFileSystem *fs, QStorageMetaInfo::instance()->fileSystems(&fsf, true))
+            addPath(fs->documentsPath(), 0, priority);
+
+        if (m_startTime.isNull())
+            m_startTime = QDateTime::currentDateTime();
+    } else {
+        addPath(path, 0, priority);
+    }
 }
 
-void DirectoryScanner::startScan(const QString& path, int depth)
+void DirectoryScanner::addPath(const QString &path, int depth, int priority)
 {
-    setTerminationEnabled(false);
-    QString dirPath=QDir::cleanPath(path);
-    const QLatin1String unknownType( "application/octet-stream" );
-    qLog(DocAPI) << "thread" << QThread::currentThreadId() << "scan called for path" << dirPath << "depth" << depth;
-
-    QContentSet dirContents;
-    QContentSetModel dirModel(&dirContents);
-
-    QContentIdList removeList;
-
-    if(depth==0) // only do it for the top level of this directory
-    {
-        // Now scan for all files under this location, and check if they're valid or not, if not, add them to the removelist too.
-        dirContents.setCriteria( QContentFilter( QContentFilter::Location, dirPath ) );
-
-        int dirCount = dirModel.rowCount();
-
-        for (int i = 0; i < dirCount; i++)
-        {
-            QContent content = dirModel.content(i);
-
-            if( !content.isValid(true) )
-                ::removeContent( &removeList, content.id() );
+    PendingPath pp;
+    pp.path = path;
+    pp.priority = priority;
+    pp.depth = depth;
+    for (int i = 0; i < m_pendingPaths.count(); ++i) {
+        if (m_pendingPaths.at(i).path == path) {
+            m_pendingPaths.removeAt(i);
+            break;
         }
+    }
+    m_pendingPaths.append(pp);
+    qSort(m_pendingPaths);
 
-        ::flushRemoves( &removeList );
+    if (!m_scanning) {
+        emit scanning(m_scanning = true);
+
+        QTimer::singleShot(0, this, SLOT(scan()));
+    }
+}
+
+void DirectoryScanner::scan()
+{
+    if (!m_pendingPaths.isEmpty()) {
+        PendingPath pending = m_pendingPaths.takeLast();
+
+        scanPath(pending.path, pending.depth, pending.priority);
+
+        QTimer::singleShot(0, this, SLOT(scan()));
+    } else {
+        flushInstalls();
+        flushUninstalls();
+
+        if (!m_startTime.isNull()) {
+            cleanupThumbnails(m_startTime);
+
+            m_startTime = QDateTime();
+
+            QTimer::singleShot(0, this, SLOT(scan()));
+        } else {
+            emit scanning(m_scanning = false);
+
+            qLog(DocAPI) << "finished scanning";
+        }
+    }
+}
+
+void DirectoryScanner::scanPath(const QString& path, int depth, int priority)
+{
+    const QString cleanPath = QDir::cleanPath(path);
+    const QString dirPath = cleanPath + QLatin1Char('/');
+    const QString unknownType(QLatin1String("application/octet-stream"));
+    qLog(DocAPI) << "scan called for path" << dirPath << "depth" << depth;
+
+    if (depth==0) { // only do it for the top level of this directory
+        // Now scan for all files under this location, and check if they're valid or not, if not, add them to the removelist too.
+        QStringList paths = QContentFilter(QContentFilter::Location, dirPath)
+                .argumentMatches(QContentFilter::Directory, QString());
+
+        QContentFilter removedPaths;
+
+        foreach (QString path, paths) {
+            if (!QFile::exists(path)) {
+                QContentIdList contentIds = QContentSet(QContentFilter::Directory, path).itemIds();
+
+                foreach (QContentId contentId, contentIds)
+                    uninstall(contentId);
+            }
+        }
     }
 
-    dirContents.setCriteria( QContentFilter( QContentFilter::Directory, dirPath ) );
-    dirContents.setSortCriteria( QContentSortCriteria( QContentSortCriteria::FileName ) );
+    const QString thumbDir = thumbnailDir(cleanPath);
 
-    QDir dir( dirPath );
+    QContentSet dirContents;
+    dirContents.setCriteria(QContentFilter::Directory, cleanPath);
+    dirContents.setSortCriteria(QContentSortCriteria(QContentSortCriteria::FileName));
 
-    QFileInfoList ents = dir.entryInfoList(
-            QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot,
-            QDir::Name );
+    QStringList fileNames = QDir(dirPath).entryList(
+            QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
-    QFileInfoList installList;
+    qSort(fileNames.begin(), fileNames.end(), binaryStringLessThan);
 
     int db = 0;
     int fs = 0;
 
-    int dirCount = dirModel.rowCount();
+    const int dbCount = dirContents.count();
+    const int fsCount = fileNames.count();
 
-    while( db < dirCount && fs < ents.count() )
-    {
-        QContent content = dirModel.content( db );
-        QFileInfo fi = ents.at( fs );
+    char buffer[16];
 
-        int comparison = QString::compare( content.fileName(), fi.absoluteFilePath() );
+    while (db < dbCount && fs < fsCount) {
+        QContent content = dirContents.content(db);
+        const QString fsName = fileNames.at(fs);
+        const QString dbName = content.fileName().mid(dirPath.length());
 
-        if( comparison == 0 )
-        {
-            if( content.type() == unknownType && QMimeType::fromFileName( fi.absoluteFilePath() ).id() != unknownType )
-            {
-                content.setName( QString() );
-                content.setType( QString() );
+        int comparison = QString::compare(dbName, fsName);
+
+        if (comparison == 0) {
+            if (content.type() == unknownType && QMimeType::fromFileName(content.fileName()).id() != unknownType) {
+                content.setName(QString());
+                content.setType(QString());
                 content.commit();
+            } else if (QFileInfo(content.fileName()).lastModified() > content.lastUpdated()) {
+                content.commit();
+            } else if (!thumbDir.isNull()) {
+                QFile thumb(thumbnailPath(thumbDir, content.fileName()));
+ 
+                 if (thumb.exists() && thumb.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
+                     thumb.read(buffer, 16);
+                     thumb.close();
+                 }
             }
-            else if( fi.lastModified() > content.lastUpdated() )
-                content.commit();
-
             ++db;
             ++fs;
-        }
-        else if( comparison < 0 )
-        {
-            ::removeContent( &removeList, content.id() );
+        } else if (comparison < 0) {
+            uninstall(content.id());
 
             ++db;
-        }
-        else if( comparison > 0 )
-        {
-            ::installContent( &installList, fi );
+        } else if (comparison > 0) {
+            install(QFileInfo(dirPath + fsName));
 
             ++fs;
         }
     }
-    dirCount = dirModel.rowCount();
-    while( db < dirCount )
-    {
-        ::removeContent( &removeList, dirModel.contentId( db++ ) );
+
+    while(db < dbCount)
+        uninstall(dirContents.contentId(db++));
+    while(fs < fsCount)
+        install(QFileInfo(dirPath + fileNames.at(fs++)));
+
+    if (depth < MaxSearchDepth)
+        foreach (QString fileName, QDir(dirPath).entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+            addPath(dirPath + fileName, depth + 1, priority - 1);
+}
+
+void DirectoryScanner::cleanupThumbnails(const QDateTime &startTime)
+{
+    const QString thumbnails(QLatin1String("Thumbnails"));
+
+    QFileSystemFilter filter;
+
+    QStringList paths;
+
+    foreach (const QFileSystem *fs, QStorageMetaInfo::instance()->fileSystems(&filter))
+        if (fs->storesType(thumbnails))
+            paths.append(fs->typePath(thumbnails));
+
+    if (!QStorageMetaInfo::instance()->typeFileSystem(thumbnails))
+        paths.append(Qtopia::homePath() + QLatin1String("/Thumbnails"));
+
+    foreach (QString path, paths) {
+        QDirIterator iterator(path, QDir::Files);
+
+        while (iterator.hasNext()) {
+            QString path = iterator.next();
+
+            QFileInfo fileInfo = iterator.fileInfo();
+
+            if (fileInfo.lastRead().secsTo(startTime) > 0)
+                QFile::remove(path);
+        }
     }
-    while( fs < ents.count() )
-    {
-        ::installContent( &installList, ents.at( fs++ ) );
+}
+
+QString DirectoryScanner::thumbnailDir(const QString &path) const
+{
+    const QString thumbnails(QLatin1String("Thumbnails"));
+
+    QFileSystem fs = QFileSystem::fromFileName(path);
+
+    if (!fs.storesType(thumbnails))
+        fs = QFileSystem::typeFileSystem(thumbnails);
+
+    QString dir = !fs.isNull()
+            ? fs.typePath(thumbnails)
+            : Qtopia::homePath() + QLatin1String("/Thumbnails");
+
+    return QFile::exists(dir) ? dir + QLatin1Char('/') : QString();
+}
+
+QString DirectoryScanner::thumbnailPath(const QString &thumbnailDir, const QString &fileName) const
+{
+    QByteArray hash = QCryptographicHash::hash(
+            fileName.toLocal8Bit(), QCryptographicHash::Md5).toHex();
+
+    return thumbnailDir + QString::fromLatin1(hash.constData(), hash.length())
+            + QLatin1String(".png");
+}
+
+void DirectoryScanner::install(const QFileInfo &fi)
+{
+    if (!QtopiaSql::instance()->isDatabase(fi.absoluteFilePath())) {
+        m_pendingInstalls.append(fi);
+
+        if (m_pendingInstalls.count() == docsPerShot) {
+            QContent::installBatch(m_pendingInstalls);
+
+            m_pendingInstalls.clear();
+        }
     }
+}
 
-    flushRemoves( &removeList );
-    flushInstalls( &installList );
+void DirectoryScanner::DirectoryScanner::flushInstalls()
+{
+    if (!m_pendingInstalls.isEmpty()) {
+        QContent::installBatch(m_pendingInstalls);
 
-    ents = dir.entryInfoList( QDir::Dirs | QDir::NoDotAndDotDot );
+        m_pendingInstalls.clear();
+    }
+}
 
-    foreach( QFileInfo entry, ents )
-        if (depth < MaxSearchDepth && !entry.fileName().startsWith(QLatin1String(".")))
-            scannerManager()->addPath(dir.path()+'/' + entry.fileName(), priority-1, depth+1);
+void DirectoryScanner::uninstall(QContentId id)
+{
+    m_pendingUninstalls.append(id);
 
-    emit scanFinished();
-    setTerminationEnabled(true);
+    if (m_pendingUninstalls.count() == docsPerShot) {
+        QContent::uninstallBatch(m_pendingUninstalls);
+
+        m_pendingUninstalls.clear();
+    }
+}
+
+void DirectoryScanner::flushUninstalls()
+{
+    if (!m_pendingUninstalls.isEmpty()) {
+        QContent::uninstallBatch(m_pendingUninstalls);
+
+        m_pendingUninstalls.clear();
+    }
 }
 
 // define ContentServerTask
 /*!
   \class ContentServerTask
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \brief The ContentServerTask class manages the Documents API's document scanning functionality.
 
@@ -657,7 +462,7 @@ void DirectoryScanner::startScan(const QString& path, int depth)
   document model.
 
   The ContentServerTask class provides the \c {ContentServer} task.
-  It is part of the Qtopia server and cannot be used by other Qtopia applications.
+  It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 QTOPIA_TASK(ContentServer, ContentServerTask);
 QTOPIA_TASK_PROVIDES(ContentServer, SystemShutdownHandler);
@@ -670,19 +475,10 @@ QTOPIA_TASK_PROVIDES(DocumentServer, SystemShutdownHandler);
     \internal
 */
 ContentServerTask::ContentServerTask()
-: m_finished(false)
 {
-    ContentServer *dup = ContentServer::getInstance();
-    dup->start( QThread::LowPriority );
-}
+    m_server.start(QThread::LowPriority);
 
-/*!\internal */
-void ContentServerTask::finished()
-{
-    if(m_finished) return;
-
-    m_finished = true;
-    emit proceed(); 
+    QTimer::singleShot(4000, &m_server, SLOT(scanAll())); 
 }
 
 /*!
@@ -706,22 +502,22 @@ bool ContentServerTask::systemShutdown()
 /*! \internal */
 void ContentServerTask::doShutdown()
 {
-    ContentServer *s = ContentServer::getInstance();
-    QObject::connect(s, SIGNAL(finished()), this, SLOT(finished()));
-    QTimer::singleShot(500, this, SLOT(finished()));
-    s->quit();
+    QObject::connect(&m_server, SIGNAL(finished()), this, SIGNAL(proceed()));
+
+    m_server.quit();
 }
 
 /*!
     \class DocumentServerTask
+    \inpublicgroup QtBaseModule
     \ingroup QtopiaServer::Task
-    \brief The DocumentServerTask class manages the lifetime of the Qtopia Document Server.
+    \brief The DocumentServerTask class manages the lifetime of the Qt Extended Document Server.
 
-    The \l{QtopiaDocumentServer}{Qtopia Document Server} provides a secure interface for applications to access
-    the functionality of the \l{Document System}{Qtopia Document System} without having access to the document
+    The \l{QtopiaDocumentServer}{Qt Extended Document Server} provides a secure interface for applications to access
+    the functionality of the \l{Document System}{Qt Extended Document System} without having access to the document
     databases or the file system.
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
     \sa QtopiaDocumentServer
 */
 
@@ -755,6 +551,4 @@ bool DocumentServerTask::systemShutdown()
     return false;
 }
 
-
 #include "contentserver.moc"
-

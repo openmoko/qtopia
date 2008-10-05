@@ -1,5 +1,9 @@
+!qbuild{
 qtopia_project(qtopia lib)
 TARGET=qtopiaphonemodem
+CONFIG += qtopia_visibility no_tr
+depends(libraries/qtopiaphone)
+}
 
 HEADERS= \
     qmodemservice.h \
@@ -63,22 +67,12 @@ SOURCES=\
     qmodempppdmanager.cpp \
     qmodemcallvolume.cpp
 
-CONFIG += qtopia_visibility no_tr
-    
-depends(libraries/qtopiaphone)
-
-sdk_qtopiaphonemodem_headers.files=$${HEADERS}
-sdk_qtopiaphonemodem_headers.path=/include/qtopiaphonemodem
-sdk_qtopiaphonemodem_headers.hint=sdk headers
-INSTALLS+=sdk_qtopiaphonemodem_headers
-
-sdk_qtopiaphonemodem_private_headers.files=$${PRIVATE_HEADERS}
-sdk_qtopiaphonemodem_private_headers.path=/include/qtopiaphonemodem/private
-sdk_qtopiaphonemodem_private_headers.hint=sdk headers
-INSTALLS+=sdk_qtopiaphonemodem_private_headers
-
-
-HEADERS+=$$PRIVATE_HEADERS
+!qbuild{
+headers.files=$$HEADERS
+headers.path=/include/qtopiaphonemodem
+headers.hint=sdk headers
+INSTALLS+=headers
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)
+}

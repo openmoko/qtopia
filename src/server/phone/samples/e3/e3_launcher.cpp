@@ -1,29 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "e3_launcher.h"
 #include "e3_clock.h"
 #include "e3_navipane.h"
-#include "phoneheader.h"
-#include "contextlabel.h"
+#include "qabstractheader.h"
+#include "qabstractcontextlabel.h"
 #include "windowmanagement.h"
 #include "themecontrol.h"
 #include <QApplication>
@@ -55,11 +53,11 @@
 #include "qabstractbrowserscreen.h"
 #include "qabstractdialerscreen.h"
 #include "qabstractmessagebox.h"
-#include "cellmodemmanager.h"
-#include "callscreen.h"
+#include "qabstractcallpolicymanager.h"
+#include "qabstractcallscreen.h"
 #include "dialercontrol.h"
 #include "applicationlauncher.h"
-#include "callhistory.h"
+#include "qabstractcallhistory.h"
 #include "qabstractthemewidgetfactory.h"
 #include "e3_today.h"
 #include "dialerservice.h"
@@ -86,16 +84,19 @@ protected:
 NonModalLauncherView::NonModalLauncherView(QWidget *parent)
 : LauncherView(parent)
 {
-    icons->installEventFilter(this);
+    setViewMode(QListView::IconMode);
+    m_icons->installEventFilter(this);
+    m_icons->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_icons->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 bool NonModalLauncherView::eventFilter(QObject *, QEvent *e)
 {
     if(e->type() == QEvent::FocusIn) {
         resetSelection();
-        icons->setEditFocus(true);
+        m_icons->setEditFocus(true);
     } else if(e->type() == QEvent::FocusOut) {
-        icons->clearSelection();
+        clearSelection();
     } else if(e->type() == QEvent::KeyPress ||
               e->type() == QEvent::KeyRelease) {
 
@@ -581,7 +582,10 @@ void E3TodoItem::dataChanged()
 
 static QWidget *callHistory()
 {
-    return new CallHistory(DialerControl::instance()->callList(), 0);
+    QAbstractCallHistory* history = qtopiaWidget<QAbstractCallHistory>();
+    if ( !history )
+        qLog(Component) << "E3Launcher: No callhistory component available";
+    return history;
 }
 
 class E3DialerServiceProxy : public DialerService
@@ -601,6 +605,13 @@ protected:
     virtual void showDialer( const QString& digits ) {
         emit doShowDialer(digits);
     }
+
+    virtual void onHook() {}
+    virtual void offHook() {}
+    virtual void headset() {}
+    virtual void speaker() {}
+    virtual void setDialToneOnlyHint( const QString &/*app*/ ) {}
+    virtual void redial() {}
 
 signals:
     void doDial( const QString& number );
@@ -636,10 +647,15 @@ E3ServerInterface::E3ServerInterface(QWidget *parent, Qt::WFlags flags)
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
 #ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
-    QExportedBackground::initExportedBackground(desktopRect.width(),
-                                                desktopRect.height());
+    QSize desktopSize = QExportedBackground::exportedBackgroundSize();
+    QExportedBackground::initExportedBackground(desktopSize.width(),
+                                                desktopSize.height());
 #endif
-    ThemeControl::instance()->setThemeWidgetFactory(new E3WidgetFactory);
+    themeCtrl = qtopiaTask<ThemeControl>();
+    if ( themeCtrl )
+        themeCtrl->setThemeWidgetFactory(new E3WidgetFactory);
+    else 
+        qLog(Component) << "E3ServerInterface: ThemeControl not available, Theme will not work properly";
 
     // Install call history builtin
     BuiltinApplicationLauncher::install("callhistory", callHistory);
@@ -648,22 +664,30 @@ E3ServerInterface::E3ServerInterface(QWidget *parent, Qt::WFlags flags)
     DialerControl::instance();
     QObject::connect(DialerControl::instance(), SIGNAL(callIncoming(QPhoneCall)), this, SLOT(showCallscreen()));
 
-    // Get cell modem manager
-    m_cell = qtopiaTask<CellModemManager>();
+    // Get cell policy manager
+    m_cell = QAbstractCallPolicyManager::managerForCallType( "Voice" ); //no tr
 
     // Create header
     header();
     // Create context
     context();
 
+    if (themeCtrl) {
+        QObject::connect(this, SIGNAL(themeLoaded()),
+                    m_header, SLOT(themeLoaded()));
+        QObject::connect(this, SIGNAL(themeLoaded()),
+                    m_context, SLOT(themeLoaded()));
+    }
+
     m_theme = new ThemedView(this);
     m_theme->setGeometry(desktopRect);
-    m_tbackground = new ThemeBackground(ThemeBackground::PrimaryScreen, this);
+    m_tbackground = new ThemeBackground(this);
     QVBoxLayout *layout = new QVBoxLayout(m_theme);
     m_theme->setLayout(layout);
     layout->setMargin(0);
     layout->setSpacing(0);
-    ThemeControl::instance()->registerThemedView(m_theme, "Home");
+    if ( themeCtrl )
+        themeCtrl->registerThemedView(m_theme, "Home");
 
     m_titleSpacer = new QWidget;
     layout->addWidget(m_titleSpacer);
@@ -673,8 +697,6 @@ E3ServerInterface::E3ServerInterface(QWidget *parent, Qt::WFlags flags)
 
     // Quick launcher bar
     m_view = new NonModalLauncherView(m_theme);
-    m_view->view()->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_view->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_view->setFixedHeight(37);
     m_view->setFixedWidth(230);
     m_view->setItemDelegate(new E3ListDelegate(m_view));
@@ -685,7 +707,6 @@ E3ServerInterface::E3ServerInterface(QWidget *parent, Qt::WFlags flags)
     l2->addWidget(m_view);
     layout->addLayout(l2);
 
-    m_view->setViewMode(QListView::IconMode);
     QObject::connect(m_view, SIGNAL(clicked(QContent)), this, SLOT(launch(QContent)));
     quickApps();
 
@@ -710,7 +731,8 @@ E3ServerInterface::E3ServerInterface(QWidget *parent, Qt::WFlags flags)
                      this, SLOT(received(QString,QByteArray)));
 
     // Themes
-    QObject::connect(ThemeControl::instance(), SIGNAL(themeChanged()),
+    if ( themeCtrl )
+        QObject::connect(themeCtrl, SIGNAL(themeChanged()),
                      this, SLOT(loadTheme()));
     loadTheme();
 
@@ -760,9 +782,11 @@ void E3ServerInterface::acceptIncoming()
 
 void E3ServerInterface::showCallscreen()
 {
-    dialer()->close();
-    callscreen()->showMaximized();
-    callscreen()->raise();
+    if ( callscreen() ) {
+        dialer()->close();
+        callscreen()->showMaximized();
+        callscreen()->raise();
+    }
 }
 
 void E3ServerInterface::showDialer(const QString &number)
@@ -779,11 +803,13 @@ void E3ServerInterface::showDialer(const QString &number)
 
 void E3ServerInterface::requestDial(const QString &number)
 {
-    if(!m_cell || !m_cell->networkRegistered()) {
+    if(!m_cell || 
+            (m_cell->registrationState() != QTelephony::RegistrationHome && 
+             m_cell->registrationState() != QTelephony::RegistrationRoaming )) {
         QAbstractMessageBox::information(this, tr("Not Registered"), tr("Cannot make call until network is registered."));
     } else if(!DialerControl::instance()->allCalls().isEmpty()) {
         QAbstractMessageBox::information(this, tr("Active call"), tr("Cannot make call while other call in progress."));
-    } else {
+    } else if ( callscreen() ) {
         DialerControl::instance()->dial(number, DialerControl::instance()->callerIdNeeded(number));
         callscreen()->showMaximized();
         callscreen()->raise();
@@ -801,13 +827,14 @@ QAbstractDialerScreen *E3ServerInterface::dialer()
     return m_dialer;
 }
 
-CallScreen *E3ServerInterface::callscreen()
+QAbstractCallScreen *E3ServerInterface::callscreen()
 {
     if(!m_callscreen) {
-        m_callscreen = new CallScreen(DialerControl::instance(), 0);
-        ThemeControl::instance()->registerThemedView(m_callscreen, "CallScreen");
-        QObject::connect(m_callscreen, SIGNAL(listEmpty()),
-                         m_callscreen, SLOT(hide()));
+        m_callscreen = qtopiaWidget<QAbstractCallScreen>(0);
+        if ( !m_callscreen ) {
+            qLog(Component) << "E3ServerInterface: Callscreen component unavailable";
+            return 0;
+        }
         QObject::connect(m_callscreen, SIGNAL(acceptIncoming()),
                          this, SLOT(acceptIncoming()));
         QObject::connect(DialerControl::instance(), SIGNAL(stateChanged()),
@@ -831,29 +858,31 @@ void E3ServerInterface::showApps()
 
 void E3ServerInterface::header()
 {
-    m_header = new PhoneHeader();
-    m_header->installEventFilter(this);
-
-    WindowManagement::protectWindow(m_header);
-    ThemeControl::instance()->registerThemedView(m_header, "Title");
-    m_header->resize(QApplication::desktop()->screenGeometry().width(),
-                     m_header->sizeHint().height());
-    QTimer::singleShot(0, m_header, SLOT(show()));
+    if (!m_header) {
+        m_header = qtopiaWidget<QAbstractHeader>();
+        if (!m_header) {
+            qLog(Component) << "E3ServerInterface: QAbstractHeader not available";
+        } else {
+            m_header->installEventFilter(this);
+            WindowManagement::protectWindow(m_header);
+            QTimer::singleShot(0, m_header, SLOT(show()));
+        }
+    }
 }
 
 void E3ServerInterface::context()
 {
-    m_context = new ContextLabel(0, Qt::FramelessWindowHint |
-                                    Qt::Tool |
-                                    Qt::WindowStaysOnTopHint );
-    m_context->move(QApplication::desktop()->screenGeometry().topLeft()); // move to the correct screen
-    WindowManagement::protectWindow(m_context);
-    m_context->setAttribute(Qt::WA_GroupLeader);
-    ThemeControl::instance()->registerThemedView(m_context, "Context");
-    // Set width now to avoid relayout later.
-    m_context->resize(QApplication::desktop()->screenGeometry().width(),
-                    m_context->sizeHint().height());
-    QTimer::singleShot(0, m_context, SLOT(show()));
+    if (!m_context) {
+        m_context = qtopiaWidget<QAbstractContextLabel>();
+        if(!m_context) {
+            qLog(UI) << "E3 ServerInterface: QAbstractContext not available";
+        } else {
+            //m_context->move(QApplication::desktop()->screenGeometry().topLeft()); // move to the correct screen
+            WindowManagement::protectWindow(m_context);
+            m_context->setAttribute(Qt::WA_GroupLeader);
+            QTimer::singleShot(0, m_context, SLOT(show()));
+        }
+    }
 }
 
 void E3ServerInterface::keyPressEvent(QKeyEvent *e)
@@ -889,10 +918,8 @@ void E3ServerInterface::loadTheme()
 {
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
-   
     WindowManagement::dockWindow(m_header, WindowManagement::Top, 
                                  m_header->reservedSize());
-
     m_theme->setGeometry(0, 0, width(), height());
     m_titleSpacer->setFixedSize(1,m_header->height());
 
@@ -900,7 +927,7 @@ void E3ServerInterface::loadTheme()
                                  m_context->reservedSize());
 
 
-    m_tbackground->updateBackground(m_theme);
+    m_tbackground->updateBackground();
 }
 
 void E3ServerInterface::quickApps()

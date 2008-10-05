@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -34,47 +32,47 @@
 
 /*!
   \class QtopiaNetwork
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QtopiaNetwork class provides functions for starting/stopping of network devices/interfaces.
 
   In general it allows the managing of existing network configurations.
   The management functions include the starting and stopping of interfaces and
   other functions which may be useful for applications which want to influence the
-  connectivity state of Qtopia. 
+  connectivity state of Qtopia.
 
-  The QtopiaNetworkServer synchronizes network interface operations across all Qtopia 
-  applications. Client applications can request network operations via the static methods 
+  The QtopiaNetworkServer synchronizes network interface operations across all Qt Extended applications. Client applications can request network operations via the static methods
   provided by this class. The following functions are thin wrapper functions encapsulating
   IPC calls to the QtopiaNetworkServer which then acts on behalf of the caller:
 
   \list
     \o startInterface()
-    \o stopInterface() 
+    \o stopInterface()
     \o setDefaultGateway()
     \o unsetDefaultGateway()
     \o shutdown()
   \endlist
-  
-  The second set of static functions relates to the management of network configuration 
-  files. By default Qtopia saves network configurations in the directory returned by 
-  settingsDir(). Network interfaces are identified via a handle which is the absolute path 
+
+  The second set of static functions relates to the management of network configuration
+  files. By default Qt Extended saves network configurations in the directory returned by
+  settingsDir(). Network interfaces are identified via a handle which is the absolute path
   and name of the network configuration file containing the parameters
-  for that interface. The network server will choose and load the appropriate network plug-in 
-  based on the configuration handle. QNetworkState::deviceType() can be used to 
-  determine the type of a network handle. In order to obtain a list of network handles of 
+  for that interface. The network server will choose and load the appropriate network plug-in
+  based on the configuration handle. QNetworkState::deviceType() can be used to
+  determine the type of a network handle. In order to obtain a list of network handles of
   a particular type availableNetworkConfigs() should be used.
 
-  loadPlugin() finds and loads the Qtopia network plug-in that is suitable for a given 
+  loadPlugin() finds and loads the Qt Extended network plug-in that is suitable for a given
   network handle. However to avoid multiple access to the same network interface the returned
   QtopiaNetworkInterface instance should be carefully managed. The most common reason
   for instanciating a QtopiaNetworkInterface from outside of the network server would be
-  the need to allow the user to configure the interface via 
-  QtopiaNetworkInterface::configuration(). The internet application would be an example 
+  the need to allow the user to configure the interface via
+  QtopiaNetworkInterface::configuration(). The internet application would be an example
   for such a use case.
 
-  QtopiaNetwork only provides a minimum level of monitoring functionality via online(). 
+  QtopiaNetwork only provides a minimum level of monitoring functionality via online().
   If more detailed monitoring is required one of the following classes should be used:
-  
+
   \list
     \o QNetworkState - very generic connectivity information related to Qtopia
     \o QNetworkDevice - specific information about the state of a particular hardware device
@@ -104,7 +102,7 @@
   QtopiaNetwork::Dialup only:
 
   \value PhoneModem The network connection is established via the internal phone
-             modem (this flag is defined for Qtopia Phone Edition only).
+             modem (this flag is defined for \l{QtCellModule}{Cell} module only).
   \value NamedModem A serial network connection using a specific device
              such as /dev/ttyS0 is established. The device name is given in the
              configuration file.
@@ -155,7 +153,7 @@ void QtopiaNetwork::stopInterface( const QString& handle, bool deleteIface)
   This function allows the stopping of network connection w/o considering other applications
   which might have an interest in the same connection. This is achieved by circumventing
   the network session manager (and thus ignoring the extended life time flag). In general
-  this should not be used by applications other than the global network manager. Qtopia's
+  this should not be used by applications other than the global network manager. The Qt Extended
   netsetup application uses this function to allow the user to stop a network connection
   which could have been started by rogue applications running in the background.
   */
@@ -186,8 +184,8 @@ void QtopiaNetwork::setDefaultGateway( const QString& handle )
 }
 
 /*!
-  Qtopia will set the default gateway to an interface that
-  is not equal to \a handle. This is useful if \a handle goes offline and the 
+  Qt Extended will set the default gateway to an interface that
+  is not equal to \a handle. This is useful if \a handle goes offline and the
   caller doesn't care what interface should become the new default gateway.
   */
 void QtopiaNetwork::unsetDefaultGateway( const QString& handle )
@@ -211,7 +209,7 @@ void QtopiaNetwork::lockdown( bool isLocked )
 /*!
   \internal
 
-  Sets the life time of the interface \a handle to \a isExtended. If \a isExtended is \c TRUE
+  Sets the life time of the interface \a handle to \a isExtended. If \a isExtended is \c true
   \a handle will remain online indefinitly. Usually the session manager would keep track of interfaces
   started by applications and shuts the device down  when the application quits. However the life time flag
   prevents the session manager from doing so.
@@ -220,7 +218,7 @@ void QtopiaNetwork::lockdown( bool isLocked )
   QtopiaNetworkInterface::Up, QtopiaNetworkInterfaces::Demand or QtopiaNetworkInterfaces::Pending. The flag
   immediately resets as soon as the device leaves one of these three states.
 
-  Currently this function can only be called by the Qtopia server and the netsetup application (enforced by SXE).
+  Currently this function can only be called by the Qt Extended server and the netsetup application (enforced by SXE).
   */
 void QtopiaNetwork::extendInterfaceLifetime( const QString& handle, bool isExtended )
 {
@@ -229,7 +227,7 @@ void QtopiaNetwork::extendInterfaceLifetime( const QString& handle, bool isExten
 }
 
 /*!
-  Returns the default directory for network interface configurations; 
+  Returns the default directory for network interface configurations;
   \c{$HOME/Applications/Network/config}.
 */
 QString QtopiaNetwork::settingsDir()
@@ -238,7 +236,7 @@ QString QtopiaNetwork::settingsDir()
 }
 
 /*!
-  \internal 
+  \internal
   Returns the type of network interface defined by \a handle.
 */
 QtopiaNetwork::Type QtopiaNetwork::toType(const QString& handle)
@@ -307,13 +305,13 @@ QtopiaNetwork::Type QtopiaNetwork::toType(const QString& handle)
 }
 
 /*!
-  Returns a list of all known Qtopia network interface handles which match \a type. 
-  A handle uniquely identifies a Qtopia network interfaces and is the absolute 
-  path to the configuration file that contains the settings for a particular 
+  Returns a list of all known Qt Extended network interface handles which match \a type.
+  A handle uniquely identifies a Qt Extended network interfaces and is the absolute
+  path to the configuration file that contains the settings for a particular
   QtopiaNetworkInterface. \a path specifies the directory where the lookup takes place.
 
   Note that the lookup is independent of the state of an interface. It always returns all
-  Qtopia network interfaces which are online and offline.
+  Qt Extended network interfaces which are online and offline.
 
   If \a type is set to \c{QtopiaNetwork::Any} it returns all known NetworkInterfaces. If \a path is
   empty the lookup will take place in settingsDir().
@@ -374,7 +372,7 @@ static void cleanup()
 
 
 /*!
-     Loads the appropriate network plug-in for the interface with \a handle; or 
+     Loads the appropriate network plug-in for the interface with \a handle; or
      0 if no suitable plug-in can be found.
 
      Only use this function if you intend to configure the returned QtopiaNetworkInterface
@@ -414,7 +412,7 @@ QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handl
             //qLog(Network) << "QN::loadPlugin() : interface already in cache, returning instance";
         } else {
             //qLog(Network) << "QN::loadPlugin() : interface deleted, removing bogus reference";
-            loadedIfaces->remove( handle ); //instance has been deleted 
+            loadedIfaces->remove( handle ); //instance has been deleted
         }
     }
 
@@ -448,7 +446,6 @@ QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handl
             plugin = knownPlugins->value(found);
             impl = plugin->network( handle );
             loadedIfaces->insert( handle, impl );
-
         } else {
             // the interface hasn't been instanciated nor do we have a
             // suitable plug-in yet. Go through all plug-ins
@@ -488,8 +485,8 @@ QPointer<QtopiaNetworkInterface> QtopiaNetwork::loadPlugin( const QString& handl
 
 /*!
     Returns true if any known network interface is online/connected.
-    This can be used to check the general connectivity status of the Qtopia environment.
-    A device is considered to be online if it is in the state \c QtopiaNetwork::Up, 
+    This can be used to check the general connectivity status of the Qt Extended environment.
+    A device is considered to be online if it is in the state \c QtopiaNetwork::Up,
     \c QtopiaNetwork::Demand or \c QtopiaNetwork::Pending.
 
     More detailed state updates on a per device base can be obtained by using QNetworkDevice

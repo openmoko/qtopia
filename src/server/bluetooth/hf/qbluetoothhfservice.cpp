@@ -1,25 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/comm/qbluetoothaudiogateway.h>
+#include <qtopiacomm/qbluetoothaudiogateway.h>
 #include "qbluetoothhfservice_p.h"
 #include "qbluetoothhfagserver_p.h"
 #include <qbluetoothrfcommserver.h>
@@ -118,6 +116,7 @@ public:
 
 /*!
     \class QBluetoothHandsfreeService
+    \inpublicgroup QtBluetoothModule
     \brief The QBluetoothHandsfreeService class implements Bluetooth Handsfree Audio Gateway profile.
     \ingroup QtopiaServer::Task::Bluetooth
 
@@ -127,7 +126,7 @@ public:
     implements the Bluetooth Handsfree Audio Gateway as defined
     in the Handsfree Bluetooth Profile specification.
 
-    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
+    This class is part of the Qt Extended server and cannot be used by other QtopiaApplications.
 */
 
 /*!
@@ -204,11 +203,9 @@ void QBluetoothHandsfreeService::serialPortsChanged()
     QStringList serialPorts = m_data->m_serialPorts->value("serialPorts").toStringList();
     qLog(Bluetooth) << "SerialPorts now: " << serialPorts;
 
-    if (serialPorts.contains(m_data->m_activeClient->device())) {
-        return;
+    if (!serialPorts.contains(m_data->m_activeClient->device())) {
+        doDisconnect();
     }
-
-    doDisconnect();
 }
 
 /*!
@@ -242,8 +239,7 @@ void QBluetoothHandsfreeService::start()
     qLog(Bluetooth) << "QBluetoothHandsfreeService::start";
 
     if (m_data->m_server->isListening()) {
-        emit started(true,
-                     tr("Handsfree Audio Gateway already running."));
+        emit started(true, tr("Handsfree Audio Gateway already running."));
         return;
     }
 
@@ -271,8 +267,7 @@ void QBluetoothHandsfreeService::start()
     if (!m_data->m_server->listen(QBluetoothAddress::any,
                 QBluetoothSdpRecord::rfcommChannel(sdpRecord))) {
         unregisterRecord(m_data->m_sdpRecordHandle);
-        emit started(true,
-                     tr("Could not listen on channel."));
+        emit started(true, tr("Could not listen on channel."));
         return;
     }
 
@@ -333,6 +328,7 @@ void QBluetoothHandsfreeService::sessionOpen()
             delete m_data->m_client;
             m_data->m_client = 0;
             m_data->m_session->endSession();
+            m_data->m_connectInProgress = false;
             emit connectResult(false, tr("Connect failed."));
             return;
         }
@@ -480,10 +476,7 @@ void QBluetoothHandsfreeService::doDisconnect()
 */
 void QBluetoothHandsfreeService::setSpeakerVolume(int volume)
 {
-    if (!m_data->m_activeClient)
-        return;
-
-    if (volume == m_data->m_speakerVolume)
+    if (!m_data->m_activeClient || volume == m_data->m_speakerVolume)
         return;
 
     emit m_data->m_adaptor->setSpeakerVolume(volume);
@@ -513,10 +506,7 @@ void QBluetoothHandsfreeService::updateSpeakerVolume(int volume)
 */
 void QBluetoothHandsfreeService::setMicrophoneVolume(int volume)
 {
-    if (!m_data->m_activeClient)
-        return;
-
-    if (volume == m_data->m_microphoneVolume)
+    if (!m_data->m_activeClient || volume == m_data->m_microphoneVolume)
         return;
 
     emit m_data->m_adaptor->setMicrophoneVolume(volume);
@@ -574,6 +564,10 @@ void QBluetoothHandsfreeService::scoStateChanged(QBluetoothAbstractSocket::Socke
 void QBluetoothHandsfreeService::releaseAudio()
 {
     if (m_data->m_scoSocket) {
+        QObject::disconnect(m_data->m_scoSocket,
+                            SIGNAL(stateChanged(QBluetoothAbstractSocket::SocketState)),
+                            this, SLOT(scoStateChanged(QBluetoothAbstractSocket::SocketState)));
+
         delete m_data->m_scoSocket;
         m_data->m_scoSocket = 0;
     }
@@ -613,13 +607,8 @@ bool QBluetoothHandsfreeService::doConnectAudio()
         return false;
     }
 
-    if (m_data->m_scofd != -1) {
+    if (m_data->m_scofd != -1 || m_data->m_scoSocket != 0) {
         qWarning("Already connected.");
-        return false;
-    }
-
-    if (m_data->m_scoSocket != 0) {
-        qWarning("Already connected!");
         return false;
     }
 
@@ -681,13 +670,9 @@ void QBluetoothHandsfreeService::newConnection()
 */
 void QBluetoothHandsfreeService::error(QBluetoothAbstractSocket::SocketError)
 {
-    if (m_data->m_connectInProgress) {
-        return;
+    if (!m_data->m_connectInProgress) {
+        qWarning("Unknown error occrred in handsfree service");
     }
-
-#if defined(BLUETOOTH_HANDSFREE_DEBUG)
-    qWarning("Unknown error occrred in handsfree service");
-#endif
 }
 
 /*!
@@ -718,8 +703,8 @@ void QBluetoothHandsfreeService::stateChanged(QBluetoothAbstractSocket::SocketSt
                 m_data->m_client = 0;
                 m_data->m_session->endSession();
             }
-
             break;
+
         default:
             break;
     };
@@ -889,7 +874,8 @@ public:
 
 /*!
     \class QBluetoothHandsfreeCommInterface
-    \brief The QBluetoothHandsfreeCommInterface class provides a Qtopia IPC interface to the Handsfree Audio Gateway profile implementation.
+    \inpublicgroup QtBluetoothModule
+    \brief The QBluetoothHandsfreeCommInterface class provides a Qt Extended IPC interface to the Handsfree Audio Gateway profile implementation.
 
     The QBluetoothHandsfreeCommInterface extends
     the QAbstractIpcInterfaceGroup class.  It adds the an
@@ -897,7 +883,7 @@ public:
     which forwards all calls to the implementation object,
     which is passed in the constructor.
 
-    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
+    This class is part of the Qt Extended server and cannot be used by other QtopiaApplications.
 */
 
 /*!

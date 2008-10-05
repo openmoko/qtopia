@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -124,7 +122,8 @@ public:
 
 /*!
     \class QCallListItem
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QCallListItem class specifies information about a single dialed, received or missed call in a QCallList set.
 
     \sa QCallList
@@ -434,7 +433,8 @@ template <typename Stream> void QCallListItem::deserialize(Stream &stream)
 
 /*!
     \class QCallList
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QCallList class provides an interface for recording the details of dialed, received, and missed calls.
 
     \sa QCallListItem
@@ -497,8 +497,9 @@ QCallList::~QCallList()
 
 /*!
     \class QCallList::SearchOptions
-    \mainclass
-    \brief The QCallList::SearchOptions class defines parameters to a search on the call history database.
+    \inpublicgroup QtTelephonyModule
+
+    \brief The SearchOptions class defines parameters to a search on the call history database.
 
     The \c number field indicates the phone number to search for, or an empty
     string if no number.  The \c contactId field indicates the QContact identifier

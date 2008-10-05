@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,7 +21,7 @@
 #include <qtopialog.h>
 #include <qtopianamespace.h>
 #include <qthumbnail.h>
-#include <qtopia/private/drmcontent_p.h>
+#include "drmcontent_p.h"
 #include <QThreadStorage>
 /*
     Generic QAbstractFileEngine implementation providing access to content using
@@ -180,7 +178,8 @@ private:
 
 /*!
     \class QDrmContentLicense
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QDrmContentLicense class provides an interface for DRM agents to monitor the consumption of DRM content.
 
     A DRM content license provides the interface through which a consuming application will notify a DRM agent
@@ -307,8 +306,9 @@ public:
 
 /*!
     \class QDrmContentPlugin
-    \mainclass
-    \brief The QDrmContentPlugin class is the primary interface between DRM agents and the Qtopia document system.
+    \inpublicgroup QtBaseModule
+
+    \brief The QDrmContentPlugin class is the primary interface between DRM agents and the Qt Extended document system.
 
     QDrmContentPlugin allows the document system to present the license state and meta-info of DRM protected files,
     provide activation options and provide metered access to the plain-text content of those files.
@@ -624,12 +624,12 @@ void QDrmContentPlugin::initialize()
 
 /*!
     \class QDrmAgentPlugin
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QDrmAgentPlugin class initializes the various services provided by a DRM agent.
 
-    In addition to integration with the Qtopia document system DRM agents may need to provide application services and
-    license management facilities.  QDrmAgentPlugin allows agents to implement a single plugin that instantiates a Qtopia
-    service for rights acquisition and user notification services, a series of widgets for a DRM management application
+    In addition to integration with the Qt Extended document system DRM agents may need to provide application services and
+    license management facilities.  QDrmAgentPlugin allows agents to implement a single plugin that instantiates a Qt Extended service for rights acquisition and user notification services, a series of widgets for a DRM management application
     and a regular QDrmContentPlugin for use in DRM enabled applications.
 
     \ingroup drm

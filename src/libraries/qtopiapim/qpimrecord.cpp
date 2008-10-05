@@ -1,31 +1,29 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/pim/qpimrecord.h>
+#include <qpimrecord.h>
 #include "vobject_p.h"
-#include <qtopia/qcategorymanager.h>
+#include <qcategorymanager.h>
 #include <qdatastream.h>
 #include <qtranslator.h>
 #include <qtextcodec.h>
-#include <qtopia/qtopiaapplication.h>
+#include <qtopiaapplication.h>
 #include <qsettings.h>
 #include <qobject.h>
 #include <stdlib.h>
@@ -34,11 +32,14 @@
 
 /*!
   \class QPimRecord
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QPimRecord class is the base class for PIM data recorded in the
-  Qtopia database.
+  Qt Extended database.
 
   The QPimRecord class contains data that is common to the differing kinds
   of PIM records such as contacts, tasks and appointments.  It is an also
@@ -146,10 +147,6 @@ bool QPimRecord::operator==( const QPimRecord &other ) const
     if (customFieldsRef() != other.customFieldsRef())
         return false;
     if (notes() != other.notes())
-        return false;
-    if (parentDependency() != other.parentDependency())
-        return false;
-    if (parentDependencyType() != other.parentDependencyType())
         return false;
     return true;
 }
@@ -390,30 +387,24 @@ bool qpe_vobjectCompatibility(const char* misfeature)
 
 void qpe_setVObjectProperty(const QString& name, const QString& value, const char* type, QPimRecord* r)
 {
-    // Ian says categories shouldn't be honoured for VObjects
-#if 0
     QCategoryManager m(type, 0);
     if ( name == VCCategoriesProp ) {
-        QStringList cl = value.split(";");
+        QStringList cl = value.split(",");
         QList<QString> ca;
         for (QStringList::ConstIterator it=cl.begin(); it!=cl.end(); ++it) {
             QString cname = *it;
-            if ( cname.left(2) == "X-" )
+            if ( cname.left(2) == "X-" ) // compatibility with weird senders
                 cname = cname.mid(2);
-            // need an extended contains for 'close matches'
-            if (cname != "Unfiled" && !m.contains(cname)) { // No tr
-                m.addTr(cname);
+            if (cname != "Unfiled") { // No tr
+                QString cid = m.idForLabel(cname);
+                if (cid.isEmpty())
+                    cid = m.add(cname);
+                if (!cid.isEmpty())
+                    ca.append(cid);
             }
-            ca.append(cname);
         }
         r->setCategories(ca);
     }
-#else
-    Q_UNUSED(name);
-    Q_UNUSED(value);
-    Q_UNUSED(type);
-    Q_UNUSED(r);
-#endif
 }
 
 VObject *qpe_safeAddPropValue( VObject *o, const char *prop, const QString &value )
@@ -443,7 +434,7 @@ void qpe_endVObjectInput()
 void qpe_endVObjectOutput(VObject *o, const char* /*type*/, const QPimRecord* r)
 {
     QStringList c = r->categories();
-    qpe_safeAddPropValue( o, VCCategoriesProp, c.join(";") );
+    qpe_safeAddPropValue( o, VCCategoriesProp, c.join(",") );
     delete comps;
     comps = 0;
 }

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,7 +24,7 @@
 //  W A R N I N G
 //  -------------
 //
-// This file is not part of the Qtopia API.  It exists purely as an
+// This file is not part of the Qt Extended API.  It exists purely as an
 // implementation detail.  This header file may change from version to
 // version without notice, or even be removed.
 //
@@ -266,28 +264,6 @@ public:
 
     QTagMap<T> &operator=(const QTagMap<T> &other);
 
-#if 0
-    bool contains(const QTagString& key) const;
-    bool contains(const QString& key) const;
-    bool contains(const QLatin1String& key) const;
-    bool contains(const char *key) const;
-
-    const T value(const QTagString& key) const;
-    const T value(const QString& key) const;
-    const T value(const QLatin1String& key) const;
-    const T value(const char *key) const;
-
-    T &operator[](const QTagString& key);
-    T &operator[](const QString& key);
-    T &operator[](const QLatin1String& key);
-    T &operator[](const char *key);
-
-    const T &operator[](const QTagString& key) const;
-    const T &operator[](const QString& key) const;
-    const T &operator[](const QLatin1String& key) const;
-    const T &operator[](const char *key) const;
-#endif
-
 };
 
 template <class T>
@@ -296,31 +272,5 @@ Q_INLINE_TEMPLATE QTagMap<T> &QTagMap<T>::operator=(const QTagMap<T> &other)
     *((QMap<QTagString, T> *)this) = *((const QMap<QTagString, T> *)&other);
     return *this;
 }
-
-#if 0
-template <class T>
-Q_INLINE_TEMPLATE bool QTagMap<T>::contains(const QTagString &key) const
-{
-    return QMap<QTagString, T>::contains(key);
-}
-
-template <class T>
-Q_INLINE_TEMPLATE bool QTagMap<T>::contains(const QString &key) const
-{
-    return QMap<QTagString, T>::contains(QTagString(key));
-}
-
-template <class T>
-Q_INLINE_TEMPLATE bool QTagMap<T>::contains(const QLatin1String &key) const
-{
-    return QMap<QTagString, T>::contains(QTagString(key));
-}
-
-template <class T>
-Q_INLINE_TEMPLATE bool QTagMap<T>::contains(const char *key) const
-{
-    return QMap<QTagString, T>::contains(QTagString(key));
-}
-#endif
 
 #endif

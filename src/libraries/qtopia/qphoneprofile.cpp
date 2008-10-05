@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -33,14 +31,15 @@
 
 /*!
   \class QPhoneProfile::Setting
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The Setting class provides applications with a mechanism to add their own settings to a profile.
 
-  Applications may integrate with the Qtopia profiles by adding their own
+  Applications may integrate with the Qt Extended profiles by adding their own
   settings.  Optionally, when the profile changes the application will be
   notified and instructed to apply the new settings.
 
-  Most profile editing applications (such as Ring Profiles in Qtopia Phone) will
+  Most profile editing applications (such as Ring Profiles in Qt Extended Phone) will
   use the Settings service to interactively acquire settings from applications
   to add in this way, but it is not necessary to do so.
 
@@ -140,8 +139,7 @@ QString QPhoneProfile::Setting::data() const
   added a custom setting, a \c {Settings::activateDefault()} message will
   be sent.
 
-  Therefore applications should be listening to the Qtopia
-  application channels to handle these requests.
+  Therefore applications should be listening to the Qt Extended application channels to handle these requests.
   For example, in the application:
 
   \code
@@ -230,6 +228,7 @@ public:
     QPhoneProfilePrivate()
     : mSaveId(-1), mIsSystemProfile(false), mVolume(3), mVibrate(true),
       mCallAlert(QPhoneProfile::Continuous), mMsgAlert(QPhoneProfile::Once),
+      mVideoOption(QPhoneProfile::AlwaysOff),
       mMsgAlertDuration(5000), mAutoAnswer(false), mPlaneMode(false) {}
     QPhoneProfilePrivate &operator=(const QPhoneProfilePrivate &o);
 
@@ -240,6 +239,7 @@ public:
     bool mVibrate;
     QPhoneProfile::AlertType mCallAlert;
     QPhoneProfile::AlertType mMsgAlert;
+    QPhoneProfile::VideoOption mVideoOption;
     int mMsgAlertDuration;
     bool mAutoAnswer;
     QContent mCallTone;
@@ -250,7 +250,9 @@ public:
     QPhoneProfile::Settings mSettings;
     QPhoneProfile::Schedule mSchedule;
     QString mAudioProfile;
+#ifdef QTOPIA_TELEPHONY
     QString mSpeedDialInput;
+#endif
 };
 
 // define QPhoneProfilePrivate
@@ -263,6 +265,7 @@ QPhoneProfilePrivate &QPhoneProfilePrivate::operator=(const QPhoneProfilePrivate
     mCallAlert = o.mCallAlert;
     mMsgAlert = o.mMsgAlert;
     mMsgAlertDuration = o.mMsgAlertDuration;
+    mVideoOption = o.mVideoOption;
     mAutoAnswer = o.mAutoAnswer;
     mCallTone = o.mCallTone;
     mVideoTone = o.mVideoTone;
@@ -273,14 +276,17 @@ QPhoneProfilePrivate &QPhoneProfilePrivate::operator=(const QPhoneProfilePrivate
     mSettings = o.mSettings;
     mSchedule = o.mSchedule;
     mAudioProfile = o.mAudioProfile;
+#ifdef QTOPIA_TELEPHONY
     mSpeedDialInput = o.mSpeedDialInput;
+#endif
 
     return *this;
 }
 
 /*!
   \class QPhoneProfile
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QPhoneProfile class encapsulates a single phone profile
          configuration.
 
@@ -325,6 +331,7 @@ static const QString cVibrate("Vibrate"); // no tr
 static const QString cCallA("CallAlert"); // no tr
 static const QString cMsgA("MsgAlert"); // no tr
 static const QString cMsgADuration("MsgAlertDuration");
+static const QString cVideoOption("VideoOption");
 static const QString cAutoAnswer("AutoAnswer"); // no tr
 static const QString cCallTone("RingTone"); // no tr
 static const QString cVideoTone("VideoTone"); // no tr
@@ -332,7 +339,9 @@ static const QString cMessageTone("MessageTone"); // no tr
 static const QString cPlaneMode("PlaneMode"); // no tr
 static const QString cIcon("Icon"); // no tr
 static const QString cAudioProfile("AudioProfile"); // no tr
+#ifdef QTOPIA_TELEPHONY
 static const QString cSpeedDialInput("SpeedDialInput");
+#endif
 static const QString cDescription("Description"); // no tr
 static const QString cData("Data"); // no tr
 static const QString cNotify("Notify"); // no tr
@@ -361,6 +370,17 @@ static QContent findSystemRingTone(const QString &name)
   \value Ascending The tone is played repeatedly with increasing volume each
          time.
   */
+
+/*!
+  \enum QPhoneProfile::VideoOption
+
+  Determines whether the video is turned or not for incoming or outgoing calls.
+
+  \value AlwaysOff The video is always off.
+  \value OnForIncoming The video will be turned on for incoming calls.
+  \value OnForOutgoing The video will be turned on for outgoing calls.
+  \value AlwaysOn The video will be turned on for both incoming and outgoing calls.
+*/
 
 /*!
   \typedef QPhoneProfile::Settings
@@ -423,6 +443,7 @@ bool QPhoneProfile::operator==(const QPhoneProfile &o) const
            d->mCallAlert == o.d->mCallAlert &&
            d->mMsgAlert == o.d->mMsgAlert &&
            d->mMsgAlertDuration == o.d->mMsgAlertDuration &&
+           d->mVideoOption == o.d->mVideoOption &&
            d->mAutoAnswer == o.d->mAutoAnswer &&
            d->mCallTone == o.d->mCallTone &&
            d->mVideoTone == o.d->mVideoTone &&
@@ -509,6 +530,14 @@ QPhoneProfile::AlertType QPhoneProfile::callAlert() const
 QPhoneProfile::AlertType QPhoneProfile::msgAlert() const
 {
     return d->mMsgAlert;
+}
+
+/*!
+  Returns the VideoOption to use for calls.
+*/
+QPhoneProfile::VideoOption QPhoneProfile::videoOption() const
+{
+    return d->mVideoOption;
 }
 
 /*!
@@ -635,6 +664,7 @@ QString QPhoneProfile::audioProfile() const
     return d->mAudioProfile;
 }
 
+#ifdef QTOPIA_TELEPHONY
 /*!
   Returns the speed dial input on which this profile should activate if applicable;
   otherwise returns an empty string.
@@ -643,6 +673,7 @@ QString QPhoneProfile::speedDialInput() const
 {
     return d->mSpeedDialInput;
 }
+#endif
 
 /*!
   Sets the profile \a id.
@@ -698,6 +729,14 @@ void QPhoneProfile::setCallAlert(AlertType type)
 void QPhoneProfile::setMsgAlert(AlertType type)
 {
     d->mMsgAlert = type;
+}
+
+/*!
+  Sets the video option to \a option.
+*/
+void QPhoneProfile::setVideoOption(VideoOption option)
+{
+    d->mVideoOption = option;
 }
 
 /*!
@@ -800,6 +839,7 @@ void QPhoneProfile::setAudioProfile(const QString &audioProfile)
     d->mAudioProfile = audioProfile;
 }
 
+#ifdef QTOPIA_TELEPHONY
 /*!
   Sets the speed dial \a input.
   */
@@ -807,6 +847,7 @@ void QPhoneProfile::setSpeedDialInput(const QString &input)
 {
     d->mSpeedDialInput = input;
 }
+#endif
 
 /*!
   \internal
@@ -820,12 +861,15 @@ void QPhoneProfile::read(QTranslatableSettings &c)
     setVibrate(c.value(cVibrate).toBool());
     setCallAlert((QPhoneProfile::AlertType)c.value(cCallA).toInt());
     setMsgAlert((QPhoneProfile::AlertType)c.value(cMsgA).toInt());
+    setVideoOption((QPhoneProfile::VideoOption)c.value(cVideoOption).toInt());
     setMsgAlertDuration(c.value(cMsgADuration).toInt());
     setAutoAnswer(c.value(cAutoAnswer).toBool());
     setPlaneMode(c.value(cPlaneMode).toBool());
     setIcon(c.value(cIcon).toString());
     setAudioProfile(c.value(cAudioProfile).toString());
+#ifdef QTOPIA_TELEPHONY
     setSpeedDialInput(c.value(cSpeedDialInput).toString());
+#endif
 
     QContent link = QContent(c.value(cCallTone).toString());
     if (link.fileKnown())
@@ -893,12 +937,15 @@ void QPhoneProfile::write(QSettings &c) const
     c.setValue(cVibrate, vibrate());
     c.setValue(cCallA, (int)callAlert());
     c.setValue(cMsgA, (int)msgAlert());
+    c.setValue(cVideoOption, (int)videoOption());
     c.setValue(cMsgADuration, msgAlertDuration());
     c.setValue(cAutoAnswer, autoAnswer());
     c.setValue(cPlaneMode, planeMode());
     c.setValue(cIcon, icon());
     c.setValue(cAudioProfile, audioProfile());
+#ifdef QTOPIA_TELEPHONY
     c.setValue(cSpeedDialInput, speedDialInput());
+#endif
 
     if ( d->mCallTone.fileKnown() )
         c.setValue(cCallTone, d->mCallTone.file());
@@ -934,11 +981,12 @@ void QPhoneProfile::write(QSettings &c) const
 
 /*!
   \class QPhoneProfile::Schedule
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The Schedule class provided information on timed auto-activation of a
          profile.
 
-  Qtopia profiles may be automatically activated on certain times and dates.
+  Qt Extended profiles may be automatically activated on certain times and dates.
   The QPhoneProfile::Schedule class represents the times at which the profile
   should be activated.  A profile's schedule can be read through the
   QPhoneProfile::schedule() method, and set through a
@@ -1194,10 +1242,11 @@ public:
 
 /*!
   \class QPhoneProfileManager
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QPhoneProfileManager class allows applications to control phone profiles.
 
-  Qtopia's phone profiles are stored in the \c {Trolltech/PhoneProfile}
+  The Qt Extended phone profiles are stored in the \c {Trolltech/PhoneProfile}
   configuration file.  A device may have any number of integrator or user
   defined profiles.  Each profile has a unique integer identifier which is used
   to refer to it by the system.

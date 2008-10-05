@@ -1,0 +1,3 @@
+SOURCES+=\
+        modemserviceprovider.cpp
+

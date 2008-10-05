@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright ( C ) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef __QBLUETOOTHREMOTEDEVICEDIALOG_H__
-#define __QBLUETOOTHREMOTEDEVICEDIALOG_H__
+#ifndef QBLUETOOTHREMOTEDEVICEDIALOG_H
+#define QBLUETOOTHREMOTEDEVICEDIALOG_H
 
 #include <qbluetoothnamespace.h>
 #include <qbluetoothaddress.h>
@@ -28,12 +26,16 @@
 #include <QDialog>
 #include <QSet>
 
+class QBluetoothRemoteDeviceDialogFilterPrivate;
 
 class QBLUETOOTH_EXPORT QBluetoothRemoteDeviceDialogFilter
 {
 public:
     QBluetoothRemoteDeviceDialogFilter();
+    QBluetoothRemoteDeviceDialogFilter(const QString &title);
     virtual ~QBluetoothRemoteDeviceDialogFilter();
+
+    QString title() const;
 
     void setAcceptedDeviceMajors( const QSet<QBluetooth::DeviceMajor> &deviceMajors );
     QSet<QBluetooth::DeviceMajor> acceptedDeviceMajors() const;
@@ -43,12 +45,9 @@ public:
 
     virtual bool filterAcceptsDevice( const QBluetoothRemoteDevice &device );
 
-protected:
-    QSet<QBluetooth::DeviceMajor> m_deviceMajors;
-    QBluetooth::ServiceClasses m_serviceClasses;
-
 private:
     Q_DISABLE_COPY(QBluetoothRemoteDeviceDialogFilter);
+    QBluetoothRemoteDeviceDialogFilterPrivate *d;
 };
 
 
@@ -76,10 +75,21 @@ public:
     void setValidationProfiles( QSet<QBluetooth::SDPProfile> profiles );
     QSet<QBluetooth::SDPProfile> validationProfiles() const;
 
-    void setFilter( QBluetoothRemoteDeviceDialogFilter *filter );
-    QBluetoothRemoteDeviceDialogFilter *filter() const;
+    void addFilter( QBluetoothRemoteDeviceDialogFilter *filter );
+    void removeFilter( QBluetoothRemoteDeviceDialogFilter *filter );
+    void clearFilters();
+
+    void setCurrentFilter( QBluetoothRemoteDeviceDialogFilter *filter );
+    QBluetoothRemoteDeviceDialogFilter *currentFilter() const;
+
+    void setFilterSelectionEnabled(bool enabled);
+    bool filterSelectionEnabled() const;
 
     QBluetoothAddress selectedDevice() const;
+
+    // obsolete
+    void setFilter( QBluetoothRemoteDeviceDialogFilter *filter );
+    QBluetoothRemoteDeviceDialogFilter *filter() const;
 
 public slots:
     virtual void done( int r );

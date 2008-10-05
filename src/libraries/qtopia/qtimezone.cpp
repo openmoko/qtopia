@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <qtimezone.h>
@@ -144,6 +142,9 @@ public:
     QString id() const { return mId; }
     QString standardAbbreviation() const;
     QString dstAbbreviation() const;
+
+    QString tzSetFormat(int stdIndex, int dstStartIndex, int dstEndIndex) const;
+    QString tzSetFormat(const QDateTime &) const;
 
     static TimeZoneData *null;
 
@@ -417,6 +418,112 @@ TimeZoneData::TimeZoneData( const QString & loc ) : mId( loc ), mDstRule( false 
     }
 }
 
+static QString toHMS(qint32 seconds)
+{
+    QString hms;
+
+    if (seconds > 0)
+        hms += '-';
+    else
+        seconds *= -1;
+
+    qint32 hours = seconds / (60*60);
+    hms += QString::number(hours);
+
+    seconds = seconds % (60*60);
+    qint32 minutes = seconds / 60;
+    if (minutes > 0) {
+        hms += ':';
+        if (minutes < 10)
+            hms += '0';
+
+        QString::number(minutes);
+    }
+
+    seconds = seconds % 60;
+    if (seconds > 0) {
+        hms += ':';
+        if (minutes < 10)
+            hms += '0';
+
+        hms += QString::number(seconds);
+    }
+
+    return hms;
+}
+
+QString TimeZoneData::tzSetFormat(int stdIndex, int dstStartIndex, int dstEndIndex) const
+{
+    QString tz;
+
+    if (stdIndex == -1 || stdIndex > transitionTimes.count())
+        return tz;
+
+    // standard time
+    const ttinfo &stdTime = timeTypes[transitionTimes[stdIndex].timeTypeIndex];
+    if (stdTime.isDst) {
+        qWarning() << "stdIndex points to DST time.";
+        return tz;
+    }
+
+    if (abbreviations[stdTime.abbreviationIndex].isEmpty())
+        tz += "STD";
+    else
+        tz += abbreviations[stdTime.abbreviationIndex];
+    tz += toHMS(stdTime.utcOffset);
+
+    // daylight savings time, if applicable
+    if (dstStartIndex == -1 || dstStartIndex > transitionTimes.count())
+        return tz;
+
+    if (dstEndIndex == -1 || dstEndIndex > transitionTimes.count())
+        return tz;
+
+    const ttinfo &dstTimeStart = timeTypes[transitionTimes[dstStartIndex].timeTypeIndex];
+    if (!dstTimeStart.isDst) {
+        qWarning() << "dstStartIndex points to STD time.";
+        return tz;
+    }
+
+    const ttinfo &dstTimeEnd = timeTypes[transitionTimes[dstEndIndex].timeTypeIndex];
+    if (dstTimeEnd.isDst) {
+        qWarning() << "dstEndIndex points to DST time.";
+        return tz;
+    }
+
+    if (abbreviations[dstTimeStart.abbreviationIndex].isEmpty())
+        tz += "DST";
+    else
+        tz += abbreviations[dstTimeStart.abbreviationIndex];
+
+    tz += toHMS(dstTimeStart.utcOffset);
+    tz += ',';
+
+    QDateTime dstStart = transitionTimes[dstStartIndex].time.addSecs(stdTime.utcOffset);
+    QDateTime dstEnd = transitionTimes[dstEndIndex].time.addSecs(dstTimeStart.utcOffset);
+
+    tz += QString::number(dstStart.date().dayOfYear() - 1);
+    tz += dstStart.time().toString("/hh:mm:ss");
+    tz += ',';
+    tz += QString::number(dstEnd.date().dayOfYear() - 1);
+    tz += dstEnd.time().toString("/hh:mm:ss");
+
+    return tz;
+}
+
+QString TimeZoneData::tzSetFormat(const QDateTime &dt) const
+{
+    int transIndex = findTranstionTimeIndex(dt, true);
+
+    if (timeTypes[transitionTimes[transIndex].timeTypeIndex].isDst) {
+        // currently in DST use transIndex+1 as STD
+        return tzSetFormat(transIndex+1, transIndex, transIndex+1);
+    } else {
+        // currently in STD use transIndex+1 and transIndex+2 to calculate DST
+        return tzSetFormat(transIndex, transIndex+1, transIndex+2);
+    }
+}
+
 /*******************************************************************
  *
  * TimeZoneLocation
@@ -609,6 +716,7 @@ QStringList TimeZoneLocation::languageList()
 
 void TimeZoneLocation::load( QHash<QByteArray,TimeZoneLocation*> &store )
 {
+
     QStringList langs = languageList();
     for (QStringList::ConstIterator lit = langs.begin(); lit!=langs.end(); ++lit) {
         QString lang = *lit;
@@ -619,7 +727,6 @@ void TimeZoneLocation::load( QHash<QByteArray,TimeZoneLocation*> &store )
         else
             delete trans;
     }
-
     QFile file( TimeZonePrivate::zoneFile() );
     if ( !file.open( QIODevice::ReadOnly ) ) {
         qWarning( "Unable to open %s", (const char *)file.fileName().toLatin1() );
@@ -675,8 +782,10 @@ QPointer<TzCache> TzCache::sInstance = 0;
 
 TzCache &TzCache::instance()
 {
-    if ( !sInstance )
+    if ( !sInstance ) {
+        if (!qApp) qWarning() << "Timezone translations cannot be loaded.";
         sInstance = new TzCache();
+    }
     return *sInstance;
 }
 
@@ -756,7 +865,8 @@ TimeZoneData *TimeZonePrivate::data() const
 
 /*!
   \class QTimeZone
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QTimeZone class provides access to time zone data.
 
   QTimeZone provides access to timezone data and conversion between
@@ -970,7 +1080,15 @@ QString lastLocRead;
 QTimeZone QTimeZone::current()
 {
     QString cZone;
+#ifndef __UCLIBC__
     cZone = getenv("TZ");
+#endif
+    if (cZone.isEmpty()) {
+        QFile file("/etc/timezone");
+        if (file.open(QFile::ReadOnly))
+            cZone = file.readAll().trimmed();
+    }
+
 #ifdef Q_WS_MAC
     QTimeZone env(cZone.toLocal8Bit());
     if ( env.isValid() )
@@ -993,15 +1111,18 @@ QTimeZone QTimeZone::current()
 #else
     QString currentLoc;
     if (lastLocRead.isEmpty() || lastZoneRead != cZone) {
-        QSettings lconfig("Trolltech","locale");
-        lconfig.beginGroup( "Location" );
-        currentLoc = lconfig.value( "Timezone" ).toString();
+        if (cZone.isEmpty()) {
+            QSettings lconfig("Trolltech","locale");
+            lconfig.beginGroup( "Location" );
+            currentLoc = lconfig.value("Timezone", "America/New_York").toString();
+        } else {
+            currentLoc = cZone;
+        }
         lastZoneRead = cZone;
         lastLocRead = currentLoc;
     } else {
         currentLoc = lastLocRead;
     }
-
     if ( !currentLoc.isEmpty() )
         return QTimeZone( currentLoc.toAscii().constData() );
 
@@ -1207,6 +1328,78 @@ template <typename Stream> void QTimeZone::deserialize(Stream &stream)
     QString id;
     stream >> id;
     setId( id.toAscii() );
+}
+
+/*!
+    Sets the system time zone to \a newtz.
+*/
+void QTimeZone::setSystemTimeZone(const QString &newtz)
+{
+    QString tzEnv;
+
+#ifdef __UCLIBC__
+    // uClibc does not support zoneinfo
+    QTimeZone tz(newtz.toLatin1().constData());
+    tzEnv = tz.d->data()->tzSetFormat(utcDateTime());
+
+    QFile localTime("/etc/TZ");
+    if (localTime.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        localTime.write(tzEnv.toLatin1().constData());
+        localTime.write(QByteArray(1, '\n'));
+        localTime.close();
+    } else {
+        qWarning() << "Cannot open" << localTime.fileName() << "for writing.";
+    }
+#else
+    // for systems that support zoneinfo
+    tzEnv = newtz;
+
+#if defined(QTOPIA_ZONEINFO_PATH)
+    QString filename = QTOPIA_ZONEINFO_PATH + newtz;
+#else
+    QString filename = "/usr/share/zoneinfo/" + newtz;
+#endif
+    QFile localTime("/etc/localtime");
+    if (localTime.exists())
+        if (!localTime.remove())
+            qWarning() << "localtime could not be removed";
+
+    if (!QFile::copy(filename, "/etc/localtime"))
+        qWarning() << "Could not copy" << newtz<< "to localtime";
+#endif
+
+    setenv("TZ", tzEnv.toLatin1().constData(), 1);
+    tzset();
+
+    QSettings lconfig("Trolltech","locale");
+    lconfig.beginGroup( "Location" );
+    lconfig.setValue( "Timezone", newtz.toLatin1().constData() );
+
+    QFile timeZone("/etc/timezone");
+    if (timeZone.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        timeZone.write(newtz.toLatin1().constData());
+        localTime.close();
+    } else {
+        qWarning() << "Cannot open" << timeZone.fileName() << "for writing.";
+    }
+}
+
+/*!
+    Sets the application time zone to \a newtz.
+*/
+void QTimeZone::setApplicationTimeZone(const QString &newtz)
+{
+    QString tzEnv;
+
+#ifdef __UCLIBC__
+    QTimeZone tz(newtz.toLatin1().constData());
+    tzEnv = tz.d->data()->tzSetFormat(utcDateTime());
+#else
+    tzEnv = newtz;
+#endif
+
+    setenv("TZ", tzEnv.toLatin1(), 1);
+    tzset();
 }
 
 Q_IMPLEMENT_USER_METATYPE(QTimeZone)

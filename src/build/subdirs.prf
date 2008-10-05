@@ -111,9 +111,9 @@ for(t,ORDERED_TARGETS) {
         } else {
             # We should only do syncqtopia for projects with CONFIG+=syncqtopia (ie. libs and subdirs)
             # However, for ordered stuff we don't bother to read .pro files so we don't know
-            # what the CONFIG value is. Since "make [first_]syncqtopa" is guaranteed to work anyway, just do it.
+            # what the CONFIG value is. Since "make [first_]syncqtopia" is guaranteed to work anyway, just do it.
             # special case for the server in singleexec mode
-            !contains(SYNCQTOPIA,$$t)|!equals(s,src/server) {
+            !contains(SYNCQTOPIA,$$t)|!equals(s,src/server/main) {
                 commands+=@$$MAKE -C $$fixpath($$s) $$t
             }
         }

@@ -1,34 +1,30 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "media.h"
+#include "timing.h"
 #include "system.h"
 #include "transfer.h"
-
 #include <qsound.h>
-
 #include <qtopianamespace.h>
 #include <qsoundcontrol.h>
 #include <qpainter.h>
-#include <qxml.h>
 #include <qmovie.h>
 #include <qlayout.h>
 #include <qapplication.h>
@@ -39,11 +35,18 @@
 #include <QDebug>
 #include <QTemporaryFile>
 #include <qdrmcontent.h>
+#include <QXmlStreamAttributes>
+#include <QMimeType>
+#ifdef MEDIA_SERVER
+#include <QtopiaMedia>
+#include <QMediaControl>
+#include <QMediaVideoControl>
+#include <QMediaContent>
+#endif
 
+static QString tempFileTemplate(Qtopia::tempDir() + "smilmedia-XXXXXX");
 
-//---------------------------------------------------------------------------
-
-SmilMedia::SmilMedia(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilMedia::SmilMedia(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts)
 {
     setVisible(false);
@@ -75,12 +78,10 @@ SmilMediaParam *SmilMedia::findParameter(const QString &name)
     return 0;
 }
 
-//---------------------------------------------------------------------------
-
-SmilText::SmilText(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilText::SmilText(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilMedia(sys, p, n, atts), waiting(false)
 {
-    source = atts.value("src");
+    source = atts.value("src").toString();
 }
 
 void SmilText::addCharacters(const QString &ch)
@@ -131,8 +132,6 @@ void SmilText::paint(QPainter *p)
     }
 }
 
-//---------------------------------------------------------------------------
-
 class ImgPrivate : public QObject
 {
     Q_OBJECT
@@ -166,11 +165,10 @@ void ImgPrivate::update(const QRect &imgrect)
     sys->update(urect);
 }
 
-
-SmilImg::SmilImg(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilImg::SmilImg(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilMedia(sys, p, n, atts), d(0), waiting(false)
 {
-    source = atts.value("src");
+    source = atts.value("src").toString();
 }
 
 SmilImg::~SmilImg()
@@ -228,6 +226,11 @@ void SmilImg::setState(State s)
     }
 }
 
+static bool withinBounds(const QSize& target, const QSize& bound)
+{
+    return target.height() < bound.height() && target.width() < bound.width();
+}
+
 void SmilImg::setData(const QByteArray &data, const QString &type)
 {
     if (type == QLatin1String("application/vnd.oma.drm.content")
@@ -273,7 +276,8 @@ void SmilImg::setData(const QByteArray &data, const QString &type)
         } else {
             QImage img;
             img.loadFromData(data);
-            img = img.scaled(rect().size(), Qt::KeepAspectRatio);
+            if(!withinBounds(img.size(),rect().size()))
+                img = img.scaled(rect().size(), Qt::KeepAspectRatio);
             pix = QPixmap::fromImage(img);
         }
         waiting = false;
@@ -291,21 +295,23 @@ void SmilImg::paint(QPainter *p)
 {
     SmilMedia::paint(p);
     if (vis) {
+        int deltax = (rect().width() - pix.size().width()) / 2;
+        int deltay = (rect().height() - pix.size().height()) / 2;
         if (d && d->movie) {
             QPixmap pm = d->movie->currentPixmap();
-            if (pm.width() > rect().width() || pm.height() > rect().height()) {
+            if(!withinBounds(pm.size(),rect().size())) {
                 QImage img = d->movie->currentImage();
                 img = img.scaled(rect().size(), Qt::KeepAspectRatio);
                 pm = QPixmap::fromImage(img);
+                deltax = (rect().width() - img.size().width()) / 2;
+                deltay = (rect().height() - img.size().height()) / 2;
             }
-            p->drawPixmap(rect().x(), rect().y(), pm);
+            p->drawPixmap(rect().x() + deltax, rect().y() + deltay, pm);
         } else {
-            p->drawPixmap(rect().x(), rect().y(), pix);
+            p->drawPixmap(rect().x() + deltax, rect().y() + deltay, pix);
         }
     }
 }
-
-//---------------------------------------------------------------------------
 
 class AudioPlayer : public QObject
 {
@@ -396,10 +402,10 @@ void AudioPlayer::stop()
 
 AudioPlayer *SmilAudio::player = 0;
 
-SmilAudio::SmilAudio(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilAudio::SmilAudio(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilMedia(sys, p, n, atts), waiting(false)
 {
-    source = atts.value("src");
+    source = atts.value("src").toString();
 }
 
 SmilAudio::~SmilAudio()
@@ -462,22 +468,290 @@ void SmilAudio::paint(QPainter *p)
     }
 }
 
-//---------------------------------------------------------------------------
+#ifdef MEDIA_SERVER
+class VideoPlayer : public QObject
+{
+    Q_OBJECT
 
-SmilMediaParam::SmilMediaParam(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+public:
+    enum State { None = 0, MediaSet, PlaybackError, ControlAvailable, VideoControlAvailable };
+
+public:
+    VideoPlayer(QObject* parent = 0);
+    ~VideoPlayer();
+
+    QWidget* videoWidget(QWidget* parent = 0);
+
+public slots:
+    void play();
+    void stop();
+    void reset();
+
+public:
+    void setData(const QByteArray& data, const QString& type);
+    int playLength() const;
+
+signals:
+    void widgetAvailable();
+
+private slots:
+    void controlAvailable(const QString& controlName);
+    void mediaError(const QString& errorString);
+    void controlValid();
+
+private:
+    static const int retryPlayTimeout = 100; //ms
+    static const int maxRetryCount = 20;
+
+private:
+    QTemporaryFile* m_tempFile;
+    QContent m_content;
+    QMediaContent* m_mediaContent;
+    QMediaControl* m_mediaControl;
+    QMediaVideoControl* m_videoControl;
+    State m_state;
+};
+
+VideoPlayer::VideoPlayer(QObject* parent)
+    :
+    QObject(parent),
+    m_tempFile(0),
+    m_mediaContent(0),
+    m_mediaControl(0),
+    m_videoControl(0),
+    m_state(None)
+{
+}
+
+VideoPlayer::~VideoPlayer()
+{
+    reset();
+}
+
+QWidget* VideoPlayer::videoWidget(QWidget* parent)
+{
+    if(m_videoControl)
+        return m_videoControl->createVideoWidget(parent);
+
+    return 0;
+}
+
+void VideoPlayer::play()
+{
+    static int retryCount = 0;
+    if(m_state >= ControlAvailable)
+    {
+        retryCount = 0;
+        m_mediaControl->start();
+    }
+    else if(m_state == MediaSet)
+    {
+        retryCount++;
+        if(retryCount > maxRetryCount)
+        {
+            qWarning() << "Playback retried " << retryCount << " times. Aborting.";
+            retryCount = 0;
+            return;
+        }
+
+        qWarning() << "Media control not yet available, retrying..";
+        QTimer::singleShot(retryPlayTimeout,this,SLOT(play()));
+    }
+}
+
+void VideoPlayer::stop()
+{
+    if(m_state >= ControlAvailable)
+        m_mediaControl->stop();
+}
+
+void VideoPlayer::reset()
+{
+    delete m_videoControl; m_videoControl = 0;
+    delete m_mediaControl; m_mediaControl = 0;
+    delete m_mediaContent; m_mediaContent = 0;
+    delete m_tempFile; m_tempFile = 0;
+    m_state = None;
+
+    //remove content entry
+    if (!m_content.isNull()) {
+        QContent::uninstall(m_content.id());
+        m_content = QContent();
+    }
+}
+
+void VideoPlayer::setData(const QByteArray& data, const QString& type)
+{
+    reset();
+
+    QString ext = QMimeType(type).extension();
+    if(ext.isEmpty())
+        qWarning() << "Unknown mimetype extension for media";
+
+    m_tempFile = new QTemporaryFile(tempFileTemplate + "." + ext);
+    m_tempFile->open();
+    m_tempFile->write(data);
+    m_tempFile->flush();
+
+    m_content = QContent(m_tempFile->fileName());
+    m_mediaContent = new QMediaContent(m_content);
+
+    connect(m_mediaContent, SIGNAL(controlAvailable(QString)), this, SLOT(controlAvailable(QString)));
+    connect(m_mediaContent, SIGNAL(mediaError(QString)), this, SLOT(mediaError(QString)));
+    m_state = MediaSet;
+}
+
+int VideoPlayer::playLength() const
+{
+    if(m_state >= ControlAvailable);
+        return m_mediaControl->length();
+    return 0;
+}
+
+void VideoPlayer::controlAvailable(const QString& controlName)
+{
+    if(controlName == QMediaControl::name())
+    {
+        if(m_mediaControl)
+            delete m_mediaControl;
+        m_mediaControl = new QMediaControl(m_mediaContent);
+        connect(m_mediaControl,SIGNAL(valid()),this,SLOT(controlValid()));
+        m_state = ControlAvailable;
+    }
+    else if(controlName == QMediaVideoControl::name() && m_state == ControlAvailable)
+    {
+        if(m_videoControl)
+            delete m_videoControl;
+        m_videoControl = new QMediaVideoControl(m_mediaContent);
+        m_state = VideoControlAvailable;
+        emit widgetAvailable();
+    }
+}
+
+void VideoPlayer::controlValid()
+{
+    //currently not needed
+}
+
+void VideoPlayer::mediaError(const QString& errorString)
+{
+    qWarning() << "Playback error: " << errorString;
+    m_state = PlaybackError;
+}
+
+SmilVideo::SmilVideo(SmilSystem* system, SmilElement* parent , const QString& name, const QXmlStreamAttributes& atts)
+    :
+    QObject(),
+    SmilMedia(system,parent,name,atts),
+    m_videoPlayer(0),
+    m_videoWidget(0),
+    m_waiting(false)
+{
+    source = atts.value("src").toString();
+}
+
+SmilVideo::~SmilVideo()
+{
+    delete m_videoPlayer;
+    delete m_videoWidget;
+}
+
+void SmilVideo::setData(const QByteArray& data, const QString& type)
+{
+    Q_ASSERT(m_videoPlayer);
+    m_videoPlayer->setData(data,type);
+    m_waiting = false;
+    sys->transferServer()->endData(this, source);
+    SmilMedia::setData(data,type);
+}
+
+void SmilVideo::process()
+{
+    SmilMedia::process();
+    if (!source.isEmpty() && !m_waiting) {
+        if(!m_videoPlayer)
+        {
+            m_videoPlayer = new VideoPlayer();
+            connect(m_videoPlayer,SIGNAL(widgetAvailable()),this,SLOT(widgetAvailable()));
+        }
+        m_waiting = true;
+        sys->transferServer()->requestData(this, source);
+    }
+}
+
+void SmilVideo::setState(State s)
+{
+
+    SmilMedia::setState(s);
+    switch(s) {
+        case Active:
+        {
+            Q_ASSERT(m_videoPlayer);
+            m_videoPlayer->play();
+        }
+        break;
+        case Idle:
+        case End:
+        {
+            if(m_videoPlayer)
+                m_videoPlayer->stop();
+        }
+        break;
+        default:
+            break;
+    }
+}
+
+Duration SmilVideo::implicitDuration()
+{
+    Duration d;
+    if(m_videoPlayer)
+        d = Duration(m_videoPlayer->playLength());
+    else
+        d = Duration(5000); //set a short duration to allow time for the implicit timing update later.
+   return d;
+}
+
+void SmilVideo::paint(QPainter* p)
+{
+    SmilMedia::paint(p);
+    if(m_videoWidget)
+        m_videoWidget->repaint();
+}
+
+void SmilVideo::reset()
+{
+    if(m_videoPlayer)
+        m_videoPlayer->reset();
+}
+
+void SmilVideo::widgetAvailable()
+{
+    m_videoWidget = m_videoPlayer->videoWidget(system()->targetWidget());
+    m_videoWidget->setGeometry(rect());
+    m_videoWidget->setVisible(true);
+    m_videoWidget->repaint();
+
+    //media api does not allow retrieval of play duration before actual playback, so  we need
+    //to update the timing settings after playback has started.
+
+    SmilTimingAttribute* ta = static_cast<SmilTimingAttribute*>(moduleAttribute("Timing"));
+    ta->updateImplicitTiming();
+}
+#endif //MEDIA_SERVER
+
+SmilMediaParam::SmilMediaParam(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts), valueType(Data)
 {
-    name = atts.value("name");
-    value = atts.value("value");
-    type = atts.value("type");
-    QString tv = atts.value("typeval");
+    name = atts.value("name").toString();
+    value = atts.value("value").toString();
+    type = atts.value("type").toString();
+    QString tv = atts.value("typeval").toString();
     if (tv == "ref")
         valueType = Ref;
     else if (tv == "object")
         valueType = Object;
 }
-
-//===========================================================================
 
 SmilMediaModule::SmilMediaModule()
     : SmilModule()
@@ -488,7 +762,7 @@ SmilMediaModule::~SmilMediaModule()
 {
 }
 
-SmilElement *SmilMediaModule::beginParseElement(SmilSystem *sys, SmilElement *e, const QString &qName, const QXmlAttributes &atts)
+SmilElement *SmilMediaModule::beginParseElement(SmilSystem *sys, SmilElement *e, const QString &qName, const QXmlStreamAttributes &atts)
 {
     if (qName == "text") {
         return new SmilText(sys, e, qName, atts);
@@ -496,15 +770,25 @@ SmilElement *SmilMediaModule::beginParseElement(SmilSystem *sys, SmilElement *e,
         return new SmilImg(sys, e, qName, atts);
     } else if (qName == "audio") {
         return new SmilAudio(sys, e, qName, atts);
-    } else if (qName == "ref") {
+    }
+#ifdef MEDIA_SERVER
+      else if (qName == "video") {
+        return new SmilVideo(sys,e,qName,atts);
+    }
+#endif
+      else if (qName == "ref") {
         // try to guess the actual type.
-        QString source = atts.value("src");
+        QString source = atts.value("src").toString();
         if ( source.contains("image/"))
             return new SmilImg(sys, e, qName, atts);
         else if (source.contains("audio/"))
             return new SmilImg(sys, e, qName, atts);
         else if (source.contains("text/"))
             return new SmilText(sys, e, qName, atts);
+#ifdef MEDIA_SERVER
+        else if (source.contains("video/"))
+            return new SmilVideo(sys,e,qName,atts);
+#endif
     } else if (qName == "param") {
         return new SmilMediaParam(sys, e, qName, atts);
     }
@@ -512,7 +796,7 @@ SmilElement *SmilMediaModule::beginParseElement(SmilSystem *sys, SmilElement *e,
     return 0;
 }
 
-bool SmilMediaModule::parseAttributes(SmilSystem *, SmilElement *, const QXmlAttributes &)
+bool SmilMediaModule::parseAttributes(SmilSystem *, SmilElement *, const QXmlStreamAttributes &)
 {
     return false;
 }
@@ -521,22 +805,25 @@ void SmilMediaModule::endParseElement(SmilElement *, const QString &)
 {
 }
 
-QStringList SmilMediaModule::elements() const
+QStringList SmilMediaModule::elementNames() const
 {
     QStringList l;
     l.append("text");
     l.append("img");
     l.append("audio");
+#ifdef MEDIA_SERVER
+    l.append("video");
+#endif
     l.append("ref");
     l.append("param");
     return l;
 }
 
-QStringList SmilMediaModule::attributes() const
+QStringList SmilMediaModule::attributeNames() const
 {
-    //###
     QStringList l;
     return l;
 }
 
 #include "media.moc"
+

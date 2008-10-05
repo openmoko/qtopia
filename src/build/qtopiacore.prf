@@ -114,11 +114,13 @@ contains(QTOPIACORE_CONFIG,qt_plugins):!enable_singleexec {
     INSTALLS+=inst_install
 }
 
-sdk_install.commands=$$COMMAND_HEADER\
-    $$make($$QTDIR/$$dir,install INSTALL_ROOT=$(SDKSANDBOX) )
-sdk_install.CONFIG=no_path
-sdk_install.hint=sdk
-INSTALLS+=sdk_install
+!contains(QTOPIACORE_CONFIG,staticlib) {
+    sdk_install.commands=$$COMMAND_HEADER\
+        $$make($$QTDIR/$$dir,install INSTALL_ROOT=$(SDKSANDBOX) )
+    sdk_install.CONFIG=no_path
+    sdk_install.hint=sdk
+    INSTALLS+=sdk_install
+}
 
 dolibs=0
 contains(QTOPIACORE_CONFIG,lib) {
@@ -132,14 +134,36 @@ equals(dolibs,1) {
     lib=$$resolveqt($$lib)
     var=$$lower($$lib)
 
-    equals(QTDIR,$$QTEDIR) {
-        QT_VERSION=$$QTE_VERSION
-        QT_MAJOR_VERSION=$$QTE_MAJOR_VERSION
-        QT_MINOR_VERSION=$$QTE_MINOR_VERSION
+    isEmpty(VERSION) {
+        equals(QTDIR,$$QTEDIR) {
+            QT_VERSION=$$QTE_VERSION
+            QT_MAJOR_VERSION=$$QTE_MAJOR_VERSION
+            QT_MINOR_VERSION=$$QTE_MINOR_VERSION
+        } else {
+            QT_VERSION=$$DQT_VERSION
+            QT_MAJOR_VERSION=$$DQT_MAJOR_VERSION
+            QT_MINOR_VERSION=$$DQT_MINOR_VERSION
+        }
     } else {
-        QT_VERSION=$$DQT_VERSION
-        QT_MAJOR_VERSION=$$DQT_MAJOR_VERSION
-        QT_MINOR_VERSION=$$DQT_MINOR_VERSION
+        QT_VERSION=$$VERSION
+        QT_MAJOR_VERSION=
+        QT_MINOR_VERSION=
+        ver=$$VERSION
+        ver~=s/\./ /g
+        ver=$$ver
+        !contains(QMAKE_BEHAVIORS,var_split) {
+            ver=$$split(ver," ")
+        }
+        for(v,ver) {
+            isEmpty(QT_MAJOR_VERSION) {
+                QT_MAJOR_VERSION=$$v
+                next()
+            }
+            isEmpty(QT_MINOR_VERSION) {
+                QT_MINOR_VERSION=$$v
+                next()
+            }
+        }
     }
 
     unix {

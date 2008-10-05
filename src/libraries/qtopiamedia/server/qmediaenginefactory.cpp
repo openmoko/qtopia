@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,11 +22,12 @@
 
 /*!
     \class QMediaEngineFactory
+    \inpublicgroup QtMediaModule
     \preliminary
     \brief The QMediaEngineFactory class is a factory used by the Media Server to construct Media Engines loaded from libraries.
 
     The Media Server loads Qt style plugins tagged with "mediaengine". Each
-    Media Engine in the Qtopia Media system is implemented as a Qt style
+    Media Engine in the Qt Extended Media system is implemented as a Qt style
     plugin. The plugin must implement the QMediaEngineFactory inteface, as it
     used by the Media Server to ensure that the plugin is able to be used in
     the server. The Media Server will call the create() function when it needs

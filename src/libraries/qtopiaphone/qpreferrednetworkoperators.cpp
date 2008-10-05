@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,7 +21,8 @@
 
 /*!
     \class QPreferredNetworkOperators
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QPreferredNetworkOperators class provides information about preferred network operators.
     \ingroup telephony
 
@@ -48,8 +47,9 @@
 
 /*!
     \class QPreferredNetworkOperators::Info
-    \mainclass
-    \brief The QPreferredNetworkOperators::Info class specifies information about a preferred network operator on the SIM.
+    \inpublicgroup QtTelephonyModule
+
+    \brief The Info class specifies information about a preferred network operator on the SIM.
 
     The \c index field indicates
     the position within the list (1 indicates the most-preferred operator).
@@ -63,8 +63,9 @@
 
 /*!
     \class QPreferredNetworkOperators::NameInfo
-    \mainclass
-    \brief The QPreferredNetworkOperators::NameInfo class specifies information about an operator that was retrieved from the SIM.
+    \inpublicgroup QtTelephonyModule
+
+    \brief The NameInfo class specifies information about an operator that was retrieved from the SIM.
 
     The \c name field is the name of the operator, and \c id is its numeric identifier.
 */

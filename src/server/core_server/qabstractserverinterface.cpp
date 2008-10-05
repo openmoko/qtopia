@@ -1,56 +1,56 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qabstractserverinterface.h"
 #include "windowmanagement.h"
 
+#include <QCloseEvent>
+
 /*!
   \class QAbstractServerInterface
-  \brief The QAbstractServerInterface class allows the Qtopia Server UI to be
+    \inpublicgroup QtBaseModule
+  \brief The QAbstractServerInterface class allows the Qt Extended Server UI to be
          replaced.
-  \ingroup QtopiaServer
-  \ingroup QtopiaServer::PhoneUI::TTSmartPhone
+    \ingroup QtopiaServer::PhoneUI::TTSmartPhone
 
-  While it is usually easier to customize one of the existing Qtopia server
-  interfaces, when building a product on top of the Qtopia system, it is
-  sometimes desirable to replace the entire Qtopia server user interface.
-  Qtopia supports replacing the server user interface through the
+  While it is usually easier to customize one of the existing Qt Extended server
+  interfaces, when building a product on top of the Qt Extended system, it is
+  sometimes desirable to replace the entire Qt Extended server user interface.
+  Qt Extended supports replacing the server user interface through the
   QAbstractServerInterface class.
 
-  The Qtopia server user interface is reponsible for direct interaction with
+  The Qt Extended server user interface is reponsible for direct interaction with
   the user.  Core system services, such as telephony and application launching,
   are handled independently within the system and are not affected by replacing
-  the UI.  Likewise, Qtopia APIs that require a server-side UI component, such
+  the UI.  Likewise, Qt Extended APIs that require a server-side UI component, such
   as QSoftMenuBar, also include server side APIs, QSoftMenuBarProvider in the
   case of QSoftMenuBar, which allows their functionality to be maintained or
   adapted to the new UI model.  In this way, it is relatively simple to replace
   the server's visual interface while maintaining a functioning and featureful
-  Qtopia platform.
+  Qt Extended platform.
 
   Replacing the entire server user interface consists of three steps:
   \list 1
   \o Implement a QAbstractServerInterface derived class that provides the user
      interface.
 
-     The Qtopia server itself provides no UI outside of this implementation
+     The Qt Extended server itself provides no UI outside of this implementation
      (with the exception of some dialogs, all of which can be disabled through
      the StandardDialogs class) and so the implementation must provide all
      aspects of the user interface.
@@ -89,7 +89,7 @@
 
   \o Set the custom implementation as the in-use server interface.
 
-     During startup, the Qtopia Server uses the standard qtopiaWidget() method
+     During startup, the Qt Extended Server uses the standard qtopiaWidget() method
      to acquire a server interface instance.  As such, all the mechanisms
      available for configuring server widgets also work in configuring the
      server interface.  In summary,
@@ -108,14 +108,14 @@
 
   \endlist
 
-  The server interface is constructed after all other Qtopia Server tasks.  The
-  server constructs it as a toplevel, frameless widget.  If during startup an
-  appropriate QAbstractServerInterface implementation cannot be found, the
+  The server interface is constructed after all other Qt Extended Server tasks.  The
+  server constructs it as a toplevel, frameless widget which ignores close events.
+  If during startup an appropriate QAbstractServerInterface implementation cannot be found, the
   system will run without a primary user interface.
 
-  For more details can be found in the \l {QtopiaServerApplication#qtopia-server-widgets}{server widget documentation}.
+  For more details can be found in the \l {QtopiaServerApplication#qt-extended-server-widgets}{server widget documentation}.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 /*!
@@ -129,4 +129,14 @@ QAbstractServerInterface::QAbstractServerInterface(QWidget *parent, Qt::WFlags f
     // below all other windows at all times.
     if ((flags & Qt::FramelessWindowHint) != 0)
         WindowManagement::setLowestWindow(this);
+
 }
+
+/*!
+    \reimp
+*/
+void QAbstractServerInterface::closeEvent(QCloseEvent *e)
+{
+    e->ignore();
+}
+

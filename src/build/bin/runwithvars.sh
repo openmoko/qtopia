@@ -1,16 +1,25 @@
 #!/bin/sh
 
-getvar()
+getvars()
 {
-    gv_varname="$1"
-    shift
     while [ $# -gt 0 ]; do
-        if [ "${1##$gv_varname=}" != "$1" ]; then
-            echo "${1##$gv_varname=}"
+        if [ "${1##DEVICE_CONFIG_PATH=}" != "$1" ]; then
+            eval "$1"
+        fi
+        if [ "${1##DEFAULT_DEVICE_PATH=}" != "$1" ]; then
+            eval "$1"
+        fi
+        if [ "${1##DEVICE_BIN=}" != "$1" ]; then
+            eval "$1"
+        fi
+        if [ "${1##DEVICE_BUILDING_FOR_DESKTOP=}" != "$1" ]; then
+            eval "$1"
         fi
         shift
     done
 }
+
+getvars "$@"
 
 # NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
 #
@@ -18,12 +27,8 @@ getvar()
 #
 # NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
 
-DEVICE_CONFIG_PATH=$(getvar DEVICE_CONFIG_PATH "$@")
-DEFAULT_DEVICE_PATH=$(getvar DEFAULT_DEVICE_PATH "$@")
-DEVICE_BIN=$(getvar DEVICE_BIN "$@")
-
 # Only pull in these files if we're actually building for a device
-if [ -n "$DEVICE_CONFIG_PATH" ]; then
+if [ -n "$DEVICE_CONFIG_PATH" -a "$DEVICE_BUILDING_FOR_DESKTOP" = 0 ]; then
     . "$DEFAULT_DEVICE_PATH/environment"
     [ -f "$DEVICE_CONFIG_PATH/environment" ] && . "$DEVICE_CONFIG_PATH/environment"
     setup_path

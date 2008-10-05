@@ -1,35 +1,37 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/smil/element.h>
-#include <qtopia/smil/module.h>
+#ifndef SMILMEDIA_H
+#define SMILMEDIA_H
+
+#include <element.h>
+#include <module.h>
 #include <qpixmap.h>
 
 class SmilSystem;
 class AudioPlayer;
+class VideoPlayer;
 
 class SmilMediaParam : public SmilElement
 {
 public:
-    SmilMediaParam(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilMediaParam(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
 
     enum ValueType { Data, Ref, Object };
 
@@ -41,8 +43,9 @@ public:
 
 class SmilMedia : public SmilElement
 {
+
 public:
-    SmilMedia(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilMedia(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
 
     void setState(State s);
     void reset();
@@ -56,7 +59,7 @@ protected:
 class SmilText : public SmilMedia
 {
 public:
-    SmilText(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilText(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
 
     void addCharacters(const QString &ch);
     virtual void setData(const QByteArray &, const QString &);
@@ -75,7 +78,7 @@ class ImgPrivate;
 class SmilImg : public SmilMedia
 {
 public:
-    SmilImg(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilImg(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
     ~SmilImg();
 
     virtual void setData(const QByteArray &, const QString &);
@@ -93,7 +96,7 @@ protected:
 class SmilAudio : public SmilMedia
 {
 public:
-    SmilAudio(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilAudio(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
     ~SmilAudio();
 
     virtual void setData(const QByteArray &, const QString &);
@@ -109,7 +112,33 @@ protected:
     bool waiting;
 };
 
-//===========================================================================
+#ifdef MEDIA_SERVER
+
+class SmilVideo : public QObject, public SmilMedia
+{
+    Q_OBJECT
+
+public:
+    SmilVideo(SmilSystem* sys, SmilElement* p, const QString& name, const QXmlStreamAttributes& atts);
+    ~SmilVideo();
+
+    virtual void setData(const QByteArray& data, const QString& type);
+    virtual void process();
+    virtual void setState(State s);
+    Duration implicitDuration();
+    void paint(QPainter* p);
+    void reset();
+
+private slots:
+    void widgetAvailable();
+
+protected:
+    VideoPlayer* m_videoPlayer;
+    QWidget* m_videoWidget;
+    bool m_waiting;
+};
+
+#endif
 
 class SmilMediaModule : public SmilModule
 {
@@ -117,10 +146,11 @@ public:
     SmilMediaModule();
     virtual ~SmilMediaModule();
 
-    virtual SmilElement *beginParseElement(SmilSystem *, SmilElement *, const QString &qName, const QXmlAttributes &atts);
-    virtual bool parseAttributes(SmilSystem *sys, SmilElement *e, const QXmlAttributes &atts);
+    virtual SmilElement *beginParseElement(SmilSystem *, SmilElement *, const QString &qName, const QXmlStreamAttributes &atts);
+    virtual bool parseAttributes(SmilSystem *sys, SmilElement *e, const QXmlStreamAttributes &atts);
     virtual void endParseElement(SmilElement *, const QString &qName);
-    virtual QStringList elements() const;
-    virtual QStringList attributes() const;
+    virtual QStringList elementNames() const;
+    virtual QStringList attributeNames() const;
 };
 
+#endif

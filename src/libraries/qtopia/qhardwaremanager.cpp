@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -36,17 +34,18 @@ struct QHardwareManagerPrivate
 
 /*!
     \class QHardwareManager
-    \mainclass
-    \brief The QHardwareManager class finds available accessory providers for a 
-    given hardware interface.
+    \inpublicgroup QtBaseModule
 
-    QHardwareManager is part of the \l{Qtopia Accessory System}{Qtopia Accessory System},
-    which provides information about the available hardware accessories.
+    \brief The QHardwareManager class finds available hardware abstraction providers for a 
+    given interface.
+
+    QHardwareManager is part of the \l{Qt Extended Hardware Abstraction},
+    which provides information about the available hardware devices.
 
     A QHardwareMonitor can be used to monitor the availability of a given
-    type of hardware accessory, providing a list of providers through providers() 
+    type of hardware, providing a list of providers through providers() 
     and emitting signals providerAdded() and  providerRemoved() when that list changes.
-    The type of hardware accessory monitored is given as a parameter to
+    The type of hardware monitored is given as a parameter to
     constructing the QHardwareMonitor.
 
     The following example responds whenever a new QSignalSource becomes available:
@@ -57,9 +56,9 @@ struct QHardwareManagerPrivate
             this, SLOT(newBatteryAdded(QString)));
     \endcode
 
-    The types of hardware accessories are the names of the accessory classes 
-    which implement the accessories. Any class that is subclassing QHardwareInterface 
-    is considered to be a Qtopia accessory.
+    The types of a hardware abstraction is the name of the abstraction classes 
+    which implement the interface to the device. Any class that is subclassing QHardwareInterface 
+    is considered to be a Qt Extended hardware abstraction.
 
     \sa QHardwareInterface, QPowerSource, QSignalSource, QVibrateAccessory
     \ingroup hardware
@@ -79,15 +78,15 @@ struct QHardwareManagerPrivate
 
 /*!
     Creates a QHardwareManager object and attaches it to \a parent. \a interface is the
-    name of the accessory interface that this object is monitoring.
+    name of the hardware interface that this object is monitoring.
 
-    The following code assumes that Qtopia is running on a device that
+    The following code assumes that Qt Extended is running on a device that
     has a modem as power source (for more details see QPowerStatus and QPowerSource).
     \code
         QHardwareManager manager( "QPowerSource" );
         QStringList providers = manager.providers();
         
-        //Qtopia always has a virtual power source with id DefaultBattery
+        //Qt Extended always has a virtual power source with id DefaultBattery
         providers.contains( "DefaultBattery" ); //always true
         providers.contains( "modem" ); //true
     \endcode

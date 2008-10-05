@@ -1,38 +1,49 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef QTOPIA_CONTACTMODEL_H
-#define QTOPIA_CONTACTMODEL_H
+#ifndef QCONTACTMODEL_H
+#define QCONTACTMODEL_H
 
 #include <QStyleOptionViewItem>
 #include <QAbstractListModel>
 #include <QAbstractItemDelegate>
 #include <QSet>
 #include <QSharedDataPointer>
-#include <qtopia/pim/qcontact.h>
-#include <qtopia/pim/qpimsource.h>
+#include <qcontact.h>
+#include <qpimsource.h>
 
 #include <QPimModel>
 
+#include <qcollectivepresenceinfo.h>
+
+typedef QMap<QString, QString> QPresenceStringMap;
+typedef QMap<QString, QCollectivePresenceInfo::PresenceType> QPresenceTypeMap;
+typedef QMap<QString, QStringList> QPresenceCapabilityMap;
+typedef QMap<QString, QDateTime> QPresenceDateTimeMap;
+
+Q_DECLARE_METATYPE(QPresenceStringMap);
+Q_DECLARE_METATYPE(QPresenceTypeMap);
+Q_DECLARE_METATYPE(QPresenceCapabilityMap);
+Q_DECLARE_METATYPE(QPresenceDateTimeMap);
+
 class QContactModelData;
+class QContactSimContext;
 class QTOPIAPIM_EXPORT QContactModel : public QPimModel
 {
     Q_OBJECT
@@ -117,7 +128,16 @@ public:
         Categories,
         OtherVOIP,
         HomeVOIP,
-        BusinessVOIP
+        BusinessVOIP,
+
+        // Presence
+        PresenceStatus,
+        PresenceStatusString,
+        PresenceDisplayName,
+        PresenceUpdateTime,
+        PresenceCapabilities,
+        PresenceMessage,
+        PresenceAvatar
     };
 
     enum QContactModelRole {
@@ -152,6 +172,8 @@ public:
     QStringList mimeTypes() const;
 
     void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+    typedef QPair<QContactModel::Field, Qt::SortOrder> SortField;
+    void sort(QList<SortField> list);
 
     QVariant data(const QModelIndex &index, int role) const;
     bool setData(const QModelIndex &, const QVariant &, int);
@@ -198,6 +220,7 @@ public:
         ContainsPhoneNumber = 0x00100,
         ContainsEmail = 0x0200,
         ContainsMailing = 0x0400,
+        ContainsChat = 0x0800
     };
 
     void setFilter(const QString &, int flags = 0);
@@ -205,33 +228,47 @@ public:
     int filterFlags() const;
     void clearFilter();
 
+    /* presence filtering */
+    void setPresenceFilter(QList<QCollectivePresenceInfo::PresenceType> types);
+    QList<QCollectivePresenceInfo::PresenceType> presenceFilter() const;
+    void clearPresenceFilter();
+
     /* used in phone a lot */
-#ifdef QTOPIA_PHONE
     QContact matchPhoneNumber(const QString &);
-#endif
     QContact matchEmailAddress(const QString &);
+    QContact matchChatAddress(const QString &, const QString& = QString());
 
     /* need a match function since otherwise QAbstractItemModel will do it poorly */
     QModelIndexList match(const QModelIndex &start, int role, const QVariant &,
             int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith | Qt::MatchWrap)) const;
 
+    QModelIndexList match(Field field, const QVariant& data, Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith), int start = 0, int hits = 1);
 
     bool writeVCard( const QString &filename );
 
-#ifdef QTOPIA_PHONE
-    bool isSIMCardContact(const QModelIndex &) const;
-    bool isSIMCardContact(const QUniqueId &) const;
-#endif
+    // Sim related functions
+    bool isSimCardContact(const QModelIndex &) const;
+    bool isSimCardContact(const QUniqueId &) const;
 
-    // missing function to aid in rendering searched for contact.
-    // QContact renderedSearchItem(QContact &)?
+    QString simCardIdentity() const;
+
+    int firstSimIndex(const QPimSource & = QPimSource()) const;
+    int lastSimIndex(const QPimSource & = QPimSource()) const;
+    int simLabelLimit(const QPimSource & = QPimSource()) const;
+    int simNumberLimit(const QPimSource & = QPimSource()) const;
+    int simIndexCount(const QPimSource & = QPimSource()) const;
+    int simFreeIndexCount(const QPimSource & = QPimSource()) const;
+    int simUsedIndexCount(const QPimSource & = QPimSource()) const;
+    QList<int> simCardIndexes(const QUniqueId &id, const QPimSource & = QPimSource()) const;
+
+    bool loadingSim(const QPimSource & = QPimSource()) const;
+
+signals:
+    void simLoaded(const QPimSource &);
+
 private slots:
     void pimMessage(const QString& message, const QByteArray& data);
-
 private:
-    void setSortField(Field);
-    Field sortField() const;
-
     static void initMaps();
     static QMap<Field, QString> k2t;
     static QMap<Field, QString> k2i;
@@ -243,4 +280,4 @@ private:
     QContactModelData *d;
 };
 
-#endif // QTOPIA_CONTACTMODEL_H
+#endif

@@ -1,25 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/pim/qcontactview.h>
+#include <qcontactview.h>
 #include <QTextEntryProxy>
 
 #include <QLabel>
@@ -37,15 +35,16 @@
 #include <QKeyEvent>
 
 #include <qtopiaapplication.h>
-#ifdef QTOPIA_PHONE
 #include <qsoftmenubar.h>
-#endif
 #include <QtopiaItemDelegate>
 
 /*!
   \class QContactDelegate
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QContactDelegate class provides drawing of QContactModel items (\l {QContact}{QContacts}).
 
@@ -136,7 +135,7 @@ QList<StringPair> QContactDelegate::subTexts(const QStyleOptionViewItem &option,
     Q_UNUSED(option);
 
     QList< StringPair > subList;
-    QString subLabel = index.model()->data(index, QContactModel::SubLabelRole).toString();
+    QString subLabel = index.data(QContactModel::SubLabelRole).toString();
     subList.append(qMakePair(QString(), subLabel));
     return subList;
 }
@@ -171,8 +170,8 @@ int QContactDelegate::subTextsCountHint(const QStyleOptionViewItem& option, cons
 void QContactDelegate::drawDecorations(QPainter* p, bool rtl, const QStyleOptionViewItem &option, const QModelIndex& index,
                                       QList<QRect>& leadingFloats, QList<QRect>& trailingFloats) const
 {
-    QPixmap decoration = qvariant_cast<QPixmap>(index.model()->data(index, QContactModel::PortraitRole));
-    QPixmap trailingdecoration = qvariant_cast<QPixmap>(index.model()->data(index, QContactModel::StatusIconRole));
+    QPixmap decoration = qvariant_cast<QPixmap>(index.data(QContactModel::PortraitRole));
+    QPixmap trailingdecoration = qvariant_cast<QPixmap>(index.data(QContactModel::StatusIconRole));
 
     QRect drawRect;
     QSize ths;
@@ -246,7 +245,8 @@ QSize QContactDelegate::decorationsSizeHint(const QStyleOptionViewItem& option, 
 
     // Note - this ignores the secondaryIconRole pixmap, since it is of variable size
     QSize ths = QContact::thumbnailSize();
-    return QSize(ths.width() + 4 + textSize.width(), qMax(ths.height() + 4, textSize.height()));
+    QPixmap trailingdecoration = qvariant_cast<QPixmap>(index.data(QContactModel::StatusIconRole));
+    return QSize(ths.width() + 4 + textSize.width() + trailingdecoration.width() + 4, qMax(qMax(ths.height(), trailingdecoration.height()) + 4, textSize.height()));
 }
 
 /*!
@@ -267,8 +267,11 @@ public:
 
 /*!
   \class QContactListView
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QContactListView class provides a list view widget for use with QContactModel.
 
@@ -477,6 +480,161 @@ void QContactListView::setFilterText()
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
 }
 
+
+class QSmoothContactListViewPrivate
+{
+public:
+    QSmoothContactListViewPrivate()
+        : proxy(0), searchTimer(0) {}
+
+    QTextEntryProxy *proxy;
+    QTimer *searchTimer;
+};
+
+/*!
+  \class QSmoothContactListView
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
+  \ingroup pim
+  \brief The QSmoothContactListView class provides a list view widget for use with QContactModel.
+
+  The convenience functions provided by QSmoothContactListView include functions for interpreting
+  the view's model, delegate and current item as the corresponding QContactModel, QContactDelegate and
+  QContact objects.  In addition, QSmoothContactListView enforces using a QContactModel (or a derivative)
+  as the model.
+
+  Upon construction, QSmoothContactListView automatically sets itself to use a QContactDelegate for drawing.
+
+  The following image displays a QSmoothContactListView, using the
+  default QContactDelegate to render QContacts from a QContactModel.
+
+  The API of this class is a subset of the QContactListView API.
+
+  \image qcontactview.png "List of QContacts"
+
+  \sa QContact, QContactModel, QContactDelegate, {Pim Library}
+*/
+
+/*!
+    \fn QContact QSmoothContactListView::currentContact() const
+
+    Returns the QContact for the currently selected index.
+*/
+
+/*!
+  \fn QContactModel *QSmoothContactListView::contactModel() const
+
+  Returns the QContactModel set for the view.
+*/
+
+/*!
+  \fn QContactDelegate *QSmoothContactListView::contactDelegate() const
+
+  Returns the QContactDelegate set for the view.  During
+  construction, QSmoothContactListView  will automatically create
+  a QContactDelegate to use as the delegate, but this can be
+  overridden with a different delegate derived from
+  QContactDelegate if necessary.
+*/
+
+
+/*!
+  Constructs a QSmoothContactListView with the given \a parent.
+
+  This also sets the layout mode to \c Batched for performance,
+  the resize mode to \c Adjust, and creates a \l QContactDelegate
+  to use as the delegate.
+*/
+QSmoothContactListView::QSmoothContactListView(QWidget *parent)
+    : QSmoothList(parent)
+{
+    d = new QSmoothContactListViewPrivate();
+    setItemDelegate(new QContactDelegate(this));
+    d->searchTimer = new QTimer(this);
+    d->searchTimer->setInterval(100);
+    d->searchTimer->setSingleShot(true);
+    connect(d->searchTimer, SIGNAL(timeout()),
+            this, SLOT(setFilterText()));
+}
+
+/*!
+  Destroys the QSmoothContactListView.
+*/
+QSmoothContactListView::~QSmoothContactListView()
+{
+    delete d;
+    d = 0;
+}
+
+/*!
+  Sets a QTextEntryProxy for the list view to \a proxy.  This allows the list
+  view to accept text and InputMethod events, which it will pass to \a proxy.
+  The text of the proxy is used for filtering the list of contacts in the view.
+*/
+void QSmoothContactListView::setTextEntryProxy(QTextEntryProxy *proxy)
+{
+    if(style()->inherits("QThumbStyle")) {
+        d->proxy = 0;
+        return;
+    }
+    if (d->proxy)
+        disconnect(d->proxy, SIGNAL(textChanged(QString)), d->searchTimer, SLOT(start()));
+
+    d->proxy = proxy;
+    d->proxy->setTarget(this);
+
+    if (d->proxy)
+        connect(d->proxy, SIGNAL(textChanged(QString)), d->searchTimer, SLOT(start()));
+}
+
+/*!
+  Returns the QTextEntryProxy for the list view.  If there is no QTextEntryProxy set returns
+  0.
+
+  \sa setTextEntryProxy()
+*/
+QTextEntryProxy *QSmoothContactListView::textEntryProxy() const
+{
+    return d->proxy;
+}
+
+/*!
+  \overload
+
+  Sets the model for the view to \a model.
+*/
+void QSmoothContactListView::setModel( QAbstractItemModel *model )
+{
+    QSmoothList::setModel(model);
+    connect(this, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(currentContactChanged(QModelIndex)));
+}
+
+/*!
+  \internal
+   Try to make sure we select the current item \a newIndex, whenever it
+   changes.
+   */
+void QSmoothContactListView::currentContactChanged(const QModelIndex& newIndex)
+{
+    Q_UNUSED(newIndex);
+}
+
+void QSmoothContactListView::setFilterText()
+{
+    QString text = d->proxy ? d->proxy->text() : QString();
+    if (contactModel()) {
+        contactModel()->setFilter(text, contactModel()->filterFlags());
+    }
+    if (text.isEmpty())
+        QSoftMenuBar::clearLabel(this, Qt::Key_Back);
+    else
+        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
+}
+
 /***************************
 * QContactSelector
 ***********************/
@@ -487,7 +645,7 @@ public:
         : view(0), mType(RejectType), mTextSelectable(false),
         newAction(0), proxy(0), mModel(0)
         {}
-    QContactListView *view;
+    QSmoothContactListView *view;
     enum AcceptType {
         RejectType,
         ContactType,
@@ -505,8 +663,11 @@ public:
 
 /*!
   \class QContactSelector
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QContactSelector class provides a way of selecting a single contact from a QContactModel.
 
@@ -563,17 +724,13 @@ void QContactSelector::init()
     l->setMargin(0);
     l->setSpacing(2);
 
-    d->view = new QContactListView;
+    d->view = new QSmoothContactListView;
 
     if(!style()->inherits("QThumbStyle")) {
         QtopiaApplication::setInputMethodHint(d->view, "text");
         d->view->setAttribute(Qt::WA_InputMethodEnabled);
     }
     d->view->installEventFilter(this);
-    d->view->setFrameStyle(QFrame::NoFrame);
-    d->view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    d->view->setSelectionMode( QListView::SingleSelection );
 
     connect( d->view, SIGNAL(activated(QModelIndex)), this, SLOT(setSelected(QModelIndex)) );
 
@@ -605,9 +762,7 @@ void QContactSelector::init()
 
     connect(this, SIGNAL(accepted()), this, SLOT(completed()));
 
-#ifdef QTOPIA_PHONE
     QtopiaApplication::setMenuLike( this, true );
-#endif
 }
 
 /*!
@@ -660,7 +815,6 @@ void QContactSelector::contactModelReset()
     QModelIndex newSel = d->mModel->index(0,0);
     if (newSel.isValid()) {
         d->view->setCurrentIndex(newSel);
-        d->view->selectionModel()->setCurrentIndex(newSel, QItemSelectionModel::ClearAndSelect);
     }
 }
 
@@ -849,8 +1003,11 @@ public:
 
 /*!
   \class QPhoneTypeSelector
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QPhoneTypeSelector class provides a way of selecting a single type of phone number.
 
@@ -1052,13 +1209,11 @@ void QPhoneTypeSelector::init()
     connect( d->mPhoneType, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(accept()) );
 
     d->mPhoneType->setFocus();
-#ifdef QTOPIA_PHONE
     if( !Qtopia::mousePreferred() ) {
     if( d->mPhoneType->hasEditFocus() )
         d->mPhoneType->setEditFocus( true );
     }
     QtopiaApplication::setMenuLike(this, true);
-#endif
 }
 
 /*!
@@ -1109,8 +1264,11 @@ void QPhoneTypeSelector::keyPressEvent(QKeyEvent *ke)
 
 /*!
   \class QContactItem
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QContactItem class provides a QStandardItem based class representing a \l QContact.
 
@@ -1261,8 +1419,11 @@ QString QContactItem::subLabel() const
 
 /*!
   \class QContactItemModel
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QContactItemModel class provides a QStandardItemModel based class representing a list of \l{QContact}s.
 

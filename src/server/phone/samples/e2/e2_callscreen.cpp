@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -32,13 +30,13 @@
 #include <QContact>
 #include <QContactModel>
 #include "e2_bar.h"
-#include "cellmodemmanager.h"
-#include "phone/samples/e1/e1_error.h"
+#include "e1_error.h"
 #include <QMouseEvent>
 #include <QCallList>
 #include <QCallListItem>
 #include <QStackedWidget>
 #include <QFrame>
+#include <qtopiaservices.h>
 
 E2CallScreen::E2CallScreen(E2Button *b, QWidget *parent, Qt::WFlags flags)
 : QWidget(parent, flags), m_timer(0),
@@ -209,12 +207,12 @@ void E2CallScreen::setActive()
 
 void E2CallScreen::sendNumber(const QString &number)
 {
+    Q_UNUSED(number);
     if(!m_hasCall.isEmpty())
         return;
 
-    CellModemManager* cellModemManager = qtopiaTask<CellModemManager>();
-    if(cellModemManager->registrationState() != QTelephony::RegistrationHome &&
-       cellModemManager->registrationState() != QTelephony::RegistrationRoaming) {
+    QValueSpaceItem item("/Telephony/Status");
+    if ( !item.value("NetworkRegistered").toBool() ) {
         E1Error::error("Not registered.");
         return;
     }
@@ -1021,6 +1019,7 @@ E2NewMessage::E2NewMessage()
 
     m_message = new QLabel(this);
     m_message->setWordWrap(true);
+    m_message->setMaximumWidth(180 - 44);
     layout->addWidget(m_message);
 
     setFixedWidth(180);

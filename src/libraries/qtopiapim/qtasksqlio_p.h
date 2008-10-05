@@ -1,44 +1,42 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef TODO_SQLIO_PRIVATE_H
-#define TODO_SQLIO_PRIVATE_H
+#ifndef QTASKSQLIO_P_H
+#define QTASKSQLIO_P_H
 
 //
 //  W A R N I N G
 //  -------------
 //
-// This file is not part of the Qtopia API.  It exists purely as an
+// This file is not part of the Qt Extended API.  It exists purely as an
 // implementation detail.  This header file may change from version to
 // version without notice, or even be removed.
 //
 // We mean it.
 //
 
-#include <qtopia/pim/qtask.h>
+#include <qtask.h>
 #include <qtopiasql.h>
 #include <qsqlquery.h>
 #include <QHash>
+#include "qtaskmodel.h"
 #include "qpimsource.h"
-#include "qtaskio_p.h"
 #include "qpimsqlio_p.h"
 
 class QTaskSqlIO;
@@ -80,92 +78,52 @@ private:
     QTaskDefaultContextData *d;
 };
 
-class QTaskSqlIO : public QTaskIO, public QPimSqlIO {
-
+class QTaskSqlIO : public QPimSqlIO
+{
     Q_OBJECT
+public:
+    explicit QTaskSqlIO(QObject *parent = 0, const QString &name = QString());
+    ~QTaskSqlIO();
 
- public:
-     explicit QTaskSqlIO(QObject *parent = 0, const QString &name = QString());
-  ~QTaskSqlIO();
+    QUuid contextId() const;
+    int count() const { return QPimSqlIO::count(); }
 
-  QUuid contextId() const;
-  int count() const { return QPimSqlIO::count(); }
+    void setSortKey(QTaskModel::Field k);
+    QTaskModel::Field sortKey() const;
 
-  bool editableByRow() const { return true; }
-  bool editableByField() const { return true; }
+    bool completedFilter() const;
+    void setCompletedFilter(bool);
 
-  void setSortKey(QTaskModel::Field k);
-  QTaskModel::Field sortKey() const;
+    QTask task(const QUniqueId &) const;
+    QTask task(int row) const;
 
-  void setCategoryFilter(const QCategoryFilter &f);
-  QCategoryFilter categoryFilter() const { return QPimSqlIO::categoryFilter(); }
+    QVariant taskField(int row, QTaskModel::Field k) const;
+    bool setTaskField(int row, QTaskModel::Field k,  const QVariant &);
 
-  void setContextFilter(const QSet<int> &);
-  QSet<int> contextFilter() const;
+    bool removeTask(int row);
+    bool removeTask(const QUniqueId & id);
+    bool removeTask(const QTask &);
+    bool removeTasks(const QList<int> &rows);
+    bool removeTasks(const QList<QUniqueId> &ids);
 
-  bool startSyncTransaction(const QSet<QPimSource> &sources, const QDateTime &syncTime) { return QPimSqlIO::startSync(sources, syncTime); }
-  bool abortSyncTransaction() { return QPimSqlIO::abortSync(); }
-  bool commitSyncTransaction() { return QPimSqlIO::commitSync(); }
+    bool updateTask(const QTask &t);
+    QUniqueId addTask(const QTask &t, const QPimSource &s)
+    { return addTask(t, s, true); }
+    QUniqueId addTask(const QTask &, const QPimSource &, bool);
 
-  QList<QUniqueId> removed(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
-  { return QPimSqlIO::removed(sources, timestamp); }
+protected:
+    void bindFields(const QPimRecord &, QPreparedSqlQuery &) const;
+    void invalidateCache();
+    QStringList sortColumns() const;
+    QStringList otherFilters() const;
 
-  QList<QUniqueId> added(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
-  { return QPimSqlIO::added(sources, timestamp); }
+private:
+    bool cCompFilter;
+    QTaskModel::Field cSort;
 
-  QList<QUniqueId> modified(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
-  { return QPimSqlIO::modified(sources, timestamp); }
-
-  bool completedFilter() const;
-  void setCompletedFilter(bool);
-
-  QTask task(const QUniqueId &) const;
-  QTask task(int row) const;
-  QUniqueId taskId(int row) const { return QPimSqlIO::recordId(row); }
-  int row(const QUniqueId & id) const { return QPimSqlIO::row(id); }
-  QUniqueId id(int row) const { return QPimSqlIO::recordId(row); }
-  QVariant key(int row) const;
-
-  QVariant taskField(int row, QTaskModel::Field k) const;
-  bool setTaskField(int row, QTaskModel::Field k,  const QVariant &);
-
-  bool removeTask(int row);
-  bool removeTask(const QUniqueId & id);
-  bool removeTask(const QTask &);
-  bool removeTasks(const QList<int> &rows);
-  bool removeTasks(const QList<QUniqueId> &ids);
-
-  bool updateTask(const QTask &t);
-  QUniqueId addTask(const QTask &t, const QPimSource &s)
-  { return addTask(t, s, true); }
-  QUniqueId addTask(const QTask &, const QPimSource &, bool);
-
-  bool exists(const QUniqueId & id) const { return !task(id).uid().isNull(); }
-  bool contains(const QUniqueId & id) const { return row(id) != -1; }
-
-  // searching.  row based.
-  // pda based
-  int startSearch(const QString &) { return -1; }
-  int nextSearchItem() { return -1; }
-  void clearSearch() { }
-
-  void checkAdded(const QUniqueId &) { invalidateCache(); }
-  void checkRemoved(const QUniqueId &) { invalidateCache(); }
-  void checkRemoved(const QList<QUniqueId> &) { invalidateCache(); }
-  void checkUpdated(const QUniqueId &) { invalidateCache(); }
- protected:
-  void bindFields(const QPimRecord &, QPreparedSqlQuery &) const;
-  void invalidateCache();
-  QStringList sortColumns() const;
-  QStringList otherFilters() const;
-
- private:
-  bool cCompFilter;
-  QTaskModel::Field cSort;
-
-  mutable bool taskByRowValid;
-  mutable QTask lastTask;
-  mutable QPreparedSqlQuery repeatFieldQuery;
+    mutable bool taskByRowValid;
+    mutable QTask lastTask;
+    mutable QPreparedSqlQuery repeatFieldQuery;
 };
 
 #endif

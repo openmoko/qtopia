@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,11 +24,17 @@
 #include <qtopiasql.h>
 #include <qtimezone.h>
 #include <qtopialog.h>
+
+#include <QValueSpaceItem>
 #include <QSqlResult>
 #include <QSqlError>
 #include <QVariant>
 #include <QTimer>
 #include <QDebug>
+
+#include <sys/types.h>
+#include <unistd.h>
+
 
 QString concat(const char *a, const char *b, const char *c, const char *d = 0, const char *e = 0){
     QString s;
@@ -45,8 +49,11 @@ QString concat(const char *a, const char *b, const char *c, const char *d = 0, c
 /*
   \internal
   \class QPimSqlIO
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QPimSqlIO class provides generalized access to QPimRecord based
   sql tables.
@@ -66,13 +73,15 @@ QString concat(const char *a, const char *b, const char *c, const char *d = 0, c
   \internal
   Constructs a PimSqlObject with context scope \a context,
   primary table \a table, \a categoryTable, customFields table, text for
-  \a updateText and text for \a insertText.
+  \a updateText and text for \a insertText.  The given \a valueSpaceKey
+  is used to notify other models of the same type of changes
+  to the underlying data.
 
   The string fields are used to generate a set of cached sql statements.
 */
-QPimSqlIO::QPimSqlIO(const QUuid &scope, const char *table, const char *categoryTable,
-        const char *customTable, const char *updateText, const char *insertText) :
-    model(table, categoryTable), idGenerator(scope),
+QPimSqlIO::QPimSqlIO(QObject *parent, const QUuid &scope, const char *table, const char *categoryTable,
+        const char *customTable, const char *updateText, const char *insertText, const char *valueSpaceKey) : QObject(parent),
+    model(table, categoryTable), mTransactionStack(0), idGenerator(scope),
     tableText(table),
     updateRecordText(concat("UPDATE ", table, " SET ", updateText, " WHERE recid = :i")),
     selectCustomText(concat("SELECT count(*) FROM ", customTable, " WHERE recid = :i")),
@@ -90,9 +99,16 @@ QPimSqlIO::QPimSqlIO(const QUuid &scope, const char *table, const char *category
     changeLogUpdate("UPDATE changelog SET modified = :ls, removed = NULL WHERE recid = :id"),
     changeLogQuery("SELECT recid FROM changelog WHERE recid = :r"),
     addRecordQuery(concat("INSERT INTO ", table, insertText)),
-    contextQuery(concat("SELECT context FROM ", table, " WHERE recid = :i"))
-
+    contextQuery(concat("SELECT context FROM ", table, " WHERE recid = :i")),
+    moveRecordQuery(concat("UPDATE ", table, " SET context = :c WHERE recid = :i"))
 {
+    vsItem = new QValueSpaceItem(valueSpaceKey, this);
+    connect(vsItem, SIGNAL(contentsChanged()), this, SLOT(invalidateCache()));
+    // We use the this pointer as a per process unique id.  We never dereference the
+    // actual value, instead relying on the parent object (valueSpaceKey based) getting
+    // the changed notifications
+    vsObject = new QValueSpaceObject(QLatin1String(valueSpaceKey) + "/" + QString::number(getpid()) + "/" + QString::number(reinterpret_cast<quint64>(this)));
+    vsValue = 1;
 }
 
 /*!
@@ -115,6 +131,18 @@ QSqlDatabase QPimSqlIO::database()
     if (!pimdb->isOpen())
         qWarning() << "Failed to open pim database";
     return *pimdb;
+}
+
+/*!
+    This function is to assist unit testing.
+
+    Sets the database object specific to the pim sql data to the given
+    \a database.  The given \a database must already be opened.
+
+*/
+void QPimSqlIO::setDatabase(QSqlDatabase *database)
+{
+    pimdb = database;
 }
 
 /*!
@@ -232,7 +260,7 @@ bool QPimSqlIO::updateRecord(const QPimRecord& r)
         bag.set(uid, ba, "text/html");
     }
 
-    invalidateCache();
+    propagateChanges();
     return true;
 
 }
@@ -245,7 +273,7 @@ bool QPimSqlIO::removeRecord(int row)
 {
     // may be better way... but not needed.  Doesn't need to be
     // efficient.
-    return removeRecord(recordId(row));
+    return removeRecord(id(row));
 }
 
 /*!
@@ -297,19 +325,40 @@ bool QPimSqlIO::removeRecord(const QUniqueId & id)
     QAnnotator bag;
     bag.remove(id);
 
-    invalidateCache();
+    propagateChanges();
     return true;
+}
+
+/*!
+    Moves the record with the given \a identifier to the given \a destination
+    source.  Returns true on success.
+*/
+bool QPimSqlIO::moveRecord(const QUniqueId &identifier, const QPimSource &destination)
+{
+    return moveRecord(identifier, sourceContext(destination));
+}
+
+/*!
+    Moves the record with the given \a identifier to the given \a destination
+    context.  Returns true on success.
+*/
+bool QPimSqlIO::moveRecord(const QUniqueId &identifier, int destination)
+{
+    moveRecordQuery.prepare();
+    moveRecordQuery.bindValue(":i", identifier.toUInt());
+    moveRecordQuery.bindValue(":c", destination);
+    return moveRecordQuery.exec();
 }
 
 /*!
   Returns the list of identifiers for records in the list of \a rows.
   This function should not be used for large lists.
 */
-QList<QUniqueId> QPimSqlIO::recordIds(const QList<int> &rows) const
+QList<QUniqueId> QPimSqlIO::ids(const QList<int> &rows) const
 {
     QList<QUniqueId> ids;
     foreach(int r, rows) {
-        QUniqueId i = recordId(r);
+        QUniqueId i = id(r);
         if (!i.isNull())
             ids.append(i);
     }
@@ -474,7 +523,7 @@ QUniqueId QPimSqlIO::addRecord(const QPimRecord &record, int context, bool creat
         bag.set(u, ba, "text/html");
     }
 
-    invalidateCache();
+    propagateChanges();
     return u;
 }
 
@@ -494,6 +543,7 @@ int QPimSqlIO::count() const
 void QPimSqlIO::setCategoryFilter(const QCategoryFilter &f)
 {
     model.setCategoryFilter(f);
+    invalidateCache();
 }
 
 /*!
@@ -508,6 +558,7 @@ QCategoryFilter QPimSqlIO::categoryFilter() const
 void QPimSqlIO::setContextFilter(const QSet<int> &list, ContextFilterType type)
 {
     model.setContextFilter(list, type == ExcludeContexts);
+    invalidateCache();
 }
 
 QSet<int> QPimSqlIO::contextFilter() const
@@ -524,9 +575,9 @@ QPimSqlIO::ContextFilterType QPimSqlIO::contextFilterType() const
   \internal
   Returns the identifier for the record at \a row in the filtered records.
 */
-QUniqueId QPimSqlIO::recordId(int row) const
+QUniqueId QPimSqlIO::id(int row) const
 {
-    return model.recordId(row);
+    return model.id(row);
 }
 
 /*!
@@ -549,6 +600,11 @@ bool QPimSqlIO::contains(const QUniqueId & id) const
     return model.contains(id);
 }
 
+bool QPimSqlIO::exists(const QUniqueId &id) const
+{
+    return row(id) != -1;
+}
+
 /*!
   \internal
   Returns the context for the record with identifier \a id.
@@ -569,12 +625,43 @@ int QPimSqlIO::context(const QUniqueId &id) const
 }
 
 /*!
-  \internal
-  Invalidates cached data and queries.
+    Returns the pim data source for the record with identifier \a id.
+*/
+QPimSource QPimSqlIO::source(const QUniqueId &id) const
+{
+    int sqlContext = context(id);
+    return contextSource(sqlContext);
+}
+
+/*!
+    \internal
+    Invalidates cached data and queries.  This function is called
+    when either the data changes or when the filters on the data changes.
+
+    \sa propagateChanges()
 */
 void QPimSqlIO::invalidateCache()
 {
     model.reset();
+    if (!mTransactionStack)
+        emit recordsUpdated();
+}
+
+/*!
+    Notifies other models of changes to the data.  This function is called
+    when the data changes.  The notification will cause all current models,
+    including this one, to invoke invalidateCache();
+
+    \sa invalidateCache()
+*/
+void QPimSqlIO::propagateChanges()
+{
+    if (!mTransactionStack)
+    {
+        vsObject->setAttribute(QString::number(reinterpret_cast<quint64>(this)), ++vsValue);
+        vsObject->sync();
+    }
+    invalidateCache();
 }
 
 /*!
@@ -639,24 +726,28 @@ bool QPimSqlIO::insertExtraTables(uint, const QPimRecord &) { return true; }
 */
 bool QPimSqlIO::removeExtraTables(uint) { return true; }
 
+QMap<QPimSource, int> QPimSqlIO::sourceMap;
+
 int QPimSqlIO::sourceContext(const QPimSource &source, bool insert)
 {
+    if (sourceMap.contains(source))
+        return sourceMap[source];
+
     QUuid id = source.context;
     QString name = source.identity;
 
-    static QPreparedSqlQuery sourceContextQuery;
+    QPreparedSqlQuery sourceContextQuery;
     sourceContextQuery.prepare("SELECT condensedid FROM sqlsources WHERE contextid = :id AND subsource = :source");
 
     sourceContextQuery.bindValue(":id", id.toString());
     sourceContextQuery.bindValue(":source", name);
 
-    if (!sourceContextQuery.exec()) {
-        return -1;
-    }
+    sourceContextQuery.exec();
 
     if (sourceContextQuery.next()) {
         int rv = sourceContextQuery.value(0).toInt();
         sourceContextQuery.reset();
+        sourceMap.insert(source, rv);
         return rv;
     }
     sourceContextQuery.reset();
@@ -671,6 +762,21 @@ int QPimSqlIO::sourceContext(const QPimSource &source, bool insert)
             return sourceContext(source, false); // recurse, but this time it should exist
     }
     return -1;
+}
+
+QPimSource QPimSqlIO::contextSource(int sqlContext)
+{
+    QPreparedSqlQuery contextSourceQuery("SELECT contextid, subsource FROM sqlsources WHERE condensedid = :c");
+    contextSourceQuery.prepare();
+    contextSourceQuery.bindValue(":c", sqlContext);
+    contextSourceQuery.exec();
+    if (contextSourceQuery.next()) {
+        QPimSource s;
+        s.context = QUuid(contextSourceQuery.value(0).toString());
+        s.identity = contextSourceQuery.value(1).toString();
+        return s;
+    }
+    return QPimSource();
 }
 
 QDateTime QPimSqlIO::lastSyncTime(const QPimSource &source)
@@ -695,11 +801,11 @@ bool QPimSqlIO::setLastSyncTime(const QPimSource &source, const QDateTime &time)
     return q.exec();
 }
 
-bool QPimSqlIO::startSync(const QPimSource &source, const QDateTime &syncTime)
+bool QPimSqlIO::startSyncTransaction(const QPimSource &source, const QDateTime &syncTime)
 {
     QSet<QPimSource> sources;
     sources.insert(source);
-    return startSync(sources, syncTime);
+    return startSyncTransaction(sources, syncTime);
 }
 
 static QString contextString(const QSet<QPimSource> &list)
@@ -719,11 +825,11 @@ static QString contextString(const QSet<QPimSource> &list)
     return contextset;
 }
 
-bool QPimSqlIO::startSync(const QSet<QPimSource> &sources, const QDateTime &syncTime)
+bool QPimSqlIO::startSyncTransaction(const QSet<QPimSource> &sources, const QDateTime &syncTime)
 {
     QString contextset = contextString(sources);
     Q_ASSERT(syncTime.isValid());
-    if (database().transaction()) {
+    if (startTransaction(syncTime)) {
         QString querytext = QLatin1String("UPDATE sqlsources SET last_sync = :ls WHERE condensedid in (");
         querytext.append(contextset);
         querytext.append(QLatin1String(")"));
@@ -731,26 +837,61 @@ bool QPimSqlIO::startSync(const QSet<QPimSource> &sources, const QDateTime &sync
         query.prepare(querytext);
         query.bindValue(":ls", syncTime);
         if (!query.exec()) {
-            database().rollback();
+            abortTransaction();
             return false;
         }
-        mSyncTime = syncTime;
     }
     return true;
 }
 
-bool QPimSqlIO::abortSync()
+bool QPimSqlIO::startTransaction()
 {
+    QDateTime syncTime = QTimeZone::current().toUtc(QDateTime::currentDateTime());
+    return startTransaction(syncTime);
+}
+
+bool QPimSqlIO::startTransaction(const QDateTime &syncTime)
+{
+    if (mTransactionStack++)
+        return true;
+
+    Q_ASSERT(mTransactionStack > 0);
+
+    if (database().transaction()) {
+        mSyncTime = syncTime;
+        return true;
+    }
+    return false;
+}
+
+bool QPimSqlIO::abortTransaction()
+{
+    // not really aborted if there is a surrounding transaction, but for 
+    // purposes of nesting, is equivalent to success.
+    if (--mTransactionStack)
+        return true;
+
+    Q_ASSERT(mTransactionStack >= 0);
+
     mSyncTime = QDateTime();
     return database().rollback();
 }
 
-bool QPimSqlIO::commitSync()
+bool QPimSqlIO::commitTransaction()
 {
+    // not really committed if there is a surrounding transaction, but for 
+    // purposes of nesting, is equivalent to success.
+    if (--mTransactionStack)
+        return true;
+
+    Q_ASSERT(mTransactionStack >= 0);
+
     if (database().commit()) {
         mSyncTime = QDateTime();
+        propagateChanges();
         return true;
     }
+    qWarning() << "Failed to commit SQL transaction" << database().lastError().text();
     return false;
 }
 

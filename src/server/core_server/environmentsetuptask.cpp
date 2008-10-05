@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -27,16 +25,21 @@
 #include <QPixmapCache>
 #ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
+#include <qscreendriverfactory_qws.h>
 #endif
 #include <QRegExp>
 #include <stdlib.h>
 #include "qtopiaserverapplication.h"
 #include <qtopialog.h>
+#include <time.h>
+#include <QTimeZone>
+
 
 extern int qws_display_id;
 
 /*!
   \class EnvironmentSetupTask
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \brief The EnvironmentSetupTask class initializes the basic system environment required by Qtopia.
 
@@ -45,7 +48,7 @@ extern int qws_display_id;
   the system.
 
   The EnvironmentSetupTask class provides the \c {EnvironmentSetup} task.
-  It is part of the Qtopia server and cannot be used by other Qtopia applications.
+  It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 /*! \internal */
@@ -56,10 +59,10 @@ void EnvironmentSetupTask::initEnvironment()
 
     QSettings config("Trolltech","locale");
     config.beginGroup( "Location" );
-    QString tz = config.value( "Timezone", getenv("TZ") ).toString().trimmed();
+    QString tz = config.value( "Timezone", QTimeZone::current().id() ).toString().trimmed();
 
     setenv( "TZ", tz.toLatin1(), 1 );
-
+    tzset();
     config.endGroup();
 
     config.beginGroup( "Language" );
@@ -97,21 +100,36 @@ void EnvironmentSetupTask::initEnvironment()
             }
         }
     }
+    bool addTransformed = false;
     if ( qws_display.isEmpty() ) {
         // fall back to defaultbuttons.conf (doesn't work with QVFb skins but runqtopia figures it out)
         QSettings env(Qtopia::defaultButtonsFile(), QSettings::IniFormat);
         env.beginGroup("Environment");
         qws_display = env.value("QWS_DISPLAY").toString();
+        addTransformed = true;
     }
 
     // final fall back, :0
-    if ( qws_display.isEmpty() )
+    if ( qws_display.isEmpty() ) {
         qws_display = ":0";
+        addTransformed = true;
+    }
 
     // Let the search for defaultbuttons.conf (below) work for QVFb's defaultbuttons.conf
     QRegExp display(":(\\d+)$");
     if ( display.indexIn( qws_display ) != -1 )
         qws_display_id = QVariant(display.cap(1)).toInt();
+
+#ifdef QT_QWS_DYNAMIC_TRANSFORMATION
+    // Now we prepend Transformed:Rot0: if the transformed driver is available (but not already enabled)
+    // This is to prevent the embarassing situation where the rotation app is present but doens't work.
+    // Note that this code doens't fire if QWS_DISPLAY is set in the environment or if -display is used.
+    if ( addTransformed && qws_display.indexOf("Transformed:") == -1 && QScreenDriverFactory::keys().contains("Transformed") ) {
+        if ( qws_display.indexOf(':') != 0 )
+            qws_display.prepend(':');
+        qws_display.prepend("Transformed:Rot0");
+    }
+#endif
 
     qLog(QtopiaServer) << "QWS_DISPLAY" << qws_display;
     setenv( "QWS_DISPLAY", qws_display.toLocal8Bit().constData(), 1 );
@@ -144,73 +162,6 @@ void EnvironmentSetupTask::initEnvironment()
     QString qws_connection_timeout = getenv("QWS_CONNECTION_TIMEOUT");
     if ( qws_connection_timeout.isEmpty() )
         setenv("QWS_CONNECTION_TIMEOUT", "30", 1);
-
-    // Ensure the selected theme is present, pick an available one if it isn't.
-    validateTheme();
-}
-
-static bool themeFileExists(const QString &file)
-{
-    bool themeExists = false;
-    QStringList instPaths = Qtopia::installPaths();
-    foreach (QString path, instPaths) {
-        QString themeDataPath(path + QLatin1String("etc/themes/") + file);
-        if (QFile::exists(themeDataPath)) {
-            themeExists = true;
-            break;
-        }
-    }
-
-    return themeExists;
-}
-
-/*! \internal */
-void EnvironmentSetupTask::validateTheme()
-{
-    QSettings config(QLatin1String("Trolltech"),QLatin1String("qpe"));
-    config.beginGroup( QLatin1String("Appearance") );
-    bool setTheme = false;
-
-    // Start by asking QSettings normally
-    QString newTheme = config.value("Theme", QString()).toString();
-    newTheme = newTheme.replace(QRegExp("\\.desktop"), ".conf");  // backwards compat
-
-    if ( !newTheme.isEmpty() && !themeFileExists(newTheme)) {
-        qWarning() << "Selected theme" << newTheme << "does not exist.";
-        // Get the default theme (could be the same as the theme we got before)
-        QSettings defSettings( Qtopia::qtopiaDir() + "etc/default/Trolltech/qpe.conf", QSettings::IniFormat );
-        defSettings.beginGroup("Appearance");
-        newTheme = defSettings.value("Theme", QString()).toString();
-        setTheme = true;
-    }
-    if ( newTheme.isEmpty() ) {
-        qWarning("No default theme specified in qpe.conf");
-    }
-
-    if ( !newTheme.isEmpty() && !themeFileExists(newTheme) ) {
-        qWarning() << "Default theme" << newTheme << "does not exist.";
-        newTheme = QString();
-    }
-
-    if ( newTheme.isEmpty() ) {
-        // Catastrophic failure. Don't bail just yet though because tere might be a
-        // .conf file we can use on the system.
-        QStringList confFiles = QDir(Qtopia::qtopiaDir() + "etc/themes/").entryList(QStringList() << "*.conf");
-        if ( confFiles.count() == 0 ) {
-            // Qtopia doesn't work without a theme!
-            qFatal("No theme files found!");
-        }
-        // Arbitrary choice here, pick the first entry (if there's more than one).
-        newTheme = confFiles[0];
-        setTheme = true;
-        qWarning() << "Found theme" << newTheme;
-    }
-
-    if ( setTheme ) {
-        // Since QSettings can't be used to pull out a valid theme, we need to set the theme now.
-        // This lets the rest of the code that uses the theme avoid doing all the checks above.
-        config.setValue("Theme", newTheme);
-    }
 }
 
 QTOPIA_STATIC_TASK(EnvironmentSetup, EnvironmentSetupTask::initEnvironment());

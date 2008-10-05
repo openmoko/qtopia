@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,12 +23,15 @@
 #include <QLabel>
 #include <QEvent>
 #include <QCloseEvent>
-#include <QListWidget>
 #include <qtopianamespace.h>
 #include <qsoftmenubar.h>
 #include <qtranslatablesettings.h>
 #include <qexpressionevaluator.h>
 #include <qcontentset.h>
+#include <QMenu>
+#include <QDebug>
+#include <qsmoothlistwidget_p.h>
+#include <Qtopia>
 
 class QtopiaServiceDescriptionPrivate {
 public:
@@ -47,7 +48,8 @@ public:
 
 /*!
   \class QtopiaServiceDescription
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QtopiaServiceDescription class describes a service request in user terms.
 
   This data includes what action to undertake when activated, and a display name
@@ -59,7 +61,7 @@ public:
 */
 
 /*!
-  Constructs an empty QtopiaServiceDescription.
+  Constructs a null QtopiaServiceDescription.
 */
 QtopiaServiceDescription::QtopiaServiceDescription()
     : d(new QtopiaServiceDescriptionPrivate())
@@ -98,6 +100,27 @@ QtopiaServiceDescription& QtopiaServiceDescription::operator=(const QtopiaServic
         d->_goop = other.d->_goop;
     }
     return *this;
+}
+
+/*!
+  Returns true if \a other is equal to this QtopiaServiceDescription.
+  Two service descriptions are considered equal if they have the same
+  icon, label, service request. Optional properties are not checked.
+*/
+bool QtopiaServiceDescription::operator==(const QtopiaServiceDescription& other) const
+{
+	return (d->_request==other.d->_request&&d->_label==other.d->_label
+			&&d->_icon==other.d->_icon);
+}
+
+/*!
+  Returns true if either the label, icon or request for this 
+  QtopiaServiceDescription is null.
+*/
+bool QtopiaServiceDescription::isNull() const
+{
+	return(d->_request.isNull() || d->_label.isNull()
+			|| d->_icon.isNull());
 }
 
 /*!
@@ -219,8 +242,35 @@ void QtopiaServiceDescription::setOptionalProperties(QVariantMap properties)
 }
 
 /*!
+    \internal
+    \fn void QtopiaServiceDescription::serialize(Stream &stream) const
+*/
+template <typename Stream> void QtopiaServiceDescription::serialize(Stream &stream) const
+{
+    stream << d->_request;
+    stream << d->_label;
+    stream << d->_icon;
+    stream << d->_goop;
+}
+
+/*!
+    \internal
+    \fn void QtopiaServiceDescription::deserialize(Stream &stream)
+*/
+template <typename Stream> void QtopiaServiceDescription::deserialize(Stream &stream)
+{
+    stream >> d->_request;
+    stream >> d->_label;
+    stream >> d->_icon;
+    stream >> d->_goop;
+}
+
+Q_IMPLEMENT_USER_METATYPE(QtopiaServiceDescription)
+
+/*!
   \class QtopiaServiceSelector
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QtopiaServiceSelector class implements a list dialog for selecting a service.
 
   \ingroup ipc
@@ -232,13 +282,15 @@ class QListView;
 #define SRV_ROLE        Qt::UserRole
 #define ICON_ROLE       Qt::UserRole + 1
 #define ACTION_ROLE     Qt::UserRole + 2
+#define ARGS_ROLE       Qt::UserRole + 3
 
 /*!
-    Construct a Qtopia service selector dialog owned by \a parent.
+    Construct a Qt Extended service selector dialog owned by \a parent.
 */
 QtopiaServiceSelector::QtopiaServiceSelector(QWidget* parent) : QDialog(parent)
 {
     setModal(true);
+    setWindowModality(Qt::WindowModal);
     setWindowTitle("Select Service");
 
     QVBoxLayout *vbl = new QVBoxLayout(this);
@@ -253,22 +305,27 @@ QtopiaServiceSelector::QtopiaServiceSelector(QWidget* parent) : QDialog(parent)
     label = new QLabel();
     hbl->addWidget(label);
 
-    actionlist = new QListWidget();
+    actionlist = new QSmoothListWidget();
+    //Below are not yet supported for QSmoothList
+    //actionlist->setUniformItemSizes(true);
+    //actionlist->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     vbl->addWidget(actionlist);
-    actionlist->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    QMenu* menu = QSoftMenuBar::menuFor(actionlist);
 
-    QListWidgetItem* item = new QListWidgetItem(tr("No action"), actionlist);
+    (void)QSoftMenuBar::menuFor(actionlist);
+
+    QSmoothListWidgetItem* item = new QSmoothListWidgetItem(tr("No action"), actionlist);
     item->setIcon(QIcon(":icon/reset"));
 
     populateActionsList();
 
-    connect(actionlist, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(selectAction(QListWidgetItem*)));
+    connect(actionlist, SIGNAL(itemActivated(QSmoothListWidgetItem*)), this, SLOT(selectAction(QSmoothListWidgetItem*)));
 }
 
 /*!
     Add all installed applications (and games and settings) to the list of services displayed in this selector.
     By default, only service actions are shown.
+
+    This will not add any application which has the same name and icon as another application or a service already in the list.
 */
 void QtopiaServiceSelector::addApplications()
 {
@@ -279,10 +336,29 @@ void QtopiaServiceSelector::addApplications()
     {
         if ( it.type() != "Separator" && it.property("Builtin") != "1") // No tr
         {
-            QListWidgetItem *item = new QListWidgetItem(it.name(), actionlist);
-            item->setData(SRV_ROLE, "Application:" + it.executableName());
+            //Do not add apparently duplicate items which may confuse the user
+            QList<QSmoothListWidgetItem*> sameItems = actionlist->findItems(
+                    Qtopia::dehyphenate(it.name()),
+                    Qt::MatchFixedString);
+            bool duplicate = false;
+            foreach(QSmoothListWidgetItem *item, sameItems){
+                if(item->data(ICON_ROLE).toString() == it.iconName()){
+                    duplicate = true;
+                    break;
+                }
+            }
+            if(duplicate){
+                continue;
+            }
+
+            //Note that in the list names will not be split over multiple lines
+            QSmoothListWidgetItem *item = new QSmoothListWidgetItem(Qtopia::dehyphenate(it.name()), actionlist);
+            QList<QVariant> args;
+            args << it.executableName();
+            item->setData(SRV_ROLE, "Launcher");
             item->setData(ICON_ROLE, it.iconName());
-            item->setData(ACTION_ROLE, "raise()");
+            item->setData(ACTION_ROLE, "execute(QString)");
+            item->setData(ARGS_ROLE, args);
             item->setIcon(QIcon(":icon/"+it.iconName()));
         }
     }
@@ -318,7 +394,7 @@ void QtopiaServiceSelector::populateActionsList(const QString& srv, QTranslatabl
     QStringList actions = cfg.value("Actions").toString().split( ';');
     QString name;
     QString icon;
-    QListWidgetItem* item;
+    QSmoothListWidgetItem* item;
 
     cfg.endGroup();
 
@@ -335,10 +411,12 @@ void QtopiaServiceSelector::populateActionsList(const QString& srv, QTranslatabl
                 if ( r.isEmpty() || expr.isValid() && expr.evaluate() && expr.result().toBool() ) {
                     icon = cfg.value("Icon").toString();
 
-                    item = new QListWidgetItem(name, actionlist);
+                    item = new QSmoothListWidgetItem(name, actionlist);
+                    QList<QVariant> args;
                     item->setData(SRV_ROLE, QVariant(srv));
                     item->setData(ICON_ROLE, QVariant(icon));
                     item->setData(ACTION_ROLE, QVariant(*ait));
+                    item->setData(ARGS_ROLE, args);
                     item->setIcon(QIcon(":icon/"+icon));
                 }
             }
@@ -356,7 +434,7 @@ void QtopiaServiceSelector::closeEvent(QCloseEvent *e)
 }
 
 /*!
-    Displays this Qtopia service selector dialog, to allow the user to select
+    Displays this Qt Extended service selector dialog, to allow the user to select
     a service to associate with \a targetlabel.  The selected service description
     is returned in \a item.
 
@@ -379,12 +457,13 @@ bool QtopiaServiceSelector::edit(const QString& targetlabel, QtopiaServiceDescri
     int count = actionlist->count();
     for(int i = 0; i < count; i++)
     {
-        QListWidgetItem* actionitem = actionlist->item(i);
+        QSmoothListWidgetItem* actionitem = actionlist->item(i);
 
         if(item.label() == actionitem->text() &&
             item.request().service() == actionitem->data(SRV_ROLE) &&
             item.iconName() == actionitem->data(ICON_ROLE) &&
-            item.request().message() == actionitem->data(ACTION_ROLE))
+            item.request().message() == actionitem->data(ACTION_ROLE) &&
+            item.request().arguments() == actionitem->data(ARGS_ROLE))
         {
             actionlist->setCurrentRow(i);
             selection = i;
@@ -414,7 +493,7 @@ bool QtopiaServiceSelector::edit(const QString& targetlabel, QtopiaServiceDescri
         }
         else if( ch > 0 )
         {
-            QListWidgetItem* actionitem = actionlist->item(ch);
+            QSmoothListWidgetItem* actionitem = actionlist->item(ch);
             if( actionitem )
             {
                 chose = true;
@@ -426,14 +505,16 @@ bool QtopiaServiceSelector::edit(const QString& targetlabel, QtopiaServiceDescri
     return chose;
 }
 
-QtopiaServiceDescription QtopiaServiceSelector::descFor(QListWidgetItem* item) const
+QtopiaServiceDescription QtopiaServiceSelector::descFor(QSmoothListWidgetItem* item) const
 {
     QString service = item->data(SRV_ROLE).toString();
     QString message = item->data(ACTION_ROLE).toString();
     QString name = item->text();
     QString icon = item->data(ICON_ROLE).toString();
+    QList<QVariant> args = item->data(ARGS_ROLE).toList();
 
     QtopiaServiceRequest sr(service, message);
+    sr.setArguments(args);
     return QtopiaServiceDescription(sr, name, icon);
 }
 
@@ -454,10 +535,11 @@ QtopiaServiceDescription QtopiaServiceSelector::descriptionFor(const QtopiaServi
             srv = QtopiaService::app(req.service());
         for (int i = 0; i < count; i++)
         {
-            QListWidgetItem* actionitem = actionlist->item(i);
+            QSmoothListWidgetItem* actionitem = actionlist->item(i);
 
             if( srv == actionitem->data(SRV_ROLE) &&
-                req.message() == actionitem->data(ACTION_ROLE))
+                req.message() == actionitem->data(ACTION_ROLE) &&
+                req.arguments() == actionitem->data(ARGS_ROLE))
             {
                 return descFor(actionitem);
             }
@@ -467,7 +549,7 @@ QtopiaServiceDescription QtopiaServiceSelector::descriptionFor(const QtopiaServi
     return QtopiaServiceDescription();
 }
 
-void QtopiaServiceSelector::selectAction(QListWidgetItem *i)
+void QtopiaServiceSelector::selectAction(QSmoothListWidgetItem *i)
 {
     int a = actionlist->row(i);
     if ( a >= 0 )

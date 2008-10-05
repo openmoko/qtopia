@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qt Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -124,12 +122,13 @@ QSizeF QtopiaItemDelegatePrivate::doTextLayout(int lineWidth) const
 
 /*!
     \class QtopiaItemDelegate
+    \inpublicgroup QtBaseModule
 
     \brief The QtopiaItemDelegate class provides display and editing facilities for
     data items from a model.
 
     \ingroup model-view
-    \mainclass
+
 
     QtopiaItemDelegate can be used to provide custom display features and editor
     widgets for item views based on QAbstractItemView subclasses. Using a
@@ -149,7 +148,7 @@ QSizeF QtopiaItemDelegatePrivate::doTextLayout(int lineWidth) const
 
     This class provides default implementations of the functions for
     painting item data in a view, and editing data obtained from a model
-    with the Qtopia look and feel.
+    with the Qt Extended look and feel.
 
     Default implementations of the paint() and sizeHint() virtual functions,
     defined in QAbstractItemDelegate, are provided to ensure that the
@@ -328,7 +327,11 @@ void QtopiaItemDelegate::paint(QPainter *painter,
             QIcon icon = qvariant_cast<QIcon>(decoration);
             QIcon::Mode mode = d->iconMode(option.state);
             QIcon::State state = d->iconState(option.state);
+#ifdef QTOPIA_HOMEUI_WIDE
+            const QSize size = option.decorationSize;
+#else
             const QSize size = icon.actualSize(option.decorationSize, mode, state);
+#endif
             decorationRect = QRect(QPoint(0, 0), size);
             break; }
         case QVariant::Pixmap: {
@@ -605,7 +608,7 @@ void QtopiaItemDelegate::drawFocus(QPainter *painter,
     o.backgroundColor = option.palette.color(cg, (option.state & QStyle::State_Selected)
                                              ? QPalette::Highlight : QPalette::Window);
     const QWidget *widget = d->widget(option);
-    QStyle *style = widget ? widget->style() : QApplication::style();
+//    QStyle *style = widget ? widget->style() : QApplication::style();
     style->drawPrimitive(QStyle::PE_FrameFocusRect, &o, painter, widget);
     */
 }
@@ -696,6 +699,16 @@ void QtopiaItemDelegate::drawBackground(QPainter *painter,
             painter->fillRect(option.rect, qvariant_cast<QBrush>(value));
             painter->setBrushOrigin(oldBO);
         }
+#ifdef QTOPIA_HOMEUI
+        else {
+            QColor bg = option.palette.color(QPalette::Base);
+            QLinearGradient bgg(option.rect.x(), option.rect.y(),
+                                option.rect.x(), option.rect.bottom());
+            bgg.setColorAt(0.0f, bg);
+            bgg.setColorAt(1.0f, bg.darker(160));
+            painter->fillRect(option.rect, bgg);
+        }
+#endif
     }
 }
 

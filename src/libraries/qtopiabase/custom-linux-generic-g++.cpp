@@ -1,32 +1,44 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
+#define QTOPIA_QVFB_BRIGHTNESS
+
 #include <custom.h>
+#include <qscreen_qws.h>
+#include <qscreenvfb_qws.h>
+#include <QDebug>
 
 QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 {
-    return 255;
+    return 10;
 }
 
-QTOPIABASE_EXPORT void qpe_setBrightness(int)
+QTOPIABASE_EXPORT void qpe_setBrightness(int b)
 {
+#ifdef Q_WS_QWS
+#ifndef QT_NO_QWS_QVFB
+    if ( b != 0 )
+        b = b*20+55; // 55 = dimmest visible level
+    QVFbScreen::setBrightness(b);
+#else
+    QScreen::instance()->blank(b==0);
+#endif
+#endif
 }
 

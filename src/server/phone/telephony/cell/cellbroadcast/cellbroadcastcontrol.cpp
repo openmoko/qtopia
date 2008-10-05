@@ -1,52 +1,63 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "cellbroadcastcontrol.h"
+#include "qabstractmessagebox.h"
+#include "qabstractcallpolicymanager.h"
+#include "messageboard.h"
 #include <QSettings>
 #include <QString>
 #include <QCellBroadcast>
 #include <QTimer>
 
 /*!
-  \class CellBroadcastControl
-  \ingroup QtopiaServer
-  \brief The CellBroadcastControl class monitors incoming cell broadcast messages.
-  
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    \class CellBroadcastControl
+    \inpublicgroup QtCellModule
+    \ingroup QtopiaServer::Telephony
+    \brief The CellBroadcastControl class monitors incoming cell broadcast messages.
+
+    This task opens a message box if a cellbroadcast message of type CellBroadcastControl::Popup
+    is received and notfies the message board task about any background broadcasts.
+    If this is not a desired behavior or such a notification
+    would be handled by a different class the message box can be disabled by setting the
+    \c {CellBroadcast\DisablePopup} key to \c true in the \c {Trolltech/Phone} configuration file. If this setting
+    is missing, the CellBroadcastControl class opens the above mentioned popup box.
+
+    This class is a Qt Extended server task. It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+    \sa MessageBoard
  */
 
 /*!
-  \enum CellBroadcastControl::Type
+    \enum CellBroadcastControl::Type
 
-  Represents the type of a received cell broadcast message.
+    Represents the type of a received cell broadcast message.
 
-  \value Popup A popup message.  The text should be shown to the user immediately.
-  \value Background A background message.  The text should be shown on the homescreen.
- */
+    \value Popup A popup message.  The text should be shown to the user immediately.
+    \value Background A background message.  The text should be shown on the homescreen.
+*/
 
 /*!
   Constructs a new CellBroadcastControl instance with the specified \a parent.
   */
 CellBroadcastControl::CellBroadcastControl(QObject *parent)
-: QObject(parent)
+: QObject(parent), infoMsgId(-1)
 {
     cb = new QCellBroadcast(QString(), this);
     QObject::connect(cb, SIGNAL(broadcast(QCBSMessage)),
@@ -55,23 +66,14 @@ CellBroadcastControl::CellBroadcastControl(QObject *parent)
                     this, SLOT(cellBroadcastResult(QTelephony::Result)));
 
     firstSubscribe = false;
-
-    CellModemManager *cellModem = qtopiaTask<CellModemManager>();
-    connect(cellModem,
+    QAbstractCallPolicyManager *cellModem = QAbstractCallPolicyManager::managerForCallType("Voice");
+    if (cellModem)
+        connect(cellModem,
             SIGNAL(registrationStateChanged(QTelephony::RegistrationState)),
             this,
             SLOT(registrationChanged(QTelephony::RegistrationState)));
-}
-
-/*!
-  Return the single instance of CellBroadcastControl.
-*/
-CellBroadcastControl *CellBroadcastControl::instance()
-{
-    static CellBroadcastControl *inst = 0;
-    if ( !inst )
-        inst = new CellBroadcastControl();
-    return inst;
+    else 
+        qLog(Component) << "CellBroadcastControl: No Cellmodem manager component available";
 }
 
 static bool isLocationSubscribed()
@@ -122,10 +124,9 @@ void CellBroadcastControl::cellBroadcast(const QCBSMessage &m)
 
     if ( channel == 50 ) {
         cellLocation = m.text();
-        CellModemManager *cellModem = 0;
-        cellModem = qtopiaTask<CellModemManager>();
+        QAbstractCallPolicyManager *cellModem = QAbstractCallPolicyManager::managerForCallType("Voice");
         if (cellModem && isLocationSubscribed())
-            cellModem->setCellLocation( cellLocation );
+            cellModem->setCellLocation( m.text() );
     }
 
     if ( !active )
@@ -145,6 +146,31 @@ void CellBroadcastControl::cellBroadcast(const QCBSMessage &m)
 
     QString channelText = QString("%1 %2").arg(label).arg(channel);
     emit broadcast((mode == 0)?Background:Popup, channelText, m.text());
+
+    if ( cfg.value("DisablePopup", false ).toBool() )
+        return;
+
+    if ( 1 == mode ) {
+        showPopup( channelText, m.text() );
+    } else {
+        //send background notification to message board for display
+        MessageBoard *board = qtopiaTask<MessageBoard>();
+        if ( board ) {
+            // clear pervious message if not yet deleted
+            // otherwise it will be shown forever
+            if ( infoMsgId > -1  )
+                hideCBSMessage();
+
+            QString disp = channelText + "\n" + m.text();
+            MessageBoard *board = qtopiaTask<MessageBoard>();
+            if ( board )
+                infoMsgId = board->postMessage(":image/antenna", disp);
+            else 
+                qLog(Component) << "CellBroadcastControl: Cannot post message due to missing MessageBoard";
+            QTimer::singleShot(10000, this, SLOT(hideCBSMessage()));
+     
+        }
+    }
 }
 
 void CellBroadcastControl::registrationChanged(QTelephony::RegistrationState state)
@@ -183,24 +209,55 @@ void CellBroadcastControl::subscribe()
     cb->setChannels( list );
 }
 
+void CellBroadcastControl::showPopup( const QString &channel, const QString &text )
+{
+    static QAbstractMessageBox *cbsMessageBox = 0;
+    
+    // remove the previous message box if there is any
+    // user will see the latest one only
+    if ( cbsMessageBox )
+        delete cbsMessageBox;
+
+    cbsMessageBox = QAbstractMessageBox::messageBox(0, channel,
+                                   text, QAbstractMessageBox::Information,
+                                   QAbstractMessageBox::No);
+    QtopiaApplication::showDialog(cbsMessageBox);
+}
+
+/*!
+  \internal
+  */
+void CellBroadcastControl::hideCBSMessage()
+{
+    if ( infoMsgId == -1 )
+        return;
+
+    MessageBoard *board = qtopiaTask<MessageBoard>();
+    if ( board )
+        board->clearMessage(infoMsgId);
+    infoMsgId = -1;
+}
+
 /*
     When cell broadcast subscription is requested from other applications
     for example, call options app, we need to make sure
-    the cell location is shown on the homescreen only when the user think
-    it is subscribed. Otherwise informe cell modem manager to update the value space with an empty string.
+    the cell location is shown on the homescreen when the user thinks
+    it is subscribed.
 */
 void CellBroadcastControl::cellBroadcastResult(QTelephony::Result result)
 {
     if (result != QTelephony::OK)
         return;
 
-    CellModemManager *cellModem = 0;
-    cellModem = qtopiaTask<CellModemManager>();
+    QAbstractCallPolicyManager *cellModem = QAbstractCallPolicyManager::managerForCallType("Voice");
     if (!cellModem)
         return;
-    if ( isLocationSubscribed() )
+
+    if (isLocationSubscribed())
         cellModem->setCellLocation( cellLocation );
     else
         cellModem->setCellLocation( QString() );
-
 }
+#
+QTOPIA_TASK(CellBroadcastControl, CellBroadcastControl);
+QTOPIA_TASK_PROVIDES(CellBroadcastControl,CellBroadcastControl);

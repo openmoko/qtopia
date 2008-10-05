@@ -19,8 +19,9 @@ DEPENDPATH+=$$INCLUDEPATH
 # Fairly useless define
 DEFINES+=QTOPIA_TARGET=$$LITERAL_ESCAPED_QUOTE$$ORIG_TARGET$$LITERAL_ESCAPED_QUOTE
 
-# Indicate host mode when compiling desktop apps.
+# Indicate host mode when compiling desktop apps and libs.
 desktop:app:DEFINES+=QTOPIA_HOST
+desktop:lib:DEFINES+=QTOPIA_HOST
 
 # This macro used to be defined by Qt in debug mode
 qt:CONFIG(debug,debug|release):DEFINES+=DEBUG
@@ -191,7 +192,22 @@ QMAKE_LIBDIR_QT = $$QTDIR/lib
 
     # Prevent dynamic_cast from being used in embedded builds (we disable rtti so it will
     # always fail or worse, succeed without checking)
-    embedded:DEFINES+=dynamic_cast=dynamic_cast_not_allowed
+    embedded:no_dynamic_cast:DEFINES+=dynamic_cast=dynamic_cast_not_allowed
+
+    # Optimize linker algorithm for memory use. Handy on memory-constrained systems.
+    ld_optimize_memory:QMAKE_LFLAGS+=-Wl,-no-keep-memory
+
+    build_qtopia:embedded {
+        singleexec:enable_singleexec:!no_singleexec {
+            # Force -fPIC off for singleexec
+            QMAKE_CFLAGS-=-fPIC
+            QMAKE_CXXFLAGS-=-fPIC
+        } else:staticlib {
+            # Force -fPIC on for static libs in dynamic builds
+            QMAKE_CFLAGS*=-fPIC
+            QMAKE_CXXFLAGS*=-fPIC
+        }
+    }
 }
 
 # Print out the "make sdk" warning everywhere, not just the top of the tree

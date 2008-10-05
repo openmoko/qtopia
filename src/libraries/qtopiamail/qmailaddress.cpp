@@ -1,26 +1,26 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qmailaddress.h"
+
 #include "qtopialog.h"
+#include "qcollectivenamespace.h"
 
 #include <QContactModel>
 #include <QMailMessage>
@@ -127,6 +127,7 @@ struct AddressSeparator : public CharacterProcessor
     virtual void finished();
 
     virtual void accept(QChar) = 0;
+    virtual QString progress() const = 0;
     virtual void complete(TokenType type, bool) = 0;
 
 private:
@@ -187,8 +188,14 @@ void AddressSeparator::process(QChar character, bool quoted, bool escaped, int c
         } else if ( character == '>' && _inAddress && !quoted && !escaped && commentDepth == 0 ) {
             _inAddress = false;
         } else if ( character == ':' && !_inGroup && !_inAddress && !quoted && !escaped && commentDepth == 0 ) {
-            _inGroup = true;
-            _type = Group;
+            static const QString collectiveTag(QCollective::protocolIdentifier() + ':');
+
+            // Don't parse as a group if we match the IM format
+            // TODO: what if the group name actually matches the tag?
+            if (progress() != collectiveTag) {
+                _inGroup = true;
+                _type = Group;
+            }
         } else if ( character == ';' && _inGroup && !_inAddress && !quoted && !escaped && commentDepth == 0 ) {
             _inGroup = false;
 
@@ -216,6 +223,7 @@ void AddressSeparator::finished()
 struct AddressListGenerator : public AddressSeparator
 {
     virtual void accept(QChar);
+    virtual QString progress() const;
     virtual void complete(TokenType, bool);
 
     QStringList result();
@@ -234,6 +242,11 @@ private:
 void AddressListGenerator::accept(QChar character)
 {
     _partial.append(character);
+}
+
+QString AddressListGenerator::progress() const
+{
+    return _partial;
 }
 
 void AddressListGenerator::complete(TokenType type, bool hardSeparator)
@@ -448,8 +461,10 @@ public:
 
     bool isPhoneNumber() const;
     bool isEmailAddress() const;
+    bool isChatAddress() const;
 
     QString minimalPhoneNumber() const;
+    QString chatIdentifier() const;
 
     QString toString() const;
 
@@ -678,10 +693,74 @@ QContact QMailAddressPrivate::matchContact() const
 
 QContact QMailAddressPrivate::matchContact(QContactModel& fromModel) const
 {
-    if (isPhoneNumber())
-        return fromModel.matchPhoneNumber(_address);
-    else if (isEmailAddress())
-        return fromModel.matchEmailAddress(_address);
+    QContact contact;
+    bool attemptNameMatch(false);
+
+    if (isPhoneNumber()) {
+        // Match against phone numbers
+        contact = fromModel.matchPhoneNumber(_address);
+    } else if (isEmailAddress()) {
+        // Match against email addresses
+        contact = fromModel.matchEmailAddress(_address);
+    } else if (isChatAddress()) {
+        // Match against IM addresses
+        contact = fromModel.matchChatAddress(chatIdentifier());
+    } else {
+        attemptNameMatch = true;
+    }
+
+    if (!contact.uid().isNull())
+        return contact;
+
+    if (attemptNameMatch) {
+        // Assume this address is a person's name - try to find a contact with a similar name
+        
+        // We don't know if the name will have the same ordering of parts, so try to match 
+        // each name component individually, and select the contact with the most matching parts:
+        //   J. Random Hacker - 'J', 'Random', 'Hacker'
+        //   David St. Hubbins - 'David', 'St', 'Hubbins'
+        //   Nigel Incubator-Jones - 'Nigel', 'Incubator', 'Jones'
+        //   Andy van der Meyde - 'Andy', 'van', 'der', 'Meyde'
+
+        QString input(_name);
+        QStringList tokens = input.replace(QRegExp("\\W"), " ").split(" ", QString::SkipEmptyParts);
+
+        typedef QMap<QModelIndex, int> MatchMap;
+
+        MatchMap matches;
+        foreach (const QString &token, tokens) {
+            // Ideally we would also tokenize the contacts' relevant fields, but instead we
+            // will try partial matches on the label field (only for non-trivial tokens)
+            if (token.size() > 2) {
+                foreach (const QModelIndex &index, fromModel.match(QContactModel::Label, QVariant(token), Qt::MatchContains)) {
+                    matches[index] += 1;
+                }
+            }
+        }
+
+        if (!matches.isEmpty()) {
+            // Find the matches with maximum token matches
+            int maxMatchCount = 0;
+
+            QList<MatchMap::const_iterator> maxMatches;
+            MatchMap::const_iterator it = matches.begin(), end = matches.end();
+            for ( ; it != end; ++it) {
+                if (it.value() > maxMatchCount) {
+                    maxMatchCount = it.value();
+                    maxMatches.clear();
+                    maxMatches.append(it);
+                } else if (it.value() == maxMatchCount) {
+                    maxMatches.append(it);
+                }
+            }
+
+            if (maxMatches.count() > 1) {
+                // TODO: choose best option from amongst equal matches
+            }
+
+            return fromModel.contact(maxMatches.first().key());
+        }
+    }
 
     return QContact();
 }
@@ -726,7 +805,12 @@ bool QMailAddressPrivate::isEmailAddress() const
     return pattern.exactMatch(QMailAddress::removeWhitespace(QMailAddress::removeComments(_address)));
 }
 
-/*! \internal */
+bool QMailAddressPrivate::isChatAddress() const
+{
+    QString provider, identifier;
+    return QCollective::decodeUri(_address, provider, identifier);
+}
+
 QString QMailAddressPrivate::minimalPhoneNumber() const
 {
     static const QRegExp nondiallingChars("[^\\d,xpwXPW\\+\\*#]");
@@ -740,6 +824,13 @@ QString QMailAddressPrivate::minimalPhoneNumber() const
     
     // Ensure any permitted alphabetical chars are lower-case
     return minimal.toLower();
+}
+
+QString QMailAddressPrivate::chatIdentifier() const
+{
+    QString provider, identifier;
+    QCollective::decodeUri(_address, provider, identifier);
+    return identifier;
 }
 
 static bool needsQuotes(const QString& src)
@@ -823,7 +914,9 @@ void QMailAddressPrivate::deserialize(Stream &stream)
 
 /*!
     \class QMailAddress
-    \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
     \brief The QMailAddress class provides an interface for manipulating message address strings.
     \ingroup messaginglibrary
 
@@ -850,6 +943,11 @@ QMailAddress::QMailAddress()
 
 /*!
     Constructs a QMailAddress object, extracting the name and address components from \a addressText.
+
+    If \a addressText cannot be separated into name and address components, both name() and address() 
+    will return the entirety of \a addressText.
+
+    \sa name(), address()
 */
 QMailAddress::QMailAddress(const QString& addressText)
 {
@@ -891,7 +989,7 @@ bool QMailAddress::operator== (const QMailAddress& other) const
 }
 
 /*!
-    Returns true if the address component has not been initialized.
+    Returns true if the address object has not been initialized.
 */
 bool QMailAddress::isNull() const
 {
@@ -961,7 +1059,7 @@ QList<QMailAddress> QMailAddress::groupMembers() const
 /*!
     Returns true if the address component has the form of a phone number; otherwise returns false.
 
-    \sa isEmailAddress(), matchContact()
+    \sa isEmailAddress(), isChatAddress(), matchContact()
 */
 bool QMailAddress::isPhoneNumber() const
 {
@@ -971,17 +1069,33 @@ bool QMailAddress::isPhoneNumber() const
 /*!
     Returns true if the address component has the form of an email address; otherwise returns false.
 
-    \sa isPhoneNumber(), matchContact()
+    \sa isPhoneNumber(), isChatAddress(), matchContact()
 */
 bool QMailAddress::isEmailAddress() const
 {
     return d->isEmailAddress();
 }
 
+/*!
+    Returns true if the address component has the form of an instant message address; otherwise returns false.
+
+    \sa isEmailAddress(), isPhoneNumber(), matchContact()
+*/
+bool QMailAddress::isChatAddress() const
+{
+    return d->isChatAddress();
+}
+
 /*! \internal */
 QString QMailAddress::minimalPhoneNumber() const
 {
     return d->minimalPhoneNumber();
+}
+
+/*! \internal */
+QString QMailAddress::chatIdentifier() const
+{
+    return d->chatIdentifier();
 }
 
 /*!

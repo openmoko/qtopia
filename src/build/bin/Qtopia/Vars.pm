@@ -37,17 +37,19 @@ our @EXPORT = qw(
     script_name
 
     $depotpath
+    $SDKROOT
 );
 
 our $VERSION = '0.01';
 
 # imported variables
 our $depotpath;
+our $SDKROOT;
 
 use constant TRACE => 0;
 
 # Platform detection
-our $isWindows = ( $^O eq "MSWin32" || $^O eq "cygwin" );
+our $isWindows = ( $^O eq "MSWin32" );
 our $isMac = ( $^O eq "darwin" );
 our $qtopiaVersionStr;
 our $qtVersionStr;
@@ -62,6 +64,9 @@ if ( !$isWindows ) {
     open IN, "$testfile" or die "Can't read $testfile";
     my $common_perl_bug_test = <IN>;
     close IN;
+    if ( !defined($common_perl_bug_test) ) {
+        die "ERROR: Your /etc/passwd file has no contents!";
+    }
     unless ( $common_perl_bug_test =~ /[^\s]+/ ) {
         warn "WARNING: Your perl has a bug with regular expressions and UTF-8\n";
         # remove the UTF8 bit from the LANG environment variable and relaunch
@@ -87,6 +92,9 @@ if ( !$isWindows ) {
         open IN, $redhat_verfile or die "Can't read $redhat_verfile";
         $_ = <IN>;
         close IN;
+        if ( !defined($_) ) {
+            die "ERROR: Your /etc/redhat-release file has no contents!";
+        }
         if ( /release 9/ ) {
             my $lang = $ENV{LANG};
             if ( $lang =~ /\.UTF-?8/i ) {
@@ -129,6 +137,7 @@ sub check_script
         $script = script_name($script);
         #print "running the perl script ".fixpath("$path/$script")."\n";
         my $ret = system("perl $path/$script ".(scalar(@ARGV)?"\"":"").join("\" \"", @ARGV).(scalar(@ARGV)?"\"":""));
+        $ret = $ret >> 8;
         exit $ret;
     }
     # Windows doesn't set HOME but the build system expects it to be set!
@@ -158,18 +167,22 @@ sub check_perl2exe_hash
 sub configopt
 {
     TRACE and print "Qtopia::Vars::configopt()\n";
-    if ( ! $depotpath ) {
+    my $dir = $depotpath;
+    if ( ! $dir ) {
+        $dir = $SDKROOT;
+    }
+    if ( ! $dir ) {
         #Qtopia::Paths::get_vars();
         croak "You must use Qtopia::Paths and call get_paths() before using Qtopia::Vars";
     }
     if ( ! @configureoptions ) {
-        # Load the .configureoptions file
-        my $file = $depotpath."/.configureoptions";
-        open IN, $file or die "Can't read $file";
-        @configureoptions = split(/\s+/, scalar(<IN>));
-        close IN;
-        if ( !(grep { $_ eq "depot" } @configureoptions) && -f "$depotpath/LICENSE.GPL" ) {
+        if ( -f "$dir/LICENSE.TROLL" ) {
+            push(@configureoptions, "depot");
+        } elsif ( -f "$dir/LICENSE.GPL" ) {
             push(@configureoptions, "free");
+        }
+        if ( -d "$dir/src/qtopiadesktop" ) {
+            push(@configureoptions, "desktop");
         }
     }
     my ( $opt ) = @_;
@@ -197,40 +210,3 @@ sub script_name
 
 # Make this file require()able.
 1;
-__END__
-
-=head1 NAME
-
-Qtopia::Vars - Global variables for Qtopia
-
-=head1 SYNOPSIS
-
-    use Qtopia::Vars;
-    if ( $isWindows ) {
-        print "Windows\n";
-    }
-
-=head1 DESCRIPTION
-
-This is just a global variable holder.
-
-=head2 EXPORT
-
-    $isWindows
-    $isMac
-    $qtopiaVersionStr
-    $qtVersionStr
-    $shadow
-    check_script
-    configopt
-    script_name
-
-=head1 AUTHOR
-
-Trolltech AS
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2006 TROLLTECH ASA. All rights reserved.
-
-=cut

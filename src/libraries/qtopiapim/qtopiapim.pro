@@ -1,18 +1,20 @@
+!qbuild{
 qtopia_project(qtopia lib)
 TARGET=qtopiapim
 CONFIG+=qtopia_visibility
 
 VERSION         = 4.0.0
 
-RESOURCES = qtopiapim.qrc
-
 enable_cell:depends(libraries/qtopiaphone)
 depends(libraries/qtopiacomm)
-depends(3rdparty/libraries/inputmatch)
+depends(libraries/qtopiacollective)
 depends(3rdparty/libraries/sqlite)
 depends(3rdparty/libraries/vobject)
+}
 
-QTOPIAPIM_HEADERS+=\
+RESOURCES = qtopiapim.qrc
+
+HEADERS+=\
     qpimrecord.h\
     qtask.h\
     qappointment.h\
@@ -28,32 +30,24 @@ QTOPIAPIM_HEADERS+=\
     qpimsourcemodel.h\
     qpimsourcedialog.h\
     qpimdelegate.h\
-    qphonenumber.h
+    qphonenumber.h\
+    qfielddefinition.h
 
-QTOPIAPIM_PRIVATE_HEADERS+=\
+PRIVATE_HEADERS+=\
     qannotator_p.h\
     qsqlpimtablemodel_p.h\
-    qtaskio_p.h\
-    qappointmentio_p.h\
     qappointmentsqlio_p.h\
-    qcontactio_p.h\
-    qpimsqlio_p.h\
     qpreparedquery_p.h\
-    qrecordio_p.h\
     qtasksqlio_p.h\
     qcontactsqlio_p.h\
-    qrecordiomerge_p.h\
     qdependentcontexts_p.h\
     qpimdependencylist_p.h
 
-QTOPIAPIM_SOURCES+=\
+SOURCES+=\
     qannotator.cpp\
     qsqlpimtablemodel.cpp\
     qpreparedquery.cpp\
     qpimrecord.cpp\
-    qtaskio.cpp\
-    qcontactio.cpp\
-    qappointmentio.cpp\
     qtask.cpp\
     qappointment.cpp\
     qappointmentsqlio.cpp\
@@ -69,46 +63,29 @@ QTOPIAPIM_SOURCES+=\
     qpimsqlio.cpp\
     qtasksqlio.cpp\
     qcontactsqlio.cpp\
-    qrecordiomerge.cpp\
     qpimsourcemodel.cpp\
     qpimsourcedialog.cpp\
     qphonenumber.cpp\
     qpimdelegate.cpp\
     qdependentcontexts.cpp\
+    qfielddefinition.cpp\
     qpimdependencylist.cpp
 
 
-
-QTOPIAPIM_PRIVATE_HEADERS+=qgooglecontext_p.h
-QTOPIAPIM_SOURCES+=qgooglecontext.cpp
-
+SEMI_PRIVATE_HEADERS+=qgooglecontext_p.h qpimsqlio_p.h
+SOURCES+=qgooglecontext.cpp
 #DEFINES+=GOOGLE_CALENDAR_CONTEXT
 
-enable_cell {
-    QTOPIAPIM_PRIVATE_HEADERS+=qsimcontext_p.h
-    QTOPIAPIM_SOURCES+=qsimcontext.cpp
-}
+CELL.TYPE=CONDITIONAL_SOURCES
+CELL.CONDITION=enable_cell
+CELL.SEMI_PRIVATE_HEADERS=qsimcontext_p.h qsimsync_p.h
+CELL.SOURCES=qsimcontext.cpp qsimsync.cpp
+!qbuild:CONDITIONAL_SOURCES(CELL)
 
-TRANSLATABLES+=\
-    qsimcontext_p.h\
-    qsimcontext.cpp\
-    qgooglecontext_p.h\
-    qgooglecontext.cpp
+pkg.desc=PIM Data access library
+pkg.domain=trusted
 
-PREFIX=QTOPIAPIM
-resolve_include()
-
-sdk_qtopiapim_headers.files=$${QTOPIAPIM_HEADERS}
-sdk_qtopiapim_headers.path=/include/qtopia/pim
-sdk_qtopiapim_headers.hint=sdk headers
-INSTALLS+=sdk_qtopiapim_headers
-
-sdk_qtopiapim_private_headers.files=$${QTOPIAPIM_PRIVATE_HEADERS}
-sdk_qtopiapim_private_headers.path=/include/qtopia/pim/private
-sdk_qtopiapim_private_headers.hint=sdk headers
-INSTALLS+=sdk_qtopiapim_private_headers
-
-pkg_qtopiapim_settings.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/Contacts.conf
+pkg_qtopiapim_settings.files=$$device_overrides(/etc/default/Trolltech/Contacts.conf)
 pkg_qtopiapim_settings.path=/etc/default/Trolltech
 INSTALLS+=pkg_qtopiapim_settings
 
@@ -126,10 +103,18 @@ tpics.hint=pics
 
 INSTALLS+=apics dpics tpics
 
+!qbuild{
+sdk_qtopiapim_headers.files=$${HEADERS}
+sdk_qtopiapim_headers.path=/include/qtopia/pim
+sdk_qtopiapim_headers.hint=sdk headers
+INSTALLS+=sdk_qtopiapim_headers
 
-
-pkg.desc=PIM Data access library
-pkg.domain=trusted
+sdk_qtopiapim_private_headers.files=$${SEMI_PRIVATE_HEADERS}
+sdk_qtopiapim_private_headers.path=/include/qtopia/pim/private
+sdk_qtopiapim_private_headers.hint=sdk headers
+INSTALLS+=sdk_qtopiapim_private_headers
 
 idep(LIBS+=-l$$TARGET)
 qt_inc($$TARGET)
+}
+

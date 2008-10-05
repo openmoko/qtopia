@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -35,12 +33,13 @@
 
 /*!
     \class QDSServices
-    \mainclass
-    \brief The QDSServices class provides a filtered list of available Qtopia Data Sharing (QDS) services.
+    \inpublicgroup QtBaseModule
+
+    \brief The QDSServices class provides a filtered list of available Qt Extended Data Sharing (QDS) services.
 
     QDSServices can used to search for available QDS services. The search can
     be filtered on a combination of request data types, response data types, 
-    attributes, and Qtopia service names.
+    attributes, and Qt Extended service names.
 
     For example if you wanted to find a QDS service which could convert a jpeg
     image into a bitmap image you would do the following:
@@ -57,10 +56,10 @@
     which had a request data type of \c "text/plain", \c "text/html", and so on.
     A null data type is used to identify no request or response data.
 
-    Qtopia service names may also use wildcards, e.g. \c "MyApp*", but attributes
+    Qt Extended service names may also use wildcards, e.g. \c "MyApp*", but attributes
     do not support wildcards.
 
-    \sa QDSServiceInfo, {Qtopia Data Sharing (QDS)}
+    \sa QDSServiceInfo, {Qt Extended Data Sharing (QDS)}
 
     \ingroup ipc
 */
@@ -69,7 +68,7 @@
     Finds all QDS services available on the device which have a request data type of
     \a requestDataType, have a response data type of \a responseDataType (both case
     insensitive), contain all the attributes listed in \a attributes (case insensitive),
-    and use Qtopia services which match \a service (case sensitive).
+    and use Qt Extended services which match \a service (case sensitive).
 */
 QDSServices::QDSServices( const QString& requestDataType,
                           const QString& responseDataType,

@@ -48,8 +48,7 @@ if ( ! @ARGV ) {
     usage();
 }
 
-# Device profiles can override the global help files
-my $qtopiahelp = "$depotpath/help";
+# Device profiles can help files
 my $devicehelp;
 if ( opt("device") ) {
     $devicehelp = opt("device", "config_path")."/help";
@@ -83,7 +82,7 @@ sub processFiles
                 for my $source ( @sources ) {
                     if ( $devicehelp ) {
                         $_ = $source;
-                        s,^\Q$qtopiahelp\E,$devicehelp,;
+                        s,^\Q$helpSource\E,$devicehelp,;
                         if ( -f $_ ) {
                             $source = $_;
                         }
@@ -102,7 +101,7 @@ sub processFiles
 
     if ( !$found ) {
         die "ERROR: installhelp could not locate any help files to install for project:\n".
-            "  $srcdir/".basename($srcdir).".pro\n".
+            "  $srcdir\n".
             "       Requested files were:\n".
             "  ".join(" ", @files)."\n".
             "       Untranslated files should be in:\n".

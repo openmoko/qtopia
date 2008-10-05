@@ -1,27 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "callcontactlist.h"
 
-#include <qtopia/pim/qphonenumber.h>
+#include <qphonenumber.h>
 
 #include <qtimestring.h>
 #include <qsoftmenubar.h>
@@ -31,8 +29,6 @@
 #include <qthumbnail.h>
 #include <qtopiaapplication.h>
 
-#include <QAction>
-#include <QTextDocument>
 #include <QKeyEvent>
 #include <QPainter>
 #include <QDebug>
@@ -41,16 +37,45 @@
 
 #include "savetocontacts.h"
 
+
+/*!
+    \class CallContactItem
+    \inpublicgroup QtTelephonyModule
+    \brief The CallContactItem class provides a wrapper for call entries.
+    \ingroup QtopiaServer::PhoneUI
+
+    It simplifies the interaction between CallContactModel and CallContactListView and connects
+    the actual call data such as the phone number with a contact.
+
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+    \sa CallContactListView, CallContactDelegate, CallContactModel
+*/
+
+/*!
+    Creates a new CallContactItem with the given \a parent.
+    The item is based on the call information provided by \a cli.
+
+    \sa QCallListItem
+*/
 CallContactItem::CallContactItem( QCallListItem cli, QObject *parent)
 : QObject(parent), mFieldType(QContactModel::Invalid), mModel(0), clItem(cli)
 {
 }
 
+/*!
+    Returns the call data associated with this item.
+*/
 QCallListItem CallContactItem::callListItem() const
 {
     return clItem;
 }
 
+/*!
+    Returns the type of the associated contact field.
+
+    \sa QContactModel::Field
+*/
 QContactModel::Field CallContactItem::fieldType() const
 {
     if (mFieldType == QContactModel::Invalid && mModel) {
@@ -60,28 +85,41 @@ QContactModel::Field CallContactItem::fieldType() const
     return mFieldType;
 }
 
+/*!
+    Returns the id of the associated contact.
+*/
 QUniqueId CallContactItem::contactID() const
 {
     return mId;
 }
 
-void CallContactItem::setContact( const QContact& cnt, const QString& number)
+
+/*!
+    The given \a number becomes associated to \a contact.
+*/
+void CallContactItem::setContact( const QContact& contact, const QString& number)
 {
-    mContact = cnt;
-    mId = cnt.uid();
+    mContact = contact;
+    mId = contact.uid();
     mModel = 0;
     mFieldType = contactNumberToFieldType(number.simplified());
 }
 
-void CallContactItem::setContact( const QContactModel *m, const QUniqueId &id)
+/*!
+    The contact item becomes associated with \a id and \a model is used to
+    to lookup the details of \a id.
+*/
+void CallContactItem::setContact( const QContactModel *model, const QUniqueId &id)
 {
-    mModel = m;
+    mModel = model;
     mId = id;
     mFieldType = QContactModel::Invalid;
     mContact = QContact();
 }
 
-//return value undefined if (mFieldType == CallContactItem::Invalid)
+/*!
+    Returns the contact associated to the call entry.
+*/
 QContact CallContactItem::contact() const
 {
     if (mContact.uid() != mId && mModel)
@@ -89,14 +127,11 @@ QContact CallContactItem::contact() const
     return mContact;
 }
 
-/*
-   Most useful is the type of phone number of a contact
-   so show that first.
+/*!
+    Returns the pixmap for this call entry.
 
-   Next most useful is a contacts image, so fall back on that
-
-   Finally, the type pixmap should be shown if nothing
-   else is available
+    The most useful pixmap is the contacts image. If the contact doesn't have a protrait
+    the phone numbers type (dialed/received/missed) pixmap is returned.
 */
 QPixmap CallContactItem::decoration() const
 {
@@ -106,12 +141,22 @@ QPixmap CallContactItem::decoration() const
     return typePixmap(clItem.type());
 }
 
+/*!
+    Returns an icon representing the contact model field of the call entry.
+    Returns a null icon if no icon is available.
+
+    \sa QContactModel::fieldIcon()
+*/
 QPixmap CallContactItem::extraDecoration() const
 {
     QIcon icon = QContactModel::fieldIcon(fieldType());
     return icon.isNull() ? QPixmap() : QPixmap(icon.pixmap(QSize(16,16)));
 }
 
+/*!
+    Returns a suitable display string for the contact or the phone number of this entry if
+    no contact information is avilable.
+*/
 QString CallContactItem::text() const
 {
     if (!mId.isNull())
@@ -119,6 +164,10 @@ QString CallContactItem::text() const
     return clItem.number();
 }
 
+/*!
+    If this call item is associated to a contact this function returns the called number.
+    Otherwise the extra information contains the call details such as "Dialed 2. March 14:30".
+*/
 QString CallContactItem::extraInfoText( ) const
 {
     if (!mId.isNull() && clItem.isNull())
@@ -127,22 +176,22 @@ QString CallContactItem::extraInfoText( ) const
     }
     else if (!clItem.isNull())
     {
-       QString desc;
-       QCallListItem::CallType st = clItem.type();
-       if ( st == QCallListItem::Dialed )
-           desc = tr("Dialed");
-       else if ( st == QCallListItem::Received )
-           desc = tr("Received");
-       else if ( st == QCallListItem::Missed )
-           desc = tr("Missed");
-       desc += " ";
-       QDateTime dt = clItem.start();
-       QDate callDate = dt.date();
-       QTime callTime = dt.time();
-       QString when("%1 %2");
-       when = when.arg(QTimeString::localMD(callDate, QTimeString::Short))
-           .arg(QTimeString::localHM(callTime, QTimeString::Medium));
-       return desc + when;
+        QString desc;
+        QCallListItem::CallType st = clItem.type();
+        if ( st == QCallListItem::Dialed )
+            desc = tr("Dialed");
+        else if ( st == QCallListItem::Received )
+            desc = tr("Received");
+        else if ( st == QCallListItem::Missed )
+            desc = tr("Missed");
+        desc += QChar(' ');
+        QDateTime dt = clItem.start();
+        QDate callDate = dt.date();
+        QTime callTime = dt.time();
+        QString when("%1 %2");
+        when = when.arg(QTimeString::localMD(callDate, QTimeString::Short))
+            .arg(QTimeString::localHM(callTime, QTimeString::Medium));
+        return desc + when;
     }
     else
     {
@@ -151,6 +200,9 @@ QString CallContactItem::extraInfoText( ) const
     }
 }
 
+/*!
+    Returns the phone number associated to this call item.
+*/
 QString CallContactItem::number() const
 {
     if (!mId.isNull() && clItem.isNull())
@@ -161,6 +213,9 @@ QString CallContactItem::number() const
         return QString("");
 }
 
+/*!
+    Returns the pixmap for \a type.
+*/
 QPixmap CallContactItem::typePixmap( QCallListItem::CallType type )
 {
     QString typePixFileName;
@@ -213,6 +268,9 @@ QString CallContactItem::fieldTypeToContactDetail() const
 }
 
 
+/*!
+    Translates the QCallListItem::CallType enum value \a st into the appropriate QCallList::ListType field.
+*/
 QCallList::ListType CallContactItem::stateToType( QCallListItem::CallType st )
 {
     if ( st == QCallListItem::Dialed )
@@ -229,14 +287,55 @@ QCallList::ListType CallContactItem::stateToType( QCallListItem::CallType st )
 
 //===================================================================
 
+/*!
+    \class CallContactModel
+    \inpublicgroup QtTelephonyModule
+    \brief The CallContactModel class provides underlying model for the call contact list view.
+    \ingroup QtopiaServer::PhoneUI
+
+    This model is based on a QAbstractListModel and maintains CallContactItems.
+    Together with CallContactListView, CallContactItem and CallContactDelegate it
+    provides a model-view representation of call contact information.
+
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+*/
+
+/*!
+    \fn QString CallContactModel::filter () const
+
+    Returns the currently applied filter for this model.
+*/
+
+/*!
+    \fn void CallContactModel::filtered(const QString& filter)
+
+    Emitted when the current filter changes. The new filter value is \a filter.
+*/
+
+/*!
+    \fn int CallContactModel::rowCount(const QModelIndex &idx) const
+
+    \reimp
+*/
+/*!
+    Creates a new CallContactModel based on the given \a callList. \a parent
+    is the standard QObject parent parameter.
+*/
 CallContactModel::CallContactModel( QCallList &callList, QObject *parent)
     :QAbstractListModel(parent), mCallList(callList), pk_matcher("text")
 {
     mRawCallList = mCallList.allCalls();
 }
 
+/*!
+    Destroys the model.
+*/
 CallContactModel::~CallContactModel() {}
 
+
+/*!
+    Returns the CallContactItem at position \a index in the model.
+*/
 CallContactItem * CallContactModel::itemAt( const QModelIndex & index ) const
 {
     if (!index.isValid())
@@ -254,6 +353,9 @@ int CallContactModel::findPattern(const QString &content) const
     return idx;
 }
 
+/*!
+    \reimp
+*/
 QVariant CallContactModel::data(const QModelIndex &index, int role) const
 {
     if (index.row() < rowCount())
@@ -285,17 +387,29 @@ QVariant CallContactModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+/*!
+    Reinitializes the call items in the model.
+*/
 void CallContactModel::refresh()
 {
     mRawCallList = mCallList.allCalls();
 }
 
+/*!
+    Resets the model to its original in any attached CallContactListView.
+    All contact items will be removed in the process.
+*/
 void CallContactModel::resetModel()
 {
     while (!callContactItems.isEmpty())
         delete callContactItems.takeFirst();
 }
 
+/*!
+    \internal
+
+    Not currently used.
+*/
 void CallContactModel::setFilter(const QString& filter)
 {
     bool ok = false;
@@ -311,13 +425,34 @@ void CallContactModel::setFilter(const QString& filter)
 
 //==================================================================
 
+/*!
+    \class CallContactDelegate
+    \inpublicgroup QtTelephonyModule
+    \brief The CallContactDelegate class provides the delegate for CallContactListView.
+    \ingroup QtopiaServer::PhoneUI
+
+    Together with CallContactListView, CallContactModel it
+    provides a model-view representation for call contact information.
+
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+*/
+
+/*!
+    Creates a new delegate with the given \a parent.
+*/
 CallContactDelegate::CallContactDelegate( QObject * parent)
     : QContactDelegate(parent)
 {
 }
 
+/*!
+    Destroys the delegate.
+*/
 CallContactDelegate::~CallContactDelegate() {}
 
+/*!
+    \reimp
+*/
 QFont CallContactDelegate::secondaryFont(const QStyleOptionViewItem& o, const QModelIndex& idx) const
 {
     QFont font = QContactDelegate::secondaryFont(o, idx);
@@ -330,11 +465,37 @@ QFont CallContactDelegate::secondaryFont(const QStyleOptionViewItem& o, const QM
 //==============================================================
 
 
-CallContactListView::CallContactListView(QWidget * parent)
-    :QListView(parent), addContactMsg(0)
-{
-    setFrameStyle(QFrame::NoFrame);
+/*!
+    \class CallContactListView
+    \inpublicgroup QtTelephonyModule
+    \brief The CallContactListView class provides a view for call entries.
+    \ingroup QtopiaServer::PhoneUI
 
+    The view is based on a QSmoothList and provides a visual representation of call records.
+    It uses CallContactModel to manage the underlying data and uses CallContactDelegate to
+    render the content.
+
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+*/
+
+/*!
+    \fn void CallContactListView::hangupActivated()
+
+    Emitted upon reception of a hangup request by the user.
+*/
+
+/*!
+    \fn void CallContactListView::requestedDial(const QString& number, const QUniqueId& contactId)
+
+    Emitted when the has requested to dial a \a number associated with \a contactId.
+*/
+
+/*!
+    Creates a new view with the given \a parent.
+*/
+CallContactListView::CallContactListView(QWidget * parent)
+    :QSmoothList(parent)
+{
     mMenu = QSoftMenuBar::menuFor( this );
 
     QIcon addressbookIcon(":image/addressbook/AddressBook");
@@ -351,19 +512,24 @@ CallContactListView::CallContactListView(QWidget * parent)
     mAllCalls->setVisible(false);
 
     m_noResultMessage = tr("No matches.");
-    setAlternatingRowColors(true);
-
-    setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
+/*!
+    Destroys the view.
+*/
 CallContactListView::~CallContactListView() {}
 
+/*!
+    \reimp
+*/
 void CallContactListView::paintEvent( QPaintEvent *pe )
 {
-    QListView::paintEvent(pe);
     if (cclm && !cclm->rowCount())
+        setEmptyText(cclm->filter().isEmpty() ? tr("No Items"): m_noResultMessage);
+    QSmoothList::paintEvent(pe);
+    /*if (cclm && !cclm->rowCount())
     {
-        QWidget *vp = viewport();
+        QWidget *vp = this;
         QPainter p( vp );
         QFont f = p.font();
         f.setBold(true);
@@ -371,9 +537,12 @@ void CallContactListView::paintEvent( QPaintEvent *pe )
         p.setFont(f);
         p.drawText( 0, 0, vp->width(), vp->height(), Qt::AlignCenter,
                 (cclm->filter().isEmpty() ? tr("No Items"): m_noResultMessage) );
-    }
+    }*/
 }
 
+/*!
+    Sets the \a model for the view.
+*/
 void CallContactListView::setModel(QAbstractItemModel* model)
 {
     cclm  = qobject_cast<CallContactModel*>(model);
@@ -381,12 +550,15 @@ void CallContactListView::setModel(QAbstractItemModel* model)
     {
         qWarning("CallContactListView::setModel(): expecting model of type CallContactModel");
     }
-    QListView::setModel(model);
+    QSmoothList::setModel(model);
 }
 
+/*!
+    Adds the currently selected call number to a contact.
+*/
 void CallContactListView::addItemToContact()
 {
-    QModelIndex idx = selectionModel()->currentIndex();
+    QModelIndex idx = currentIndex();
     CallContactItem * cci = cclm->itemAt(idx);
     if (!cci)
         return;
@@ -396,9 +568,13 @@ void CallContactListView::addItemToContact()
         SavePhoneNumberDialog::savePhoneNumber(number);
 }
 
+/*!
+    Shows the contact information for the currently selected entry. If the current
+    entry doesn't have any contact information this function does nothing.
+*/
 void CallContactListView::openContact()
 {
-    QModelIndex idx = selectionModel()->currentIndex();
+    QModelIndex idx = currentIndex();
     CallContactItem* cci = cclm->itemAt(idx);
     if (!cci)
         return;
@@ -412,9 +588,12 @@ void CallContactListView::openContact()
     }
 }
 
+/*!
+    Sends a message to the currently selected entry.
+*/
 void CallContactListView::sendMessageToItem()
 {
-    QModelIndex idx = selectionModel()->currentIndex();
+    QModelIndex idx = currentIndex();
     CallContactItem* cci = cclm->itemAt(idx);
     if (!cci)
         return;
@@ -430,9 +609,13 @@ void CallContactListView::sendMessageToItem()
     }
 }
 
+/*!
+    The view ionly shows call entries which are related to the currently selected entry
+    (e.g. have the same number).
+*/
 void CallContactListView::showRelatedCalls()
 {
-    QModelIndex idx = selectionModel()->currentIndex();
+    QModelIndex idx = currentIndex();
     CallContactItem * cci = cclm->itemAt(idx);
     if ( !cci )
         return;
@@ -440,13 +623,22 @@ void CallContactListView::showRelatedCalls()
         cclm->setFilter( cci->number() );
     else
         cclm->setFilter( cci->contact().label() );
+
+    updateMenu();
 }
 
+/*!
+    Reverts any currently applied filter settings such as those applied by
+    calling showRelatedCalls().
+*/
 void CallContactListView::showAllCalls()
 {
     cclm->setFilter( QString() );
 }
 
+/*!
+    Updates the actions in the context menu based on the current selection.
+*/
 void CallContactListView::updateMenu()
 {
     mSendMessage->setEnabled(false);
@@ -460,7 +652,15 @@ void CallContactListView::updateMenu()
     mAllCalls->setEnabled(false);
     mAllCalls->setVisible(false);
 
-    CallContactItem* cci = cclm->itemAt(selectionModel()->currentIndex());
+    if ( !cclm->filter().isEmpty() ) {
+        mAllCalls->setEnabled(true);
+        mAllCalls->setVisible(true);
+    }
+
+    if (Qtopia::mousePreferred()) // No way to select item without activating
+        return;
+
+    CallContactItem* cci = cclm->itemAt(currentIndex());
     if (!cci)
         return;
 
@@ -489,12 +689,12 @@ void CallContactListView::updateMenu()
     if ( cclm->filter().isEmpty() ) {
         mRelatedCalls->setEnabled(true);
         mRelatedCalls->setVisible(true);
-    } else {
-        mAllCalls->setEnabled(true);
-        mAllCalls->setVisible(true);
     }
 }
 
+/*!
+    Returns the phone number at position \a idx.
+*/
 QString CallContactListView::numberForIndex(const QModelIndex & idx) const
 {
     QString number;
@@ -505,6 +705,9 @@ QString CallContactListView::numberForIndex(const QModelIndex & idx) const
     return number;
 }
 
+/*!
+    Returns the contact at position \a idx.
+*/
 QContact CallContactListView::contactForIndex(const QModelIndex & idx) const
 {
     CallContactItem* cci = cclm->itemAt(idx);
@@ -513,17 +716,22 @@ QContact CallContactListView::contactForIndex(const QModelIndex & idx) const
     return cci->contact();
 }
 
+/*!
+    Reset the internal state of the list.
+*/
 void CallContactListView::reset()
 {
-    QListView::reset();
-    mNumber = QString();
+    QSmoothList::reset();
 }
 
+/*!
+    \reimp
+*/
 void CallContactListView::keyPressEvent( QKeyEvent *e )
 {
     int key = e->key();
     if (key == Qt::Key_Call || key == Qt::Key_Yes) {
-        QModelIndex idx = selectionModel()->currentIndex();
+        QModelIndex idx = currentIndex();
         if( idx.isValid() )
             emit requestedDial( numberForIndex(idx), contactForIndex(idx).uid() );
         else
@@ -540,16 +748,32 @@ void CallContactListView::keyPressEvent( QKeyEvent *e )
             e->accept();
         }
     } else {
-        QListView::keyPressEvent( e );
+        QSmoothList::keyPressEvent( e );
     }
 }
 
+/*!
+    \reimp
+*/
 void CallContactListView::focusInEvent( QFocusEvent *focusEvent)
 {
-    QListView::focusInEvent( focusEvent );
+    QSmoothList::focusInEvent( focusEvent );
     setEditFocus( true );
 }
 
+/*!
+    \reimp
+*/
+void CallContactListView::focusOutEvent( QFocusEvent *focusEvent)
+{
+    QSmoothList::focusOutEvent( focusEvent );
+    if (Qtopia::mousePreferred())
+        clearSelection();
+}
+
+/*!
+    Sets the \a newMessage to be shown while the list is empty.
+*/
 void CallContactListView::setEmptyMessage(const QString& newMessage)
 {
     m_noResultMessage = newMessage;

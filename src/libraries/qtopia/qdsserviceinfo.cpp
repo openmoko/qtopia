@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -235,8 +233,9 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
 
 /*!
     \class QDSServiceInfo
-    \mainclass
-    \brief The QDSServiceInfo class encapsulates the description of a Qtopia Data Sharing (QDS) service
+    \inpublicgroup QtBaseModule
+
+    \brief The QDSServiceInfo class encapsulates the description of a Qt Extended Data Sharing (QDS) service
 
     Each QDS service is described by:
 
@@ -251,12 +250,11 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
         \o An icon (optional)
     \endlist
 
-    Each QDS service must have a unique combination of QDS service name and Qtopia
-    service. The QDS service name must only contain alphanumeric characters.
+    Each QDS service must have a unique combination of QDS service name and Qt Extended service. The QDS service name must only contain alphanumeric characters.
 
     The description for a QDS service is obtained from the service file
-    \c{<Qtopia Runtime Prefix>/etc/qds/<qtopia_service>}. Each QDS service
-    in a Qtopia service should be included in the one service file, and should
+    \c{<Qt Extended Runtime Prefix>/etc/qds/<qtopia_service>}. Each QDS service
+    in a Qt Extended service should be included in the one service file, and should
     follow the form below:
 
     \code
@@ -304,8 +302,8 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
     \endcode
 
     The QDS service should also be included in the actions section of the
-    Qtopia service description, for the QDS services list above, the
-    \c{<Qtopia Runtime Prefix>/services/Contacts.service} file would look
+    Qt Extended service description, for the QDS services list above, the
+    \c{<Qt Extended Runtime Prefix>/services/Contacts.service} file would look
     like:
 
     \code
@@ -318,7 +316,7 @@ bool QDSServiceInfoPrivate::supportsDataType( const QStringList& supported,
     Name[]=Contacts
     \endcode
 
-    \sa QDSAction, QDSActionRequest, QDSServices, {Qtopia Data Sharing (QDS)}
+    \sa QDSAction, QDSActionRequest, QDSServices, {Qt Extended Data Sharing (QDS)}
 
     \ingroup ipc
 */
@@ -343,7 +341,7 @@ QDSServiceInfo::QDSServiceInfo( const QDSServiceInfo& other )
 
 /*!
     Constructs a QDSServiceInfo object for the QDS service \a name
-    and the Qtopia service \a service.
+    and the Qt Extended service \a service.
 */
 QDSServiceInfo::QDSServiceInfo( const QString& name,
                                 const QString& service )

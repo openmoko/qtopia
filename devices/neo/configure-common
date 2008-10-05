@@ -1,0 +1,36 @@
+# This device uses the mobile UI
+-ui-type mobile
+
+# Turn on features.
+-dynamic-rotation
+-ssl
+-dbus
+-libamr
+-pictureflow
+
+# FIXME Enable this once it actually works
+#-add-mediaengines gstreamer
+# Features that are controlled via modules.
+
+-add-mediaengines cruxus
+-add-modules bluetooth
+-add-modules cell
+-add-modules connectivity
+-add-modules devtools
+-add-modules essentials
+-add-modules games
+-add-modules inputmethods
+-add-modules location
+-add-modules media
+-add-modules messaging
+-add-modules pim
+-add-modules pkgmanagement
+-add-modules telephony
+-add-modules ui
+
+# Device config
+-displaysize 480x640
+-font dejavu_sans_condensed:10,12,13,16,28:50
+-font dejavu_sans_condensed:13,14,15,16,20,21,23,32,36:75
+
+

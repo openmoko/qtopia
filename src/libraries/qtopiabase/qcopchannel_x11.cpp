@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2006 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Phone Edition of the Qt Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -35,13 +33,14 @@
 #include "qdebug.h"
 #include "qtimer.h"
 #include "qtopianamespace.h"
-//#define QT_NO_SXE 1
 #ifndef QT_NO_SXE
 #include "qtransportauth_qws.h"
-#include "qtransportauth_qws_p.h"
+#include "qtransportauthdefs_qws.h"
 #include "qvarlengtharray.h"
 #endif
 
+// Define this to enable debugging.  The code below is performance-critical,
+// which is why this isn't turned on permanently or using qLog.
 //#define QCOP_DEBUG 1
 
 typedef QMap<QString, QList<QCopX11Client*> > QCopServerMap;
@@ -97,6 +96,7 @@ public:
 
 /*!
     \class QCopChannel
+    \inpublicgroup QtBaseModule
     \ingroup qws
 
     \brief The QCopChannel class provides communication capabilities
@@ -107,7 +107,7 @@ public:
     and anyone who wants to can listen to it. The QCOP protocol allows
     clients to communicate both within the same address space and
     between different processes, but it is currently only available
-    for \l {Qtopia Core} (on X11 and Windows we are exploring the use
+    for \l {Qt for Embedded Linux} (on X11 and Windows we are exploring the use
     of existing standards such as DCOP and COM).
 
     Typically, QCopChannel is either used to send messages to a
@@ -128,7 +128,7 @@ public:
     emitted with the given message and data when a QCopChannel
     subclass receives a message from its channel.
 
-    \sa QCopServer, {Running Qtopia Core Applications}
+    \sa QCopServer, {Running Qt for Embedded Linux Applications}
 */
 
 /*!
@@ -503,7 +503,7 @@ void QCopChannel::detach(const QString& ch, QCopX11Client *cl)
     specified channel.
 */
 
-void QCopChannel::answer(QCopX11Client */*cl*/, const QString& ch,
+void QCopChannel::answer(QCopX11Client * /*cl*/, const QString& ch,
                           const QString& msg, const QByteArray &data)
 {
     if (qcopServerMap) {
@@ -1086,10 +1086,11 @@ void QCopX11Server::incomingConnection( int socketDescriptor )
 
 /*!
     \class QCopServer
+    \inpublicgroup QtBaseModule
     \ingroup qws
     \brief The QCopServer class provides the server-side implementation of QCopChannel.
 
-    QCopServer is used internally by Qtopia to implement the server-side
+    QCopServer is used internally by Qt Extended to implement the server-side
     counterpart to QCopChannel on X11 configurations.  It is not used for QWS.
 
     \sa QCopChannel

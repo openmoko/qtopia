@@ -1,27 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <themedview.h>
-#include <qtopia/private/themedviewinterface_p.h>
-#include <qtopia/private/qtagmap_p.h>
+#include "themedviewinterface_p.h"
+#include "qtagmap_p.h"
 #include <qtopianamespace.h>
 #include <qpluginmanager.h>
 #include <qexpressionevaluator.h>
@@ -46,9 +44,7 @@
 #include <QUuid>
 #include <QVariant>
 #include <QtopiaService>
-#ifndef QTOPIA_NO_SVG
 #include <QSvgRenderer>
-#endif
 #include <QPixmapCache>
 #include <QPicture>
 
@@ -230,6 +226,9 @@ private:
         } else if (iname == "level") {
             item = new ThemeLevelItem(parent, m_view, atts);
             readElement(item);
+        } else if (iname == "anim") {
+            item = new ThemeAnimationItem(parent, m_view, atts);
+            readElement(item);
         } else if (iname == "status") {
             item = new ThemeStatusItem(parent, m_view, atts);
             readElement(item);
@@ -409,7 +408,8 @@ private:
 
 /*!
   \class ThemeTemplateInstanceItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The ThemeTemplateInstanceItem class represents a template instance in a ThemedView.
 
   You can create new template instance items using ThemeTemplateItem::createInstance().
@@ -456,7 +456,8 @@ struct ThemeTemplateItemPrivate
 
 /*!
   \class ThemeTemplateItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeTemplateItem class represents a theme template in a ThemedView.
 
@@ -533,6 +534,7 @@ ThemedViewPrivate::ThemedViewPrivate(ThemedView *view)
 ThemedViewPrivate::~ThemedViewPrivate()
 {
     delete root;
+    delete factory;
 }
 
 struct ThemeMessageData
@@ -612,7 +614,8 @@ static ThemeItem::State indexToState( int idx )
 
 /*!
   \class ThemeItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeItem class is the base class of all items in a ThemedView.
 
@@ -1488,7 +1491,8 @@ void ThemeItem::addCharacters(const QString &characters)
 
 /*!
   \class ThemeGroupItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeGroupItem class groups its children into a single item in a ThemedView.
 
@@ -1541,7 +1545,8 @@ void ThemeGroupItem::setPressed( bool p )
 
 /*!
   \class ThemePluginItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemePluginItem class manages the interaction between a ThemedItemInterface implementation and a ThemedView.
 
@@ -1660,7 +1665,8 @@ void ThemePluginItem::releasePlugin()
 
 /*!
   \class ThemeExclusiveItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeExclusiveItem class allows only one of its children to be active in a ThemedView.
 
@@ -1735,7 +1741,8 @@ struct ThemeLayoutItemPrivate
 
 /*!
   \class ThemeLayoutItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeLayoutItem class positions and resizes its child items in a ThemedView.
 
@@ -1887,7 +1894,8 @@ struct ThemePageItemPrivate
 };
 /*!
   \class ThemePageItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemePageItem class is the root item in a ThemedView.
 
@@ -2141,7 +2149,8 @@ struct ThemeGraphicItemPrivate
 
 /*!
   \class ThemeGraphicItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeGraphicItem class contains common functionality for graphics based items in a ThemedView.
 
@@ -2425,7 +2434,8 @@ struct ThemeTextItemPrivate {
 
 /*!
   \class ThemeTextItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The ThemeTextItem class represents a text in a ThemedView.
 
   The ThemeTextItem class implements the \l{Themed View Elements#themetextelement}{text element} from the theme XML.
@@ -2826,7 +2836,8 @@ void ThemeTextItem::addCharacters(const QString &ch)
 
 /*!
   \class ThemeRectItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeRectItem class represents a visual rectangle in a ThemedView.
 
@@ -2924,7 +2935,8 @@ void ThemeRectItem::paint(QPainter *p, const QRect &rect)
 
 /*!
   \class ThemeLineItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeLineItem class represents a visual line in a ThemedView.
 
@@ -2989,7 +3001,8 @@ struct ThemePixmapItemPrivate
 
 /*!
   \class ThemePixmapItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemePixmapItem class contains common functionality for image based items in a ThemedView.
 
@@ -3193,7 +3206,7 @@ bool ThemePixmapItem::replaceColor(QImage &image, const QColor &before, const QC
 }
 
 /*
-   We cannot use QtopiaResource translation lookup 
+   We cannot use QtopiaResource translation lookup
    because we use absolute addressing with two subdirs. QtopiaResource only looks up
    one subdir down.
 
@@ -3203,7 +3216,7 @@ QString imageTr( const QString& path, const QString& image, bool i18n )
 {
     if ( !i18n )
         return QString (path+image);
-    
+
     static QStringList langs;
     if ( langs.empty() ) {
         langs = Qtopia::languageList();
@@ -3248,7 +3261,6 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         imgName.remove(0, 5 /*strlen("i18n/") */ );
     }
 
-#ifndef QTOPIA_NO_SVG
     if (filename.endsWith(".svg")) {
         int w = width ? width : geometry().width();
         int h = height ? height : geometry().height();
@@ -3319,7 +3331,6 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         QPixmapCache::insert(key, pm);
         return pm;
     }
-#endif
 
     if (colorRole != QPalette::NColorRoles || alpha != 255) {
         QColor colour = getColor(col, colorRole);
@@ -3440,17 +3451,24 @@ bool ThemePixmapItem::verticalScale() const
 */
 void ThemePixmapItem::scaleImage( const QString &key, int width, int height )
 {
+    // We are not visible anymore.. do not scale the image as we might want to use it again
+    if (width == 0 && height == 0) {
+        return;
+    }
+
     for ( int i = 0; i < 3; i++ ) {
         QTagMap<Image> &map = d->images[i];
         QString filename = map[key].filename;
-#ifndef QTOPIA_NO_SVG
+
+        if (map[key].pixmap.width() == width && map[key].pixmap.height() == height)
+            continue;
+
         if ( filename.endsWith(".svg") ) {
             QColor colour = color( QLatin1String("color") );
             int alpha = attribute( QLatin1String("alpha") );
             map[key].pixmap = loadImage( map[key].filename, QPalette::NColorRoles, colour, alpha, width, height );
-        } else
-#endif
-        {
+
+        } else if (!filename.isEmpty() && !map[key].pixmap.isNull()) {
             map[key].pixmap = scalePixmap( map[key].pixmap, width, height );
         }
     }
@@ -3530,7 +3548,8 @@ struct ThemeAnimationItemPrivate
 
 /*!
   \class ThemeAnimationItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeAnimationItem class represents a pixmap-based animation in a ThemedView.
 
@@ -3900,7 +3919,8 @@ struct ThemeLevelItemPrivate
 
 /*!
   \class ThemeLevelItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeLevelItem class represents a level indicator in a ThemedView.
 
@@ -4040,7 +4060,8 @@ struct ThemeStatusItemPrivate
 
 /*!
   \class ThemeStatusItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeStatusItem class represents a status indicator in a ThemedView.
 
@@ -4264,7 +4285,8 @@ struct ThemeImageItemPrivate
 
 /*!
   \class ThemeImageItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeImageItem class represents an image in a ThemedView.
 
@@ -4464,27 +4486,23 @@ void ThemeImageItem::layout()
     if (d->stretch) {
         qreal ratio = 1.0;
         if ( d->sorient == Qt::Horizontal ) {
-            ratio = (qreal)geometry().height() / pm.height();
-            width = qRound( pm.width() * ratio );
-            height = geometry().height();
+            if (geometry().height() && pm.height()) {
+                ratio = (qreal)geometry().height() / pm.height();
+                width = qRound( pm.width() * ratio );
+                height = geometry().height();
+            }
         }
         else {
-            ratio = (qreal)geometry().width() / pm.width();
-            width = geometry().width();
-            height = qRound( pm.height() * ratio );
+            if (geometry().width() && pm.width()) {
+                ratio = (qreal)geometry().width() / pm.width();
+                width = geometry().width();
+                height = qRound( pm.height() * ratio );
+            }
         }
         d->offs[0] = qRound( ratio * d->offs[0] );
         d->offs[1] = qRound( ratio * d->offs[1] );
     }
     scaleImage( QLatin1String("src"), width, height );
-}
-
-/*!
-  Update the default image.
-*/
-void ThemeImageItem::updateDefaultImage()
-{
-    updateImage(ThemeItem::Default);
 }
 
 /*!
@@ -4622,7 +4640,8 @@ protected:
 
 /*!
   \class ThemeWidgetItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeWidgetItem class represents a widget in a ThemedView.
 
@@ -4837,7 +4856,8 @@ struct ThemeListItemPrivate
 };
 /*!
   \class ThemeListItem
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemeListItem class represents a graphical list in a themed view.
 
@@ -4962,7 +4982,8 @@ struct ThemeListModelEntryPrivate
 
 /*!
     \class ThemeListModelEntry
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
     \brief The ThemeListModelEntry class implements a single theme list entry in a ThemeListModel.
 
@@ -5103,9 +5124,10 @@ struct ThemeListModelPrivate
 
 /*!
     \class ThemeListModel
-    \mainclass
+    \inpublicgroup QtBaseModule
 
-    \brief The ThemeListModel class provides a list model that is used for list functionality in Qtopia theming.
+
+    \brief The ThemeListModel class provides a list model that is used for list functionality in Qt Extended theming.
 
     List functionality in theming is implemented using Qt's model-view architecture and theme templates.
 
@@ -5230,9 +5252,12 @@ ThemeListItem* ThemeListModel::listItem() const
 /*!
   \reimp
 */
-QVariant ThemeListModel::data(const QModelIndex &, int ) const
+QVariant ThemeListModel::data(const QModelIndex &index, int ) const
 {
-    return QVariant();
+    QVariant ret;
+    if (index.isValid() && (index.row() < d->items.count()))
+        ret = QVariant::fromValue( d->items.at(index.row()) );
+    return ret;
 }
 
 
@@ -5383,11 +5408,12 @@ int ThemeListDelegate::height(ThemeListModelEntry* entry, const QModelIndex& ) c
 
 /*!
   \class ThemedView
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The ThemedView widget constructs, manages and displays themed views in Qtopia.
 
-  A Qtopia theme is made up of multiple themed views, each described by an XML document called the themed view XML.
+  A Qt Extended theme is made up of multiple themed views, each described by an XML document called the themed view XML.
   You construct a new ThemedView by passing a themed view XML file to the ThemedView::loadSource() function.
   The ThemedView widget parses the XML, creates the theme item tree and renders it to the widget.
 
@@ -5409,7 +5435,7 @@ int ThemeListDelegate::height(ThemeListModelEntry* entry, const QModelIndex& ) c
   The above example finds the item with name "myTextItem" and a ThemeItem::rtti() value of ThemedView::Text and
   sets its contents to be "Hello, World!".
 
-  2. ThemeLevelItem, ThemeStatusItem, ThemeTextItem and ThemeImageItem can source their data through Qtopia's expression evaluator.
+  2. ThemeLevelItem, ThemeStatusItem, ThemeTextItem and ThemeImageItem can source their data through a QExpressionEvaluator.
      This method allows items to source data from the system without any tight-coupling.  See the item-specific documentation for details.
 
   The ThemedView is also responsible for handling user interactivity with theme items. You can monitor user interactivity
@@ -5774,37 +5800,37 @@ void ThemedView::dumpState(ThemeItem *item, int _indent) const
 QString ThemedView::rttiToString(int rtti) const
 {
     switch(rtti) {
-        case Item: 
+        case Item:
             return "Item";
-        case Page: 
+        case Page:
             return "Page";
-        case Animation: 
+        case Animation:
             return "Animation";
-        case Level: 
+        case Level:
             return "Level";
-        case Status: 
+        case Status:
             return "Status";
-        case Image: 
+        case Image:
             return "Image";
-        case Text: 
+        case Text:
             return "Text";
         case Rect:
             return "Rect";
-        case Line: 
+        case Line:
             return "Line";
-        case Plugin: 
+        case Plugin:
             return "Plugin";
-        case Exclusive: 
+        case Exclusive:
             return "Exclusive";
-        case Layout: 
+        case Layout:
             return "Layout";
-        case Group: 
+        case Group:
             return "Group";
-        case Widget: 
+        case Widget:
             return "Widget";
-        case List: 
+        case List:
             return "List";
-        case Template: 
+        case Template:
             return "Template";
         case TemplateInstance:
             return "TemplateInstance";
@@ -5816,13 +5842,13 @@ QString ThemedView::rttiToString(int rtti) const
 /*!
   \internal
   Paint \a item and all sub-items on the painter \a painter.  \a clip dictates the
-  clip rectangle to use relative to \a item.  That is a clip rect of 
+  clip rectangle to use relative to \a item.  That is a clip rect of
   QRect(0, 0, item->width(), item->height()) does not clip item at all.
  */
 void ThemedView::paintItem(QPainter *painter, ThemeItem *item, const QRect &clip)
 {
-    if (!clip.isEmpty() && 
-       (!item->transient() || item->active()) && 
+    if (!clip.isEmpty() &&
+       (!item->transient() || item->active()) &&
        item->isVisible()) {
         QRect geom = item->geometry();
         QRect myClip = clip.intersected(geom).translated(-geom.topLeft());
@@ -5832,7 +5858,7 @@ void ThemedView::paintItem(QPainter *painter, ThemeItem *item, const QRect &clip
             item->paint(painter, myClip);
 
             QList<ThemeItem*> children = item->children();
-            foreach( ThemeItem *child, children ) { 
+            foreach( ThemeItem *child, children ) {
                 paintItem(painter, child, myClip);
             }
 

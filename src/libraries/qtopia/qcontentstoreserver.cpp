@@ -1,29 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <qtopia/private/qcontentstoreserver_p.h>
-#include <qtopia/private/qcontentstore_p.h>
-#include <qtopia/private/qmimetypedata_p.h>
-#include <qtopia/private/qsqlcontentstore_p.h>
-#include <qtopia/private/qcontentsetengine_p.h>
-#include <qtopiabase/qtopianamespace.h>
+#include "qcontentstoreserver_p.h"
+#include "qcontentstore_p.h"
+#include "qmimetypedata_p.h"
+#include "qsqlcontentstore_p.h"
+#include "qcontentsetengine_p.h"
+#include <qtopianamespace.h>
 #include <QtDebug>
 
 class QContentStoreServerSet : public QObject
@@ -257,6 +255,23 @@ QDocumentServerMessage QContentStoreServer::invokeMethod( const QDocumentServerM
 
         return message.createReply( QVariant::fromValue( QContentStore::instance()->copyContentTo(
                 &content, qvariant_cast< QString >( arguments[ 1 ] ) ) ) );
+    }
+    else if (signature == "renameContent(QContentId,QString)")
+    {
+        Q_ASSERT(arguments.count() == 2);
+
+        QContent content(qvariant_cast<QContentId>(arguments[0]));
+
+        if (QContentStore::instance()->renameContent(&content, qvariant_cast<QString>(arguments[1]))) {
+            return message.createReply(QVariant::fromValue(content));
+        } else {
+            QString errorString = QContentStore::instance()->errorString();
+
+            if (errorString.isEmpty())
+                errorString == "Content rename failed for an unknown reason";
+
+            return message.createError(errorString);
+        }
     }
     else if( signature.startsWith( "openContent(QContent,QIODevice::OpenMode," ) )
     {

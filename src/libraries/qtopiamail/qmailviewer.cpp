@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -48,9 +46,16 @@ public:
 
     // Support the interface of QMailViewerPluginInterface
     virtual QString key() const = 0;
-    virtual int type() const = 0;
+    virtual QMailViewerFactory::PresentationType presentation() const = 0;
+    virtual QList<int> types() const = 0;
 
-    bool isSupported(int t) const { return (t == QMailViewerFactory::AnyContent || t == type()); }
+    bool isSupported(QMailMessage::ContentType t, QMailViewerFactory::PresentationType pres) const 
+    { 
+        if ((pres != QMailViewerFactory::AnyPresentation) && (pres != presentation()))
+            return false;
+
+        return types().contains(t); 
+    }
 
     // Load the plugin if necessary and create a viewer object
     virtual QMailViewerInterface* create(QWidget* parent)
@@ -75,15 +80,31 @@ private:
 };
 
 // Describe the plugins we know about
+
 class GenericViewerPluginDescriptor : public ViewerPluginDescriptor
 {
 public:
     GenericViewerPluginDescriptor(QPluginManager& manager) : ViewerPluginDescriptor(manager) {}
 
     static QString pluginKey() { return "GenericViewer"; }
-
     virtual QString key() const { return pluginKey(); }
-    virtual int type() const { return QMailViewerFactory::StaticContent; }
+
+    virtual QMailViewerFactory::PresentationType presentation() const { return QMailViewerFactory::StandardPresentation; }
+
+    virtual QList<int> types() const { return QList<int>() << QMailMessage::PlainTextContent
+                                                           << QMailMessage::RichTextContent
+                                                           << QMailMessage::ImageContent
+                                                           << QMailMessage::AudioContent
+                                                           << QMailMessage::VideoContent
+                                                           << QMailMessage::MultipartContent
+#ifndef QTOPIA_HOMEUI
+                                                           << QMailMessage::VoicemailContent
+                                                           << QMailMessage::VideomailContent
+#endif
+                                                           << QMailMessage::HtmlContent         // temporary...
+                                                           << QMailMessage::VCardContent        // temporary...
+                                                           << QMailMessage::VCalendarContent    // temporary...
+                                                           << QMailMessage::ICalendarContent; } // temporary...
 };
 
 class SmilViewerPluginDescriptor : public ViewerPluginDescriptor
@@ -92,10 +113,43 @@ public:
     SmilViewerPluginDescriptor(QPluginManager& manager) : ViewerPluginDescriptor(manager) {}
 
     static QString pluginKey() { return "SmilViewer"; }
-
     virtual QString key() const { return pluginKey(); }
-    virtual int type() const { return QMailViewerFactory::SmilContent; }
+
+    virtual QMailViewerFactory::PresentationType presentation() const { return QMailViewerFactory::StandardPresentation; }
+
+    virtual QList<int> types() const { return QList<int>() << QMailMessage::SmilContent; }
 };
+
+class ConversationViewerPluginDescriptor : public ViewerPluginDescriptor
+{
+public:
+    ConversationViewerPluginDescriptor(QPluginManager& manager) : ViewerPluginDescriptor(manager) {}
+
+    static QString pluginKey() { return "ConversationViewer"; }
+    virtual QString key() const { return pluginKey(); }
+
+    virtual QMailViewerFactory::PresentationType presentation() const { return QMailViewerFactory::ConversationPresentation; }
+
+    virtual QList<int> types() const { return QList<int>() << QMailMessage::PlainTextContent; }
+};
+
+#ifdef QTOPIA_HOMEUI
+
+class VoicemailViewerPluginDescriptor : public ViewerPluginDescriptor
+{
+public:
+    VoicemailViewerPluginDescriptor(QPluginManager& manager) : ViewerPluginDescriptor(manager) {}
+
+    static QString pluginKey() { return "VoicemailViewer"; }
+    virtual QString key() const { return pluginKey(); }
+
+    virtual QMailViewerFactory::PresentationType presentation() const { return QMailViewerFactory::StandardPresentation; }
+
+    virtual QList<int> types() const { return QList<int>() << QMailMessage::VoicemailContent 
+                                                           << QMailMessage::VideomailContent; }
+};
+
+#endif
 
 typedef QMap<QString, ViewerPluginDescriptor*> PluginMap;
 
@@ -107,6 +161,10 @@ static PluginMap initMap(QPluginManager& manager)
     map.insert(GenericViewerPluginDescriptor::pluginKey(), new GenericViewerPluginDescriptor(manager));
 #ifndef QTOPIA_NO_MMS
     map.insert(SmilViewerPluginDescriptor::pluginKey(), new SmilViewerPluginDescriptor(manager));
+#endif
+    map.insert(ConversationViewerPluginDescriptor::pluginKey(), new ConversationViewerPluginDescriptor(manager));
+#ifdef QTOPIA_HOMEUI
+    map.insert(VoicemailViewerPluginDescriptor::pluginKey(), new VoicemailViewerPluginDescriptor(manager));
 #endif
 
     return map;
@@ -128,17 +186,18 @@ static ViewerPluginDescriptor* mapping(const QString& key)
     if ((it = pluginMap().find(key)) != pluginMap().end())
         return it.value();
 
-    qWarning() << "Failed attempt to map viewer:" << key;
     return 0;
 }
 
 /*!
     \class QMailViewerInterface
-    \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
     \brief The QMailViewerInterface class defines the interface to objects that can display a mail message.
     \ingroup messaginglibrary
 
-    Qtopia uses the QMailViewerInterface interface for displaying mail messages.  A class may implement the 
+    Qt Extended uses the QMailViewerInterface interface for displaying mail messages.  A class may implement the 
     QMailViewerInterface interface to display a mail message format.
     
     The message to be displayed is provided to the viewer class using the \l {QMailViewerInterface::setMessage()}
@@ -183,10 +242,75 @@ static ViewerPluginDescriptor* mapping(const QString& key)
 */
 
 /*!
+    \fn QMailViewerInterface::replyToSender()
+
+    This signal is emitted by the viewer to initiate a reply action.
+*/
+
+/*!
+    \fn QMailViewerInterface::replyToAll()
+
+    This signal is emitted by the viewer to initiate a reply-to-all action.
+*/
+
+/*!
+    \fn QMailViewerInterface::forwardMessage()
+
+    This signal is emitted by the viewer to initiate a message forwarding action.
+*/
+
+/*!
+    \fn QMailViewerInterface::completeMessage()
+
+    This signal is emitted by the viewer to initiate a message completion action.  
+    This is only meaningful if the message has not yet been completely retrieved.
+
+    \sa QMailMessage::status(), QMailMessageServer::completeRetrieval()
+*/
+
+/*!
+    \fn QMailViewerInterface::deleteMessage()
+
+    This signal is emitted by the viewer to initiate a message deletion action.
+*/
+
+/*!
+    \fn QMailViewerInterface::saveSender()
+
+    This signal is emitted by the viewer to request that the sender's address should be saved as a Contact.
+*/
+
+/*!
+    \fn QMailViewerInterface::contactDetails(const QContact &contact)
+
+    This signal is emitted by the viewer to request a display of \a{contact}'s details.
+*/
+
+/*!
     \fn QMailViewerInterface::anchorClicked(const QUrl& link)
 
     This signal is emitted when the user presses the select key while the display has the 
     anchor \a link selected.
+*/
+
+/*!
+    \fn QMailViewerInterface::messageChanged(const QMailMessageId &id)
+
+    This signal is emitted by the viewer to report that it is now viewing a different message, 
+    identified by \a id.
+*/
+
+/*!
+    \fn QMailViewerInterface::viewMessage(const QMailMessageId &id, QMailViewerFactory::PresentationType type)
+
+    This signal is emitted by the viewer to request a display of the message identified by \a id, 
+    using the presentation style \a type.
+*/
+
+/*!
+    \fn QMailViewerInterface::sendMessage(const QMailMessage &message)
+
+    This signal is emitted by the viewer to send a new message, whose contents are held by \a message.
 */
 
 /*!
@@ -229,6 +353,34 @@ void QMailViewerInterface::addActions( QMenu* menu ) const
     Q_UNUSED(menu)
 }
 
+/*!
+    Allows the viewer object to handle the notification of the arrival of new messages, 
+    identified by \a list.
+
+    Return true to indicate that the event has been handled, or false to let the caller handle
+    the new message event.
+*/
+bool QMailViewerInterface::handleIncomingMessages( const QMailMessageIdList &list ) const
+{
+    // default implementation does nothing
+    Q_UNUSED(list)
+    return false;
+}
+
+/*!
+    Allows the viewer object to handle the notification of the transmission of queued messages, 
+    identified by \a list.
+
+    Return true to indicate that the event has been handled, or false to let the caller handle
+    the new message event.
+*/
+bool QMailViewerInterface::handleOutgoingMessages( const QMailMessageIdList &list ) const
+{
+    // default implementation does nothing
+    Q_UNUSED(list)
+    return false;
+}
+
 /*! 
     Supplies the viewer object with a resource that may be referenced by a mail message.  The resource 
     identified as \a name will be displayed as the object \a value.  
@@ -243,7 +395,9 @@ void QMailViewerInterface::setResource(const QUrl& name, QVariant value)
 
 /*!
     \class QMailViewerFactory
-    \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
     \brief The QMailViewerFactory class creates objects implementing the QMailViewerInterface interface.
     \ingroup messaginglibrary
 
@@ -259,39 +413,38 @@ void QMailViewerInterface::setResource(const QUrl& name, QVariant value)
 */
 
 /*!
-    \enum QMailViewerFactory::ContentType
+    \enum QMailViewerFactory::PresentationType
 
-    This enum defines the types of mail content that viewer objects may be able to display.
+    This enum defines the types of presentation that message viewer components may implement.
 
-    \value StaticContent Mail content that is not animated, such as plain text and HTML.
-    \value SmilContent Content marked up via Synchronized Multimedia Integration Language.
-    \value AnyContent Do not specify the type of content to be viewed.
+    \value AnyPresentation Do not specify the type of presentation to be employed.
+    \value StandardPresentation Present the message in the standard fashion for the relevant content type.
+    \value ConversationPresentation Present the message in the context of a conversation with a contact.
+    \value UserPresentation The first value that can be used for application-specific purposes.
 */
 
 /*!
-    Returns a list of keys identifying classes that can display a message containing \a type content.
-
-    \sa QMailViewerFactory::ContentType
+    Returns a list of keys identifying classes that can display a message containing \a type content,
+    using the presentation type \a pres.
 */
-QStringList QMailViewerFactory::keys( ContentType type )
+QStringList QMailViewerFactory::keys(QMailMessage::ContentType type, PresentationType pres)
 {
     QStringList in;
 
     foreach (PluginMap::mapped_type plugin, pluginMap())
-        if (plugin->isSupported(type))
+        if (plugin->isSupported(type, pres))
             in << plugin->key();
 
     return in;
 }
 
 /*!
-    Returns the key identifying the first class found that can display message containing \a type content.
-
-    \sa QMailViewerFactory::ContentType
+    Returns the key identifying the first class found that can display message containing \a type content,
+    using the presentation type \a pres.
 */
-QString QMailViewerFactory::defaultKey( ContentType type )
+QString QMailViewerFactory::defaultKey(QMailMessage::ContentType type, PresentationType pres)
 {
-    QStringList list(QMailViewerFactory::keys(type));
+    QStringList list(QMailViewerFactory::keys(type, pres));
     return (list.isEmpty() ? QString() : list.first());
 }
 
@@ -299,7 +452,7 @@ QString QMailViewerFactory::defaultKey( ContentType type )
     Creates a viewer object of the class identified by \a key, setting the returned object to 
     have the parent widget \a parent.
 */
-QMailViewerInterface *QMailViewerFactory::create( const QString &key, QWidget *parent )
+QMailViewerInterface *QMailViewerFactory::create(const QString &key, QWidget *parent)
 {
     return mapping(key)->create(parent);
 }

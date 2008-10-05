@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "qfscontentengine_p.h"
@@ -23,11 +21,12 @@
 #include <qtopialog.h>
 #include <qtopianamespace.h>
 #include <QFileSystem>
-#include <qtopia/private/qcontentstore_p.h>
+#include "qcontentstore_p.h"
 
 /*!
     \class QFSContentEngine
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief QFSContentEngine is the default content for non DRM protected files.
 
     \internal
@@ -63,7 +62,7 @@ QContentEngine *QFSContentEngine::copyTo( const QString &newPath )
 {
     if( fileName().isEmpty() )
     {
-        setError( "Empty destination path" );
+        setError( "Empty source path" );
 
         return 0;
     }
@@ -93,7 +92,7 @@ bool QFSContentEngine::moveTo( const QString &newPath )
 {
     if( fileName().isEmpty() )
     {
-        setError( "Empty destination path" );
+        setError( "Empty source path" );
 
         return false;
     }
@@ -117,6 +116,36 @@ bool QFSContentEngine::moveTo( const QString &newPath )
     setError( source.errorString() );
 
     return false;
+}
+
+/*!
+    \reimp
+*/
+bool QFSContentEngine::rename(const QString &name)
+{
+    if (fileName().isEmpty()) {
+        setError("Empty source path");
+
+        return false;
+    }
+
+    QString extension = determineExtension(name, mimeType());
+    QString baseName = determineBaseName(name, extension);
+
+    QString newPath = newFilePath(baseName, extension, QFileInfo(fileName()).absoluteDir());
+
+    QFile file(fileName());
+
+    if (file.rename(newPath)) {
+        setFileName(newPath);
+        setName(baseName);
+
+        return true;
+    } else {
+        setError(file.errorString());
+
+        return false;
+    }
 }
 
 /*!
@@ -172,18 +201,12 @@ QIODevice *QFSContentEngine::open( QIODevice::OpenMode mode )
                     ? QFileSystem::fromFileName( media )
                     : QFileSystem::documentsFileSystem();
 
-            setFileName( newFileName( name(), mimeType().id(), fs.documentsPath() ) );
+            QDir dir = determineDirectory(mimeType(), fs.documentsPath());
+            QString extension = determineExtension(name(), mimeType());
+            QString baseName = determineBaseName(name(), extension);
 
-            QString extension = determineExtension( name(), mimeType() );
-
-            if( !extension.isEmpty() && name().endsWith( extension, Qt::CaseInsensitive ) )
-            {
-                QString baseName = name();
-
-                baseName.chop( extension.length() );
-
-                setName( baseName );
-            }
+            setName(baseName);
+            setFileName(newFilePath(baseName, extension, dir));
         }
         else
             return 0;
@@ -238,41 +261,58 @@ bool QFSContentEngine::queryValidity()
 }
 
 /*!
-    Constructs a new file name for the content with the user visible name \a name, and mime type \a type in the
-    the directory \a location.
+    Constructs a new file name fo the content with a user visible \a name and mime \a type in the
+    given \a directory.
 */
-QString QFSContentEngine::newFileName( const QString &name, const QString &type, const QString &location )
+QString QFSContentEngine::newFilePath(const QString &name, const QString &extension, const QDir &directory)
 {
-    if( name.isEmpty() || type.isEmpty() || location.isEmpty() )
-        return QString();
-
-    QString extension = determineExtension( name, QMimeType::fromId( type ) );
-
-    QString baseName = name;
-
-    if( !extension.isEmpty() && baseName.endsWith( extension, Qt::CaseInsensitive ) )
-        baseName.chop( extension.length() );
-
-    QDir dir( location +  QLatin1Char( '/' ) + type );
-
-    if( !dir.exists() )
-        QDir::root().mkpath( dir.absolutePath() );
-
     QString safeName;
 
-    foreach( QChar c, baseName )
-        safeName += (c.isLetterOrNumber() || c == QLatin1Char( '.' )) ? c : QLatin1Char( '_' );
+    foreach (QChar c, name)
+        safeName += (c.isLetterOrNumber() || c == QLatin1Char('.')) ? c : QLatin1Char('_');
 
     QString possibleName = safeName + extension;
 
     int number = 0;
 
-    while( dir.exists( possibleName ) )
-        possibleName = safeName + QLatin1Char( '_' ) + QString::number( number++ ) + extension;
+    while (directory.exists(possibleName))
+        possibleName = safeName + QLatin1Char('_') + QString::number(number++) + extension;
 
-    return dir.filePath( possibleName );
+    return directory.filePath(possibleName);
 }
 
+/*!
+    Determines the approriate directory within a \a location path for saving content of a given \a {mimeType}.
+*/
+QDir QFSContentEngine::determineDirectory(const QMimeType &mimeType, const QString &location)
+{
+    QDir dir(location + QLatin1Char('/') + mimeType.id());
+
+    if (!dir.exists())
+        QDir::root().mkpath(dir.absolutePath());
+
+    return dir;
+}
+
+/*!
+    Determines the base name of a file based on its \a name and the \a extension for its type.
+*/
+QString QFSContentEngine::determineBaseName(const QString &name, const QString &extension)
+{
+    QString baseName = name;
+
+    if (!extension.isEmpty() && name.endsWith(extension, Qt::CaseInsensitive))
+        baseName.chop(extension.length());
+
+    return baseName;
+}
+
+/*!
+    Determines the appropriate extension for content with the given \a name and \a type.
+
+    If name ends in one of the known extensions for the type that extension will be returned,
+    otherwise the default extension for the type will be returned.
+*/
 QString QFSContentEngine::determineExtension( const QString &name, const QMimeType &type )
 {
     foreach( QString extension, type.extensions() )

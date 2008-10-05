@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,201 +21,122 @@
 
 #include <qtopiaipcenvelope.h>
 #include <qtopialog.h>
-
+#include <QDesktopWidget>
 #include <QSettings>
 #include <QStyle>
 #include <QPixmapCache>
 #include <QDebug>
 #include <QApplication>
 #include <QTimer>
-#include "qsoftmenubarprovider.h"
-#include "qtopiainputevents.h"
+#include <QVBoxLayout>
 
 /*!
-  \class ContextLabel
-  \ingroup QtopiaServer::PhoneUI
-  \brief The ContextLabel class provides a themeable, dockable soft key bar for phones.
+    \class BaseContextLabel::BaseButton
+    \inpublicgroup QtUiModule
+    \ingroup QtopiaServer::PhoneUI
+    \brief The BaseButton class provides a storage for the buttons used by the BaseContextLabel class.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
- */
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+*/
 
 /*!
-  Create a new ContextLabel widget, with the appropriate \a parent and \a flags.
-  */
-ContextLabel::ContextLabel( QWidget *parent, Qt::WFlags flags )
-    : PhoneThemedView(parent, flags), buttons(0), blockUpdates(false),
-    pressedBtn(-1), loadedTheme(false), themeInit(false), menuProvider(0)
+    \fn BaseContextLabel::BaseButton::BaseButton(int key)
 
+    Creates a new BaseButton instance with the given \a key.
+*/
+
+/*!
+    \fn bool BaseContextLabel::BaseButton::changed()
+
+    Returns true if the buttons description or pixmap has recently changed. This can be
+    used to detect recent changes.
+*/
+
+/*!
+    \fn void BaseContextLabel::BaseButton::setChanged(bool c)
+
+    Sets the changed flag to \a c. BaseContextLabel sets this flag when it detects a change of
+    the description or pixmap for this button.
+*/
+
+/*!
+    \fn int BaseContextLabel::BaseButton::key()
+
+    Returns the key linked to this button.
+*/
+
+/*!
+    \class BaseContextLabel
+    \inpublicgroup QtUiModule
+    \ingroup QtopiaServer::PhoneUI
+    \brief The BaseContextLabel class provides a dockable soft key bar for phones.
+
+    This class provides an abstract dockable soft key bar for phones.
+    It should be used as a base for any soft key bar implementation. The only missing part
+    for a complete context label is the user frontend. The context label should be completed
+    by subclassing this class.
+
+    The ThemedContextLabel class is an example subclass and adds the UI via theming capabilities.
+
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+    \sa ThemedContextLabel, QAbstractContextLabel
+*/
+
+/*!
+    Create a new BaseContextLabel widget, with the appropriate \a parent and \a flags.
+*/
+
+BaseContextLabel::BaseContextLabel( QWidget *parent, Qt::WFlags flags )
+    : QAbstractContextLabel(parent, flags),
+        menuProvider(0)
 {
-    if(!parent)
-        setWindowTitle("_decoration_");
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Tool |
+                   Qt::WindowStaysOnTopHint);
 
     menuProvider = new QSoftMenuBarProvider(this);
-    QObject::connect(menuProvider, SIGNAL(keyChanged(QSoftMenuBarProvider::MenuButton)), this, SLOT(keyChanged(QSoftMenuBarProvider::MenuButton)));
-    buttonCount = menuProvider->keyCount();
-    qLog(UI) << "ContextLabel: generating" << buttonCount <<  "buttons";
+    QObject::connect(menuProvider,SIGNAL(keyChanged(QSoftMenuBarProvider::MenuButton)),
+                     this, SLOT(keyChanged(QSoftMenuBarProvider::MenuButton)));
+    qLog(UI) << "BaseContextLabel: generating" << menuProvider->keyCount() <<  "buttons";
     if(menuProvider->keyCount()) {
-        buttons = new Button [buttonCount];
         for(int ii = 0; ii < menuProvider->keyCount(); ++ii) {
-            buttons[ii].key = menuProvider->key(ii).key();
-            qLog(UI) << "Add contextbutton:" << buttons[ii].key;
-            buttons[ii].imgItem = 0;
-            buttons[ii].txtItem = 0;
-            buttons[ii].changed = false;
+            BaseButton *btn = new BaseButton(menuProvider->key(ii).key());
+            qLog(UI) << "Add contextbutton:" << btn->key();
+            btn->setChanged(false);
+            baseBtns.append( btn );
         }
     }
-
-    connect(this, SIGNAL(itemPressed(ThemeItem*)),
-            this, SLOT(itemPressed(ThemeItem*)));
-    connect(this, SIGNAL(itemReleased(ThemeItem*)),
-            this, SLOT(itemReleased(ThemeItem*)));
-
     QtopiaInputEvents::addKeyboardFilter(this);
 }
 
 /*!
-  Destroys the widget.
- */
-ContextLabel::~ContextLabel()
+    Destroys the widget.
+*/
+BaseContextLabel::~BaseContextLabel()
 {
-    delete [] buttons;
+    while ( baseBtns.count() > 0 )
+        delete baseBtns.takeLast();
 }
 
 /*!
-  Returns the size of the ContextLabel widget.
-  */
-QSize ContextLabel::reservedSize() const
+    Returns the list of Buttons managed by the context label. This may be of
+    use when accessing the button information from subclasses.
+*/
+QList<BaseContextLabel::BaseButton*> BaseContextLabel::baseButtons() const
 {
-    int rh = -1;
-    ThemeItem *reserved = ((ThemedView *)this)->findItem("reserved", Item);
-    if (reserved)
-        rh = reserved->rect().height();
+    return baseBtns;
+}
 
-    return QSize(sizeHint().width(), rh);
+/*!
+    Returns the QSoftMenuProvider controlled by this context label.
+*/
+QSoftMenuBarProvider *BaseContextLabel::softMenuProvider() const
+{
+    return menuProvider;
 }
 
 /*! \internal */
-void ContextLabel::themeLoaded(const QString &)
-{
-    loadedTheme = true;
-    themeInit = false;
-    QTimer::singleShot(0, this, SLOT(initializeButtons()));
-}
-
-void ContextLabel::initializeButtons()
-{
-    if (loadedTheme && !themeInit) {
-        int availBtns = 0;
-        int maxbuttons = buttonCount >= 3 ? 3 : buttonCount;
-        ThemeImageItem *img[3] = { NULL, NULL, NULL };
-        ThemeTextItem *txt[3] = { NULL, NULL, NULL };
-
-        if (buttonCount) {
-            for (int i = 0; i < maxbuttons; i++) {
-                buttons[i].imgItem = 0;
-                buttons[i].txtItem = 0;
-                buttons[i].changed = true;
-                ThemeImageItem *ii = (ThemeImageItem *)findItem("button"+QString::number(i),
-                        Image);
-                ThemeTextItem *ti = (ThemeTextItem *)findItem("button"+QString::number(i),
-                        Text);
-
-                if (ii || ti) {
-                    img[availBtns] = ii;
-                    txt[availBtns] = ti;
-                    availBtns++;
-                }
-            }
-        }
-
-        if (buttonCount) {
-            buttons[0].imgItem = img[0];
-            buttons[0].txtItem = txt[0];
-        }
-
-        if (availBtns == buttonCount) {
-            for (int i = 1; i < availBtns; i++) {
-                buttons[i].imgItem = img[i];
-                buttons[i].txtItem = txt[i];
-            }
-        } else if (availBtns < buttonCount) {
-            if (availBtns == 2) {
-                buttons[2].imgItem = img[1];
-                buttons[2].txtItem = txt[1];
-            }
-        } else {
-            if (buttonCount == 2) {
-                buttons[1].imgItem = img[2];
-                buttons[1].txtItem = txt[2];
-            }
-        }
-        themeInit = true;
-
-        updateLabels();
-    }
-}
-
-int ContextLabel::buttonForItem(ThemeItem *item) const
-{
-    int pressed = -1;
-    for( int i = 0 ; i < buttonCount ; ++i )
-    {
-        if( buttons[i].imgItem == item )
-        {
-            pressed = i;
-            break;
-        }
-        if( buttons[i].txtItem == item )
-        {
-            pressed = i;
-            break;
-        }
-    }
-
-    return pressed;
-}
-
-/*! \internal */
-void ContextLabel::itemPressed(ThemeItem *item)
-{
-    initializeButtons();
-    pressedBtn = buttonForItem(item);
-    if (pressedBtn >= 0) {
-        int keycode = buttons[pressedBtn].key;
-        //we have to swap the keycode because the Keyfilter in ServerApplication
-        //swaps these two keys by default
-        if ( QApplication::layoutDirection() == Qt::RightToLeft ) {
-            if ( keycode == Qt::Key_Context1 )
-                keycode = Qt::Key_Back;
-            else if ( keycode == Qt::Key_Back )
-                keycode = Qt::Key_Context1;
-        }
-        QtopiaInputEvents::processKeyEvent(0xffff, keycode, 0, true, false);
-    }
-}
-
-/*! \internal */
-void ContextLabel::itemReleased( ThemeItem *item )
-{
-    Q_UNUSED(item);
-    initializeButtons();
-    if (pressedBtn >= 0) {
-        int keycode = buttons[pressedBtn].key;
-        //we have to swap the keycode because the Keyfilter in ServerApplication
-        //swaps these two keys by default
-        if ( QApplication::layoutDirection() == Qt::RightToLeft ) {
-            if ( keycode == Qt::Key_Context1 )
-                keycode = Qt::Key_Back;
-            else if ( keycode == Qt::Key_Back )
-                keycode = Qt::Key_Context1;
-        }
-        QtopiaInputEvents::processKeyEvent(0xffff, keycode, 0, false, false);
-        pressedBtn = -1;
-    }
-}
-
-/*! \internal */
-bool ContextLabel::filter(int unicode, int keycode, int modifiers, bool press,
+bool BaseContextLabel::filter(int unicode, int keycode, int modifiers, bool press,
                           bool autoRepeat)
 {
     if(isHidden())
@@ -240,27 +159,59 @@ bool ContextLabel::filter(int unicode, int keycode, int modifiers, bool press,
 }
 
 /*! \internal */
-void ContextLabel::keyChanged(const QSoftMenuBarProvider::MenuButton &button)
+void BaseContextLabel::keyChanged(const QSoftMenuBarProvider::MenuButton &button)
 {
-    Q_ASSERT(button.index() < buttonCount);
-    initializeButtons();
-    buttons[button.index()].changed = true;
-    updateLabels();
+    Q_ASSERT(button.index() < menuProvider->keyCount());
+    baseButtons().at(button.index())->setChanged(true);
+    emit buttonsChanged();
 }
 
-/*! \internal */
-void ContextLabel::updateLabels()
+/*!
+    Specifies the behaviour of the context label when \a pressedButton is pressed.
+*/
+void BaseContextLabel::buttonPressed(int pressedButton)
 {
-    initializeButtons();
-    for (int idx = 0; idx < buttonCount; idx++) {
-        if (buttons[idx].changed) {
-            if (buttons[idx].txtItem)
-                buttons[idx].txtItem->setText(menuProvider->key(idx).text());
-            if (buttons[idx].imgItem)
-                buttons[idx].imgItem->setImage(menuProvider->key(idx).pixmap());
-
-            buttons[idx].changed = false;
+    if ( pressedButton >= 0 ) {
+        int keycode = baseButtons().at(pressedButton)->key();
+        if ( QApplication::layoutDirection() == Qt::RightToLeft ) {
+             if ( keycode == Qt::Key_Context1 )
+                keycode = Qt::Key_Back;
+             else if ( keycode == Qt::Key_Back )
+                keycode = Qt::Key_Context1;
         }
+        QtopiaInputEvents::processKeyEvent(0xffff, keycode, 0, true, false);
     }
 }
 
+/*!
+    Specifies the behaviour of the context label when \a releasedButton is released.
+*/
+void BaseContextLabel::buttonReleased(int releasedButton)
+{
+    if ( releasedButton >= 0 ) {
+        int keycode = baseButtons().at(releasedButton)->key();
+        if ( QApplication::layoutDirection() == Qt::RightToLeft ) {
+             if ( keycode == Qt::Key_Context1 )
+                keycode = Qt::Key_Back;
+             else if ( keycode == Qt::Key_Back )
+                keycode = Qt::Key_Context1;
+        }
+        QtopiaInputEvents::processKeyEvent(0xffff, keycode, 0, false, false);
+    }
+}
+
+/*!
+    \fn QSize BaseContextLabel::reservedSize() const
+
+    Returns the size reserved for the contextlabel. This size depends on the
+    implementation of the class and should be rewritten according to the need.
+    The ThemedContextLabel provides an implementation of this function.
+*/
+
+/*! \fn void BaseContextLabel::buttonsChanged ()
+
+    Emitted when the key mapping of the menu bar has been changed by QSoftMenuBarProvider.
+    The usual action would be to update the pixmap/text displayed by the UI.
+    \l BaseButton::changed() returns \c true for the button that has been changed. Once the
+    update is performed \l BaseButton::setChanged() should be used to reset the change flag.
+*/

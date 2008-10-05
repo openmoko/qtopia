@@ -1,5 +1,10 @@
+qbuild {
+SOURCEPATH+=bluetooth
+QT+=dbus
+} else {
 PREFIX=BLUETOOTH
 VPATH+=bluetooth
+}
 
 BLUETOOTH_HEADERS+=\
     qbluetoothaddress.h\
@@ -26,7 +31,8 @@ BLUETOOTH_HEADERS+=\
     qbluetoothl2capsocket.h \
     qbluetoothl2capserver.h \
     qbluetoothl2capdatagramsocket.h \
-    qbluetoothglobal.h
+    qbluetoothglobal.h \
+    qbluetoothauthorizationagent.h
 
 BLUETOOTH_SOURCES+=\
     qbluetoothaddress.cpp\
@@ -56,31 +62,44 @@ BLUETOOTH_SOURCES+=\
     qbluetoothl2capsocket.cpp \
     qbluetoothl2capserver.cpp \
     qbluetoothl2capdatagramsocket.cpp \
+    qbluetoothauthorizationagent.cpp
 
 BLUETOOTH_PRIVATE_HEADERS+=\
-    qbluetoothnamespace_p.h\
     qbluetoothremotedevicedialog_p.h \
-    qbluetoothremotedeviceselector_p.h \
-    qsdpxmlparser_p.h \
     qsdpxmlgenerator_p.h \
     qbluetoothabstractsocket_p.h \
     qbluetoothabstractserver_p.h
 
-unix {
-    BLUETOOTH_SOURCES += qbluetoothsocketengine_unix.cpp
-}
+BLUETOOTH_SEMI_PRIVATE_HEADERS+=\
+    qbluetoothnamespace_p.h\
+    qsdpxmlparser_p.h \
+    qbluetoothremotedeviceselector_p.h \
 
+BLUETOOTH_UNIX.TYPE=CONDITIONAL_SOURCES
+BLUETOOTH_UNIX.CONDITION=unix
+BLUETOOTH_UNIX.SOURCES=qbluetoothsocketengine_unix.cpp
+!qbuild:BLUETOOTH_UNIX.PREFIX=BLUETOOTH
+!qbuild:CONDITIONAL_SOURCES(BLUETOOTH_UNIX)
+
+qbuild {
+HEADERS+=$$BLUETOOTH_HEADERS
+SOURCES+=$$BLUETOOTH_SOURCES
+PRIVATE_HEADERS+=$$BLUETOOTH_PRIVATE_HEADERS
+SEMI_PRIVATE_HEADERS+=$$BLUETOOTH_SEMI_PRIVATE_HEADERS
+} else {
 sdk_bluetooth_headers.files=$$BLUETOOTH_HEADERS
 sdk_bluetooth_headers.path=/include/qtopia/comm
 sdk_bluetooth_headers.hint=sdk headers
 INSTALLS+=sdk_bluetooth_headers
 
-sdk_bluetooth_private_headers.files=$$BLUETOOTH_PRIVATE_HEADERS
-sdk_bluetooth_private_headers.path=/include/qtopiacomm/private
+sdk_bluetooth_private_headers.files=$$BLUETOOTH_SEMI_PRIVATE_HEADERS
+sdk_bluetooth_private_headers.path=/include/qtopia/comm/private
 sdk_bluetooth_private_headers.hint=sdk headers
 INSTALLS+=sdk_bluetooth_private_headers
+}
 
 pics.files=$$QTOPIA_DEPOT_PATH/pics/bluetooth/*
 pics.path=/pics/bluetooth
 pics.hint=pics
 INSTALLS+=pics
+

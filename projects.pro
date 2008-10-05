@@ -15,7 +15,7 @@ build_qtopiadesktop:SUBDIRS+=src/qtopiadesktop
 
 !isEmpty(EXTRA_SUBDIRS):SUBDIRS+=$$EXTRA_SUBDIRS
 
-enable_singleexec:SUBDIRS+=src/server
+build_qtopia:SUBDIRS+=src/server/main
 
 !win {
     clean_qtopia.commands=$$COMMAND_HEADER\
@@ -37,7 +37,15 @@ for(prefix,PREFIXES) {
     cleanimage.commands+=$$RMRF $$prefix
 }
 build_qtopia:cleanimage.commands+=$$LINE_SEP_VERBOSE\
-    $$QPEDIR/bin/content_installer -clearlocks $(INSTALL_ROOT)/qtopia_db.sqlite
+    $$QPEDIR/bin/content_installer -clearlocks $(INSTALL_ROOT)/qtopia_db.sqlite\
+    $$LINE_SEP_VERBOSE\
+    @for qtopia in $$fixpath(/tmp/qtopia-*); do\
+        if [ -f \$$qtopia/$(INSTALL_ROOT)/qtopia_db.sqlite ]; then\
+            $$QPEDIR/bin/content_installer -clearlocks\
+                \$$qtopia/$(INSTALL_ROOT)/qtopia_db.sqlite;\
+        fi;\
+    done
+
 QMAKE_EXTRA_TARGETS+=cleanimage
 qtopia_install.depends+=cleanimage
 

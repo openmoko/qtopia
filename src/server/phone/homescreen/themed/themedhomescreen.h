@@ -1,36 +1,33 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _THEMEDHOMESCREEN_H
-#define _THEMEDHOMESCREEN_H
+#ifndef THEMEDHOMESCREEN_H
+#define THEMEDHOMESCREEN_H
 
-#include "qabstracthomescreen.h"
+#include "basichomescreen.h"
 
+class MessageBoard;
 class PhoneThemedView;
-class ThemedItemPlugin;
 class ThemeItem;
-class ThemeBackground;
 class QValueSpaceObject;
 
-class ThemedHomeScreen : public QAbstractHomeScreen
+class ThemedHomeScreen : public BasicHomeScreen
 {
     Q_OBJECT
 
@@ -38,27 +35,24 @@ public:
     ThemedHomeScreen(QWidget *parent = 0, Qt::WFlags flags = 0);
     ~ThemedHomeScreen();
 
-    void updateBackground();
-    void updateHomeScreenInfo();
-    void updateInformation();
-    void activatePinbox(bool enable);
-    void showPinboxInformation(const QString &pix, const QString &text);
-
-protected:
-//    bool eventFilter(QObject *, QEvent *);
-
 public Q_SLOTS:
-    void applyHomeScreenImage();
+    void updateHomeScreenImage();
+    void updateBackground();
+    void exportBackground();
 
 private Q_SLOTS:
+    void updateHomeScreenInfo();
+    void updateInformation();
     void themeLoaded();
     void themeItemClicked(ThemeItem *item);
+    void themeChanged();
+    void sysMessage(const QString& message, const QByteArray &data);
+    void showPinboxInformation(bool enable, const QString &pix, const QString &text);
 
 private:
     PhoneThemedView     *themedView;
-    ThemedItemPlugin    *bgIface;
-    ThemeBackground     *themeBackground;
     QValueSpaceObject   *vsObject;
+    MessageBoard        *board;
 };
 
-#endif // _THEMEDHOMESCREEN_H
+#endif

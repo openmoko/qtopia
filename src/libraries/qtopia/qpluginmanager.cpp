@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -45,7 +43,7 @@
 #include <signal.h>
 #include <dirent.h>
 
-// Qtopia can try to disabled broken plugins automatically
+// Qt Extended can try to disabled broken plugins automatically
 // on an individual basis. This has performance implications.
 //
 //#define QTOPIA_DISABLE_ONLY_BROKEN_PLUGINS
@@ -156,7 +154,8 @@ static const char *cfgName()
 
 /*!
   \class QPluginManager
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QPluginManager class simplifies plug-in loading and allows plugins to be
   enabled/disabled.
 
@@ -412,7 +411,7 @@ void QPluginManager::initType()
 
 QStringList QPluginManager::languageList() const
 {
-    return Qtopia::languageList();
+    return Qtopia::languageList() << QLatin1String("en_US");
 }
 
 /*!
@@ -453,7 +452,7 @@ bool QPluginManager::isEnabled( const QString &name ) const
 }
 
 /*!
-  Returns true if Qtopia is currently in \i{Safe Mode}.  In safe mode
+  Returns true if Qt Extended is currently in \i{Safe Mode}.  In safe mode
   list() will return an empty list and no plugins should be loaded.  This
   is to allow misbehaving plugins to be disabled.
 */
@@ -528,7 +527,7 @@ QPluginLoader *PluginLibraryManager::refLibrary( const QString &file )
         lib = new QPluginLoader( file );
         lib->load();
         if ( !lib->isLoaded() ) {
-            qWarning() << "Coult not load" << file << "errorString()" << lib->errorString();
+            qWarning() << "Could not load" << file << "errorString()" << lib->errorString();
             delete lib;
             return 0;
         }

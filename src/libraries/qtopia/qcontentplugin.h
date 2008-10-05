@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,6 +22,8 @@
 
 #include <qcontent.h>
 #include <qtopiaglobal.h>
+
+class QContentPropertiesEngine;
 
 class QTOPIA_EXPORT QContentPlugin
 {
@@ -34,8 +34,22 @@ public:
 
     virtual bool installContent( const QString &path, QContent *content ) = 0;
     virtual bool updateContent( QContent *content );
+
+    static void preloadPlugins();
+};
+
+class QTOPIA_EXPORT QContentPropertiesPlugin
+{
+public:
+    virtual ~QContentPropertiesPlugin();
+
+    virtual QStringList mimeTypes() const = 0;
+
+    virtual QImage thumbnail( const QContent &content, const QSize &size, Qt::AspectRatioMode mode ) = 0;
+    virtual QContentPropertiesEngine *createPropertiesEngine( const QContent &content ) = 0;
 };
 
 Q_DECLARE_INTERFACE( QContentPlugin, "com.trolltech.Qtopia.QContentPlugin/1.0" );
+Q_DECLARE_INTERFACE( QContentPropertiesPlugin, "com.trolltech.Qtopia.QContentPropertiesPlugin/1.0" );
 
 #endif

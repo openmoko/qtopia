@@ -1,55 +1,67 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef __QTOPIA_MEDIA_VIDEOCONTROLSERVER_H
-#define __QTOPIA_MEDIA_VIDEOCONTROLSERVER_H
+#ifndef QMEDIAVIDEOCONTROLSERVER_H
+#define QMEDIAVIDEOCONTROLSERVER_H
 
 #include <QWSEmbedWidget>
 
-#include "qmediahandle_p.h"
-#include "qmediaabstractcontrolserver.h"
-
 #include <qtopiaglobal.h>
+#include <qtopiavideo.h>
+
+
+
+
+class QMediaHandle;
+
+class QMediaVideoControlServerPrivate;
 
 
 class QTOPIAMEDIA_EXPORT QMediaVideoControlServer :
-    public QMediaAbstractControlServer
+    public QObject
 {
     Q_OBJECT
 
 public:
     QMediaVideoControlServer(QMediaHandle const& handle,
-                             QWidget* target = 0,
-                             QObject* parent = 0);
+                             QWidget *target = 0,
+                             QObject *parent = 0);
     ~QMediaVideoControlServer();
 
     void setRenderTarget(QWidget* target);
-    void setRenderTarget(int wid);
-
+    void setRenderTarget(WId wid);
     void unsetRenderTarget();
 
+    QtopiaVideo::VideoRotation videoRotation() const;
+    QtopiaVideo::VideoScaleMode videoScaleMode() const;
+
 signals:
-    void videoTargetAvailable();
-    void videoTargetRemoved();
+    void rotationChanged(QtopiaVideo::VideoRotation);
+    void scaleModeChanged(QtopiaVideo::VideoScaleMode);
+
+private slots:
+    void updateVideoRotation();
+    void updateVideoScaleMode();
+
+private:
+    QMediaVideoControlServerPrivate *d;
 };
 
+#endif
 
-#endif  // __QTOPIA_MEDIA_VIDEOCONTROLSERVER_H

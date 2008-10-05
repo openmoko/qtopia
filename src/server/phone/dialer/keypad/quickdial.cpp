@@ -1,40 +1,43 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "numberdisplay.h"
 #include "quickdial.h"
+
+#include "callcontactlist.h"
 #include "dialercontrol.h"
+#include "dtmfaudio.h"
+#include "servercontactmodel.h"
 #include "qtopiaserverapplication.h"
+#ifdef QTOPIA_TELEPHONY
+#include "abstractdialfilter.h"
+#endif
 
-#include <qtopia/pim/qphonenumber.h>
+#include <qphonenumber.h>
 #include <qsoftmenubar.h>
-#include <qtopiaapplication.h>
 #include <quniqueid.h>
-#include <qtopia/pim/qcontactmodel.h>
 
-#include <QDialog>
 #include <QLayout>
 #include <QDebug>
 #include <QKeyEvent>
-#include <QSet>
+#include <QTimer>
+
 
 // declare QuickDialModel
 class QuickDialModel : public CallContactModel
@@ -132,7 +135,9 @@ void QuickDialModel::refresh()
     if (filter().isEmpty()) {
         CallContactModel::resetModel(); //delete existing items
         CallContactModel::refresh(); //reread CallListItems
+#ifndef QTOPIA_HOMEUI // show all list to begin with if on Deskphone
         return;
+#endif
     }
 
     if (wcActive) {
@@ -141,26 +146,9 @@ void QuickDialModel::refresh()
     }
 
     if (!clm) {
-        clm = new QContactModel(this);
+        clm = new ServerContactModel;
+        clm->setParent( this );
         connect(clm, SIGNAL(modelReset()), this, SLOT(populate()));
-    }
-
-    QSettings config( "Trolltech", "Contacts" );
-
-    // load SIM/No SIM settings.
-    config.beginGroup( "default" );
-    if (config.contains("SelectedSources/size")) {
-        int count = config.beginReadArray("SelectedSources");
-        QSet<QPimSource> set;
-        for(int i = 0; i < count; ++i) {
-            config.setArrayIndex(i);
-            QPimSource s;
-            s.context = QUuid(config.value("context").toString());
-            s.identity = config.value("identity").toString();
-            set.insert(s);
-        }
-        config.endArray();
-        clm->setVisibleSources(set);
     }
 
     if (filter() == clm->filterText())
@@ -174,8 +162,10 @@ void QuickDialModel::populate()
     CallContactModel::resetModel(); //delete existing items
     CallContactModel::refresh(); //reread CallListItems
 
+#ifndef QTOPIA_HOMEUI
     if( clm->filterText().isEmpty() )
         return; //don't display anything if the filter is empty
+#endif
 
     QList<QCallListItem> cl = mRawCallList;
 
@@ -232,14 +222,18 @@ void QuickDialModel::populate()
 //---------------------------------------------------------------------------
 
 /*!
-  \class PhoneQuickDialerScreen
-  \brief The PhoneQuickDialerScreen class implements a keypad based dialer UI.
-  \ingroup QtopiaServer::PhoneUI
+    \class PhoneQuickDialerScreen
+    \inpublicgroup QtTelephonyModule
+    \brief The PhoneQuickDialerScreen class implements a keypad based dialer UI.
+    \ingroup QtopiaServer::PhoneUI
 
-  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
-  It is part of the Qtopia server and cannot be used by other Qtopia applications.
+    An image of this dialer screen can be found in
+    the \l{Server Widget Classes}{server widget gallery}.
 
-  \sa QAbstractServerInterface, QAbstractDialerScreen
+    This class is a Qt Extended \l{QtopiaServerApplication#qt-extended-server-widgets}{server widget}.
+    It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+    \sa QAbstractServerInterface, QAbstractDialerScreen
   */
 
 
@@ -255,6 +249,7 @@ void QuickDialModel::populate()
 */
 PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
     : QAbstractDialerScreen( parent, fl ), mSpeedDial( false )
+      , delayedDialTimer( 0 ), delayedDial( false )
 {
     QCallList &callList = DialerControl::instance()->callList();
     QVBoxLayout *l = new QVBoxLayout( this );
@@ -264,7 +259,6 @@ PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
     l->addWidget(mNumberDS);
     QtopiaApplication::setInputMethodHint( mNumberDS, QtopiaApplication::AlwaysOff );
 
-    // cadams - fix for bug 188035
     QSoftMenuBar::setLabel( this, Qt::Key_Select, "phone/calls" , tr( "Dial", "dial highlighted number" ) );
     QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Cancel );
     mDialList = new QuickDialContactView( this );
@@ -276,8 +270,7 @@ PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
     CallContactDelegate * delegate = new CallContactDelegate( mDialList );
     mDialList->setItemDelegate( delegate );
 
-    QItemSelectionModel * sm = mDialList->selectionModel();
-    connect( sm, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+    connect( mDialList, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
         mDialList, SLOT(updateMenu()) );
 
     connect( mNumberDS, SIGNAL(numberChanged(QString)), this,
@@ -303,6 +296,23 @@ PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
     mNumberDS->installEventFilter( this );
     mDialList->installEventFilter( this );
     // Set the dialog to the maximum possible size.
+
+    dtmf = qtopiaTask<DtmfAudio>();
+    if (dtmf)
+        connect( mNumberDS, SIGNAL(numberKeyPressed(int)),
+            dtmf, SLOT(playDtmfKeyTone(int)) );
+    else
+        qLog(Component) <<"PhoneQuickDialerScreen: DtmfAudio not available";
+
+
+    if ( Qtopia::hasKey( Qtopia::Key_Hook ) ) {
+        delayedDialTimer = new QTimer( this );
+        delayedDialTimer->setSingleShot( true );
+        delayedDialTimer->setInterval( 3000 );
+        connect( delayedDialTimer, SIGNAL(timeout()), this, SLOT(delayedDialTimeout()) );
+        connect( mNumberDS, SIGNAL(numberKeyPressed(int)), this, SLOT(numberKeyPressed(int)) );
+        connect( mDialModel, SIGNAL(modelReset()), this, SLOT(resetDelayedDialTimer()) );
+    }
 }
 
 /*!
@@ -334,18 +344,27 @@ void PhoneQuickDialerScreen::selectedNumber( const QString &num )
 /*! \internal */
 void PhoneQuickDialerScreen::selectedNumber( const QString &num, const QUniqueId &cnt )
 {
+    if ( delayedDialTimer && delayedDialTimer->isActive() )
+        delayedDialTimer->stop();
+
     if( num.isEmpty() )
     {
         close();
         return;
     }
+#ifdef QTOPIA_TELEPHONY
     // Filter for special GSM key sequences.
-    bool filtered = false;
-    emit filterSelect( num, filtered );
-    if ( filtered ) {
-        mNumber = QString();
-        close();
-    } else if (num.contains(QChar('d'), Qt::CaseInsensitive) &&
+    if ( AbstractDialFilter::defaultFilter() ) {
+        AbstractDialFilter::Action act = AbstractDialFilter::defaultFilter()->filterInput(num,true);
+        if ( act == AbstractDialFilter::ActionTaken ) {
+            mNumber = QString();
+            close();
+            return;
+        }
+    }
+#endif
+
+    if (num.contains(QChar('d'), Qt::CaseInsensitive) &&
                !num.contains(QChar(':')) && !num.contains(QChar('@'))) {
         mDialModel->setWildcardNumberActive(true);
         mNumberDS->setWildcardNumber(num);
@@ -372,11 +391,10 @@ bool PhoneQuickDialerScreen::eventFilter( QObject *o, QEvent *e )
         {
             case Qt::Key_Up:
             {
-                QItemSelectionModel * selectModel = mDialList->selectionModel();
                 if( !mDialModel->rowCount() ||
-                    selectModel->isSelected(mDialModel->index(0)) )
+                    mDialList->currentIndex() == mDialModel->index(0) )
                 {
-                    selectModel->clear();
+                    mDialList->clearSelection();
                     mNumberDS->setFocus();
                     mNumberDS->setEditFocus(true);
                     return true;
@@ -385,11 +403,10 @@ bool PhoneQuickDialerScreen::eventFilter( QObject *o, QEvent *e )
             }
             case Qt::Key_Down:
             {
-                QItemSelectionModel * selectModel = mDialList->selectionModel();
                 if( !mDialModel->rowCount() ||
-                        selectModel->isSelected(mDialModel->index(mDialModel->rowCount()-1)) )
+                    mDialList->currentIndex() == mDialModel->index(mDialModel->rowCount()-1) )
                 {
-                    selectModel->clear();
+                    mDialList->clearSelection();
                     mNumberDS->setFocus();
                     mNumberDS->setEditFocus(true);
                     return true;
@@ -463,13 +480,17 @@ void PhoneQuickDialerScreen::rejectEmpty( const QString &t )
     if( t.isEmpty() && !isVisible() ) {
         close();
      } else {
+#ifdef QTOPIA_TELEPHONY
         // Fitler special GSM key sequences that act immediately (e.g. *#06#).
-        bool filtered = false;
-        emit filterKeys( t, filtered );
-        if ( filtered ) {
-            mNumber = QString();
-            close();
+        if (AbstractDialFilter::defaultFilter()) {
+            AbstractDialFilter::Action action = 
+                            AbstractDialFilter::defaultFilter()->filterInput(t);
+            if ( action == AbstractDialFilter::ActionTaken ) {
+                mNumber = QString();
+                close();
+            }
         }
+#endif
     }
 }
 
@@ -506,6 +527,59 @@ void PhoneQuickDialerScreen::setDigits(const QString &digits)
 void PhoneQuickDialerScreen::appendDigits(const QString &digits)
 {
     appendDigits(digits, false, true);
+}
+
+/*! \reimp */
+void PhoneQuickDialerScreen::doOffHook()
+{
+    if ( !delayedDialTimer )
+        return;
+    delayedDial = true;
+    if ( !mNumberDS->number().isEmpty() )
+        selectedNumber( mNumberDS->number() );
+}
+
+/*! \reimp */
+void PhoneQuickDialerScreen::doOnHook()
+{
+    if ( !delayedDialTimer )
+        return;
+    delayedDial = false;
+}
+
+/*!
+  \internal
+  */
+void PhoneQuickDialerScreen::resetDelayedDialTimer()
+{
+    if ( delayedDialTimer && delayedDialTimer->isActive() )
+        delayedDialTimer->stop();
+    if ( !delayedDialTimer || !delayedDial || mDialModel->rowCount() )
+        return;
+    delayedDialTimer->start();
+}
+
+/*!
+  \internal
+  */
+void PhoneQuickDialerScreen::delayedDialTimeout()
+{
+    if ( !delayedDialTimer || !delayedDial )
+        return;
+    selectedNumber( mNumberDS->number() );
+}
+
+/*!
+  \internal
+  */
+void PhoneQuickDialerScreen::numberKeyPressed( int key )
+{
+    if ( key == Qt::Key_NumberSign && Qtopia::hasKey( Qtopia::Key_Hook ) ) {
+        if ( delayedDialTimer && delayedDialTimer->isActive() )
+            delayedDialTimer->stop();
+        delayedDial = false;
+        selectedNumber( mNumberDS->number() );
+    }
 }
 
 QTOPIA_REPLACE_WIDGET_WHEN(QAbstractDialerScreen, PhoneQuickDialerScreen, Keypad);

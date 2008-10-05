@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,16 +24,17 @@
 //  W A R N I N G
 //  -------------
 //
-// This class (QIMActionDescriptionPrivate) is not part of the Qtopia API.
-// It exists purely as an implementation detail.  This header file may
-// change from version to version without notice, or even be removed.
+// This file is not part of the Qt Extended API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
 //
 // We mean it.
 //
 
 /*!
     \class QIMActionDescription
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \preliminary
     \brief The QIMActionDescription class provides a way to define a QAction for a QtopiaInputMethod in the QSoftMenuBar QMenu.
 
@@ -176,10 +175,11 @@ void QIMActionDescription::setIconFileName(const QString &string) {d->m_iconFile
 
 /*!
   \class QtopiaInputMethod
-  \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QtopiaInputMethod class describes the minimum interface that an input method plug-in must provide.
 
-    Input Methods may be added to Qtopia via plug-ins.  In
+    Input Methods may be added to Qt Extended via plug-ins.  In
     order to write an input method plug-in you must create an
     interface for your plug-in by deriving from the
     QtopiaInputMethod class.
@@ -417,7 +417,7 @@ void QtopiaInputMethod::clicked() {}
   If \a restricted is true
   the widget only accepts one kind of input and input method
   should disable any mode switching.  For example, the
-  home screen Qtopia might set the hint to be restricted
+  home screen Qt Extended might set the hint to be restricted
   to phone numbers.
 
   an empty hint is used to indicate that input is not needed for the
@@ -486,7 +486,7 @@ void QtopiaInputMethod::menuActionActivated(int data){Q_UNUSED(data)};
     Implement this function in a derived class to return a description of
     the menu that should be installed on the input methods behalf.
 
-    This function is called by Qtopia when the input methods menu is shown,
+    This function is called by Qt Extended when the input methods menu is shown,
     or when the inputmethod emits stateChanged(), in order to construct the
     softkey menu entries for the input method.
 

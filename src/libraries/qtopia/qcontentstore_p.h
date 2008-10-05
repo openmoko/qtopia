@@ -1,32 +1,30 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef QCONTENTSTORE_H
-#define QCONTENTSTORE_H
+#ifndef QCONTENTSTORE_P_H
+#define QCONTENTSTORE_P_H
 
 //
 //  W A R N I N G
 //  -------------
 //
-// This file is not part of the Qtopia API.  It exists purely as an
+// This file is not part of the Qt Extended API.  It exists purely as an
 // implementation detail.  This header file may change from version to
 // version without notice, or even be removed.
 //
@@ -38,7 +36,7 @@
 #include <QCache>
 #include <QReadWriteLock>
 
-#include <qtopia/private/qcontentengine_p.h>
+#include "qcontentengine_p.h"
 
 class QContentSetEngine;
 class QContentFilterSetEngine;
@@ -75,6 +73,7 @@ public:
 
     virtual bool moveContentTo( QContent *content, const QString &newFileName ) = 0;
     virtual bool copyContentTo( QContent *content, const QString &newFileName ) = 0;
+    virtual bool renameContent(QContent *content, const QString &name) = 0;
 
     virtual QIODevice *openContent( QContent *content, QIODevice::OpenMode mode ) = 0;
 
@@ -83,6 +82,10 @@ public:
     virtual QContentEnginePropertyCache contentProperties( QContentId id ) = 0;
 
     virtual QStringList contentMimeTypes( QContentId contentId ) = 0;
+
+#ifndef QTOPIA_CONTENT_INSTALLER
+    virtual QImage thumbnail(const QContent &content, const QSize &size, Qt::AspectRatioMode);
+#endif
 
     virtual QMimeTypeData mimeTypeFromId( const QString &mimeId ) = 0;
 
@@ -109,6 +112,13 @@ public:
 protected:
     void setErrorString( const QString &error );
 
+#ifndef QTOPIA_CONTENT_INSTALLER
+    QImage readThumbnail(const QString &fileName, const QSize &size, Qt::AspectRatioMode mode);
+    void saveThumbnail(const QString &fileName, const QImage &thumbnail);
+
+    QString thumbnailPath(const QString &fileName) const;
+#endif
+
     QContentEngine::Attributes dirtyAttributes( const QContentEngine &engine ) const;
 
     void setId( QContentId id, QContentEngine *engine ) const;
@@ -123,6 +133,8 @@ protected:
     void ensureCategoriesLoaded( QContentEngine *engine ) const{ if( !(engine->d_func()->loadedAttributes & QContentEngine::Categories) ) engine->loadCategories(); }
 
 private:
+    const QStringList m_folderThumbnails;
+    const QString m_audioPrefix;
     QString m_errorString;
 };
 

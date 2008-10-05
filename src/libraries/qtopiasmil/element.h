@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef ELEMENT_H
-#define ELEMENT_H
+#ifndef SMILELEMENT_H
+#define SMILELEMENT_H
 
 #include <qmap.h>
 #include <qstring.h>
@@ -30,7 +28,7 @@
 
 #include <qtopiaglobal.h>
 
-class QXmlAttributes;
+class QXmlStreamAttributes;
 class QPainter;
 class SmilSystem;
 class SmilModuleAttribute;
@@ -68,6 +66,7 @@ bool operator<(const Duration &d1, const Duration &d2);
 bool operator>(const Duration &d1, const Duration &d2);
 Duration min(const Duration &d1, const Duration &d2);
 Duration max(const Duration &d1, const Duration &d2);
+QDebug& operator <<(QDebug& dbg, const Duration& d);
 
 //===========================================================================
 
@@ -94,7 +93,7 @@ protected:
 class QTOPIASMIL_EXPORT SmilElement
 {
 public:
-    SmilElement(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts);
+    SmilElement(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts);
     virtual ~SmilElement();
 
     const QString &id() const { return eid; }
@@ -112,8 +111,8 @@ public:
 
     virtual void setData(const QByteArray &, const QString &type);
 
-    SmilModuleAttribute *module(const QString &name) const;
-    void addModule(SmilModuleAttribute *m);
+    SmilModuleAttribute *moduleAttribute(const QString &name) const;
+    void addModuleAttribute(SmilModuleAttribute *m);
 
     virtual Duration implicitDuration();
     virtual void addCharacters(const QString &ch);
@@ -125,6 +124,7 @@ public:
     virtual void event(SmilElement *, SmilEvent *);
 
     virtual void paint(QPainter *p);
+
     void setVisible(bool v) { vis = v; }
     bool isVisible() const { return vis; }
 
@@ -147,13 +147,16 @@ public:
     Duration currentEnd;
 
 protected:
+    void processAttributes();
+
+protected:
     QRect r;
     QColor bg;
     SmilSystem *sys;
     SmilElement *prnt;
     QString ename;
     QString eid;
-    QList<SmilModuleAttribute*> modules;
+    QList<SmilModuleAttribute*> attributes;
     QList<SmilElement*> chn;
     QList<SmilElement*> listeners;
     State currentState;

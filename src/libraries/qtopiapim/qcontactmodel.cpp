@@ -1,32 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#include <qtopia/pim/qcontactmodel.h>
+#include <qcontactmodel.h>
 #include "qcontactsqlio_p.h"
 #include "vobject_p.h"
 #include <qtopianamespace.h>
 #ifdef QTOPIA_CELL
 #include "qsimcontext_p.h"
-#endif
-#ifdef QTOPIA_PHONE
-#include <qtopia/inputmatch/pkimmatcher.h>
 #endif
 #include <QSettings>
 #include <QPainter>
@@ -39,8 +34,6 @@
 #include <QTextDocument>
 
 #include <QDebug>
-
-#include "qrecordiomerge_p.h"
 
 #include "qtopiaipcenvelope.h"
 #include "qtopiachannel.h"
@@ -124,6 +117,15 @@ void QContactModel::initMaps()
         { "nickname", QT_TR_NOOP( "Nickname" ), Nickname},
         { "children", QT_TR_NOOP( "Children" ), Children},
 
+        // Presence
+        { "presencestatus", QT_TR_NOOP( "Presence Status Type"), PresenceStatus},
+        { "presencemessage", QT_TR_NOOP( "Presence Message"), PresenceMessage},
+        { "presencestatusstring", QT_TR_NOOP ("Presence Status" ), PresenceStatusString},
+        { "presencedisplayname", QT_TR_NOOP( "Presence Display Name" ), PresenceDisplayName},
+        { "presenceupdatetime", QT_TR_NOOP( "Presence Update Time"), PresenceUpdateTime},
+        { "presencecapabilities", QT_TR_NOOP( "Presence Capabilities" ), PresenceCapabilities},
+        { "presenceavatar", QT_TR_NOOP( "Presence Avatar"), PresenceAvatar},
+
         // other
         { "notes", QT_TR_NOOP( "Notes" ), Notes},
         // next to added in 4.0
@@ -197,9 +199,9 @@ QList<QContactModel::Field> QContactModel::phoneFields()
 {
     // Used by QContact::phoneNumbers.  thats why its a static function.
     QList<Field> result;
-    //result.append(OtherPhone);
-    //result.append(OtherMobile);
-    //result.append(OtherFax);
+    result.append(OtherPhone);
+    result.append(OtherMobile);
+    result.append(OtherFax);
     //result.append(OtherPager);
     result.append(HomePhone);
     result.append(HomeMobile);
@@ -219,7 +221,7 @@ QList<QContactModel::Field> QContactModel::phoneFields()
 */
 QList<QContactModel::Field> QContactModel::labelFields()
 {
-    return QContactIO::labelKeys();
+    return ContactSqlIO::labelKeys();
 }
 
 /*!
@@ -259,14 +261,18 @@ public:
     mutable QContactModel *searchModel;
     mutable QString filterText;
     mutable int filterFlags;
+    mutable QList<QCollectivePresenceInfo::PresenceType> presenceFilter;
 
     static QUniqueId mPersonalId;
     static bool mPersonalIdRead;
 
-    QContactIO *defaultio;
+    ContactSqlIO *defaultio;
     QPimSource phoneSource;
     QPimSource simSource;
-    uint simContext;
+#ifdef QTOPIA_CELL
+    uint simContextId;
+    QContactSimContext *simContext;
+#endif
     static QIcon getCachedIcon(const QString& path);
     static QHash<QString, QIcon> cachedIcons;
 };
@@ -304,8 +310,11 @@ QIcon QContactModel::fieldIcon(Field field)
 
 /*!
   \class QContactModel
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QContactModel class provides access to the Contacts data.
 
@@ -459,7 +468,33 @@ QIcon QContactModel::fieldIcon(Field field)
     The URI for the contact's home VOIP id
   \value BusinessVOIP
     The URI for the contact's business VOIP id
+  \value PresenceStatus
+    A map (QPresenceTypeMap) of presence URIs to presence status types for this contact
+  \value PresenceStatusString
+    A map (QPresenceStringMap) of presence URIs to presence status strings for this contact
+  \value PresenceMessage
+    A map (QPresenceStringMap) of presence URIs to presence messages for this contact
+  \value PresenceDisplayName
+    A map (QPresenceStringMap) of presence URIs to display names for this contact
+  \value PresenceUpdateTime
+    A map (QPresenceDateTimeMap) of presence URIs to last update time for this contact
+  \value PresenceAvatar
+    A map (QPresenceStringMap) of presence URIs to avatar file paths for this contact
+  \value PresenceCapabilities
+    A map (QPresenceCapabilityMap) of presence URIs to presence capabilities for this contact
  */
+
+/*!
+  \typedef QContactModel::SortField
+
+  \brief The QContactModel::SortField structure provides sorting instructions.
+
+  This structure holds a QContactModel field to sort by, and a sorting direction.
+  Typically an ordered list of these structures is used to allows arbitrary
+  sorting to be performed on a QContactModel.
+
+  \sa QContactModel
+*/
 
 /*!
   \fn bool QContactModel::isPersonalDetails(int row) const
@@ -479,15 +514,18 @@ QContactModel::QContactModel(QObject *parent)
     ContactSqlIO *access = new ContactSqlIO(this);
     QContactDefaultContext *context = new QContactDefaultContext(this, access);
 
-    addAccess(access);
+    setAccess(access);
     addContext(context);
     d->defaultio = access;
 
 #ifdef QTOPIA_CELL
     QContactSimContext *scon = new QContactSimContext(this, access);
     d->simSource = scon->defaultSource();
-    d->simContext = QUniqueIdGenerator::mappedContext(d->simSource.context);
+    d->simContextId = QUniqueIdGenerator::mappedContext(d->simSource.context);
     addContext(scon);
+    d->simContext = scon;
+    connect(scon, SIGNAL(simLoaded(const QPimSource &)),
+            this, SIGNAL(simLoaded(const QPimSource &)));
 #endif
 
     QtopiaChannel *channel = new QtopiaChannel( "QPE/PIM",  this );
@@ -523,20 +561,30 @@ QStringList QContactModel::mimeTypes() const
 }
 
 /*!
-  \overload
+    \overload
 
-  Sorts the model by \a column in ascending order
-
-  Currently \a order is ignored but may be implemented at a future date.
+    Sorts the model by \a column in the specified \a order.
 */
 void QContactModel::sort(int column, Qt::SortOrder order)
 {
-    Q_UNUSED(order)
-
-    // TODO handle order later.
-    if (column >= 0 && column < columnCount())
-        setSortField((Field)column);
+    SortField pair((Field)column, order);
+    QList<SortField> list;
+    list << pair;
+    sort(list);
 }
+
+/*!
+    \fn void QContactModel::sort(QList<SortField> list)
+
+    Sorts the model by the fields specified in \a list.  Each
+    entry in the list specifies a field and an order (ascending or descending).
+*/
+void QContactModel::sort(QList<SortField> list)
+{
+    d->defaultio->setOrderBy(list);
+}
+
+
 
 /*!
   \overload
@@ -549,7 +597,7 @@ void QContactModel::sort(int column, Qt::SortOrder order)
 */
 QVariant QContactModel::data(const QModelIndex &index, int role) const
 {
-    /* XXX Early out if we don't understand the role to avoid creating a contact */
+    /* Early out if we don't understand the role to avoid fetching a contact */
     if (index.column() == Label) {
         switch(role) {
             case Qt::DecorationRole:
@@ -566,101 +614,75 @@ QVariant QContactModel::data(const QModelIndex &index, int role) const
         }
     }
 
-    // No I/O means no contact
-    QContactIO *io = qobject_cast<QContactIO*>(access(index.row()));
-    if (io) {
-        int row = index.row();
-        switch(index.column()) {
-            case Label:
-                if (row < rowCount()){
-                    // later, take better advantage of roles.
-                    switch(role) {
-                        default:
-                            break;
-                        case Qt::DecorationRole:
-                            // We can tell if this is a SIM contact, but not much else
-                            if (io->contactField(row, Portrait).toString().isEmpty() && isSIMCardContact(index))
-                                return QContactModelData::getCachedIcon(QLatin1String(":icon/addressbook/sim-contact"));
-                            else {
-                                QContact c = io->simpleContact(row);
-                                return c.icon();
-                            }
-                        case PortraitRole:
-#ifdef QTOPIA_PHONE
-                            if (io->contactField(row, Portrait).toString().isEmpty() && isSIMCardContact(index)) {
-                                QPixmap pm;
-                                static const QLatin1String key("pimcontact-sim-thumb");
-                                if (!QGlobalPixmapCache::find(key, pm)) {
-                                    QImageReader reader(":image/addressbook/sim-contact");
-                                    reader.setScaledSize(QContact::thumbnailSize());
-                                    QImage img = reader.read();
-                                    if (!img.isNull()) {
-                                        pm = QPixmap::fromImage(img);
-                                        QGlobalPixmapCache::insert(key, pm);
-                                    }
-                                }
+    int row = index.row();
+    switch(index.column()) {
+        case Label:
+            if (row < rowCount()){
+                // later, take better advantage of roles.
+                switch(role) {
+                    default:
+                        break;
+                    case Qt::DecorationRole:
+                        // We can tell if this is a SIM contact, but not much else
+                        return d->defaultio->simpleContact(row).icon();
+                    case PortraitRole:
+                        {
+                            // Don't duplicate the thumbnail logic here
+                            QContact c = d->defaultio->simpleContact(row);
+                            return qvariant_cast<QPixmap>(c.thumbnail());
+                        }
+                    case Qt::DisplayRole:
+                        return d->defaultio->contactField(row, Label);
+                    case Qt::EditRole:
+                        return QVariant(id(row).toByteArray());
+                    case LabelRole:
+                        {
+                            QString l = d->defaultio->contactField(row, Label).toString();
+                            return "<b>" + l + "</b>";
+                        }
+                    case SubLabelRole:
+                        {
+                            int f = filterFlags();
+                            QString email = d->defaultio->contactField(row, DefaultEmail).toString();
+                            // XXX ContainsChat
 
-                                return qvariant_cast<QPixmap>(pm);
-                            } else
-#endif
-                            {
-                                // Don't duplicate the thumbnail logic here
-                                QContact c = io->simpleContact(row);
-                                return qvariant_cast<QPixmap>(c.thumbnail());
-                            }
-                        case Qt::DisplayRole:
-                            return QVariant(io->formattedLabel(row));
-                        case Qt::EditRole:
-                            return QVariant(id(row).toByteArray());
-                        case LabelRole:
-                            {
-                                QString l = io->formattedLabel(row);
-                                return "<b>" + l + "</b>";
-                            }
-                        case SubLabelRole:
-                            {
-                                int f = filterFlags();
-                                QString email = io->contactField(row, DefaultEmail).toString();
-                                // If we are set to filter in email and not phones, check the email address
-                                if (((f & (ContainsEmail|ContainsPhoneNumber)) == ContainsEmail) && !email.isEmpty())
-                                    return Qt::escape(email);
-#ifdef QTOPIA_PHONE
-                                QString phone = io->contactField(row, DefaultPhone).toString();
-                                if (!phone.isEmpty())
-                                    return Qt::escape(phone);
-#endif
-                                // If we have any inclination towards email, use it
-                                if ((f == 0 || f & ContainsEmail) && !email.isEmpty())
-                                    return Qt::escape(email);
+                            // If we are set to filter in email and not phones, check the email address
+                            if (((f & (ContainsEmail|ContainsPhoneNumber)) == ContainsEmail) && !email.isEmpty())
+                                return Qt::escape(email);
+                            QString phone = d->defaultio->contactField(row, DefaultPhone).toString();
+                            if (!phone.isEmpty())
+                                return Qt::escape(phone);
+                            // If we have any inclination towards email, use it
+                            if ((f == 0 || f & ContainsEmail) && !email.isEmpty())
+                                return Qt::escape(email);
 
-                                QString label = io->contactField(row, Label).toString();
-                                QString company = io->contactField(row, Company).toString();
-                                // Otherwise use this other stuff
-                                if (label != company)
-                                    return Qt::escape(company);
-                            }
-                        case StatusIconRole:
-                            if (isPersonalDetails(id(row))) {
-                                QPixmap pm;
-                                static const QLatin1String key("pimcontact-personaldetails-thumb");
-                                if (!QGlobalPixmapCache::find(key, pm)) {
-                                    QIcon i(":icon/addressbook/personaldetails");
-                                    pm = i.pixmap(QContact::thumbnailSize());
-                                    if (!pm.isNull()) {
-                                        QGlobalPixmapCache::insert(key, pm);
-                                    }
+                            QString label = d->defaultio->contactField(row, Label).toString();
+                            QString company = d->defaultio->contactField(row, Company).toString();
+                            // Otherwise use this other stuff
+                            if (label != company)
+                                return Qt::escape(company);
+                        }
+                    case StatusIconRole:
+                        if (isPersonalDetails(id(row))) {
+                            QPixmap pm;
+                            static const QLatin1String key("pimcontact-personaldetails-thumb");
+                            if (!QGlobalPixmapCache::find(key, pm)) {
+                                QIcon i(":icon/addressbook/personaldetails");
+                                pm = i.pixmap(QContact::thumbnailSize());
+                                if (!pm.isNull()) {
+                                    QGlobalPixmapCache::insert(key, pm);
                                 }
-                                return qvariant_cast<QPixmap>(pm);
-                            } else
-                                return QPixmap();
-                    }
+                            }
+                            return qvariant_cast<QPixmap>(pm);
+                        } else
+                            return QPixmap();
                 }
-                break;
-            default:
-                if (index.column() > 0 && index.column() < columnCount())
-                    return io->contactField(row, (Field)index.column());
-                break;
-        }
+            }
+            break;
+        default:
+            if (index.column() > 0 && index.column() < columnCount())
+                return d->defaultio->contactField(row, (Field)index.column());
+            break;
     }
     return QVariant();
 }
@@ -671,7 +693,7 @@ QVariant QContactModel::data(const QModelIndex &index, int role) const
 int QContactModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    return Categories+1;// last column + 1
+    return PresenceAvatar + 1;// last column + 1
 }
 
 /*!
@@ -697,17 +719,18 @@ bool QContactModel::setData(const QModelIndex &index, const QVariant &value, int
     return updateContact(c);
 
 #if 0
-    /* disabled due to 'notifyUpdated' require whole record.
-       While writing whole record is less efficient than partial - at 
-       this stage it was the easiest way of fixing the bug where setData
-       did not result in cross-model data change from being propogated properly
+    /*
+        disabled due to 'notifyUpdated' require whole record.
+        While writing whole record is less efficient than partial - at
+        this stage it was the easiest way of fixing the bug where setData
+        did not result in cross-model data change from being propagated properly
    */
 
     int i = index.row();
-    const QContactIO *model = qobject_cast<const QContactIO*>(d->mio->model(i));
+    const ContactSqlIO *model = qobject_cast<const QContactIO*>(d->mio->model(i));
     int r = d->mio->row(i);
     if (model)
-        return ((QContactIO *)model)->setContactField(r, (Field)index.column(), value);
+        return ((ContactSqlIO *)model)->setContactField(r, (Field)index.column(), value);
     return false;
 #endif
 }
@@ -788,11 +811,7 @@ QContact QContactModel::contact(const QModelIndex &index) const
 */
 QContact QContactModel::contact(int row) const
 {
-    const QContactIO *model = qobject_cast<const QContactIO*>(access(row));
-    int r = accessRow(row);
-    if (model)
-        return model->contact(r);
-    return QContact();
+    return d->defaultio->contact(row);
 }
 
 /*!
@@ -801,10 +820,7 @@ QContact QContactModel::contact(int row) const
 */
 QContact QContactModel::contact(const QUniqueId & identifier) const
 {
-    const QContactIO *model = qobject_cast<const QContactIO *>(access(identifier));
-    if (model)
-        return model->contact(identifier);
-    return QContact();
+    return d->defaultio->contact(identifier);
 }
 
 /*!
@@ -929,6 +945,22 @@ QVariant QContactModel::contactField(const QContact &contact, QContactModel::Fie
             return contact.firstNamePronunciation();
         case QContactModel::CompanyPronunciation:
             return contact.companyPronunciation();
+
+        //  Meta stuff (not present in contact itself)
+        case QContactModel::PresenceStatus:
+            return qVariantFromValue(ContactSqlIO::presenceStatus(contact.uid()));
+        case QContactModel::PresenceMessage:
+            return qVariantFromValue(ContactSqlIO::presenceMessage(contact.uid()));
+        case QContactModel::PresenceStatusString:
+            return qVariantFromValue(ContactSqlIO::presenceStatusString(contact.uid()));
+        case QContactModel::PresenceDisplayName:
+            return qVariantFromValue(ContactSqlIO::presenceDisplayName(contact.uid()));
+        case QContactModel::PresenceAvatar:
+            return qVariantFromValue(ContactSqlIO::presenceAvatar(contact.uid()));
+        case QContactModel::PresenceCapabilities:
+            return qVariantFromValue(ContactSqlIO::presenceCapabilities(contact.uid()));
+        case QContactModel::PresenceUpdateTime:
+            return qVariantFromValue(ContactSqlIO::presenceUpdateTime(contact.uid()));
     }
     return QVariant();
 }
@@ -1473,13 +1505,13 @@ QByteArray QContactModel::record(const QUniqueId &identifier, const QString &for
 
 void QContactModel::pimMessage(const QString& message, const QByteArray& data)
 {
-    if (message == QLatin1String("updatePersonalId(QUniqueId)")) {
-        QUniqueId id;
+    if (message == QLatin1String("updatePersonalId(QUniqueId,QUniqueId)")) {
         QDataStream ds(data);
 
         QUniqueId newId;
-        QUniqueId oldId = d->mPersonalIdRead ? d->mPersonalId : QUniqueId();
+        QUniqueId oldId;
 
+        ds >> oldId;
         ds >> newId;
 
         d->mPersonalId = newId;
@@ -1573,6 +1605,9 @@ void QContactModel::clearPersonalDetails()
 */
 void QContactModel::setPersonalDetails(const QUniqueId & identifier)
 {
+    // Force a read
+    QUniqueId oldId = personalID();
+
     {
         QSettings c("Trolltech","Pim");
         c.beginGroup("Contacts");
@@ -1584,8 +1619,8 @@ void QContactModel::setPersonalDetails(const QUniqueId & identifier)
 
     // The IPC will send the appropriate signals, if required.
     {
-        QtopiaIpcEnvelope e("QPE/PIM", "updatePersonalId(QUniqueId)");
-        e << identifier;
+        QtopiaIpcEnvelope e("QPE/PIM", "updatePersonalId(QUniqueId,QUniqueId)");
+        e << oldId << identifier;
     }
 
     updateBusinessCard(contact(identifier));
@@ -1635,7 +1670,6 @@ void QContactModel::removeBusinessCard()
     QFile::remove( businessCardName() );
 }
 
-#ifdef QTOPIA_PHONE
 /*!
   Returns the best match for the phone number \a text.  If no contact
   in the model has a phone number matching the given text returns a
@@ -1643,22 +1677,9 @@ void QContactModel::removeBusinessCard()
 */
 QContact QContactModel::matchPhoneNumber(const QString &text)
 {
-    int bestMatch = 0;
-    QUniqueId bestId;
-    foreach(const QRecordIO *model, accessModels()) {
-        const QContactIO *contactModel = qobject_cast<const QContactIO *>(model);
-        int match;
-        QUniqueId id = contactModel->matchPhoneNumber(text, match);
-        if (match > bestMatch) {
-            bestMatch = match;
-            bestId = id;
-        }
-    }
-    if (bestMatch > 0)
-        return contact(bestId);
-    return QContact();
+    int match;
+    return contact(d->defaultio->matchPhoneNumber(text, match));
 }
-#endif
 
 /*!
   Returns the best match for the email address \a text.  If no contact
@@ -1667,20 +1688,22 @@ QContact QContactModel::matchPhoneNumber(const QString &text)
 */
 QContact QContactModel::matchEmailAddress(const QString &text)
 {
-    int bestMatch = 0;
-    QUniqueId bestId;
-    foreach(const QRecordIO *model, accessModels()) {
-        const QContactIO *contactModel = qobject_cast<const QContactIO *>(model);
-        int match;
-        QUniqueId id = contactModel->matchEmailAddress(text, match);
-        if (match > bestMatch) {
-            bestMatch = match;
-            bestId = id;
-        }
-    }
-    if (bestMatch > 0)
-        return contact(bestId);
-    return QContact();
+    int match;
+    return contact(d->defaultio->matchEmailAddress(text, match));
+}
+
+/*!
+  Returns the best match for the chat address \a text.  If the
+  \a provider is not empty, restricts matches to contacts with
+  chat addresses from that QCollectivePresence provider. If no contact
+  in the model has a chat address matching the given text returns a
+  null contact.
+
+  \sa QCollectivePresence
+*/
+QContact QContactModel::matchChatAddress(const QString &text, const QString& provider)
+{
+    return contact(d->defaultio->matchChatAddress(text, provider).value(0));
 }
 
 /*!
@@ -1688,12 +1711,14 @@ QContact QContactModel::matchEmailAddress(const QString &text)
 
   These flags describe what kind of contact information to filter contacts on.
 
-  \value ContainsPhoneNumber
-      The contact must provide one or more phone numbers.
-  \value ContainsEmail
-      The contact must provide one or more email addresses.
-  \value ContainsMailing
-      The contact must provide one or more mailing addresses.
+    \value ContainsPhoneNumber
+        The contact must provide one or more phone numbers.
+    \value ContainsEmail
+        The contact must provide one or more email addresses.
+    \value ContainsMailing
+        The contact must provide one or more mailing addresses.
+    \value ContainsChat
+        The contact must provide one or more chat addresses.
 
   \sa setFilter()
 */
@@ -1712,10 +1737,7 @@ void QContactModel::setFilter(const QString &text, int flags)
 
     d->filterText = text;
     d->filterFlags = flags;
-    foreach(QRecordIO *model, accessModels()) {
-        QContactIO *contactModel = qobject_cast<QContactIO *>(model);
-        contactModel->setFilter(text, flags);
-    }
+    d->defaultio->setFilter(text, flags);
 }
 
 /*!
@@ -1740,69 +1762,72 @@ int QContactModel::filterFlags() const
 
 /*!
   Clears contact name and type filtering for the model.
-  Does not affect category filtering.
+  Does not affect category or presence filtering.
 */
 void QContactModel::clearFilter()
 {
     if (d->filterText.isEmpty() && d->filterFlags == 0)
         return;
 
-    foreach(QRecordIO *model, accessModels()) {
-        QContactIO *contactModel = qobject_cast<QContactIO *>(model);
-        contactModel->clearFilter();
-    }
+    d->defaultio->clearFilter();
 
     d->filterText.clear();
     d->filterFlags = 0;
 }
 
-#ifdef QTOPIA_PHONE
+
+/*!
+    Sets the model to only contain those contacts that have
+    a presence status in the supplied \a types.
+*/
+void QContactModel::setPresenceFilter(QList<QCollectivePresenceInfo::PresenceType> types)
+{
+    d->presenceFilter = types;
+    d->defaultio->setPresenceFilter(types);
+}
+
+/*!
+    Returns the presence filter being used by the model.
+
+    \sa setPresenceFilter()
+*/
+QList<QCollectivePresenceInfo::PresenceType> QContactModel::presenceFilter() const
+{
+    return d->presenceFilter;
+}
+
+/*!
+   Clears any presence filtering done by the model.
+
+   \sa setPresenceFilter()
+*/
+void QContactModel::clearPresenceFilter()
+{
+    d->presenceFilter.clear();
+    d->defaultio->clearPresenceFilter();
+}
+
 /*!
   Returns true if the contact at the given \a index is stored on the SIM card.
 */
-bool QContactModel::isSIMCardContact(const QModelIndex &index) const
+bool QContactModel::isSimCardContact(const QModelIndex &index) const
 {
-    return isSIMCardContact(id(index));
+    return isSimCardContact(id(index));
 }
 
 /*!
   Returns true if the contact with the given \a identifier is on the SIM card.
 */
-bool QContactModel::isSIMCardContact(const QUniqueId & identifier) const
+bool QContactModel::isSimCardContact(const QUniqueId & identifier) const
 {
 #ifdef QTOPIA_CELL
     simSource();
     // mContext part of id
-    return identifier.mappedContext() == d->simContext;
+    return identifier.mappedContext() == d->simContextId;
 #else
     Q_UNUSED(identifier);
     return false;
 #endif
-}
-
-#endif
-
-/*!
-  \internal
-  */
-void QContactModel::setSortField(Field s)
-{
-    if (s == sortField())
-        return;
-
-    foreach(QRecordIO *model, accessModels()) {
-        QContactIO *contactModel = qobject_cast<QContactIO *>(model);
-        contactModel->setSortKey(s);
-    }
-}
-
-/*!
-  \internal
-  */
-QContactModel::Field QContactModel::sortField() const
-{
-    // assumed others are the same.
-    return d->defaultio->sortKey();
 }
 
 /*!
@@ -1944,3 +1969,197 @@ QModelIndexList QContactModel::match(const QModelIndex &start, int role, const Q
     return l;
 }
 
+/*!
+    Returns a list of indexes for the items where the data in the \a field value
+    matches the specified \a value.  The list that is returned may be empty.
+
+    The search starts from the \a start row and continues until the number of
+    matching data items equals \a hits or the search reaches the last row.
+
+    The \a flags argument can contain any of the following flags:
+
+    - Qt::MatchWildcard
+    - Qt::MatchFixedString (or equivalently Qt::MatchExactly)
+    - Qt::MatchContains
+    - Qt::MatchStartsWith
+    - Qt::MatchCaseSensitive
+
+*/
+QModelIndexList QContactModel::match(Field field, const QVariant& value, Qt::MatchFlags flags, int start, int hits)
+{
+    QModelIndexList l;
+    if ( 0 == hits )
+        return l;
+
+    QList<QUniqueId> matchedIds = d->defaultio->match(field, value, flags);
+
+    foreach(QUniqueId id, matchedIds) {
+        QModelIndex idx = index(id);
+        if (idx.row() >= start) {
+            l.append(idx);
+            if (hits != -1 && l.count() >= hits)
+                break;
+        }
+    }
+
+    return l;
+}
+
+/*!
+    Returns the identifier for the currently inserted SIM card.
+*/
+QString QContactModel::simCardIdentity() const
+{
+#ifdef QTOPIA_CELL
+    return d->simContext->card();
+#else
+    return QString();
+#endif
+}
+
+/*!
+    Returns the index of the first entry for a SIM cnotact data \a source.
+*/
+int QContactModel::firstSimIndex(const QPimSource &source) const
+{
+#ifdef QTOPIA_CELL
+    Q_UNUSED(source)
+    return d->simContext->firstIndex();
+#else
+    Q_UNUSED(source)
+    return 0;
+#endif
+}
+
+/*!
+    Returns the index of the last entry for a SIM contact data \a source.
+*/
+int QContactModel::lastSimIndex(const QPimSource &source) const
+{
+#ifdef QTOPIA_CELL
+    Q_UNUSED(source)
+    return d->simContext->lastIndex();
+#else
+    Q_UNUSED(source)
+    return 0;
+#endif
+}
+
+/*!
+    Returns the maximum number of characters for the label component
+    of a SIM contact data \a source entry.
+
+    Note that when storing contacts with multiple phone numbers to a SIM,
+    part of the label may be used to indicate the type phone number
+    for the entries used.
+*/
+int QContactModel::simLabelLimit(const QPimSource &source) const
+{
+#ifdef QTOPIA_CELL
+    Q_UNUSED(source)
+    return d->simContext->labelLimit();
+#else
+    Q_UNUSED(source)
+    return 0;
+#endif
+}
+
+/*!
+    Returns the maximum number of characters for the number component
+    of a SIM contact data \a source entry.
+*/
+int QContactModel::simNumberLimit(const QPimSource &source) const
+{
+#ifdef QTOPIA_CELL
+    Q_UNUSED(source)
+    return d->simContext->numberLimit();
+#else
+    Q_UNUSED(source)
+    return 0;
+#endif
+}
+
+/*!
+    Returns the total number of indexes available for a given
+    SIM contact data \a source.
+*/
+int QContactModel::simIndexCount(const QPimSource &source) const
+{
+#ifdef QTOPIA_CELL
+    Q_UNUSED(source)
+    return d->simContext->indexCount();
+#else
+    Q_UNUSED(source)
+    return 0;
+#endif
+}
+
+/*!
+    Returns the number of free indexes for a given SIM contact data \a source.
+*/
+int QContactModel::simFreeIndexCount(const QPimSource &source) const
+{
+#ifdef QTOPIA_CELL
+    Q_UNUSED(source)
+    return d->simContext->freeIndexCount();
+#else
+    Q_UNUSED(source)
+    return 0;
+#endif
+}
+
+/*!
+    Returns the number of indexes used for a given SIM contact data \a source.
+*/
+int QContactModel::simUsedIndexCount(const QPimSource &source) const
+{
+#ifdef QTOPIA_CELL
+    Q_UNUSED(source)
+    return d->simContext->usedIndexCount();
+#else
+    Q_UNUSED(source)
+    return 0;
+#endif
+}
+
+/*!
+    Returns the list of indexes in the given \a source of contact data
+    on a SIM card for the contact with the given \a identifier.
+*/
+QList<int> QContactModel::simCardIndexes(const QUniqueId &identifier, const QPimSource &source) const
+{
+#ifdef QTOPIA_CELL
+    Q_UNUSED(source)
+    return d->simContext->simCardIndexes("SM", identifier);
+#else
+    Q_UNUSED(identifier)
+    Q_UNUSED(source)
+    return QList<int>();
+#endif
+}
+
+/*!
+    Returns true if the entries for the given SIM contact \a source 
+    are still being loaded into SQL storage.
+
+    \sa simLoaded()
+*/
+bool QContactModel::loadingSim(const QPimSource &source) const
+{
+#ifdef QTOPIA_CELL
+    Q_UNUSED(source)
+    return d->simContext->loadingSim();
+#else
+    Q_UNUSED(source)
+    return false;
+#endif
+}
+
+/*!
+    \fn void QContactModel::simLoaded(const QPimSource &source)
+
+    This signal is emitted when the given \a source of contact
+    data on a SIM card completes syncing to the SQL storage.
+
+    \sa loadingSim()
+*/

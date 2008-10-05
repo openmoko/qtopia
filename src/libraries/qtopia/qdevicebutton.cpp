@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,10 +22,11 @@
 #include "qdevicebutton.h"
 
 /*! \class QDeviceButton
-    \mainclass
-    \brief The QDeviceButton class represents a user-programmable button on a Qtopia device.
+    \inpublicgroup QtBaseModule
 
-    This class represents a physical special-function button on a Qtopia device.
+    \brief The QDeviceButton class represents a user-programmable button on a Qt Extended device.
+
+    This class represents a physical special-function button on a Qt Extended device.
     The location and number of buttons will vary from device to
     device and the button is described in the help documentation by \c userText() and \c pixmap().
 
@@ -66,8 +65,7 @@ int QDeviceButton::keycode() const
 /*!
   Returns the button context. If the context is empty, then the button
   applies in all contexts. The semantics of non-empty contexts is device specific,
-  but in general the meaning of a context is a certain device state. The Qtopia
-  server defines the context "HomeScreen" such that device button mappings can
+  but in general the meaning of a context is a certain device state. The Qt Extended server defines the context "HomeScreen" such that device button mappings can
   be made that only apply on the device home screen.
  */
 QString QDeviceButton::context() const

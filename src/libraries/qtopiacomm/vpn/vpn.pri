@@ -1,5 +1,9 @@
+qbuild{
+SOURCEPATH+=vpn
+} else {
 PREFIX=VPN
 VPATH+=vpn
+}
 
 VPN_HEADERS+=\
     qvpnclient.h\
@@ -18,7 +22,7 @@ VPN_PRIVATE_HEADERS+=\
     qipsec_p.h
 
 # Don't put this in include because it depends on the forms
-VPN_PACKAGE_HEADERS+=\
+VPN_PRIVATE_HEADERS+=\
     qopenvpngui_p.h
 
 VPN_FORMS+=\
@@ -27,21 +31,20 @@ VPN_FORMS+=\
     optionsopenvpnbase.ui\
     deviceopenvpnbase.ui
 
+qbuild{
+HEADERS+=$$VPN_HEADERS
+SOURCES+=$$VPN_SOURCES
+PRIVATE_HEADERS+=$$VPN_PRIVATE_HEADERS
+FORMS+=$$VPN_FORMS
+} else {
 sdk_vpn_headers.files=$$VPN_HEADERS
 sdk_vpn_headers.path=/include/qtopia/comm
 sdk_vpn_headers.hint=sdk headers
 INSTALLS+=sdk_vpn_headers
-
-sdk_vpn_private_headers.files=$$VPN_PRIVATE_HEADERS
-sdk_vpn_private_headers.path=/include/qtopiacomm/private
-sdk_vpn_private_headers.hint=sdk headers
-INSTALLS+=sdk_vpn_private_headers
-
-VPN_HEADERS+=$$VPN_PACKAGE_HEADERS
 
 # the server does this for us
 #vpn_categories.files=$$QTOPIA_DEPOT_PATH/etc/categories/vpn.conf
 #vpn_categories.trtarget=QtopiaCategories
 #vpn_categories.hint=nct
 #INSTALLS+=vpn_categories
-
+}

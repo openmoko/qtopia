@@ -1,38 +1,41 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "e3_phonebrowser.h"
 #include "qtopiaserverapplication.h"
+#include "launcherview.h"
 #include <QCategoryManager>
 #include <QContent>
 #include <QContentFilter>
-#include <QVBoxLayout>
-#include <QHash>
 #include <QKeyEvent>
-#include "phonebrowser.h"
+#include "lazycontentstack.h"
 #include <QSoftMenuBar>
-#include <QMenu>
+
 #include <QAction>
-#include <QItemDelegate>
 #include <QDebug>
+#include <QHash>
+#include <QItemDelegate>
+#include <QListView>
+#include <QMenu>
+#include <QPainter>
+#include <QStackedWidget>
+#include <QVBoxLayout>
 
 QTOPIA_REPLACE_WIDGET(QAbstractBrowserScreen, E3BrowserScreen);
 
@@ -113,6 +116,7 @@ public:
 protected:
     virtual QObject* createView(const QString &);
     virtual void raiseView(const QString &, bool reset);
+    virtual QObject* currentViewObject();
 
 private:
     QListView::ViewMode m_mode;
@@ -185,6 +189,11 @@ QObject* E3BrowserScreenStack::createView(const QString &name)
     }
 
     return view;
+}
+
+QObject* E3BrowserScreenStack::currentViewObject()
+{
+    return stack->currentWidget();
 }
 
 void E3BrowserScreenStack::raiseView(const QString &view, bool)

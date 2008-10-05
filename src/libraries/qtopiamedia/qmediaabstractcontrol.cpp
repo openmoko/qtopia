@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,7 +22,9 @@
 #include <QTimer>
 #include <QtopiaIpcAdaptor>
 #include <QValueSpaceItem>
-#include <qdebug.h>
+#include <QDebug>
+
+#include "qmediahandle_p.h"
 #include "qmediacontent.h"
 
 #include "qmediaabstractcontrol.h"
@@ -48,7 +48,8 @@ QMediaAbstractControl::QMediaAbstractControl(QMediaContent* mediaContent, QStrin
     d->name = name;
     d->values = 0;
 
-    QString baseName = mediaContent->handle().toString() + "/" + name;
+    QMediaHandle handle = QMediaHandle::getHandle(mediaContent);
+    QString baseName = handle.toString() + "/" + name;
 
     d->send = new QtopiaIpcAdaptor("QPE/Media/Server/Control/" + baseName, this);
     d->recieve = new QtopiaIpcAdaptor("QPE/Media/Library/Control/" + baseName, this);
@@ -60,17 +61,18 @@ QMediaAbstractControl::QMediaAbstractControl(QMediaContent* mediaContent, QStrin
             this, SLOT(controlUnavailable(QString)));
 
     // Check if active server TODO: bit of a hack
-    QValueSpaceItem item("/Media/Control/" + d->mediaContent->handle().toString() + "/Session");
+    QValueSpaceItem item("/Media/Control/" + handle.toString() + "/Session");
 
     if (item.value("controls").toStringList().contains(name))
     {
-        d->values = new QValueSpaceItem("/Media/Control/" + d->mediaContent->handle().toString() + "/" + name);
+        d->values = new QValueSpaceItem("/Media/Control/" + handle.toString() + "/" + name);
         QTimer::singleShot(0, this, SIGNAL(valid()));
     }
 }
 
 QMediaAbstractControl::~QMediaAbstractControl()
 {
+    delete d->values;
     delete d;
 }
 
@@ -88,6 +90,7 @@ void QMediaAbstractControl::setValue(QString const& name, QVariant const& value)
         qWarning("Attempting to call setValue() on an invalid control");
 
     d->values->setValue(name, value);
+    d->values->sync();
 }
 
 void QMediaAbstractControl::proxyAll()
@@ -125,7 +128,7 @@ void QMediaAbstractControl::controlAvailable(const QString& name)
     if (name == d->name && d->values == 0)
     {
         // Connect to our valuespace
-        d->values = new QValueSpaceItem("/Media/Control/" + d->mediaContent->handle().toString() + "/" + name);
+        d->values = new QValueSpaceItem("/Media/Control/" + QMediaHandle::getHandle(d->mediaContent).toString() + "/" + name);
 
         emit valid();
     }

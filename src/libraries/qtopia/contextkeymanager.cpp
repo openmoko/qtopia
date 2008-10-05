@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -30,13 +28,16 @@
 #include <qsettings.h>
 #include <qcombobox.h>
 #include <QKeySequence>
-#include <QtGui/qtextcursor.h>
+#include <qtextcursor.h>
 #include <QTextBlock>
 #include <QTextLayout>
 #include <QTextBrowser>
 #include <QObject>
 #include <QSoftKeyLabelHelper>
 #include <QInputContext>
+#ifndef QT_NO_WIZARD
+#include <QWizard>
+#endif
 
 #include "qtopiaipcenvelope.h"
 #include "qsoftmenubar.h"
@@ -95,7 +96,7 @@ ContextKeyManager::ContextKeyManager()
         setClassStandardLabel("QSlider", Qt::Key_Select, QSoftMenuBar::Edit, QSoftMenuBar::NavigationFocus);
 
         setClassStandardLabel("QMenu", Qt::Key_Back, QSoftMenuBar::NoLabel, QSoftMenuBar::AnyFocus);
-        if (QApplication::style()->inherits("Series60Style"))  //HACK
+        if (QApplication::style()->inherits("Series60Style"))
             setClassStandardLabel("QMenu", Qt::Key_Back, QSoftMenuBar::Cancel, QSoftMenuBar::AnyFocus);
 
         setClassStandardLabel("QCalendarPopup", Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
@@ -167,12 +168,6 @@ void ContextKeyManager::updateLabelsForFocused()
     bool modal = true;
     if( !Qtopia::mousePreferred() )
         modal = w->hasEditFocus();
-
-    // Set top-level defaults
-    bool fromDialog = false;
-    if ( w->topLevelWidget() ) {
-        fromDialog = w->topLevelWidget()->inherits("QDialog");
-    }
 
     int menuKey = QSoftMenuBar::menuKey();
     bool editMenu = false;
@@ -246,6 +241,21 @@ void ContextKeyManager::updateLabelsForFocused()
                 overrideSelect = true;
             }
         }
+#ifndef QT_NO_WIZARD
+        QWizard *wizard = qobject_cast<QWizard *>(w->topLevelWidget());
+        if (wizard) {
+            if (wizard->currentPage()->isComplete()) {
+                if (wizard->nextId() == -1)
+                    backLabel = QSoftMenuBar::Finish;
+                else
+                    backLabel = QSoftMenuBar::Next;
+                overrideBack = true;
+            } else if (wizard->currentId() != wizard->startId()) {
+                backLabel = QSoftMenuBar::Previous;
+                overrideBack = true;
+            }
+        }
+#endif
     }
 
     for (int i = 0; i < static_cast<int>(buttons.count()); i++) {
@@ -693,6 +703,8 @@ QString ContextKeyManager::standardText(QSoftMenuBar::StandardLabel l)
             return tr("Cancel");
         case QSoftMenuBar::Deselect:
             return tr("Deselect");
+        case QSoftMenuBar::Finish:
+            return tr("Finish");
         default:
             return QString();
     }
@@ -729,6 +741,8 @@ QString ContextKeyManager::standardPixmap(QSoftMenuBar::StandardLabel l)
             return "edit-revert";
         case QSoftMenuBar::Deselect:
             return "select";
+        case QSoftMenuBar::Finish:
+            return "done";
         default:
             return QString();
     }

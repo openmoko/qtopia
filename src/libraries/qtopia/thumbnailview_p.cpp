@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -46,9 +44,7 @@
 #include <QDesktopWidget>
 #include <QContentSet>
 #include <Qtopia>
-#include <private/drmcontent_p.h>
-
-// ### TODO: incorporate global pixmap cache
+#include "drmcontent_p.h"
 
 void ThumbnailCache::insert( const ThumbnailRequest& request, const QPixmap& pixmap )
 {
@@ -265,9 +261,6 @@ ThumbnailRepository::ThumbnailRepository( ThumbnailCache* cache, ThumbnailLoader
 
 QPixmap ThumbnailRepository::thumbnail( const ThumbnailRequest& request )
 {
-    // If thumbnail available from cache, return thumbnail
-    // Otherwise, request thumbnail from thumbnail loader
-    // ### FIXME: continual loading of request if unable to load image
     QPixmap pixmap = cache_->retrieve( request );
     if( pixmap.isNull() && !cache_->contains( request ) ) {
         loader_->load( request );
@@ -351,8 +344,6 @@ QSize ThumbnailDelegate::sizeHint( const QStyleOptionViewItem& option, const QMo
 ThumbnailView::ThumbnailView( QWidget* parent )
     : QListView( parent )
 {
-    QDesktopWidget *desktop = QApplication::desktop();
-    resize(desktop->availableGeometry(desktop->screenNumber(this)).width(), height());  //### workaround to make view layout properly on first view.
     setMovement( QListView::Static );
     setFrameStyle(QFrame::NoFrame);
     connect( this, SIGNAL(pressed(QModelIndex)), this, SLOT(emitSelected(QModelIndex)) );

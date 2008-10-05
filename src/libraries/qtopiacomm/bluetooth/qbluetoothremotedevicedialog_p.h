@@ -1,31 +1,30 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#ifndef __QBLUETOOTHREMOTEDEVICEDIALOG_P_H__
-#define __QBLUETOOTHREMOTEDEVICEDIALOG_P_H__
+
+#ifndef QBLUETOOTHREMOTEDEVICEDIALOG_P_H
+#define QBLUETOOTHREMOTEDEVICEDIALOG_P_H
 
 //
 //  W A R N I N G
 //  -------------
 //
-// This file is not part of the Qtopia API.  It exists purely as an
+// This file is not part of the Qt Extended API.  It exists purely as an
 // implementation detail.  This header file may change from version to
 // version without notice, or even be removed.
 //
@@ -38,6 +37,7 @@
 
 #include <QList>
 #include <QIcon>
+#include <QComboBox>
 
 class QBluetoothRemoteDeviceSelector;
 class QLabel;
@@ -45,7 +45,7 @@ class QWaitWidget;
 class QBluetoothSdpQueryResult;
 class QActionGroup;
 class QMenu;
-class QTableWidgetItem;
+class QVBoxLayout;
 
 
 class DiscoveryStatusIcon : public QObject
@@ -84,19 +84,34 @@ public:
     QBluetoothRemoteDeviceDialogPrivate(QBluetoothLocalDevice *local, QBluetoothRemoteDeviceDialog *parent);
     ~QBluetoothRemoteDeviceDialogPrivate();
 
+    void addFilter( QBluetoothRemoteDeviceDialogFilter *filter );
+    void removeFilter( QBluetoothRemoteDeviceDialogFilter *filter );
+    void clearFilters();
+
+    void setCurrentFilter(int index);
+    void setCurrentFilter( QBluetoothRemoteDeviceDialogFilter *filter );
+    QBluetoothRemoteDeviceDialogFilter *currentFilter() const;
+
     QBluetoothAddress selectedDevice() const;
 
     void addDeviceAction(QAction *action);
     void removeDeviceAction(QAction *action);
 
+    void enableFilterSelector();
+    void disableFilterSelector();
+
     void cleanUp();
+
     QSet<QBluetooth::SDPProfile> m_validProfiles;
-    QBluetoothRemoteDeviceDialogFilter *m_filter;
+    bool m_filterSelectorEnabled;
 
 protected:
     void showEvent(QShowEvent *event);
 
 private slots:
+    void filterIndexChanged(int index);
+    void showFilterDialog();
+
     void deviceSelectionChanged();
     void activated(const QBluetoothAddress &addr);
 
@@ -112,6 +127,7 @@ private slots:
     void serviceSearchCancelCompleted();
 
 private:
+    QString describeDiscoveryResults();
     void startDiscovery();
     bool cancelDiscovery();
 
@@ -121,7 +137,6 @@ private:
     bool serviceProfilesMatch(const QList<QBluetoothSdpRecord> services);
 
     void setDeviceActionsEnabled(bool enabled);
-    void addDeviceToDisplay(const QBluetoothRemoteDevice &device);
 
     void initWidgets();
     void initLayout();
@@ -131,7 +146,7 @@ private:
 
     QBluetoothRemoteDeviceDialog *m_parent;
     QPointer<QBluetoothLocalDevice> m_local;
-    bool m_triedAutoDiscovery;
+    bool m_firstShow;
 
     // device discovery
     bool m_discovering;
@@ -158,6 +173,16 @@ private:
     // action icons
     QIcon m_discoveryStartIcon;
     QIcon m_discoveryCancelIcon;
+
+    // filters
+    QComboBox *m_filterCombo;
+    QDialog *m_filterDialog;
+    QAction *m_chooseFilterAction;
+    QList<QBluetoothRemoteDeviceDialogFilter *> m_filters;
+    int m_currFilterIndex;
+    QList<QBluetoothRemoteDevice> m_discoveredDevices;
+
+    QVBoxLayout *m_mainLayout;
 };
 
 #endif

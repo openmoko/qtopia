@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,7 +21,8 @@
 
 /*!
     \class QVibrateAccessory
-    \mainclass
+    \inpublicgroup QtBaseModule
+
 
     \brief The QVibrateAccessory class provides access to the vibrate device on a phone.
 
@@ -45,12 +44,12 @@
 */
 
 /*!
-    Construct a new vibrate accessory object for provider \a id and attaches
+    Construct a new vibrate abstraction object for provider \a id and attaches
     it to \a parent.  The object will be created in client mode if
     \a mode is Client, or server mode otherwise.
 
     If \a id is empty, this class will use the first available
-    accessory provider that supports the vibrate interface.  If there is more
+    provider that supports the vibrate interface.  If there is more
     than one service that supports the vibrate interface, the caller
     should enumerate them with QHardwareManager::providers()
     and create separate QVibrateAccessory objects for each.
@@ -137,7 +136,8 @@ void QVibrateAccessory::setVibrateNow( const bool value )
 
 /*!
     \class QVibrateAccessoryProvider
-    \mainclass
+    \inpublicgroup QtBaseModule
+
 
     \brief The QVibrateAccessoryProvider class provides an interface for vibrate devices to integrate into Qtopia.
 
@@ -178,7 +178,7 @@ void QVibrateAccessoryProvider::setSupportsVibrateOnRing( bool value )
 }
 
 /*!
-    Indicate whether this vibrate accessory supports vibrateNow()
+    Indicate whether this vibrate provider supports vibrateNow()
     with \a value.  This is typically called from the constructor
     of subclass implementations.
 */
@@ -190,7 +190,7 @@ void QVibrateAccessoryProvider::setSupportsVibrateNow( bool value )
 /*!
     Sets the vibrateOnRing attribute to \a value. The default implementation
     updates the vibrateOnRing attribute as seen by vibrateOnRing() on the
-    client.  Vibrate accessory implementations should override this function
+    client.  Vibrate provider implementations should override this function
     to provide device-specific functionality and then call this implementation
     to update the client's view of the vibrateOnRing value.
 */
@@ -203,7 +203,7 @@ void QVibrateAccessoryProvider::setVibrateOnRing( const bool value )
 /*!
     Turns on the vibration device if \a value is true; otherwise it is turned
     off.  The default implementation updates the vibrateNow state as seen by
-    vibrateNow() on the client.  Vibrate accessory implementations should
+    vibrateNow() on the client.  Vibrate provider implementations should
     override this function to provide device-specific functionality and then
     call this implementation to update the client's view of the vibrateNow
     state.

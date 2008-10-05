@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -33,11 +31,17 @@
 #include <qmediasessionrequest.h>
 
 #include "media.h"
+#include "qmediahandle_p.h"
 #include "mediaserverproxy_p.h"
 
 
 namespace mlp
 {
+
+/*!
+    \class mlp::MediaServerCallback
+    \internal
+*/
 
 // {{{ MediaServerCallback
 MediaServerCallback::~MediaServerCallback()
@@ -101,6 +105,8 @@ void MediaServerProxy::destroySession(QMediaHandle const& handle)
     envelope << handle.id();
     envelope.send();
 
+    m_callbackMap.remove(handle.id());
+
     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 }
 
@@ -118,11 +124,7 @@ void MediaServerProxy::sessionCreated(QUuid const& id)
     CallbackMap::iterator it = m_callbackMap.find(id);
 
     if (it != m_callbackMap.end())
-    {
         (*it)->mediaReady();
-
-        m_callbackMap.erase(it);
-    }
 }
 
 void MediaServerProxy::sessionError(QUuid const& id, QString const& error)
@@ -130,15 +132,21 @@ void MediaServerProxy::sessionError(QUuid const& id, QString const& error)
     CallbackMap::iterator it = m_callbackMap.find(id);
 
     if (it != m_callbackMap.end())
-    {
         (*it)->mediaError(error);
-
-        m_callbackMap.erase(it);
-    }
 }
 
 void MediaServerProxy::simpleInfoChanged()
 {
+    if (m_simpleInfo->subPaths().empty()) {
+        // We'll take it no providers means something bad happened
+        // Tell any of our sessions they are now in error.
+        for (CallbackMap::iterator it = m_callbackMap.begin();
+             it != m_callbackMap.end();
+             ++it) {
+
+            (*it)->mediaError(QString("Connection lost"));
+        }
+    }
 }
 
 MediaServerProxy::MediaServerProxy()
@@ -155,10 +163,7 @@ MediaServerProxy::MediaServerProxy()
 
     // values
     m_simpleInfo = new QValueSpaceItem("/Media/Library/Info/Simple", this);
-    /*   Don't currently need to monitor
-    connect(m_simpleInfo, SIGNAL(contentsChanged()),
-            this, SLOT(simpleInfoChanged()));
-    */
+    connect(m_simpleInfo, SIGNAL(contentsChanged()), SLOT(simpleInfoChanged()));
 }
 // }}}
 

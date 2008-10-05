@@ -1,30 +1,31 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/pim/qphonenumber.h>
+#include <qphonenumber.h>
 
 /*!
     \class QPhoneNumber
-    \mainclass
-    \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
     \ingroup pim
     \brief The QPhoneNumber class provides utility functions to manipulate telephone numbers.
 
@@ -110,7 +111,9 @@ typedef struct
 
 // This list was derived from a combination of the codes in the
 // back of the Telstra White Pages, and the local area code prefixes
-// at "http://kropla.com/dialcode.htm".
+// at "http://kropla.com/dialcode.htm". As a list of facts, they are
+// not copyrightable.
+
 
 static IDDRule const rules[] = {
     {"Afghanistan",              93,    2,  0,   0,   1},
@@ -223,7 +226,7 @@ static IDDRule const rules[] = {
     {"Iraq",                    964,    2,  1,   0,   1},
     {"Ireland",                 353,    2,  1,   0,   1},
     {"Israel",                  972,    1,  0,   0,   1},
-    {"Italy",                   390,    2,  1,   0,   1},
+    {"Italy",                    39,    0,  0,  -1,   1},
     {"Ivory Coast",             225,    0,  0,   0,   1},
 
     {"Jamaica",                1876,    0,  0,   1,   1},

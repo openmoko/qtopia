@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef VOLUMEIMPL_H
@@ -23,8 +21,6 @@
 
 #include "ui_volume.h"
 #include <QDialog>
-
-#include "qtopiaserverapplication.h"
 
 class VolumeWidget;
 class VolumeDialogImplPrivate;
@@ -35,7 +31,7 @@ class VolumeDialogImpl : public QDialog
 public:
     VolumeDialogImpl( QWidget* parent = 0, Qt::WFlags fl = 0 );
 
-    void setVolume( bool up );
+    int  setVolume( bool up );
 
     static const int TIMEOUT = 1500;
 
@@ -51,10 +47,24 @@ private slots:
     void valueSpaceVolumeChanged();
 
 private:
+    void screenUpdate();
+
+    int initialized;
+    int old_slot;
     int m_tid;
     int m_oldValue;
     VolumeWidget *volumeWidget;
     VolumeDialogImplPrivate  *m_d;
+};
+
+class VolumeDialogTask : public QObject
+{
+    Q_OBJECT
+public:
+    VolumeDialogTask( QObject *parent = 0 );
+    ~VolumeDialogTask();
+private slots:
+    void volumeChanged(bool up);
 };
 
 #endif

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -32,10 +30,30 @@
 #include <QSettings>
 #include "qpixmapwheel.h"
 #include <QTimeLine>
-#include <Qtopia>
+#include <qtopianamespace.h>
 #include <QContentFilter>
 #include <QContentSet>
 
+
+/*!
+    \class WheelBrowserScreen
+    \inpublicgroup QtUiModule
+    \brief The WheelBrowserScreen class provides a wheel based application
+    launcher view.
+    \ingroup QtopiaServer::PhoneUI
+
+    An image of this browser screen can be found in the \l {Server Widget Classes}{server widget gallery}.
+
+    This class is a Qt Extended \l{QtopiaServerApplication#qt-extended-server-widgets}{server widget}.
+    It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+    \sa QAbstractBrowserScreen
+*/
+
+/*!
+    Constructs a new WheelBrowserScreen instance with the given \a parent and
+    widget \a flags.
+*/
 WheelBrowserScreen::WheelBrowserScreen(QWidget *parent, Qt::WFlags flags)
 : QAbstractBrowserScreen(parent, flags),
   m_fillAlpha(0), m_hiding(false), m_wheel(0), m_fillTimeline(0)
@@ -101,6 +119,9 @@ WheelBrowserScreen::WheelBrowserScreen(QWidget *parent, Qt::WFlags flags)
                      this, SLOT(timelineStep(qreal)));
 }
 
+/*!
+    \reimp
+*/
 void WheelBrowserScreen::showEvent(QShowEvent *e)
 {
     setEditFocus(true);
@@ -112,6 +133,9 @@ void WheelBrowserScreen::showEvent(QShowEvent *e)
     QAbstractBrowserScreen::showEvent(e);
 }
 
+/*!
+    \reimp
+*/
 void WheelBrowserScreen::hideEvent(QHideEvent *e)
 {
     m_wheel->setWheel(QPixmapWheelData());
@@ -131,6 +155,9 @@ void WheelBrowserScreen::clicked(const QString &name)
     }
 }
 
+/*!
+    \reimp
+*/
 void WheelBrowserScreen::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
@@ -140,6 +167,9 @@ void WheelBrowserScreen::paintEvent(QPaintEvent *)
     p.fillRect(0, 0, width(), height(), fill);
 }
 
+/*!
+    \reimp
+*/
 void WheelBrowserScreen::keyPressEvent(QKeyEvent *e)
 {
     if(e->key() == Qt::Key_Back ||
@@ -176,11 +206,17 @@ void WheelBrowserScreen::doHide()
     }
 }
 
+/*!
+    \reimp
+*/
 QString WheelBrowserScreen::currentView() const
 {
     return "Main";
 }
 
+/*!
+    \reimp
+*/
 bool WheelBrowserScreen::viewAvailable(const QString &view) const
 {
     return "Main" == view;
@@ -200,6 +236,9 @@ void WheelBrowserScreen::timelineStep(qreal r)
     update();
 }
 
+/*!
+    \reimp
+*/
 void WheelBrowserScreen::resetToView(const QString &name)
 {
     if(name.isEmpty()) {
@@ -254,6 +293,9 @@ QPixmapWheelData WheelBrowserScreen::getData(const QString &name)
     return QPixmapWheelData();
 }
 
+/*!
+    \reimp
+*/
 void WheelBrowserScreen::moveToView(const QString &name)
 {
     QPixmapWheelData data = getData(name);
@@ -280,11 +322,6 @@ QContent *WheelBrowserScreen::readLauncherMenuItem(const QString &entry)
             delete applnk;
             applnk = 0;
         }
-    } else if (entry == "Running") { // No tr
-        applnk = new QContent();
-        applnk->setName(tr("Running"));
-        applnk->setType("Folder/Running");
-        applnk->setIcon("Generic");
     } else {
         QCategoryManager catman("Applications");
         if(catman.contains(entry))

@@ -1,29 +1,26 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "layout.h"
-#include <qxml.h>
 #include <qpainter.h>
-
-SmilLayout::SmilLayout(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+#include <QXmlStreamAttributes>
+SmilLayout::SmilLayout(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts)
 {
     currentState = Active;
@@ -34,22 +31,20 @@ SmilLayout::~SmilLayout()
 {
 }
 
-//===========================================================================
-
-SmilRootLayout::SmilRootLayout(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilRootLayout::SmilRootLayout(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts)
 {
     currentState = Active;
     vis = true;
-    QString val = atts.value("width");
+    QString val = atts.value("width").toString();
     if (!val.isEmpty())
         size.setWidth(val.toInt());
-    val = atts.value("height");
+    val = atts.value("height").toString();
     if (!val.isEmpty())
         size.setHeight(val.toInt());
-    val = atts.value("backgroundColor");
+    val = atts.value("backgroundColor").toString();
     if (val.isEmpty())
-        val = atts.value("background-color");
+        val = atts.value("background-color").toString();
     if (!val.isEmpty())
         setBackgroundColor(parseColor(val));
     else
@@ -61,6 +56,9 @@ void SmilRootLayout::process()
     SmilElement *root = parent();
     while (root->parent())
         root = root->parent();
+
+    //if geometry specified, set root to our size
+    //otherwise use root size
 
     if (root) {
         QRect r = root->rect();
@@ -79,21 +77,19 @@ void SmilRootLayout::paint(QPainter *p)
     p->fillRect(rect(), backgroundColor());
 }
 
-//===========================================================================
-
-SmilRegion::SmilRegion(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilRegion::SmilRegion(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts), fit(FillFit), showBackground(ShowAlways), zIndex(0)
 {
     currentState = Active;
     vis = true;
-    QString val = atts.value("backgroundColor");
+    QString val = atts.value("backgroundColor").toString();
     if (val.isEmpty())
-        val = atts.value("background-color");
+        val = atts.value("background-color").toString();
     if (!val.isEmpty())
         setBackgroundColor(parseColor(val));
     else
         setBackgroundColor(Qt::white);
-    val = atts.value("fit");
+    val = atts.value("fit").toString();
     if (val == "hidden")
         fit = HiddenFit;
     else if (val == "meet")
@@ -102,22 +98,22 @@ SmilRegion::SmilRegion(SmilSystem *sys, SmilElement *p, const QString &n, const 
         fit = ScrollFit;
     else if (val == "slice")
         fit = SliceFit;
-    regionName = atts.value("regionName");
+    regionName = atts.value("regionName").toString();
     if (regionName.isEmpty())
-        regionName = atts.value("id");
-    if (atts.value("showBackground") == "whenActive")
+        regionName = atts.value("id").toString();
+    if (atts.value("showBackground").toString() == "whenActive")
         showBackground = ShowActive;
-    val = atts.value("z-index");
+    val = atts.value("z-index").toString();
     if (!val.isEmpty())
         zIndex = val.toInt();
 
-    right = parsePosition(atts.value("right"));
-    width = parsePosition(atts.value("width"));
-    left = parsePosition(atts.value("left"));
+    right = parsePosition(atts.value("right").toString());
+    width = parsePosition(atts.value("width").toString());
+    left = parsePosition(atts.value("left").toString());
 
-    bottom = parsePosition(atts.value("bottom"));
-    height = parsePosition(atts.value("height"));
-    top = parsePosition(atts.value("top"));
+    bottom = parsePosition(atts.value("bottom").toString());
+    height = parsePosition(atts.value("height").toString());
+    top = parsePosition(atts.value("top").toString());
 }
 
 void SmilRegion::process()
@@ -232,8 +228,6 @@ SmilRegion::Position SmilRegion::parsePosition(const QString &val)
     return pos;
 }
 
-//===========================================================================
-
 SmilLayoutModule::SmilLayoutModule()
 {
 }
@@ -242,7 +236,7 @@ SmilLayoutModule::~SmilLayoutModule()
 {
 }
 
-SmilElement *SmilLayoutModule::beginParseElement(SmilSystem *sys, SmilElement *e, const QString &qName, const QXmlAttributes &atts)
+SmilElement *SmilLayoutModule::beginParseElement(SmilSystem *sys, SmilElement *e, const QString &qName, const QXmlStreamAttributes &atts)
 {
     if (qName == "layout") {
         SmilLayout *l = new SmilLayout(sys, e, qName, atts);
@@ -257,9 +251,9 @@ SmilElement *SmilLayoutModule::beginParseElement(SmilSystem *sys, SmilElement *e
     return 0;
 }
 
-bool SmilLayoutModule::parseAttributes(SmilSystem *, SmilElement *e, const QXmlAttributes &atts)
+bool SmilLayoutModule::parseAttributes(SmilSystem *, SmilElement *e, const QXmlStreamAttributes &atts)
 {
-    QString val = atts.value("region");
+    QString val = atts.value("region").toString();
     if (!val.isEmpty()) {
         new RegionAttribute(this, e, atts);
         return true;
@@ -274,20 +268,20 @@ void SmilLayoutModule::endParseElement(SmilElement *e, const QString &)
         // Ensure there is a layout
         if (!e->findChild(QString(), "layout")) {
             // We need to add a default layout
-            QXmlAttributes atts;
+            QXmlStreamAttributes atts;
             SmilLayout* layout = new SmilLayout(e->system(), e, "layout", atts);
 
             atts.clear();
-            atts.append("id", QString(), QString(), "image");
-            atts.append("width", QString(), QString(), "100%");
-            atts.append("height", QString(), QString(), "67%");
+            atts.append(QString(), "id", "image");
+            atts.append(QString(), "width", "100%");
+            atts.append(QString(), "height", "67%");
             SmilRegion* region = new SmilRegion(e->system(), layout, "region", atts);
             layout->addChild(region);
 
             atts.clear();
-            atts.append("id", QString(), QString(), "text");
-            atts.append("width", QString(), QString(), "100%");
-            atts.append("height", QString(), QString(), "33%");
+            atts.append(QString(), "id", "text");
+            atts.append(QString(), "width", "100%");
+            atts.append(QString(), "height", "33%");
             region = new SmilRegion(e->system(), layout, "region", atts);
             layout->addChild(region);
 
@@ -297,7 +291,7 @@ void SmilLayoutModule::endParseElement(SmilElement *e, const QString &)
     }
 }
 
-QStringList SmilLayoutModule::elements() const
+QStringList SmilLayoutModule::elementNames() const
 {
     QStringList l;
     l.append("layout");
@@ -306,7 +300,7 @@ QStringList SmilLayoutModule::elements() const
     return l;
 }
 
-QStringList SmilLayoutModule::attributes() const
+QStringList SmilLayoutModule::attributeNames() const
 {
     QStringList l;
     l.append("region");
@@ -331,12 +325,10 @@ SmilRegion *SmilLayoutModule::findRegion(const QString &id)
     return 0;
 }
 
-//===========================================================================
-
-RegionAttribute::RegionAttribute(SmilLayoutModule *m, SmilElement *e, const QXmlAttributes &atts)
+RegionAttribute::RegionAttribute(SmilLayoutModule *m, SmilElement *e, const QXmlStreamAttributes &atts)
     : SmilModuleAttribute(e, atts), layoutModule(m)
 {
-    rgn = atts.value("region");
+    rgn = atts.value("region").toString();
 }
 
 void RegionAttribute::process()
@@ -351,4 +343,3 @@ void RegionAttribute::process()
         qWarning("Cannot find region: %s", rgn.toLatin1().constData());
     }
 }
-

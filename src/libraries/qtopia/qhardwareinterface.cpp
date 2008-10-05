@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -36,41 +34,42 @@
 
 /*!
     \class QHardwareInterface
-    \mainclass
-    \brief The QHardwareInterface class is the base class of all accessory classes.
+    \inpublicgroup QtBaseModule
 
-    QHardwareInterface and the accessory classes are part of the
-    \l {Qtopia Accessory System}, which provides information and on the
-    availability of physical accessories and an API for controlling those
-    accessories.  The accessory API is split into two sets of classes:
-    accessory provider classes and accessory client classes.  Both sets are
+    \brief The QHardwareInterface class is the base class of all hardware abstraction classes.
+
+    QHardwareInterface and the abstraction classes are part of the
+    \l {Qt Extended Hardware Abstraction}, which provides information on the
+    availability of physical device and an API for controlling those
+    devices.  The device API is split into two sets of classes:
+    iabstraction provider classes and abstraction client classes.  Both sets are
     subclasses of QHardwareInterface.
     
-    The accessory provider classes implement device-specific code for
+    The provider classes implement device-specific code for
     controlling the hardware feature and manage the state that is reported to
-    the rest of Qtopia through the accessory client API.  Provider classes are
+    the rest of Qt Extended through the client API.  Provider classes are
     created by passing QAbstractIpcInterface::Server as the mode parameter when
     constructing QHardwareInterface derived classes.
 
-    The accessory client classes provide an API for querying the state of and
-    controlling accessories.  Client classes communicate with provider classes
+    The client classes provide an API for querying the state of and
+    controlling devices.  Client classes communicate with provider classes
     through an Inter Process Communication (IPC) mechanism.  Multiple client
-    instances can connect to a single accessory provider.  Client classes are
+    instances can connect to a single provider.  Client classes are
     created by passing QAbstractIpcInterface::Client as the mode parameter when
     constructing QHardwareInterface derived classes.
 
-    Qtopia automatically recognizes any subclass of QHardwareInterface as a Qtopia accessory.
-    Each accessory follows the principal of accessory and accessory provider whereby
-    the provider is a subclass of the accessory class. See the documentation for 
-    QAbstractIpcInterface for more information on wrting and using interface classes.
+    Qt Extended automatically recognizes any subclass of QHardwareInterface as a Qt Extended hardware abstraction.
+    Each abstraction follows the principal of client and provider split whereby
+    the provider is a subclass of the client class. See the documentation for 
+    QAbstractIpcInterface for more information on writing and using interface classes.
 
-    The accessory system supports multiple accessory providers of the same
+    The system supports multiple providers of the same
     interface type.  For example, a device could have a primary and secondary
     battery.  Each battery would be exposed as a separate instance of a
-    QPowerSourceProvider derived class.  Default accessories can be defined in
+    QPowerSourceProvider derived class.  Default devices can be defined in
     the \c {Trolltech/HardwareAccessories.conf} configuration file.  The file
     contains a list of interface names and the identity of the default
-    accessory, for example:
+    device, for example:
 
     \code
     [Defaults]
@@ -89,7 +88,7 @@
     identity \a id and operates in \a mode.  The object is attached to
     \a parent.
 
-    If \a id is empty the default accessory for \a name will be
+    If \a id is empty the default device for \a name will be
     automatically selected.
 */
 QHardwareInterface::QHardwareInterface( const QString& name,

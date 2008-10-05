@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,15 +21,16 @@
 
 /*!
   \class QAbstractDialerScreen
+    \inpublicgroup QtTelephonyModule
   \brief The QAbstractDialerScreen class allows developers to replace the "dialer screen" portion of the Phone UI.
 
   The QAbstractDialerScreen interface is part of the 
-  \l {QtopiaServerApplication#qtopia-server-widgets}{server widgets framework} and allows developers 
-  to replace the standard touchscreen or quick dialers in Qtopia's phone UI.  
+  \l {QtopiaServerApplication#qt-extended-server-widgets}{server widgets framework} and allows developers 
+  to replace the standard touchscreen or quick dialers in the Qt Extended phone UI.  
   A small tutorial on how to develop new server widgets using one of the abstract widgets as base can
   be found in QAbstractServerInterface class documentation.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   \ingroup QtopiaServer::PhoneUI::TTSmartPhone
  */
 
@@ -56,9 +55,9 @@
  */
 
 /*!
-  \fn void QAbstractDialerScreen::appendDigits(const QString &digits)
+    \fn void QAbstractDialerScreen::appendDigits(const QString &digits)
 
-  Appends \a digits to the current number.
+    Appends \a digits to the current number.
  */
 
 /*!
@@ -66,6 +65,22 @@
 
   Sets the current number to  \a digits.
  */
+
+/*!
+    \fn void QAbstractDialerScreen::doOffHook()
+
+    Implements the behavior when the phone handset is taken off its hook.
+
+    \sa DialProxy::onHookGesture()
+*/
+
+/*!
+    \fn void QAbstractDialerScreen::doOnHook()
+
+    Implements the behavior when the phone handset is put on its hook.
+
+    \sa DialProxy::offHookGesture()
+*/
 
 /*!
   \fn void QAbstractDialerScreen::requestDial(const QString &number, const QUniqueId &contact)
@@ -77,27 +92,9 @@
  */
 
 /*!
-  \fn void QAbstractDialerScreen::speedDial(const QString &number)
+    \fn void QAbstractDialerScreen::speedDial(const QString &number)
 
-  Emitted whenever the user speed dials a number from the dial screen.  Qtopia
-  will resolve the \a number into a speed dial action and perform it
-  appropriately.
- */
-
-/*!
-  \fn void QAbstractDialerScreen::filterKeys(const QString& input, bool& filtered)
-
-  Emitted whenever a key is entered which modified the \a input.
-  Slots connected to this signal may elect to filter out the input
-  and handle it themselves.  If they do, \a filtered should be
-  set to true.
-*/
-
-/*!
-  \fn void QAbstractDialerScreen::filterSelect(const QString& input, bool& filtered)
-
-  Emitted when the user selects the \a input within the dialer,
-  usually by pressing the call button.  Slots connected to this signal
-  may elect to filter out the input and handle it themselves.
-  If they do, \a filtered should be set to true.
+    Emitted whenever the user speed dials a number from the dial screen. A speed dial is
+    usually characterized by a press and hold action on a keypad number. Qt Extended will resolve the \a number into a speed dial action and perform it
+    appropriately.
 */

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -29,6 +27,9 @@
 #include <QValueSpaceItem>
 
 #include <math.h>
+#include "qtopiaserverapplication.h"
+#include "mediaservicestask.h"
+
 
 class VolumeWidget : public QWidget
 {
@@ -69,7 +70,7 @@ public:
     QLabel *m;
 
 protected:
-    void paintEvent(QPaintEvent * /*event*/)
+    void paintEvent(QPaintEvent* /*event*/)
     {
         int w = rect().width() - (3 * m_steps);
         barWidth = qRound(w / (m_steps - 1));
@@ -112,11 +113,21 @@ public:
     ~VolumeDialogImplPrivate();
 
     QValueSpaceItem* m_vsVolume;
+
+    int  old_volume[5];
+    bool state;
+    bool firstUpdate;
 };
 
 VolumeDialogImplPrivate::VolumeDialogImplPrivate()
 {
-    m_vsVolume  = new QValueSpaceItem("Volume/CurrentVolume");
+    m_vsVolume  = new QValueSpaceItem("/System/Volume");
+    old_volume[0] = 100;
+    old_volume[1] = 1;
+    old_volume[2] = 2;
+    old_volume[3] = 3;
+    state = false;
+    firstUpdate = false;
 }
 
 VolumeDialogImplPrivate::~VolumeDialogImplPrivate()
@@ -128,10 +139,7 @@ VolumeDialogImplPrivate::~VolumeDialogImplPrivate()
 VolumeDialogImpl::VolumeDialogImpl( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl ), m_tid(0), m_oldValue(0), m_d(new VolumeDialogImplPrivate)
 {
-    QRect d = QApplication::desktop()->screenGeometry();
-    int dw = d.width();
-    int dh = d.height();
-    setGeometry(20*dw/100, 30*dh/100, 60*dw/100, 40*dh/100);
+    screenUpdate();
 
     QColor c(Qt::black);
     c.setAlpha(255);     //XXX: Make fully opaque for now, for  DirectPainter widgets in the background
@@ -177,16 +185,36 @@ VolumeDialogImpl::VolumeDialogImpl( QWidget* parent, Qt::WFlags fl )
     vBox->addLayout(wp);
 
     connect(m_d->m_vsVolume, SIGNAL(contentsChanged()), this, SLOT(valueSpaceVolumeChanged()));
+    initialized = 0;
+    old_slot = 0;
+
+    resetTimer();
+}
+
+void VolumeDialogImpl::screenUpdate()
+{
+    QRect d = QApplication::desktop()->screenGeometry();
+    int dw = d.width();
+    int dh = d.height();
+    setGeometry(20*dw/100, 30*dh/100, 60*dw/100, 40*dh/100);
 }
 
 void VolumeDialogImpl::timerEvent( QTimerEvent *e )
 {
+    m_d->state = false;
+    m_d->old_volume[2] = 0;
+    m_d->old_volume[3] = 0;
+
+    if (m_tid > 0)
+        killTimer( m_tid );
+
     Q_UNUSED(e)
     close();
 }
 
-void VolumeDialogImpl::setVolume( bool up)
+int VolumeDialogImpl::setVolume( bool up)
 {
+    int ret = (volumeWidget->value() == m_oldValue);
     m_oldValue = volumeWidget->value();
     volumeWidget->setCurrent( up ? m_oldValue + 1 : m_oldValue - 1 );
     int value = volumeWidget->value();
@@ -197,24 +225,68 @@ void VolumeDialogImpl::setVolume( bool up)
         emit volumeChanged( false );
 
     resetTimer();
+
+    return ret;
 }
 
 void VolumeDialogImpl::resetTimer()
 {
-    killTimer( m_tid );
+    if (m_tid > 0)
+        killTimer( m_tid );
     m_tid = startTimer( TIMEOUT );
 }
 
 void VolumeDialogImpl::valueSpaceVolumeChanged()
 {
-    int volume = m_d->m_vsVolume->value().toInt();
+    QValueSpaceItem vol("/System/Volume/CurrentVolume");
+    int volume = vol.value().toInt();
+
     int slot =   qBound(1,(int)::ceil(volume/(volumeWidget->steps()))+1,10);
+    int slot2 =  qBound(1,volume+1,100);
+
     volumeWidget->setCurrent( slot );
+    initialized++;
+
+    resetTimer();
+
+    if(initialized < 3) // Ignore initial emit on connect to valueSpace item
+        return;
+
+    if((volume == 0) || (volume == 100)) {
+        // Handle press and hold of volume keys at max or min!
+        if(m_d->state) {
+            m_d->old_volume[3] = m_d->old_volume[2];
+            m_d->old_volume[2] = m_d->old_volume[1];
+            m_d->old_volume[1] = m_d->old_volume[0];
+            m_d->old_volume[0] = volume;
+            if(!((m_d->old_volume[1] == volume) && (m_d->old_volume[2] == volume) &&
+                        (m_d->old_volume[3] == volume)))
+                return;
+        } else {
+            m_d->state = true;
+            return;
+        }
+    } else if(volume == m_d->old_volume[0]) {
+        return;
+    } else {
+        m_d->old_volume[3] = m_d->old_volume[2];
+        m_d->old_volume[2] = m_d->old_volume[1];
+        m_d->old_volume[1] = m_d->old_volume[0];
+        m_d->old_volume[0] = volume;
+    }
+
+    screenUpdate();
+
+    if(!m_d->firstUpdate) {
+        // Ignore the first actual update as that would be startup
+        m_d->firstUpdate = true;
+        return;
+    }
 
     QString str;
     str.setNum(volume);
+    old_slot = slot2;
     emit setText(str+"%");
-
     if(volume > 0)
     {
         volumeWidget->m->hide();
@@ -227,5 +299,59 @@ void VolumeDialogImpl::valueSpaceVolumeChanged()
         volumeWidget->setCurrent( 1 );
     }
     this->show();
-    resetTimer();
 }
+
+/*!
+  \class VolumeDialogTask
+    \inpublicgroup QtMediaModule
+    \inpublicgroup QtBluetoothModule
+  \ingroup QtopiaServer::GeneralUI
+  \brief The VolumeDialogTask class provides a volume dialog that gives feedback on volume changes.
+
+  The volume dialog appears in response to the VolumeControlTask::volumeChanged() signal which is triggered
+  when the user presses the \c Qt::Key_VolumeUp or \c Qt::Key_VolumeDown keys.
+  If the appearance of this dialog is not suitable for the target device this task should be replaced by a 
+  more suitable implementation.
+
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+*/
+
+/*!
+  \internal
+  */
+VolumeDialogTask::VolumeDialogTask( QObject *parent )
+    : QObject( parent )
+{
+    if(qtopiaTask<VolumeControlTask>()) {
+        //QObject::connect(qtopiaTask<VolumeControlTask>(), SIGNAL(volumeChanged(bool)), this, SLOT(volumeChanged(bool)));
+        // NOTE: The Volume Widget is now modified via ValueSpace Item: /Volume/GlobalVolume
+        static VolumeDialogImpl *vd = 0;
+        if ( !vd ) {
+            vd = new VolumeDialogImpl(0, Qt::Tool| Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+        }
+
+    }
+}
+
+
+/*!
+  \internal
+  */
+VolumeDialogTask::~VolumeDialogTask()
+{
+}
+
+/*!
+  \internal
+  */
+void VolumeDialogTask::volumeChanged(bool up)
+{
+    static VolumeDialogImpl *vd = 0;
+    if ( !vd ) {
+        vd = new VolumeDialogImpl(0, Qt::Tool| Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    }
+    if(vd->setVolume(up))
+        vd->show();
+}
+
+QTOPIA_TASK(VolumeDialogTask, VolumeDialogTask);

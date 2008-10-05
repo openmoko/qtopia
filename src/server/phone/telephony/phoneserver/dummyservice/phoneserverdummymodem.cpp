@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,6 +21,7 @@
 #include <qvaluespace.h>
 #include <QSignalSourceProvider>
 #include <qtimer.h>
+#include "phoneserver.h"
 
 QPhoneCallDummy::QPhoneCallDummy
         ( QPhoneCallProvider *provider, const QString& identifier,
@@ -255,8 +254,8 @@ void QNetworkRegistrationDummy::requestAvailableOperators()
     QList<QNetworkRegistration::AvailableOperator> opers;
     QNetworkRegistration::AvailableOperator oper;
     oper.availability = QTelephony::OperatorAvailable;
-    oper.name = "Qtopia";       // No tr
-    oper.id = "0Qtopia";       // No tr
+    oper.name = "Qt Extended";       // No tr
+    oper.id = "0QtExtended";       // No tr
     oper.technology = "GSM";       // No tr
     opers.append( oper );
     emit availableOperators( opers );
@@ -271,7 +270,7 @@ void QNetworkRegistrationDummy::home()
 {
     updateRegistrationState( QTelephony::RegistrationHome );
     updateCurrentOperator( QTelephony::OperatorModeAutomatic,
-                           "0Qtopia", "Qtopia", "GSM" );    // No tr
+                           "0QtExtended", "Qt Extended", "GSM" );    // No tr
 }
 
 void QNetworkRegistrationDummy::initDone()
@@ -390,3 +389,27 @@ void QTelephonyServiceDummy::initialize()
 
     QTelephonyService::initialize();
 }
+
+class DummyTelephonyServiceFactory : public TelephonyServiceFactory 
+{
+    Q_OBJECT
+public: 
+    DummyTelephonyServiceFactory( QObject *parent = 0 )
+    {
+        Q_UNUSED(parent);
+    }
+
+    QTelephonyService* service()
+    {
+        return new QTelephonyServiceDummy( "modem" );
+    }
+
+    QByteArray serviceName() const 
+    {
+        //synchronize with phoneserver.cpp 
+        return QByteArray("DummyModemService");    
+    }
+};
+#include "phoneserverdummymodem.moc"
+QTOPIA_TASK(DummyTelephonyServiceFactory, DummyTelephonyServiceFactory);
+QTOPIA_TASK_PROVIDES(DummyTelephonyServiceFactory, TelephonyServiceFactory);

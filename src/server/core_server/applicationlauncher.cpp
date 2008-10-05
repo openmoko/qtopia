@@ -1,27 +1,25 @@
-// -*-C++-*-
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "applicationlauncher.h"
-#include <Qtopia>
+#include <qtopianamespace.h>
+#include <QEvent>
 #include <QFile>
 #include <QProcess>
 #include <QTimer>
@@ -31,12 +29,9 @@
 #include <qcopchannel_x11.h>
 #endif
 #include <QValueSpaceObject>
-#include "qcoprouter.h"
 #include "qcopfile.h"
 #include <QtopiaApplication>
 #include <unistd.h>
-#include <sys/time.h>
-#include <sys/resource.h>
 #include <qtopiaipcenvelope.h>
 #include <qtopiaabstractservice.h>
 #include <qtopialog.h>
@@ -44,23 +39,13 @@
 #include <QWSServer>
 #endif
 #include <QContent>
-#include <QContentFilter>
-#include <QContentSet>
-#include <qtopiaservices.h>
-#include "qperformancelog.h"
 
-#include <fstream>
-#include <iostream>
-using namespace std;
-
-#include "oommanager.h"
 
 /*!
   \class ApplicationIpcRouter::RouteDestination
+    \inpublicgroup QtBaseModule
   \brief The RouteDestination class represents an IPC route destination.
   \ingroup QtopiaServer::AppLaunch
-  \ingroup QtopiaServer::AppLaunch
-  \ingroup QtopiaServer::Task::Interfaces
   \ingroup QtopiaServer::Task::Interfaces
 
   A route destination allows an ApplicationTypeLauncher to add a manual
@@ -68,7 +53,7 @@ using namespace std;
   are usefull to adapt the system's primary IPC transport to other transport
   models.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   An overview of the application launcher mechanism and the role the
   RouteDestination plays in it is given in the documentation of the
@@ -91,21 +76,21 @@ using namespace std;
 
 /*!
   \class ApplicationIpcRouter
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::AppLaunch
   \ingroup QtopiaServer::Task::Interfaces
   \brief The ApplicationIpcRouter class provides an interface through which
          ApplicationTypeLauncher instances to control IPC message routing.
 
-  The ApplicationIpcRouter provides a Qtopia Server Task interface.  Qtopia
-  Server Tasks are documented in full in the QtopiaServerApplication class
+  The ApplicationIpcRouter provides a Qt Extended Server Task interface.  Qt Extended Server Tasks are documented in full in the QtopiaServerApplication class
   documentation.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   Generally only one task in the system implements the ApplicationIpcRouter task
   interface.  This task is known as the system's IPC Router and is broadly
   responsible for coupling the configured IPC system into Qtopia.  Currently
-  Qtopia only supports the both QCop IPC system, but could conceivably
+  Qt Extended only supports the both QCop IPC system, but could conceivably
   support other transport systems in the future.
 
   An overview of the application launcher mechanism and the role the
@@ -128,16 +113,16 @@ using namespace std;
 
 /*!
   \class ApplicationTypeLauncher
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::AppLaunch
   \ingroup QtopiaServer::Task::Interfaces
   \brief The ApplicationTypeLauncher class provides an interface to control
          a particular application type in the system.
 
-  The ApplicationTypeLauncher provides a Qtopia Server Task interface.  Qtopia
-  Server Tasks are documented in full in the QtopiaServerApplication class
+  The ApplicationTypeLauncher provides a Qt Extended Server Task interface.  Qt Extended Server Tasks are documented in full in the QtopiaServerApplication class
   documentation.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   ApplicationTypeLauncher implementers are used by the ApplicationLauncher to
   control a specific type of application.  An overview of the application
@@ -218,18 +203,27 @@ using namespace std;
   cause of the termination.
 */
 
+/*! 
+  \fn void ApplicationTypeLauncher::pidStateChanged(const QString& application, Q_PID pid)
+
+  This signal is used by the memory monitor. If \a pid is empty the Qtopia \a application
+  exited; otherwise pid is greater than zero. Most server classes should use the
+  terminated() or applicationStateChanged() signal.
+*/
+
 /*!
   \class ApplicationTerminationHandler
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::AppLaunch
   \ingroup QtopiaServer::Task::Interfaces
   \brief The ApplicationTerminationHandler class allows tasks to be notified,
          and possibly filter, when an application terminates.
 
-  The ApplicationTerminationHandler provides a Qtopia Server Task interface.
-  Qtopia Server Tasks are documented in full in the QtopiaServerApplication
+  The ApplicationTerminationHandler provides a Qt Extended Server Task interface.
+  Qt Extended Server Tasks are documented in full in the QtopiaServerApplication
   class documentation.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   When an application terminates, the ApplicationLauncher notifies all tasks, in
   order, that implement the ApplicationTerminationHandler interface.  A task
@@ -290,15 +284,15 @@ class LegacyLauncherService : public QtopiaAbstractService
 
 /*!
   \class QtopiaServerApplicationLauncher
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \ingroup QtopiaServer::AppLaunch
-  \brief The QtopiaServerApplicationLauncher class acts as a proxy for the Qtopia Server within the application launcher framework.
+  \brief The QtopiaServerApplicationLauncher class acts as a proxy for the Qt Extended Server within the application launcher framework.
 
-  The QtopiaServerApplicationLauncher provides a Qtopia Server Task.  Qtopia
-  Server Tasks are documented in full in the QtopiaServerApplication class
+  The QtopiaServerApplicationLauncher provides a Qt Extended Server Task.  Qt Extended Server Tasks are documented in full in the QtopiaServerApplication class
   documentation.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   \table
   \row \o Task Name \o QtopiaServerApplicationLauncher
@@ -306,7 +300,7 @@ class LegacyLauncherService : public QtopiaAbstractService
   \row \o Services \o None
   \endtable
 
-  To enable the Qtopia server itself to receive IPC messages, it must be known
+  To enable the Qt Extended server itself to receive IPC messages, it must be known
   to the application launcher framework.  The QtopiaServerApplicationLauncher
   task provides this.
 
@@ -332,11 +326,9 @@ bool QtopiaServerApplicationLauncher::canLaunch(const QString &app)
 void QtopiaServerApplicationLauncher::launch(const QString &app)
 {
     Q_ASSERT(canLaunch(app));
-#ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
     if (r)
         r->addRoute(app,this);
-#endif
     emit applicationStateChanged(app, Starting);
     emit applicationStateChanged(app, Running);
 }
@@ -365,11 +357,9 @@ void QtopiaServerApplicationLauncher::routeMessage(const QString &app,
                                                    const QString &message,
                                                    const QByteArray &data)
 {
-#ifndef QTOPIA_DBUS_IPC
     QCopFile::writeQCopMessage(app, message, data);
     QtopiaChannel::send("QPE/pid/" + QString::number(::getpid()),
                         "QPEProcessQCop()");
-#endif
 }
 
 // declare ExeApplicationLauncherPrivate
@@ -413,15 +403,11 @@ struct ExeApplicationLauncherPrivate {
     RunningProcess *runningProcess(QProcess *);
 
     QMap<QString, RunningProcess *> m_runningProcesses;
-    /*
-      The out-of-memory manager keeps track of all the running
-      processes in terms of how killable they are.
-     */
-    OomManager        oom_manager;
 };
 
 /*!
   \class ExeApplicationLauncher
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \ingroup QtopiaServer::AppLaunch
   \brief The ExeApplicationLauncher class simplifies implementing ApplicationTypeLauncher for process based applications.
@@ -430,7 +416,7 @@ struct ExeApplicationLauncherPrivate {
   implementations that are slight variations on the simple executable process
   model.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   Many application types are just different ways of starting a QtopiaApplication
   application.  For example, the SimpleExeApplicationLauncher and the
@@ -479,7 +465,6 @@ ExeApplicationLauncher::ExeApplicationLauncher()
  */
 ExeApplicationLauncher::~ExeApplicationLauncher()
 {
-    d->oom_manager.remove(QString("qpe"));
     delete d;
 }
 
@@ -498,11 +483,9 @@ void ExeApplicationLauncher::addStartingApplication(const QString &app,
 
     d->m_runningProcesses.insert(app,
          new ExeApplicationLauncherPrivate::RunningProcess(app,proc,Starting));
-#ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
     if (r)
         r->addRoute(app,this);
-#endif
     emit applicationStateChanged(app,Starting);
 }
 
@@ -527,7 +510,7 @@ void ExeApplicationLauncher::kill(const QString& app)
       When a process is killed, the out-of-memory manager
       must remove it from its data structures.
      */
-    d->oom_manager.remove(rp->app);
+    emit pidStateChanged(rp->app, 0 );
     rp->kill();
 }
 
@@ -547,14 +530,12 @@ void ExeApplicationLauncher::routeMessage(const QString& app,
                                           const QString& message,
                                           const QByteArray& data)
 {
-#ifndef QTOPIA_DBUS_IPC
     ExeApplicationLauncherPrivate::RunningProcess* rp = d->runningProcess(app);
     Q_ASSERT(rp);
 
     QCopFile::writeQCopMessage(app, message, data);
     QtopiaChannel::send("QPE/pid/" + QString::number(rp->proc->pid()),
                         "QPEProcessQCop()");
-#endif
 }
 
 /*!
@@ -570,11 +551,9 @@ void ExeApplicationLauncher::appExited(int , QProcess::ExitStatus)
     Q_ASSERT(rp);
     Q_ASSERT(NotRunning != rp->state);
 
-#ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter* r = qtopiaTask<ApplicationIpcRouter>();
     if (r)
         r->remRoute(rp->app,this);
-#endif
 
     if (Starting == rp->state && proc->error() == QProcess::FailedToStart ) {
         rp->state = NotRunning;
@@ -595,7 +574,7 @@ void ExeApplicationLauncher::appExited(int , QProcess::ExitStatus)
       When a process exits, the out-of-memory manager
       must remove it from its data structures.
      */
-    d->oom_manager.remove(rp->app);
+    emit pidStateChanged(rp->app, 0);
     d->m_runningProcesses.remove(rp->app);
     delete rp;
 }
@@ -629,7 +608,7 @@ void ExeApplicationLauncher::appError(QProcess::ProcessError error)
       out-of-memory manager must remove it from its
       data structures.
      */
-    d->oom_manager.remove(rp->app);
+    emit pidStateChanged(rp->app, 0);
     d->m_runningProcesses.remove(rp->app);
 
     {
@@ -638,11 +617,9 @@ void ExeApplicationLauncher::appError(QProcess::ProcessError error)
         e << rp->app;
     }
 
-#ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
     if (r)
         r->remRoute(rp->app,this);
-#endif
 
 #ifndef QT_NO_SXE
     QValueSpaceItem sxeVsi( "/Sxe/killedPids", this );
@@ -679,7 +656,7 @@ void ExeApplicationLauncher::qtopiaApplicationChannel(const QString &message,
               Tell the out-of-memory manager about this new
               process that is now running.
              */
-            d->oom_manager.insert(rp->app,pid);
+            emit pidStateChanged(rp->app, pid);
             emit applicationStateChanged(rp->app,Running);
             return;
         }
@@ -740,15 +717,16 @@ ExeApplicationLauncherPrivate::runningProcess(QProcess *proc)
 // define SimpleExeApplicationLauncher
 /*!
   \class SimpleExeApplicationLauncher
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \ingroup QtopiaServer::AppLaunch
   \brief The SimpleExeApplicationLauncher class supports launching regular
          QtopiaApplication executables.
 
-  The SystemSuspend provides a Qtopia Server Task.  Qtopia Server Tasks are
+  The SystemSuspend provides a Qt Extended Server Task.  Qt Extended Server Tasks are
   documented in full in the QtopiaServerApplication class documentation.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   \table
   \row \o Task Name \o SimpleExeApplicationLauncher
@@ -822,6 +800,8 @@ void SimpleExeApplicationLauncher::launch(const QString &app)
             return; // Found and done
         }
     }
+
+    delete proc;
 }
 
 /*! \internal */
@@ -861,225 +841,6 @@ void SimpleExeApplicationLauncher::setupPackageLaunch(const QString &exec, QProc
     proc->setWorkingDirectory( packageDir );
 }
 
-#ifndef QT_NO_SXE
-// define SandboxedExeApplicationLauncherPrivate
-class SandboxedExeApplicationLauncherPrivate
-{
-public:
-    SandboxedExeApplicationLauncherPrivate();
-    QString rlimiterExecutable();
-    QHash<int, unsigned long> resourceLimits;
-
-private:
-    QString m_rlimiterExecutable;
-};
-
-SandboxedExeApplicationLauncherPrivate::SandboxedExeApplicationLauncherPrivate()
-    :m_rlimiterExecutable()
-{
-}
-
-/*! \internal
-    Returns the absolute path to the rlimiter executable
-*/
-QString SandboxedExeApplicationLauncherPrivate::rlimiterExecutable()
-{
-    if(m_rlimiterExecutable.isEmpty()) {
-        QStringList rv;
-        QStringList paths = Qtopia::installPaths();
-        for(int ii = 0; m_rlimiterExecutable.isEmpty() && ii < paths.count(); ++ii)
-            if(QFile::exists(paths.at(ii) + "bin/rlimiter"))
-                m_rlimiterExecutable = paths.at(ii) + "bin/rlimiter";
-    }
-    return m_rlimiterExecutable;
-}
-
-/*!
-  \class SandboxedExeApplicationLauncher
-  \ingroup QtopiaServer::AppLaunch
-  \brief The SandboxedExeApplicationLauncher class supports launching untrusted
-         downloaded application executables.
-
-  \bold {Note:} This class is only relevant if SXE is enabled
-  It is part of the Qtopia server and cannot be used by other Qtopia applications.
-
-  The SanboxedExeApplicationLauncher class provides the ApplicationTypeLauncher
-  implementation for simple but untrusted executable based applications (which
-  have been downloaded and installed via packagemanager).  The executable is run under
-  sandboxed conditions to minimize the potential damage the application
-  may cause.
-
-  The SandboxedExeApplicationLauncher class provides the
-  SanboxedExeApplicationLauncher Task.
-*/
-
-QTOPIA_TASK(SandboxedExeApplicationLauncher, SandboxedExeApplicationLauncher);
-QTOPIA_TASK_PROVIDES(SandboxedExeApplicationLauncher, ApplicationTypeLauncher);
-
-// define SandboxedExeApplicationLauncher
-/*!
-  Constructs a new SandboxedExeApplicationLauncher instance.
- */
-SandboxedExeApplicationLauncher::SandboxedExeApplicationLauncher()
-: d( new SandboxedExeApplicationLauncherPrivate() )
-{
-    QTimer::singleShot( 0, this, SLOT(init()) );
-}
-
-/*!
-  Destroys the SandboxedExeApplicationLauncher instance.
- */
-SandboxedExeApplicationLauncher::~SandboxedExeApplicationLauncher()
-{
-    delete d;
-    d = 0;
-}
-
-/*!
-  \internal
-  Obtains the resource limits to be used, currently the only limit
-  is RLIMIT_AS. As a very rough measure, this memeory limit
-  is a proportion of the available physical memory on the device.
-*/
-void SandboxedExeApplicationLauncher::init()
-{
-    QLatin1String sxeConfName( "Sxe" );
-    QLatin1String limitsGroup( "Limits" );
-    QLatin1String maxMemRatio( "MaxMemRatio" );
-    QSettings conf( QSettings::SystemScope,"Trolltech", sxeConfName );
-    conf.beginGroup( limitsGroup );
-    bool ok = false;
-
-    if ( conf.contains( maxMemRatio ) )
-    {
-        double memRatio = conf.value( maxMemRatio ).toDouble(&ok);
-        if ( !ok )
-        {
-            qFatal( "SandboxedExeApplication::init(): Could not read value of key, %s/%s from "
-                  "%s.conf.", limitsGroup.latin1(), maxMemRatio.latin1(), sxeConfName.latin1() ) ;
-        }
-        else if ( memRatio <= 0.0 )
-        {
-            qFatal( "SandboxedExeApplication::init():  Invalid config value from %s.conf. "
-                    "The value of %s/%s must be > 0", sxeConfName.latin1(),
-                    limitsGroup.latin1(), maxMemRatio.latin1() );
-        }
-
-        qLog( SXE ) << "SandboxedExeApplicationLauncher::init() " << sxeConfName + QLatin1String(".conf")
-                    << limitsGroup << "/" << maxMemRatio << "=" << memRatio;
-
-        QFile procFile("/proc/meminfo");
-        unsigned int memTotal=0; //unit is kb
-        if ( !procFile.open( QIODevice::ReadOnly ) )
-        {
-            qFatal("SandboxedExeApplicationLauncher::init(): Could not open %s to get "
-                 "total memory available on device. ", qPrintable(procFile.fileName()) );
-        }
-        else
-        {
-            QByteArray line;
-            bool memTotalFound = false;
-            while( !((line = procFile.readLine()).isEmpty()) )
-            {
-                if ( line.startsWith("MemTotal:") )
-                {
-                    memTotalFound = true;
-                    line = line.simplified();
-                    line = line.split(' ').at(1);  //expected line format is MemTotal:   12345 kb
-                    memTotal = line.toULong( &ok );
-                    qLog( SXE ) << "SandboxedExeApplicationLauncher::init() /proc/meminfo MemTotal ="
-                                << memTotal << "kb";
-                    if ( !ok )
-                    {
-                        qFatal("SandboxedExeApplicationLauncher::init(): Could not obtain "
-                            "value for total memory after reading %s", qPrintable(procFile.fileName())) ;
-                    }
-                    break;
-                }
-            }
-            if ( !memTotalFound )
-            {
-                qFatal("SandboxedExeApplicationlauncher::init(): Could not find MemTotal field in "
-                         "%s.", qPrintable(procFile.fileName()));
-            }
-        }
-        d->resourceLimits[ RLIMIT_AS ] = static_cast<unsigned long>(memRatio * memTotal * 1024);
-        qLog( SXE ) << "SandboxedExeApplication::init() RLIMIT_AS="
-                    << d->resourceLimits[ RLIMIT_AS ];
-    }
-}
-
-/*! \internal */
-bool SandboxedExeApplicationLauncher::canLaunch(const QString &app)
-{
-    // Check whether the executable exists
-    QStringList exes = applicationExecutable(app);
-    for(int ii = 0; ii < exes.count(); ++ii) {
-        if( !QFile::exists( exes.at(ii) ) && QFile::symLinkTarget(exes.at(ii)).endsWith("__DISABLED") ) {
-            QtopiaServiceRequest req( "SystemMessages", "showDialog(QString,QString)" );
-            req << tr("Security Alert");
-            QString msg = tr("<qt>This application has been <font color=\"#FF0000\">disabled</font></qt>");
-            req << msg;
-            req.send();
-            return false;
-        }
-        if(QFile::exists(exes.at(ii)))
-            return true;
-    }
-    return false;
-}
-
-
-/*! \internal */
-void SandboxedExeApplicationLauncher::launch(const QString &app)
-{
-    if(isRunning(app))
-        return; // We're already launching/have launched this guy
-
-    Q_ASSERT(canLaunch(app));
-
-    // We need to launch it
-    QProcess *proc = new QProcess(this);
-    proc->setReadChannelMode(QProcess::ForwardedChannels);
-    proc->closeWriteChannel();
-
-    QStringList exes = applicationExecutable(app);
-    for(int ii = 0; ii < exes.count(); ++ii) {
-        if(QFile::exists(exes.at(ii))) {
-
-            QStringList args;
-            args.append( exes.at(ii) );
-            args.append( QString::number( d->resourceLimits.count() ) );
-            QHash<int, unsigned long>::const_iterator iter = d->resourceLimits.constBegin();
-            while (iter != d->resourceLimits.constEnd()) {
-               args.append( QString::number(iter.key()) );
-               args.append( QString::number(iter.value()) );
-               ++iter;
-            }
-            args.append( "-noshow" );
-            setupPackageLaunch(exes.at(ii), proc);
-            proc->start( d->rlimiterExecutable(), args);
-            addStartingApplication(app, proc);
-            return; // Found and done
-        }
-    }
-}
-
-/*! \internal
-  If the application requested is an absolute path containing Qtopia::packagePath(),
-  it is run with restrictions;  otherwise Qtopia::packagePath()/bin is searched.
-*/
-QStringList SandboxedExeApplicationLauncher::applicationExecutable(const QString &app)
-{
-    if ( app.startsWith( "/" )  && app.contains(Qtopia::packagePath()) )
-        return QStringList() << app;
-
-    QStringList rv(Qtopia::packagePath() + "bin/" + app);
-
-    return rv;
-}
-#endif
-
 // declare BuiltinApplicationLauncherPrivate
 struct BuiltinApplicationLauncherPrivate
 {
@@ -1090,16 +851,17 @@ Q_GLOBAL_STATIC(BuiltinApplicationLauncherPrivate, bat);
 
 /*!
   \class BuiltinApplicationLauncher
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \ingroup QtopiaServer::AppLaunch
   \brief The BuiltinApplicationLauncher class supports launching simple
-         applications that run inside the Qtopia Server process.
+         applications that run inside the Qt Extended Server process.
 
-  The BuiltinApplicationLauncher provides a Qtopia Server Task.  Qtopia Server
+  The BuiltinApplicationLauncher provides a Qt Extended Server Task.  Qt Extended Server
   Tasks are documented in full in the QtopiaServerApplication class
   documentation.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   \table
   \row \o Task Name \o BuiltinApplicationLauncher
@@ -1108,16 +870,15 @@ Q_GLOBAL_STATIC(BuiltinApplicationLauncherPrivate, bat);
   \endtable
 
   The BuiltinApplicationLauncher class provides the ApplicationTypeLauncher
-  implementation for simple applications compiled into the Qtopia Server -
+  implementation for simple applications compiled into the Qt Extended Server -
   known as builtin applications.
 
   A builtin application must consist of a single, toplevel widget.  Generally
   builtins do not implement services, but they may.  If multiple builtins
-  implement the same service, or the Qtopia Server and a builtin implements the
+  implement the same service, or the Qt Extended Server and a builtin implements the
   same service, the behaviour is undefined.
 
-  Adding a builtin application is a simple case of linking it into the Qtopia
-  Server, and adding a QTOPIA_SIMPLE_BUILTIN() macro to your code.  The
+  Adding a builtin application is a simple case of linking it into the Qt Extended Server, and adding a QTOPIA_SIMPLE_BUILTIN() macro to your code.  The
   QTOPIA_SIMPLE_BUILTIN() macro registers the builtin application with the
   BuiltinApplicationLauncher class.  The macro takes the application name,
   and a simple static function that "launches" the application and returns a
@@ -1147,24 +908,37 @@ Q_GLOBAL_STATIC(BuiltinApplicationLauncherPrivate, bat);
   example, the following code adds a simple builtin named "TestBuiltin" to the
   server.
   \code
-  class TestBuiltinWindow : public QWidget
-  {
+    class TestBuiltinWindow : public QWidget
+    {
      // ...
-  };
-  static QWidget *testBuiltinFunc()
-  {
-      return new TestBuiltinWindow(0);
-  }
-  QTOPIA_SIMPLE_BUILTIN(TestBuiltin, testBultinFunc);
+    };
+    static QWidget *testBuiltinFunc()
+    {
+        static QPointer<TestBuiltinWindow> w = 0
+        if (!w)
+            w = new TestBuiltinWindow(0);
+
+        return w;
+    }
+    QTOPIA_SIMPLE_BUILTIN(TestBuiltin, testBultinFunc);
   \endcode
 
- */
+    If the builtin doesn't return a widget the system assumes that the builtin application
+    provides a background task. Therefore any UI builtin must return the widget.
+
+    Also if the function keeps a QWidget pointer it must ensure that the pointer is valid.
+    This is best ensured by wrapping the widget with a QPointer (see above) since the
+    BuiltinApplicationLauncher may delete the widget when it is told to kill the builtin
+    application.
+
+*/
 /*!
   Constructs a new BuiltinApplicationLauncher instance.
  */
 BuiltinApplicationLauncher::BuiltinApplicationLauncher()
 : d(0)
 {
+    vso = new QValueSpaceObject("/System/Applications", this);
 }
 
 /*!
@@ -1192,6 +966,9 @@ void BuiltinApplicationLauncher::routeMessage(const QString &app,
         w->showMaximized();
         w->raise();
         w->activateWindow();
+        vso->setAttribute(app+"/Tasks/UI", true);
+        QtopiaIpcEnvelope env(QLatin1String("QPE/QtopiaApplication"), QLatin1String("appRaised(QString)"));
+        env << app;
     } else if("close()" == msg) {
         w->close();
     } else if("setDocument(QString)" == msg && w->metaObject()->indexOfMethod("setDocument(QString)") != -1) {
@@ -1202,6 +979,28 @@ void BuiltinApplicationLauncher::routeMessage(const QString &app,
         w->showMaximized();
         w->raise();
     }
+}
+
+/*!
+    \reimp
+*/
+bool BuiltinApplicationLauncher::eventFilter(QObject* obj, QEvent *e)
+{
+    if (e->type() == QEvent::Show || e->type() == QEvent::Hide)
+        if (obj->isWidgetType()) {
+            BuiltinApplicationLauncherPrivate *p = bat();
+            QWidget *wid = static_cast<QWidget *>(obj);
+            for(QMap<QString, QWidget *>::Iterator iter = p->runningApplications.begin();
+                    iter != p->runningApplications.end();
+                    ++iter) {
+                if(*iter == wid) {
+                    vso->setAttribute(iter.key()+"/Tasks/UI", (e->type() == QEvent::Show)?true:false);
+                    return ApplicationTypeLauncher::eventFilter(obj, e);
+                }
+            }
+        }
+
+    return ApplicationTypeLauncher::eventFilter(obj, e);
 }
 
 /*! \internal */
@@ -1221,6 +1020,7 @@ void BuiltinApplicationLauncher::appDestroyed(QObject *obj)
             emit applicationStateChanged(iter.key(), NotRunning);
             ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
             if(r) r->remRoute(iter.key(), this);
+            vso->removeAttribute(iter.key()+"/Tasks/UI");
             p->runningApplications.erase(iter);
             return;
         }
@@ -1286,6 +1086,7 @@ void BuiltinApplicationLauncher::launch(const QString &app)
         ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
         if (r)
             r->addRoute(app, this);
+        wid->installEventFilter(this);
         if (wid->isHidden())
             wid->deleteLater(); // Shutdown
     }
@@ -1301,6 +1102,7 @@ void BuiltinApplicationLauncher::kill(const QString &app)
     QMap<QString, QWidget *>::Iterator iter = p->runningApplications.find(app);
     if (iter != p->runningApplications.end())
         (*iter)->deleteLater();
+        //(*iter)->close();
 }
 
 /*! \internal */
@@ -1356,16 +1158,17 @@ struct ConsoleApplicationLauncherPrivate
 // define ConsoleApplicationLauncher
 /*!
   \class ConsoleApplicationLauncher
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \ingroup QtopiaServer::AppLaunch
   \brief The ConsoleApplicationLauncher class supports launching console
          applications.
 
-  The ConsoleApplicationLauncher provides a Qtopia Server Task.  Qtopia Server
+  The ConsoleApplicationLauncher provides a Qt Extended Server Task.  Qt Extended Server
   Tasks are documented in full in the QtopiaServerApplication class
   documentation.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   \table
   \row \o Task Name \o ConsoleApplicationLauncher
@@ -1382,9 +1185,9 @@ struct ConsoleApplicationLauncherPrivate
 
   Console applications are started whenever any application is sent to their
   application channel.  They do not respond to any messages specifically.
-  Qtopia does not try to manage (or understand) the life cycle of console
+  Qt Extended does not try to manage (or understand) the life cycle of console
   applications.  An application is considered "Running" as soon as the
-  executable is started (as opposed to regular Qtopia applications that must
+  executable is started (as opposed to regular Qt Extended applications that must
   create the QtopiaApplication object first).
 */
 
@@ -1456,10 +1259,8 @@ void ConsoleApplicationLauncher::launch(const QString &app)
 
             d->apps.insert(app, capp);
 
-#ifndef QTOPIA_DBUS_IPC
             ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
             if(r) r->addRoute(app, this);
-#endif
 
             emit applicationStateChanged(app, Starting);
             return;
@@ -1476,6 +1277,7 @@ void ConsoleApplicationLauncher::appStarted()
     Q_ASSERT(proc);
 
     app->state = Running;
+    emit pidStateChanged(app->app, proc->pid());
     emit applicationStateChanged(app->app, Running);
 }
 
@@ -1489,12 +1291,11 @@ void ConsoleApplicationLauncher::appExited(int)
 
     Q_ASSERT(Running == app->state);
 
-#ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
     if(r) r->remRoute(app->app, this);
-#endif
 
     app->state = NotRunning;
+    emit pidStateChanged(app->app, 0);
     emit terminated(app->app, Normal);
     emit applicationStateChanged(app->app, NotRunning);
 
@@ -1525,12 +1326,11 @@ void ConsoleApplicationLauncher::appError(QProcess::ProcessError error)
 
     app->state = NotRunning;
 
-#ifndef QTOPIA_DBUS_IPC
     ApplicationIpcRouter *r = qtopiaTask<ApplicationIpcRouter>();
     if (r)
         r->remRoute(app->app, this);
-#endif
 
+    emit pidStateChanged(app->app, 0);
     emit terminated(app->app, reason);
     emit applicationStateChanged(app->app, NotRunning);
 
@@ -1576,14 +1376,15 @@ QTOPIA_TASK_PROVIDES(ConsoleApplicationLauncher, ApplicationTypeLauncher);
 
 /*!
   \class ApplicationLauncher
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \ingroup QtopiaServer::AppLaunch
   \brief The ApplicationLauncher class is responsible for fundamental application management and IPC routing within Qtopia.
 
-  The ApplicationLauncher provides a Qtopia Server Task.  Qtopia Server Tasks
+  The ApplicationLauncher provides a Qt Extended Server Task.  Qt Extended Server Tasks
   are documented in full in the QtopiaServerApplication class documentation.
 
-  \bold{Note:} This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  \bold{Note:} This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   \table
   \row \o Task Name \o ApplicationLauncher
@@ -1592,8 +1393,8 @@ QTOPIA_TASK_PROVIDES(ConsoleApplicationLauncher, ApplicationTypeLauncher);
   \endtable
 
   IPC and application control are tightly linked in Qtopia.  At any level higher
-  than the ApplicationLauncher itself, Qtopia does not intrinsically understand
-  the notion of "starting" an application.  Qtopia treats an application as
+  than the ApplicationLauncher itself, Qt Extended does not intrinsically understand
+  the notion of "starting" an application.  Qt Extended treats an application as
   a named IPC endpoint that exposes one or more IPC services for use by other
   applications or the system itself.  The named IPC endpoint is known as the
   application's "application channel".
@@ -1613,7 +1414,7 @@ QTOPIA_TASK_PROVIDES(ConsoleApplicationLauncher, ApplicationTypeLauncher);
   application - it is something that can be started, stopped and can receive IPC
   messages.  The specifics of process control is handled by pluggable
   implementers of the ApplicationTypeLauncher interface.  By separating the
-  specifics in this way, Qtopia can easily be adapted to handle foreign
+  specifics in this way, Qt Extended can easily be adapted to handle foreign
   applications, such as Java applications, in a seamless and highly integrated
   fashion.
 
@@ -1632,7 +1433,7 @@ QTOPIA_TASK_PROVIDES(ConsoleApplicationLauncher, ApplicationTypeLauncher);
   Each task is asked if it can launch the application, and if it can, is asked
   to do so.  The ApplicationLauncher monitors the progress of the
   ApplicationTypeLauncher through Qt signals, which it consolidates and emits
-  to the rest of the Qtopia server.
+  to the rest of the Qt Extended server.
 
   Once the application is ready to receive messages, the ApplicationTypeLauncher
   informs the router by invoking the ApplicationIpcRouter::addRoute() method,
@@ -1644,11 +1445,9 @@ QTOPIA_TASK_PROVIDES(ConsoleApplicationLauncher, ApplicationTypeLauncher);
   How the ApplicationIpcRouter::RouteDestination implementation (usually the
   ApplicationTypeLauncher) handles delivery of the message is up to it.  This
   allows more advanced ApplicationTypeLauncher implementations - such as a
-  Java application type launcher - to adapt Qtopia service messages into a form
-  suitable for the application type they manage.  For example, while Qtopia
-  uses a "raise()" message sent to an application's application channel to
-  cause it to show its main UI, a Java application that has no notion of Qtopia
-  messages will need to have this message transformed appropriately.
+  Java application type launcher - to adapt Qt Extended service messages into a form
+  suitable for the application type they manage.  For example, while Qt Extended uses a "raise()" message sent to an application's application channel to
+  cause it to show its main UI, a Java application that has no notion of Qt Extended messages will need to have this message transformed appropriately.
 
   To summarize,
 
@@ -1685,7 +1484,6 @@ ApplicationLauncher::ApplicationLauncher()
     m_vso = new QValueSpaceObject("/System/Applications", this);
 
     new LegacyLauncherService(this);
-    oom_manager.insert(QString("qpe"),getpid());
 
 }
 
@@ -1736,7 +1534,6 @@ ApplicationLauncher::handleStateChange(const QString &app,
 
         m_vso->setAttribute(app + "/Info/State", stateText);
         qLog(QtopiaServer) << "ApplicationLauncher::handleStateChanged(" << app << ", " << stateText << ")";
-        QPerformanceLog("QtopiaServer") << "ApplicationLauncher::handleStateChanged(" << app << "," << stateText << ")";
     }
 
     if (busyApps.count() != oldBusyCount)
@@ -1926,8 +1723,6 @@ void LegacyLauncherService::execute( const QString& app )
 {
     qLog(ApplicationLauncher) << "LegacyLauncherService: Request for execute("
                               << app << ")";
-    QPerformanceLog("ApplicationLauncher") << "LegacyLauncherService: Request for execute("
-                      << app.toLatin1() << ")";
     QtopiaIpcEnvelope env("QPE/Application/" + app, "raise()");
 }
 
@@ -1936,8 +1731,6 @@ void LegacyLauncherService::execute(const QString& app,
 {
     qLog(ApplicationLauncher) << "LegacyLauncherService: Request for execute("
                               << app << ", " << document << ")";
-    QPerformanceLog("ApplicationLauncher") << "LegacyLauncherService: Request for execute("
-                      << app.toLatin1() << ", " << document.toLatin1() << ")";
     QtopiaIpcEnvelope env("QPE/Application/" + app, "setDocument(QString)");
     env << document;
 }

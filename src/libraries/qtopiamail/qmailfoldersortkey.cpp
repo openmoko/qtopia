@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,23 +23,25 @@
 
 /*!
     \class QMailFolderSortKey
-    \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
     \preliminary
-    \brief The QMailFolderSortKey class defines the parameters used for sorting a subset of
+    \brief The QMailFolderSortKey class defines the parameters used for sorting a subset of 
     queried folders from the mail store.
     \ingroup messaginglibrary
 
-    A QMailFolderSortKey is composed of a folder property to sort and a sort order.
-    The QMailFolderSortKey class is used in conjunction with the QMailStore::queryFolders()
+    A QMailFolderSortKey is composed of a folder property to sort and a sort order. 
+    The QMailFolderSortKey class is used in conjunction with the QMailStore::queryFolders() 
     function to sort folder results according to the criteria defined by the sort key.
 
     For example:
     To create a query for all folders sorted by the name in ascending order:
     \code
     QMailFolderSortKey sortNameKey(QMailFolderSortKey::Name,Qt::Ascending);
-    QMailIdList results = QMailStore::instance()->queryFolders(sortNameKey);
+    QMailIdList results = QMailStore::instance()->queryFolders(QMailFolderKey(),sortNameKey);
     \endcode
-
+    
     \sa QMailStore, QMailFolderKey
 */
 
@@ -51,16 +51,19 @@
     This enum type describes the sortable data properties of a QMailFolder.
 
     \value Id The ID of the folder.
-    \value Name The name of the folder.
-    \value ParentId the ID of the parent folder for a given folder.
+    \value Name The name of the folder in native form.
+    \value ParentId The ID of the parent folder for a given folder.
+    \value ParentAccountId The ID of the parent account for a given folder.
+    \value DisplayName The name of the folder, designed for display to users.
+    \value Status The status value of the folder.
 */
 
 /*!
     Create a QMailFolderSortKey with specifying matching parameters.
 
-    A default-constructed key (one for which isEmpty() returns true) sorts no folders.
+    A default-constructed key (one for which isEmpty() returns true) sorts no folders. 
 
-    The result of combining an empty key with a non-empty key is the same as the original
+    The result of combining an empty key with a non-empty key is the same as the original 
     non-empty key.
 
     The result of combining two empty keys is an empty key.
@@ -68,15 +71,15 @@
 
 QMailFolderSortKey::QMailFolderSortKey()
 {
-	d = new QMailFolderSortKeyPrivate();
+    d = new QMailFolderSortKeyPrivate();
 }
 
 /*!
-    Construct a QMailFolderSortKey which sorts a set of results based on the
-    QMailFolderSortKey::Property \a p and the Qt::SortOrder \a order
+    Construct a QMailFolderSortKey which sorts a set of results based on the  
+    QMailFolderSortKey::Property \a p and the Qt::SortOrder \a order 
 */
 
-QMailFolderSortKey::QMailFolderSortKey(const Property& p, const Qt::SortOrder& order)
+QMailFolderSortKey::QMailFolderSortKey(Property p, Qt::SortOrder order)
 {
     d = new QMailFolderSortKeyPrivate();
     QMailFolderSortKeyPrivate::Argument a(p,order);
@@ -92,11 +95,9 @@ QMailFolderSortKey::QMailFolderSortKey(const QMailFolderSortKey& other)
     d = other.d;
 }
 
-
 /*!
     Destroys this QMailFolderSortKey.
 */
-
 
 QMailFolderSortKey::~QMailFolderSortKey()
 {
@@ -125,7 +126,7 @@ QMailFolderSortKey& QMailFolderSortKey::operator&=(const QMailFolderSortKey& oth
 }
 
 /*!
-    Returns \c true if the value of this key is the same as the key \a other. Returns
+    Returns \c true if the value of this key is the same as the key \a other. Returns 
     \c false otherwise.
 */
 
@@ -140,7 +141,7 @@ bool QMailFolderSortKey::operator==(const QMailFolderSortKey& other) const
 
 bool QMailFolderSortKey::operator!=(const QMailFolderSortKey& other) const
 {
-   return !(*this == other);
+   return !(*this == other); 
 }
 
 /*!

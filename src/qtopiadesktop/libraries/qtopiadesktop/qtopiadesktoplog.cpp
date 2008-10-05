@@ -1,51 +1,53 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <qtopiadesktoplog.h>
 #include <desktopsettings.h>
 
+Q_GLOBAL_STATIC_WITH_ARGS(DesktopSettings, logSettings, ("Log"));
+Q_GLOBAL_STATIC(QList<char*>, logCache);
+
+void qtopiadesktopLogSemiVolatile(char *mem)
+{
+    QList<char*> &list(*logCache());
+    if (!list.contains(mem))
+        list.append(mem);
+}
+
 bool qtopiadesktopLogEnabled( const char *_category )
 {
-    static QMap<QString,bool> *cache = 0;
-    if ( cache && _category == 0 ) {
-        delete cache;
-        cache = 0;
+    if (_category == 0) {
+        logSettings()->sync();
+        foreach (char *mem, *logCache())
+            (*mem) = 0;
         return false;
     }
-    if ( !cache ) {
-        cache = new QMap<QString,bool>;
-    }
     QLatin1String category( _category );
-    if ( cache->contains(category) )
-        return (*cache)[category];
-
-    DesktopSettings settings( "Log" );
+    DesktopSettings &settings(*logSettings());
     QVariant v = settings.value( category );
     if ( v.isNull() ) {
         v = DesktopSettings::debugMode()?1:0;
         if ( category == "TRACE" )
             v = 0;
         settings.setValue( category, v );
+        settings.sync();
     }
     bool ret = v.toBool();
-    (*cache)[QString(category)] = ret;
     //qDebug() << "category" << category << ret;
     return ret;
 }
@@ -54,9 +56,9 @@ bool qtopiadesktopLogEnabled( const char *_category )
   \headerfile <qtopiadesktoplog.h>
   \title <qtopiadesktoplog.h>
   \ingroup headers
-  \brief The <qtopiadesktoplog.h> header contains the category definitions used in Qtopia Sync Agent.
+  \brief The <qtopiadesktoplog.h> header contains the category definitions used in Qt Extended Sync Agent.
 
-  The <qtopiadesktoplog.h> header contains the category definitions used in Qtopia Sync Agent.
+  The <qtopiadesktoplog.h> header contains the category definitions used in Qt Extended Sync Agent.
 
   \quotefromfile libraries/qtopiadesktop/qtopiadesktoplog.h
   \skipto QLOG_UNCATEGORIZED

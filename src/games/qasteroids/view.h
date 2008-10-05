@@ -1,24 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
+**
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
+**
 **
 ****************************************************************************/
 
-/*
- * KAsteroids - Copyright (c) Martin R. Jones 1997
- *
- * Part of the KDE project
- */
-
-#ifndef __AST_VIEW_H__
-#define __AST_VIEW_H__
+#ifndef VIEW_H
+#define VIEW_H
 
 #include <qwidget.h>
 #include <qlist.h>
@@ -32,7 +32,7 @@ class MyGraphicsView : public QGraphicsView
 {
     Q_OBJECT
  public:
-    MyGraphicsView(QGraphicsScene* scene, QWidget* parent = 0)
+    explicit MyGraphicsView(QGraphicsScene* scene, QWidget* parent = 0)
         : QGraphicsView(scene,parent) { }
 
  protected:
@@ -51,7 +51,7 @@ class KAsteroidsView : public QWidget
     void newShip();
     void raiseShield();
     void teleport();
-    void pause(bool p);
+    void pause();
     void reportMissileFired();
     void reportRockDestroyed(int rock_size);
 
@@ -63,6 +63,11 @@ class KAsteroidsView : public QWidget
     void reportShipKilled();
     void reportGameOver();
     void markVitalsChanged() { vitalsChanged_ = true; }
+
+    bool isPaused() { return game_paused_; }
+
+    bool canPause() { return canPause_; }
+    void setCanPause(bool truth) { canPause_ = truth; }
 
  signals:
     void missileFired();
@@ -82,6 +87,7 @@ class KAsteroidsView : public QWidget
 
     bool		instruct_user_;
     bool 		game_paused_;
+    bool                canPause_;
     bool 		vitalsChanged_;
     bool		textPending_;
 

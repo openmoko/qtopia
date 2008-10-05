@@ -46,6 +46,12 @@ unix {
     build.hint=sdk
     INSTALLS+=build
 
+    editions.files=\
+        $$QTOPIA_DEPOT_PATH/editions
+    editions.path=/
+    editions.hint=sdk
+    INSTALLS+=editions
+
     qtopialibs.commands=$$COMMAND_HEADER\
         for file in $$QPEDIR/lib/*; do\
             cp -aRpf \$$file $(INSTALL_ROOT)/lib;\
@@ -198,15 +204,6 @@ unix {
     qtdocsyms.hint=sdk
     INSTALLS+=qtdocsyms
 
-    co=sdk
-    phone:co+=phone
-    else:pda:co+=pda
-    configureoptions.commands=$$COMMAND_HEADER\
-        echo $$co >$(INSTALL_ROOT)/.configureoptions
-    configureoptions.CONFIG=no_path
-    configureoptions.hint=sdk
-    INSTALLS+=configureoptions
-
     # default device directory
     device.files=$$QTOPIA_DEPOT_PATH/devices/default
     device.path=/devices
@@ -236,8 +233,3 @@ listcomponents.commands=$$COMMAND_HEADER\
     echo THEMES = $$THEMES
 QMAKE_EXTRA_TARGETS+=listcomponents
 
-enable_dbusipc {
-    convert_services.commands=$$QPEDIR/bin/convert_services_to_dbus $(INSTALL_ROOT)
-    convert_services.CONFIG=no_path
-    INSTALLS+=convert_services
-}

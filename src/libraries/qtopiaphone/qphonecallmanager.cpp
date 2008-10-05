@@ -1,33 +1,33 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <qphonecallmanager.h>
-#include <qtopiaphone/private/qphonecallmanager_p.h>
-#include <qtopiaphone/private/qphonecall_p.h>
+#include "qphonecallmanager_p.h"
+#include "qphonecall_p.h"
 #include <qglobal.h>
 #include <quuid.h>
+#include <qtimer.h>
 
 /*!
     \class QPhoneCallManager
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QPhoneCallManager class provides access to the phone's call list.
     \ingroup telephony
 
@@ -183,6 +183,7 @@ void QPhoneCallManagerPrivate::callStateTransaction
         stream >> dataPort;
 
         // Find the call.
+        call = QPhoneCall();
         for ( it = calls.begin(); it != calls.end(); ++it ) {
             if ( (*it).identifier() == identifier ) {
                 call = *it;
@@ -261,6 +262,17 @@ void QPhoneCallManagerPrivate::loadCallTypes()
                 callTypeMap[type] += service;
             }
         }
+    }
+
+    // Abort any calls that relate to services that are no longer active.
+    // We abort upon the next entry to the event loop to prevent the
+    // "calls" list from being side-effected while we are scanning it.
+    QList<QPhoneCall>::ConstIterator it;
+    QPhoneCallPrivate *priv;
+    for ( it = calls.begin(); it != calls.end(); ++it ) {
+        priv = (*it).d;
+        if ( !services.contains(priv->service) )
+            QTimer::singleShot(0, priv, SLOT(abortCall()));
     }
 }
 

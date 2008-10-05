@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,6 +22,7 @@
 
 /*!
     \class QMediaSessionBuilder
+    \inpublicgroup QtMediaModule
     \preliminary
     \brief The QMediaSessionBuilder class is a base class to be used by Media Engines
             which need to create sessions within the Media Server.
@@ -105,7 +104,7 @@ QMediaSessionBuilder::~QMediaSessionBuilder()
     Returns a QMap of Attribute Name and Value pairs. This may be used for
     communication of some builder type information to a builder type manager,
     or for custom builder types may just be information that is useful to be
-    presented into the Qtopia Value-space.
+    presented into the Qt Extended Value-space.
 
     \sa QValueSpaceItem
 */

@@ -50,6 +50,7 @@ open OUT, ">$tmpbat" or die "Can't write $tmpbat";
 print OUT $command;
 close OUT;
 my $ret = system($tmpbat);
+$ret = $ret >> 8;
 unlink $tmpbat;
-exit ( $ret != 0 );
+exit $ret;
 

@@ -1,89 +1,85 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef SPEEDDIAL_H
-#define SPEEDDIAL_H
+#ifndef QSPEEDDIAL_H
+#define QSPEEDDIAL_H
 
-#include <qtopiaserviceselector.h>
-#include <QListView>
+#include <qtopiaglobal.h>
+#include "qfavoriteservicesmodel.h"
+#include <QtopiaServiceDescription>
+#include <QSmoothList>
 #include <QList>
 
 class QSpeedDial;
-class QSpeedDialListPrivate;
 class QSpeedDialList;
+class QSpeedDialListPrivate;
 
 
-class QTOPIA_EXPORT QSpeedDialList : public QListView
+class QTOPIA_EXPORT QSpeedDialList : public QSmoothList
 {
     Q_OBJECT
     Q_PROPERTY(int count READ count)
     Q_PROPERTY(int currentRow READ currentRow WRITE setCurrentRow)
     Q_PROPERTY(QString currentInput READ currentInput)
-    friend class QSpeedDialDialog;
+    friend class QSpeedDialAddDialog;
 
 public:
     explicit QSpeedDialList(QWidget* parent=0);
     ~QSpeedDialList();
 
     QString currentInput() const;
-    void setCurrentInput(const QString&);
-
     QString rowInput(int row) const;
 
+    void setCurrentInput ( const QString & input );
     void setCurrentRow(int row);
     int currentRow() const;
 
     int count() const;
 
-    void setBlankSetEnabled(bool);
-    bool isBlankSetEnabled() const;
-
 public slots:
-    void reload(const QString& sd);
+    void addItem();
     void editItem(int row);
     void editItem();
     void clearItem(int row);
     void clearItem();
+    void reload ( const QString & input );
 
 signals:
     void currentRowChanged(int row);
     void rowClicked(int row);
-    void itemSelected(QString);
 
 protected:
-    void keyPressEvent(QKeyEvent*);
-    void timerEvent(QTimerEvent*);
     void scrollContentsBy(int dx, int dy);
+    void keyPressEvent(QKeyEvent* e);
+    void disableEditMenu();
+    void timerEvent(QTimerEvent*);
+    void setSelector(int startPos, const QString &label, const QString &icon);
+    QString selectorInput();
 
 private slots:
     void select(const QModelIndex& index);
     void click(const QModelIndex& index);
     void sendRowChanged();
+    void clearKeyInput();
 
 private:
-    void init(const QString&);
-    QSpeedDialList(const QString& label, const QString& icon, QWidget* parent);
-    void setActionChooserEnabled(bool);
-
-    QSpeedDialListPrivate* d;
+    QSpeedDialListPrivate *d;
 };
 
 
@@ -91,8 +87,6 @@ private:
 class QTOPIA_EXPORT QSpeedDial
 {
 public:
-    // QSpeedDial is very similar to QDeviceButtonManager
-
     static QString addWithDialog(const QString& label, const QString& icon,
         const QtopiaServiceRequest& action, QWidget* parent);
     static QString selectWithDialog(QWidget* parent);
@@ -101,6 +95,9 @@ public:
     static QtopiaServiceDescription* find(const QString& input);
     static void remove(const QString& input);
     static void set(const QString& input, const QtopiaServiceDescription&);
+protected:
+    static int firstAvailableSlot();
+
 };
 
 #endif

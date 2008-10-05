@@ -1,44 +1,47 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/private/qcontentstore_p.h>
-#include <qtopia/private/qsqlcontentstore_p.h>
+#include "qcontentstore_p.h"
+#include "qsqlcontentstore_p.h"
+
 #include <QtopiaApplication>
 
-
 #ifndef QTOPIA_CONTENT_INSTALLER
+#include "qdocumentservercontentstore_p.h"
+#include "contentpluginmanager_p.h"
 #include <QApplication>
-#include <qtopia/private/qdocumentservercontentstore_p.h>
 #include <QThreadStorage>
-
+#include <QImageReader>
+#include <QImageWriter>
+#include <QCryptographicHash>
+#include <QFileSystem>
 Q_GLOBAL_STATIC( QThreadStorage< QContentStore * >, contentStores );
 #endif
 
-#include <qtopiabase/qtopialog.h>
+#include <qtopialog.h>
 #include <QReadLocker>
 #include <QWriteLocker>
 
 /*!
     \class QContentStore
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QContentStore class is an interface to a backing store of content information.
 
     \internal
@@ -65,6 +68,11 @@ Q_GLOBAL_STATIC( QThreadStorage< QContentStore * >, contentStores );
 */
 QContentStore::QContentStore( QObject *parent )
     : QObject( parent )
+    , m_folderThumbnails(QStringList()
+            << QLatin1String(".album-art.jpg")
+            << QLatin1String(".album-art.png")
+            << QLatin1String("folder.jpg"))
+    , m_audioPrefix(QLatin1String("audio/"))
 {
 }
 
@@ -130,6 +138,127 @@ QContentStore::~QContentStore()
     Returns the mime type data for the mime type with the id \a mimeId.
 */
 
+#ifndef QTOPIA_CONTENT_INSTALLER
+
+/*!
+    Loads a thumbnail representation of \a content.  The thumbnail will be scaled to \a size
+    according to the given aspect ratio mode.
+*/
+QImage QContentStore::thumbnail(const QContent &content, const QSize &size, Qt::AspectRatioMode mode)
+{
+    QImage thumbnail;
+
+    QString thumbPath = thumbnailPath(content.fileName());
+
+    QFileInfo thumbInfo(thumbPath);
+
+    if (thumbInfo.exists()) {
+        if (thumbInfo.lastModified() > content.lastUpdated())
+            thumbnail = readThumbnail(thumbPath, size, mode);
+    } else {
+        thumbnail = QContentFactory::thumbnail(content, size, mode);
+    }
+
+    if (thumbnail.isNull()) {
+        if (QIODevice *device = content.open()) {
+            QImageReader reader(device);
+
+            if (reader.canRead()) {
+                QSize scaledSize = reader.size();
+
+                reader.setQuality(25);
+                if (scaledSize.width() > 128 || scaledSize.height() > 128) {
+                    scaledSize.scale(QSize(128, 128), Qt::KeepAspectRatio);
+
+                    reader.setScaledSize(scaledSize);
+                    reader.read(&thumbnail);
+
+                    if (!thumbnail.isNull()) {
+                        QImageWriter writer(thumbPath, QByteArray::fromRawData("PNG", 3));
+                        writer.setQuality(25);
+                        writer.write(thumbnail);
+
+                        if (size.isValid())
+                            thumbnail = thumbnail.scaled(size, mode);
+                    }
+                } else {
+                    if (size.isValid()) {
+                        scaledSize.scale(size, mode);
+
+                        reader.setScaledSize(scaledSize);
+                    }
+                    reader.read(&thumbnail);
+                }
+            }
+
+            delete device;
+        }
+    }
+
+    if (thumbnail.isNull() && content.type().startsWith(m_audioPrefix)) {
+        QDir dir = QFileInfo(content.fileName()).absoluteDir();
+
+        foreach (const QString &fileName, m_folderThumbnails) {
+            if (dir.exists(fileName)) {
+                thumbnail = readThumbnail(dir.absoluteFilePath(fileName), size, mode);
+                break;
+            }
+        }
+    }
+
+    return thumbnail;
+}
+
+/*!
+    Loads a thumbnail from a thumbnail file with the given \a fileName.  The thumbnail will be
+    scaled to \a size according to the given aspect ratio mode.
+*/
+QImage QContentStore::readThumbnail(const QString &fileName, const QSize &size, Qt::AspectRatioMode mode)
+{
+    QImage thumbnail;
+
+    QImageReader reader(fileName);
+
+    if (reader.canRead()) {
+        if (size.isValid()) {
+            QSize scaledSize = reader.size();
+            scaledSize.scale(size, mode);
+
+            reader.setScaledSize(scaledSize);
+        }
+
+        reader.read(&thumbnail);
+    }
+
+    return thumbnail;
+}
+
+/*!
+    Returns the directory to which thumbnails of \a fileName should be saved.
+*/
+QString QContentStore::thumbnailPath(const QString &fileName) const
+{
+    const QString thumbnails(QLatin1String("Thumbnails"));
+
+    QFileSystem fs = QFileSystem::fromFileName(fileName);
+
+    if (!fs.storesType(thumbnails))
+        fs = QFileSystem::typeFileSystem(thumbnails);
+
+    QDir dir(!fs.isNull() ? fs.typePath(thumbnails) : Qtopia::homePath() + QLatin1String("/Thumbnails"));
+
+    if (!dir.exists())
+        dir.mkpath(QLatin1String("."));
+
+    QByteArray hash = QCryptographicHash::hash(
+            fileName.toLocal8Bit(), QCryptographicHash::Md5).toHex();
+
+    return dir.absoluteFilePath(QString::fromLatin1(hash.constData(), hash.length()))
+            + QLatin1String(".png");
+}
+
+#endif
+
 /*!
     \fn QContentStore::contentSet( const QContentFilter &filter, const QContentSortCriteria &order, QContentSet::UpdateMode mode )
 
@@ -188,6 +317,12 @@ QContentStore::~QContentStore()
     Copies the backing file of the given \a content to a new file location a \a newFileName and creates a copy
     of the content record for the new file.
  */
+
+/*!
+    \fn QContentStore::renameContent(QContent *content, const QString &name)
+
+    Changes the \a name of \a content and renames the backing file appropriately.
+*/
 
 /*!
     \fn QContentStore::openContent( QContent *content, QIODevice::OpenMode mode )
@@ -330,16 +465,22 @@ void QContentCache::remove( QContentId contentId )
 
 void QContentCache::cacheMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType, int key )
 {
+    QWriteLocker locker( &m_lock );
+
     m_mimeIdCache.insert( qMakePair( mimeType, databaseId ), new int( key ) );
 }
 
 void QContentCache::cacheLocationKey( QtopiaDatabaseId databaseId, const QString &location, int key )
 {
+    QWriteLocker locker( &m_lock );
+
     m_locationIdCache.insert( qMakePair( location, databaseId ), new int( key ) );
 }
 
 int QContentCache::lookupMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType )
 {
+    QReadLocker locker( &m_lock );
+
     int *key = m_mimeIdCache.object( qMakePair( mimeType, databaseId ) );
 
     return key ? *key : -1;
@@ -347,6 +488,8 @@ int QContentCache::lookupMimeTypeKey( QtopiaDatabaseId databaseId, const QString
 
 int QContentCache::lookupLocationKey( QtopiaDatabaseId databaseId, const QString &location )
 {
+    QReadLocker locker( &m_lock );
+
     int *key = m_locationIdCache.object( qMakePair( location, databaseId ) );
 
     return key ? *key : -1;

@@ -1,27 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 
-#include <qtopiaphone/private/qphonecall_p.h>
-#include <qtopiaphone/private/qphonecallmanager_p.h>
+#include "qphonecall_p.h"
+#include "qphonecallmanager_p.h"
 #include <qatutils.h>
 #include <qserialsocket.h>
 #include <qtopialog.h>
@@ -41,7 +39,8 @@
 
 /*!
     \class QPhoneCall
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QPhoneCall class provides an interface for managing individual incoming and outgoing phone calls.
     \ingroup telephony
 
@@ -165,7 +164,7 @@
     QPhoneCallProvider implementation.  Each call is associated with with a
     QPhoneCallImpl object, whose functions mirror those in QPhoneCall.
 
-    The Qtopia telephony API automatically routes requests from client applications
+    The Qt Extended telephony API automatically routes requests from client applications
     to the appropriate QPhoneCallProvider, based on the callType().  State changes
     in the provider are routed back to client applications and appear as
     \c stateChanged() signals (use connectStateChanged() to access these signals).
@@ -1180,6 +1179,11 @@ void QPhoneCallPrivate::addPendingTones( const QString &_tones )
         sentAllTones = false;
     if( state == QPhoneCall::Connected && !toneTimer->isActive() )
         sendPendingTones();
+}
+
+void QPhoneCallPrivate::abortCall()
+{
+    callStateChanged( identifier, QPhoneCall::OtherFailure, number, service, callType, 0 );
 }
 
 void QPhoneCallPrivate::callStateChanged

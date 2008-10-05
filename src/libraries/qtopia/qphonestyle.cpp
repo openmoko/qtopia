@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,8 +22,12 @@
 #include <custom.h>
 #ifdef QTOPIA_ENABLE_GLOBAL_BACKGROUNDS
 #include "qexportedbackground.h"
+#ifdef Q_WS_QWS
+#include "qscreen_qws.h"
 #endif
-
+#endif
+#include <QValueSpaceItem>
+#include <qtopialog.h>
 #include <qtopianamespace.h>
 #include <QStyleOption>
 #include <QPainter>
@@ -63,6 +65,7 @@
 #include <values.h>
 #include <QGlobalPixmapCache>
 #include <QSoftMenuBar>
+#include <QTableView>
 
 static const int phoneItemFrame        =  1; // menu item frame width
 static const int phoneSepHeight        =  1; // separator item height
@@ -407,19 +410,19 @@ protected:
                         opt.subControls |= QStyle::SC_GroupBoxCheckBox;
                     QRect frame = style()->subControlRect(QStyle::CC_GroupBox, &opt, QStyle::SC_GroupBoxFrame, gb);
                     wgeom.setTop(wgeom.top() + frame.y());
-                    
+
                     int sp = 0;
                     if (widget->parentWidget() && widget->parentWidget()->layout())
                         sp = widget->parentWidget()->layout()->spacing();
                     frame.adjust(0, 0, sp, sp);
                     rectPath.addRoundRect(frame, 800/frame.width(), 800/frame.height());
-                    
+
                     //put highlight around checkbox and title as well
                     QRect checkRect = style()->subControlRect(QStyle::CC_GroupBox, &opt, QStyle::SC_GroupBoxLabel, gb);
                     checkRect = checkRect.united(style()->subControlRect(QStyle::CC_GroupBox, &opt, QStyle::SC_GroupBoxCheckBox, gb));
                     checkRect.adjust(0,0,sp,sp);
                     p.drawRoundRect(checkRect, 800/checkRect.width(), 800/checkRect.height());
-                    
+
                     QRegion region(this->rect());
                     region -= QRegion(checkRect);
                     p.setClipRegion(region);
@@ -485,6 +488,9 @@ public:
 #endif
         connect(qApp, SIGNAL(focusChanged(QWidget*,QWidget*)),
                 SLOT(focusChangedSlot(QWidget*,QWidget*)));
+
+        connect(QApplication::desktop(), SIGNAL(workAreaResized(int)),
+                this, SLOT(bgUpdated()));
     }
 
     void updateDecoration() {
@@ -574,6 +580,36 @@ private slots:
     void updateLabelFocus();
 };
 
+
+QTOPIA_EXPORT int qtopia_background_natural_rotation(int screen)
+{
+#if defined(QTOPIA_ENABLE_GLOBAL_BACKGROUNDS) && defined(Q_WS_QWS)
+    // XXX - we only do this for the primary screen at present and we
+    // assume that the primary screen is specified first.
+    if (screen < 0 || screen == qApp->desktop()->primaryScreen()) {
+        QValueSpaceItem *rotation = new QValueSpaceItem("/UI/Rotation/Default");
+        return rotation->value().toUInt();
+    } else {
+        return 0;
+    }
+#else
+    return 0;
+#endif
+}
+
+QTOPIA_EXPORT int qtopia_background_brush_rotation(int screen)
+{
+#if defined(QTOPIA_ENABLE_GLOBAL_BACKGROUNDS) && defined(Q_WS_QWS)
+    QValueSpaceItem *rotation = new QValueSpaceItem("/UI/Rotation/Current");
+    int rot =  rotation->value().toUInt() - qtopia_background_natural_rotation(screen);
+    if (rot < 0)
+        rot += 360;
+    return rot;
+#else
+    return 0;
+#endif
+}
+
 bool QPhoneStylePrivate::eventFilter(QObject *o, QEvent *e)
 {
     QWidget *wgt = qobject_cast<QWidget*>(o);
@@ -589,6 +625,13 @@ bool QPhoneStylePrivate::eventFilter(QObject *o, QEvent *e)
                 // using QPainter::CompositionMode_Source
                 if (p.paintEngine()->hasFeature(QPaintEngine::PorterDuff))
                     p.setCompositionMode(QPainter::CompositionMode_Source);
+                int screen = QApplication::desktop()->screenNumber(wgt);
+                int rotation = qtopia_background_brush_rotation(screen);
+                if (rotation != 0) {
+                    QTransform transform = b.transform();
+                    transform.rotate(rotation);
+                    b.setTransform(transform);
+                }
                 p.fillRect(pe->rect(), b);
             }
         } else if (e->type() == QEvent::ParentChange) {
@@ -610,11 +653,19 @@ bool QPhoneStylePrivate::eventFilter(QObject *o, QEvent *e)
             if (screen >= 0 && bgManaged.contains(wgt) && bgManaged[wgt] != screen) {
                 bgManaged[wgt] = screen;
                 QExportedBackground *bge = bgForScreen(screen);
-                QPalette pal = bgPal;
-                QColor windowCol = pal.color(QPalette::Window);
-                windowCol.setAlpha(255);
-                pal.setBrush(QPalette::Window, QBrush(windowCol, bge->background()));
-                wgt->setPalette(pal);
+                if (bge->isAvailable()) {
+                    QPalette pal = bgPal;
+                    QColor windowCol = pal.color(QPalette::Window);
+                    windowCol.setAlpha(255);
+                    pal.setBrush(QPalette::Window, QBrush(windowCol, bge->background()));
+                    wgt->setPalette(pal);
+                } else {
+                    QPalette pal = bgPal;
+                    QColor windowCol = pal.color(QPalette::Window);
+                    windowCol.setAlpha(255);
+                    pal.setBrush(QPalette::Window, QBrush(windowCol));
+                    wgt->setPalette(pal);
+                }
             }
     //        w->repaint();  //XXX maybe nice if we allow windows to be moved by user
         } else if (e->type() == QEvent::Destroy) {
@@ -670,7 +721,7 @@ bool QPhoneStylePrivate::eventFilter(QObject *o, QEvent *e)
         if (qobject_cast<QMenu*>(wgt)) {
             //TODO: can we do a better check and make a more accurate mask?
             QRegion reg(wgt->rect());
-            if (QApplication::desktop()->width() < 240) {
+            if (wgt->logicalDpiY() < 240) {
                 reg -= QRegion(QRect(0, 0, 1, 1));
                 reg -= QRegion(QRect(wgt->rect().right(), 0, 1, 1));
                 reg -= QRegion(QRect(0, wgt->rect().bottom(), 1, 1));
@@ -773,7 +824,7 @@ void QPhoneStylePrivate::focusChangedSlot(QWidget *old, QWidget *now)
     QScrollArea *sa;
     if(widget) {
         while (widget->parentWidget()) {
-            //if (widget->objectName() == QLatin1String("qt_scrollarea_viewport")) 
+            //if (widget->objectName() == QLatin1String("qt_scrollarea_viewport"))
 
             if ((sa = qobject_cast<QScrollArea*>(widget->parentWidget()))) {
                 sa->removeEventFilter(this);
@@ -785,7 +836,7 @@ void QPhoneStylePrivate::focusChangedSlot(QWidget *old, QWidget *now)
     widget = (QWidget*)now;
     if(widget) {
         while (widget->parentWidget()) {
-            //if (widget->objectName() == QLatin1String("qt_scrollarea_viewport")) 
+            //if (widget->objectName() == QLatin1String("qt_scrollarea_viewport"))
             if ((sa = qobject_cast<QScrollArea*>(widget->parentWidget()))) {
                 sa->installEventFilter(this);
             }
@@ -801,34 +852,10 @@ void QPhoneStylePrivate::focusChangedSlot(QWidget *old, QWidget *now)
 
 void QPhoneStylePrivate::updateLabelFocus()
 {
-    QLabel *hl = 0;
     QWidget *focus = QApplication::focusWidget();
-    QWidget *w = focus;
-    int pass = 0;   //two passes total (for situations like qtimezonecombo/qtimezonewidget)
-    while (1) {
-        if (w && w->parentWidget()) {
-            QObjectList ol = w->parentWidget()->children();
-            foreach (QObject *o, ol) {
-                if (o->isWidgetType()) {
-                    if (QLabel *l = qobject_cast<QLabel*>(o)) {
-                        if (l->buddy() == focus) {  //to be more lenient, change focus to w
-                            focus = w;
-                            hl = l;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (hl || pass)
-                break;
-            w = w->parentWidget();
-            if (w->focusProxy() == focus)
-                focus = w;
-        }
-        if (pass)
-            break;
-        ++pass;
-    }
+    QLabel *hl = QtopiaStyle::buddyForWidget(focus);
+    if (hl)
+        focus = hl->buddy();
     /*
     if (focus) {
         qDebug() << "Focus for" << focus
@@ -908,16 +935,17 @@ void QPhoneStylePrivate::drawStretch(QPainter *p, const QRect &r,
 
 /*!
     \class QPhoneStyle
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QPhoneStyle class provides a phone look and feel.
 
     \ingroup appearance
 
-    This style is Qtopia's default GUI style for Qtopia Phone Edition.
-    To write a customized style for Qtopia Phone it is recommended that
+    This style is the default GUI style for Qt Extended Phone Edition.
+    To write a customized style for Qt Extended Phone it is recommended that
     QPhoneStyle be subclassed.  QPhoneStyle provides improved display
     for widgets in edit and navigation mode.  It also applies the
-    global background to Qtopia widgets.
+    global background to Qt Extended widgets.
 
     \image qphonestyle.png
     \sa QWindowsStyle
@@ -925,8 +953,8 @@ void QPhoneStylePrivate::drawStretch(QPainter *p, const QRect &r,
 
 /*!
     \enum QPhoneStyle::PhoneStyleHint
-    
-    This enum describes the extra style hints available for QPhoneStyle and derived classes. 
+
+    This enum describes the extra style hints available for QPhoneStyle and derived classes.
     A style hint is a general look and/or feel hint.
 
     \value SH_ExtendedFocusHighlight A boolean indicating whether the widget with focus should have an extended highlight.
@@ -957,12 +985,12 @@ QPhoneStyle::QPhoneStyle() : QtopiaStyle()
     sliderGrooveHeight = qRound(4.25 * dpi / 100.0);
 
     if(!scrollbarSize) {
-        int w = QApplication::desktop()->screen()->width();
+        int w = QApplication::desktop()->screenGeometry(QApplication::desktop()->primaryScreen()).width();
         if(w > 240)
             scrollbarSize = qRound(8.0 * QApplication::desktop()->screen()->logicalDpiX() /100.0);
         else if(w > 180)
             scrollbarSize = 13;
-        else 
+        else
             scrollbarSize = 8;
     }
     d = new QPhoneStylePrivate(this);
@@ -1134,7 +1162,13 @@ void QPhoneStyle::polish(QWidget *widget)
         } else if (widget->parentWidget() && widget->parentWidget()->isWindow() && !widget->testAttribute(Qt::WA_SetPalette) ) {
             widget->setPalette(QApplication::palette());
         }
+    } else {
+        if (QMenu *menu = qobject_cast<QMenu*>(widget))
+            menu->installEventFilter(d);
     }
+#else
+    if (QMenu *menu = qobject_cast<QMenu*>(widget))
+        menu->installEventFilter(d);
 #endif
 }
 
@@ -1264,13 +1298,16 @@ QSize QPhoneStyle::sizeFromContents(ContentsType type, const QStyleOption* opt,
                     - 2*pixelMetric(PM_MenuHMargin, opt, widget)
                     - 2*pixelMetric(QStyle::PM_MenuPanelWidth, opt, widget);
             }
-            int h = sz.height();
-            if (mi->menuItemType == QStyleOptionMenuItem::Separator) {
-                h = 3;
-            } else {
-                h = qMax(h, mi->fontMetrics.height() + 4);
-                if (!mi->icon.isNull())
-                    h = qMax(h, mi->icon.pixmap(pixelMetric(PM_SmallIconSize), QIcon::Normal).height() + 2);
+            int h = 0;
+            if (opt->state & State_Enabled) {
+                h = sz.height();
+                if (mi->menuItemType == QStyleOptionMenuItem::Separator) {
+                    h = 3;
+                } else {
+                    h = qMax(h, mi->fontMetrics.height() + 4);
+                    if (!mi->icon.isNull())
+                        h = qMax(h, mi->icon.pixmap(pixelMetric(PM_SmallIconSize), QIcon::Normal).height() + 2);
+                }
             }
             sz.setWidth(w);
             sz.setHeight(h);
@@ -1287,23 +1324,10 @@ QSize QPhoneStyle::sizeFromContents(ContentsType type, const QStyleOption* opt,
             }
             if (!fullWidthMenus || isSubMenu(widget)) {
                 sz = QtopiaStyle::sizeFromContents(type, opt, csz, widget);
-#if QT_VERSION < 0x040400
-                // without this, the right margin is too wide
-                sz.setWidth(sz.width() - pixelMetric(PM_MenuHMargin, opt, widget) + 1);
-#else
-                #warning "Fix extra menu margins in Qt 4.4"
-#endif
             } else {
                 sz = QSize(QApplication::desktop()->availableGeometry().width(),
                            csz.height());
             }
-
-#if QT_VERSION < 0x040400
-            // without this, the bottom margin is too high
-            sz.setHeight(sz.height() - pixelMetric(PM_MenuVMargin, opt, widget));
-#else
-            #warning "Fix extra menu margins in Qt 4.4"
-#endif
         }
         break;
     case CT_TabBarTab:
@@ -1311,7 +1335,7 @@ QSize QPhoneStyle::sizeFromContents(ContentsType type, const QStyleOption* opt,
         if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(opt)) {
             int w = 0;
             int h = 0;
-            if ( (tab->direction == Qt::LeftToRight && 
+            if ( (tab->direction == Qt::LeftToRight &&
                     tab->position == QStyleOptionTab::End) ||
                   (tab->direction == Qt::RightToLeft &&
                     tab->position == QStyleOptionTab::Beginning) ) {
@@ -1495,6 +1519,17 @@ QRect QPhoneStyle::subControlRect(ComplexControl cc, const QStyleOptionComplex *
             ret = visualRect(scrollbar->direction, scrollbar->rect, ret);
         }
         break;
+    case CC_GroupBox: {
+        if (const QStyleOptionGroupBox *groupBox = qstyleoption_cast<const QStyleOptionGroupBox *>(opt)) {
+            if (groupBox->features & QStyleOptionFrameV2::Flat) {
+                QStyleOptionGroupBox myOpt(*groupBox);
+                myOpt.features &= (~QStyleOptionFrameV2::Flat);
+                ret = QtopiaStyle::subControlRect(cc, &myOpt, sc, w);
+            } else {
+                ret = QtopiaStyle::subControlRect(cc, opt, sc, w);
+            }
+        }
+        break; }
     default:
         ret = QtopiaStyle::subControlRect(cc, opt, sc, w);
     }
@@ -1629,7 +1664,7 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
             drawRoundRect(p, shadowRect, 10, 10);
         }
 
-        QColor bg = opt->palette.color(!enabled ? QPalette::Base : 
+        QColor bg = opt->palette.color(!enabled ? QPalette::Base :
                 (focus && !Qtopia::mousePreferred()) ? QPalette::Highlight : QPalette::Button);
         if (widget && qobject_cast<QTabBar*>(widget->parentWidget())) {
             if (enabled)
@@ -1808,18 +1843,20 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
 
             if (panel->lineWidth > 0)
                 drawPrimitive(PE_FrameLineEdit, panel, p, widget);
-   
+
             if (opt->state & State_HasFocus && !(panel->state & State_HasEditFocus)
                 && !styleHint((QStyle::StyleHint)SH_ExtendedFocusHighlight, panel, widget)) {
 
                 QRect r = opt->rect;
                 int m = 3;
-                if (qobject_cast<const QComboBox *>(widget->parentWidget()))
-                    m = 1;
-                else if (const QDateTimeEdit *dte = qobject_cast<const QDateTimeEdit *>(widget->parentWidget()))
-                    m = dte->calendarPopup() ? 1 : 2;
-                else if (qobject_cast<const QSpinBox *>(widget->parentWidget()))
-                    m = 2;
+                if (widget) {
+                    if (qobject_cast<const QComboBox *>(widget->parentWidget()))
+                        m = 1;
+                    else if (const QDateTimeEdit *dte = qobject_cast<const QDateTimeEdit *>(widget->parentWidget()))
+                        m = dte->calendarPopup() ? 1 : 2;
+                    else if (qobject_cast<const QSpinBox *>(widget->parentWidget()))
+                        m = 2;
+                }
                 r.adjust(m,m,-m,-m);
 
                 QStyleOptionFocusRect focus;
@@ -1866,7 +1903,7 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
         p->setRenderHint(QPainter::Antialiasing, false);
         if (!small)
             r.adjust(2,2,-2,-2);
-        QColor c = opt->palette.color(!enabled ? QPalette::Base : 
+        QColor c = opt->palette.color(!enabled ? QPalette::Base :
                 (focus && !Qtopia::mousePreferred()) ? QPalette::Highlight : QPalette::Button);   //||down
         QLinearGradient bgg(r.x(), r.y(), r.x(), r.bottom());
         bgg.setColorAt(0.4f, c);
@@ -1881,7 +1918,7 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
         p->setPen(Qt::NoPen);
         int shinew = (r.width() > 12) ? r.width()/3 : 4;
         int shineh = shinew/2;
-        
+
         QRect shine(r.left()+2, r.top()+2, shinew, shineh);
         p->drawRect(shine);
 
@@ -1976,7 +2013,7 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
         drawPrimitive(PE_IndicatorArrowDown, opt, p, widget);
         break;
     case PE_IndicatorMenuCheckMark: {
-        int maxwidth = phoneCheckMarkWidth > 10 ? phoneCheckMarkWidth - 4 : 7; 
+        int maxwidth = phoneCheckMarkWidth > 10 ? phoneCheckMarkWidth - 4 : 7;
         const int markW = opt->rect.width() > maxwidth ? maxwidth : opt->rect.width();
         const int markH = markW;
         int posX = opt->rect.x() + (opt->rect.width() - markW)/2 + 1;
@@ -2145,7 +2182,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
 
             int xm = phoneItemFrame + phoneItemHMargin + (drawicons ? iconcol : 0);
             int xpos = menuitem->rect.x() + xm;
-            QRect textRect(xpos, y + phoneItemVMargin, 
+            QRect textRect(xpos, y + phoneItemVMargin,
                            w - xm - phoneRightBorder - tab + 1 - (checked ? checkcol : 0 ), h - 2 * phoneItemVMargin);
             QRect vTextRect = visualRect(opt->direction, menuitem->rect, textRect);
             QString s = menuitem->text;
@@ -2172,7 +2209,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
             if (menuitem->checkType == QStyleOptionMenuItem::Exclusive) {   //draw exclusive indicators
                 QRect vCheckRect = visualRect(opt->direction, menuitem->rect, QRect(x+w-checkcol, y, checkcol, h));
                 //size calculations same as those in PE_IndicatorMenuCheckMark
-                int maxwidth = phoneCheckMarkWidth > 10 ? phoneCheckMarkWidth - 4 : 7; 
+                int maxwidth = phoneCheckMarkWidth > 10 ? phoneCheckMarkWidth - 4 : 7;
                 const int markW = vCheckRect.width() > maxwidth ? maxwidth : vCheckRect.width();
                 const int markH = markW;
                 int posX = vCheckRect.x() + (vCheckRect.width() - markW)/2 + 1;
@@ -2224,7 +2261,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
             int dif = (extent == 0) ? 0 : ((origextent-extent)%2 == 1) ? (origextent-extent)/2+1 : (origextent-extent)/2;
             horz ? r.setRect(r.x(),dif,r.width(),extent) : r.setRect(dif,r.y(),extent,r.height());
             horz ? r.adjust(-1,0,-1,0) : r.adjust(0,-1,0,-1);
-            
+
             p->setPen(opt->palette.shadow().color());
             p->setBrush(opt->palette.shadow());
 
@@ -2254,10 +2291,10 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
             int dif = (extent == 0) ? 0 : ((origextent-extent)%2 == 1) ? (origextent-extent)/2+1 : (origextent-extent)/2;
             horz ? r.setRect(r.x(),dif,r.width(),extent) : r.setRect(dif,r.y(),extent,r.height());
             horz ? r.adjust(0,0,1,0) : r.adjust(0,0,0,2);
-    
+
             p->setPen(opt->palette.shadow().color());
             p->setBrush(opt->palette.shadow());
-    
+
             QPainterPath path;
             if (horz) {
                 path.moveTo(r.right(), r.top());
@@ -2282,14 +2319,14 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
 
             static const int bodySize = 8;
             QSize cachedSize;
-            int minSlider = pixelMetric(PM_ScrollBarSliderMin, opt); 
+            int minSlider = pixelMetric(PM_ScrollBarSliderMin, opt);
             QString key;
             if (horz) {
-                cachedSize = QSize(minSlider + bodySize, opt->rect.height()); 
+                cachedSize = QSize(minSlider + bodySize, opt->rect.height());
                 r.setWidth(cachedSize.width());
                 key = uniqueName("sb-h", opt, QRect(QPoint(0,0),cachedSize));
             } else {
-                cachedSize = QSize(opt->rect.width(), minSlider + bodySize); 
+                cachedSize = QSize(opt->rect.width(), minSlider + bodySize);
                 r.setHeight(cachedSize.height());
                 key = uniqueName("sb-v", opt, QRect(QPoint(0,0),cachedSize));
             }
@@ -2310,7 +2347,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
                 ppm.setRenderHint(QPainter::Antialiasing);
                 drawRoundRect(&ppm, shadowRect, 5, 10);
                 ppm.setRenderHint(QPainter::Antialiasing, false);
-        
+
                 //main portion
                 QColor c = opt->palette.color(QPalette::Highlight);
                 QLinearGradient bgg(r.x(), r.y(), horz ? r.x() : r.right(),
@@ -2347,7 +2384,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
                 path.arcTo(r.right()-5, r.bottom()-5, 5, 5, 0, -90);
                 path.lineTo(r.left()+2, r.bottom());
                 ppm.drawPath(path);
-        
+
                 ppm.setPen(c.lighter(105));
                 QPainterPath path2;
                 path2.moveTo(r.right()-2, r.top()+1);
@@ -2401,7 +2438,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
             }
             if (!btn->text.isEmpty()){
                 drawItemText(p, textRect, alignment | Qt::TextShowMnemonic,
-                             btn->palette, btn->state & State_Enabled, btn->text, 
+                             btn->palette, btn->state & State_Enabled, btn->text,
                              (btn->state & State_HasFocus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText : QPalette::WindowText);
             }
         }
@@ -2558,7 +2595,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
                                 || tabV2.shape == QTabBar::RoundedWest
                                 || tabV2.shape == QTabBar::TriangularEast
                                 || tabV2.shape == QTabBar::TriangularWest;
-            bool bottomTabs = tabV2.shape == QTabBar::RoundedSouth 
+            bool bottomTabs = tabV2.shape == QTabBar::RoundedSouth
                                 || tabV2.shape == QTabBar::TriangularSouth;
             bool selected = tabV2.state & State_Selected;
             bool onlyOne = tab->position == QStyleOptionTab::OnlyOneTab;
@@ -2592,8 +2629,8 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
 
             //tab
             {
-                QColor bg = opt->palette.color(selected ? QPalette::Mid : QPalette::Button); 
-                
+                QColor bg = opt->palette.color(selected ? QPalette::Mid : QPalette::Button);
+
                 if (selected) {
                     QPalette pal(opt->palette);
                     QColor windowCol = pal.color(QPalette::Window);
@@ -2601,7 +2638,8 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
 #ifdef QTOPIA_ENABLE_GLOBAL_BACKGROUNDS
                     pal.setBrush(QPalette::Window, QBrush(windowCol, d->bgExport->background()));
 #endif
-                    p->setBrushOrigin(-widget->mapToGlobal(QPoint(0,0)));
+                    if (widget)
+                        p->setBrushOrigin(-widget->mapToGlobal(QPoint(0,0)));
                     p->setBrush(pal.window());
                     p->setPen(opt->palette.color(QPalette::Light));
                 } else {
@@ -2616,7 +2654,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
 
                 //TODO: cache gradient
                 p->setRenderHint(QPainter::Antialiasing);
-                
+
                 QPainterPath path;
                 path.moveTo(r.left(), selected ? r.bottom() + 1 : r.bottom()-1);
                 path.lineTo(r.left(), r.top()+5);
@@ -2625,7 +2663,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
                 path.quadTo(r.right()-5, r.y(), r.right(), selected ? r.bottom() + 1 : r.bottom()-1);
                 p->drawPath(path);
             }
-            
+
             //shine
             if (1) {
                 p->setRenderHint(QPainter::Antialiasing);
@@ -2694,7 +2732,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
                     tr.setRight(tr.right() - pixelMetric(QStyle::PM_TabBarTabShiftHorizontal, tab,
                                                         widget));
                 }
-    
+
                 int alignment = Qt::AlignCenter | Qt::TextShowMnemonic;
                 if (!styleHint(SH_UnderlineShortcut, opt, widget))
                     alignment |= Qt::TextHideMnemonic;
@@ -2718,9 +2756,9 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
                 }
 
                 if (!twoline || selected) {
-                    // for tab text in twoline mode, need to elide text to full 
+                    // for tab text in twoline mode, need to elide text to full
                     // tabbar width (tab->text is only elided to width of this tab)
-                    QString text = (twoline) ? 
+                    QString text = (twoline) ?
                         (tabV2.fontMetrics.elidedText(tb->tabText(tb->currentIndex()), tb->elideMode(), tr.width())) :
                         tab->text;
                     drawItemText(p, tr, alignment, tab->palette, tab->state & State_Enabled, text,
@@ -2781,9 +2819,15 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                 State flags = State_None;
 
                 QRect re = subControlRect(CC_ComboBox, cmb, SC_ComboBoxFrame, widget);
-                QBrush editBrush = (cmb->state & State_Enabled && cmb->state & State_HasEditFocus)
-                                    ? cmb->palette.brush(QPalette::Base)
-                                    : cmb->palette.brush(QPalette::Window);
+                QBrush editBrush;
+                if (cmb->state & State_Enabled && cmb->state & State_HasEditFocus) {
+                    editBrush = cmb->palette.brush(QPalette::Base);
+                } else {
+                    editBrush = cmb->palette.brush(QPalette::Window);
+                    QColor col = editBrush.color();
+                    col.setAlpha(0);
+                    editBrush.setColor(col);
+                }
                 p->fillRect(re, editBrush);
                 if (cmb->frame && cmb->state & State_HasFocus && !extendedFocus && !Qtopia::mousePreferred()) {
                     QStyleOptionFocusRect fropt;
@@ -2808,7 +2852,7 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                     p->setPen(cmb->palette.dark().color());
                     p->setBrush(cmb->palette.brush(QPalette::Button));
                     p->drawRect(ar.adjusted(0,0,-1,-1));
-                    
+
                     flags |= State_Sunken;
                 }*/   //never draw 'pressed' state for arrow
 
@@ -2836,12 +2880,9 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                     p->drawPixmap(x, y, monthIcon);
                 } else {
                     ar.adjust(2, 2, -2, -2);
-                    //2*(x/2) code is workaround for bug 179885 (Qt 4.3)
-                    ar.setWidth(2*(ar.width()/2));
-                    ar.setHeight(2*(ar.height()/2));
                     QPalette pal = cmb->palette;
                     if (extendedFocus && cmb->state & State_HasFocus)
-                        pal.setColor(QPalette::Normal, QPalette::ButtonText, 
+                        pal.setColor(QPalette::Normal, QPalette::ButtonText,
                                      pal.color(QPalette::Normal, cmb->editable ? QPalette::Text : QPalette::HighlightedText));  //TODO: edit focus for editable combos should be different?
                     QStyleOption arrowOpt(0);
                     arrowOpt.rect = ar;
@@ -2924,9 +2965,6 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                 copy.rect = subControlRect(CC_SpinBox, sb, SC_SpinBoxUp, widget);
 //                drawPrimitive(PE_PanelButtonBevel, &copy, p, widget);
                 copy.rect.adjust(3, 0, -4, 0);
-                //2*(x/2) code is workaround for bug 179885 (Qt 4.3)
-                copy.rect.setWidth(2*(copy.rect.width()/2));
-                copy.rect.setHeight(2*(copy.rect.height()/2));
                 drawPrimitive(pe, &copy, p, widget);
             }
 
@@ -2956,9 +2994,6 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                 copy.rect = subControlRect(CC_SpinBox, sb, SC_SpinBoxDown, widget);
 //                drawPrimitive(PE_PanelButtonBevel, &copy, p, widget);
                 copy.rect.adjust(3, 0, -4, 0);
-                //2*(x/2) code is workaround for bug 179885 (Qt 4.3)
-                copy.rect.setWidth(2*(copy.rect.width()/2));
-                copy.rect.setHeight(2*(copy.rect.height()/2));
                 drawPrimitive(pe, &copy, p, widget);
             }
         }
@@ -3023,7 +3058,7 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                     //TODO: vertical
                 }
             }
-            
+
             if (slider->subControls & SC_SliderTickmarks) {
                 p->setRenderHint(QPainter::Antialiasing, false);
                 //int tickOffset = pixelMetric(PM_SliderTickmarkOffset, slider, widget);
@@ -3094,7 +3129,7 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                 p->setBrush(bgg);
                 p->setPen(c.darker(120));
                 p->drawEllipse(r);
-        
+
                 //shine TODO: make this scale better
                 p->setBrush(QColor(255,255,255,110));
                 p->setPen(Qt::NoPen);
@@ -3197,7 +3232,7 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                     fropt.rect = textRect;
                     drawPrimitive((QStyle::PrimitiveElement)PE_FilledFocusRect, &fropt, p, widget);
                 }
-                
+
                 drawItemText(p, textRect,  Qt::TextShowMnemonic | Qt::AlignHCenter | alignment,
                              groupBox->palette, groupBox->state & State_Enabled, groupBox->text,
                              (groupBox->state & State_HasFocus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText
@@ -3244,7 +3279,8 @@ bool QPhoneStyle::event(QEvent *e)
             if ( qobject_cast<QLineEdit*>(focusWidget) ||
                   qobject_cast<QAbstractSpinBox*>(focusWidget) ||
                   qobject_cast<QSlider*>(focusWidget) ||
-                  qobject_cast<QComboBox*>(focusWidget) ) {
+                  qobject_cast<QComboBox*>(focusWidget) ||
+                  qobject_cast<QTableView*>(focusWidget) ) {
                 focusWidget->update();
             }
 

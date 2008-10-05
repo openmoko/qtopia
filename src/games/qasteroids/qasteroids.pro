@@ -1,6 +1,8 @@
+!qbuild {
 qtopia_project(qtopia app)
 TARGET=qasteroids
-CONFIG+=qtopia_main no_quicklaunch
+CONFIG+=qtopia_main
+}
 
 HEADERS		= ledmeter.h sprites.h toplevel.h view.h
 SOURCES		= ledmeter.cpp sprites.cpp toplevel.cpp view.cpp main.cpp

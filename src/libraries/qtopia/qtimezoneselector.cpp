@@ -1,23 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
+
+#include "qtimezoneselector.h"
 
 #include <QFile>
 #include <QRegExp>
@@ -26,16 +27,20 @@
 #include <QSettings>
 #include <QStringList>
 #include <QComboBox>
+#include <QAbstractItemView>
+#include <QTimeZone>
 
 #include <stdlib.h>
 
 #include "qtimezone.h"
 #include "qworldmap.h"
-#include "qtimezoneselector.h"
+
+#include <qworldmapdialog.h>
 #include "qtopiaapplication.h"
 #include <qsoftmenubar.h>
 
 #include <qtopiachannel.h>
+
 
 // ============================================================================
 //
@@ -52,10 +57,12 @@ public:
 
     QString currZone() const;
     QString prevZone() const;
-    void setCurrZone( const QString& id );
+
+    bool okToShow;
 
 public slots:
     void setToPreviousIndex();
+    void setCurrZone( const QString& id );
 
 protected:
     friend class QTimeZoneSelector;
@@ -73,32 +80,7 @@ private:
     int         prevIndex2;
 };
 
-// ============================================================================
-//
-// QWorldmapDialog
-//
-// ============================================================================
 
-class QWorldmapDialog : public QDialog
-{
-    Q_OBJECT;
-
-public:
-    QWorldmapDialog( QWidget* parent = 0, Qt::WFlags f = 0 );
-
-    void setZone( const QTimeZone& zone );
-    QTimeZone selectedZone() const;
-
-public slots:
-    int exec();
-    void selected();
-    void selected( const QTimeZone& zone );
-    void cancelled();
-
-private:
-    QWorldmap* mMap;
-    QTimeZone mZone;
-};
 
 // ============================================================================
 //
@@ -132,7 +114,8 @@ QTimeZoneComboBox::QTimeZoneComboBox( QWidget *p )
 :   QComboBox( p ),
     cfg("Trolltech","WorldTime"),
     prevIndex1( 0 ),
-    prevIndex2( 0 )
+    prevIndex2( 0 ),
+    okToShow(1)
 {
     cfg.beginGroup("TimeZones");
     updateZones();
@@ -165,7 +148,7 @@ void QTimeZoneComboBox::updateZones()
     clear();
     identifiers.clear();
     int curix=0;
-    QString tz = getenv("TZ");
+    QString tz = QTimeZone::current().id();
     bool tzFound = false; // found the current timezone.
     bool hasCur = !cur.isEmpty();
     int listIndex = 0;
@@ -196,6 +179,7 @@ void QTimeZoneComboBox::updateZones()
         ++cfgIndex;
         ++listIndex;
     }
+    //     for (int i=0; i<extras.count(); i++) {
     for (QStringList::Iterator it=extras.begin(); it!=extras.end(); ++it) {
         QTimeZone z( (*it).toLatin1() );
         comboList << z.name();
@@ -236,6 +220,7 @@ void QTimeZoneComboBox::indexChange( const int index )
 */
 void QTimeZoneComboBox::setToPreviousIndex()
 {
+    okToShow = false;
     setCurrentIndex( prevIndex2 );
 }
 
@@ -244,7 +229,7 @@ void QTimeZoneComboBox::setToPreviousIndex()
 */
 QString QTimeZoneComboBox::prevZone() const
 {
-    if (identifiers.count())
+    if (identifiers.count() && prevIndex2 < identifiers.count())
         return identifiers[prevIndex2];
     return QString();
 }
@@ -274,11 +259,13 @@ void QTimeZoneComboBox::setCurrZone( const QString& id )
         }
     }
 
-    QString name = QTimeZone(id.toLatin1()).name();
+     QString name = QTimeZone(id.toLatin1()).name();
     int index = count() - 1;
     if ( index > 0 ) {
         insertItem( index, name );
         setCurrentIndex( index );
+        QModelIndex modelIndex = model()->index(index, modelColumn(), rootModelIndex());
+        view()->setCurrentIndex( modelIndex );
         identifiers.append(id);
         extras.append(id);
         emit activated( index );
@@ -297,123 +284,6 @@ void QTimeZoneComboBox::handleSystemChannel(const QString&msg, const QByteArray&
 
 // ============================================================================
 //
-// QWorldmapDialog
-//
-// ============================================================================
-
-/*!
-    \internal
-*/
-QWorldmapDialog::QWorldmapDialog( QWidget* parent, Qt::WFlags f )
-:   QDialog( parent, f | Qt::FramelessWindowHint ),
-    mMap( 0 ),
-    mZone()
-{
-    setWindowTitle( tr( "Select Time Zone" ) );
-
-    QVBoxLayout *bl = new QVBoxLayout(this);
-    mMap = new QWorldmap(this);
-    QSizePolicy sp = mMap->sizePolicy();
-    sp.setHeightForWidth(true);
-    mMap->setSizePolicy(sp);
-    bl->addWidget( mMap );
-    bl->setSpacing( 4 );
-    bl->setMargin( 4 );
-
-    setMinimumWidth( qApp->desktop()->width() );
-    setMinimumHeight( qApp->desktop()->height() / 2 );
-    setMaximumHeight( qApp->desktop()->height() / 2 );
-
-    QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Cancel );
-
-    if( !Qtopia::mousePreferred()) {
-    connect( mMap,
-             SIGNAL(newZone(QTimeZone)),
-             this,
-             SLOT(selected(QTimeZone)) );
-    } else {
-        connect( mMap,
-                 SIGNAL(buttonSelected()),
-                 this,
-                 SLOT(selected()) );
-    }
-
-    connect( mMap,
-             SIGNAL(selectZoneCanceled()),
-             this,
-             SLOT(cancelled()) );
-
-    if( !Qtopia::mousePreferred()) mMap->setFocus();
-}
-
-/*!
-    \internal
-*/
-int QWorldmapDialog::exec()
-{
-    if ( isHidden() )
-        show();
-
-    if ( mZone.isValid() )
-        mMap->setZone( mZone );
-
-    mMap->selectNewZone();
-    return QDialog::exec();
-}
-
-/*!
-    \internal
-*/
-void QWorldmapDialog::setZone( const QTimeZone& zone )
-{
-    mZone = zone;
-}
-
-/*!
-    \internal
-*/
-void QWorldmapDialog::selected( const QTimeZone& zone )
-{
-    if ( zone.isValid() ) {
-        mZone = zone;
-        accept();
-    } else {
-        reject();
-    }
-}
-
-/*!
-\internal
-*/
-void QWorldmapDialog::selected( )
-{
-    qLog(Time)<<"QWorldmapDialog::selected( )";
-    if ( mMap->zone().isValid() ) {
-        mZone = mMap->zone();
-        accept();
-    } else {
-        reject();
-    }
-}
-
-/*!
-    \internal
-*/
-void QWorldmapDialog::cancelled()
-{
-    reject();
-}
-
-/*!
-    \internal
-*/
-QTimeZone QWorldmapDialog::selectedZone() const
-{
-    return mZone;
-}
-
-// ============================================================================
-//
 // QTimeZoneSelectorPrivate
 //
 // ============================================================================
@@ -423,16 +293,26 @@ QTimeZone QWorldmapDialog::selectedZone() const
 */
 void QTimeZoneSelectorPrivate::showWorldmapDialog( void )
 {
+    if (!cmbTz->okToShow) {
+        cmbTz->setToPreviousIndex();
+        cmbTz->okToShow = true;
+        return;
+    }
+
     QWorldmapDialog* map = new QWorldmapDialog( q );
 
     if ( cmbTz->prevZone().isEmpty() || ( cmbTz->prevZone() == "None" ) )
-        map->setZone( QTimeZone(getenv( "TZ" )) );
+        map->setZone( QTimeZone::current() );
     else
         map->setZone( QTimeZone( cmbTz->prevZone().toLatin1() ) );
 
-    map->setModal( true );
-    if ( map->exec() == QDialog::Accepted && map->selectedZone().isValid() ) {
-        cmbTz->setCurrZone( map->selectedZone().id() );
+    connect(map, SIGNAL(zoneSelected(const QString& )),
+            cmbTz,SLOT(setCurrZone(const QString &)));
+
+    if (QtopiaApplication::execDialog(map) == QDialog::Accepted
+        && map->selectedZone().isValid()
+        && map->selectedZone() != QTimeZone::current()) {
+        cmbTz->setCurrZone(map->selectedZone().id());
     } else {
         cmbTz->setToPreviousIndex();
     }
@@ -446,7 +326,8 @@ void QTimeZoneSelectorPrivate::showWorldmapDialog( void )
 
 /*!
   \class QTimeZoneSelector
-  \mainclass
+    \inpublicgroup QtBaseModule
+
 
   \brief The QTimeZoneSelector class provides a widget for selecting a time zone.
   \ingroup time

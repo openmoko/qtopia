@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -34,7 +32,8 @@ QPointer<QDeviceButtonManager> QDeviceButtonManager::m_Instance = 0L;
 
 /*!
   \class QDeviceButtonManager
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QDeviceButtonManager class manages device button mappings.
 
   The function buttons on a device may generate key presses and also
@@ -95,7 +94,7 @@ QPointer<QDeviceButtonManager> QDeviceButtonManager::m_Instance = 0L;
   a \c {deviceButtonMappingChanged()} message is sent on the \c {QPE/System}
   channel.
 
-  The Buttons settings application in Qtopia allows the user to configure
+  The Buttons settings application in Qt Extended allows the user to configure
   mappable device buttons.
 
 
@@ -129,6 +128,7 @@ QDeviceButtonManager::QDeviceButtonManager() : QObject( qApp )
 */
 QDeviceButtonManager::~QDeviceButtonManager()
 {
+    while (m_Buttons.count()) delete m_Buttons.takeLast();
 }
 
 /*!
@@ -290,7 +290,7 @@ void QDeviceButtonManager::loadButtonSettings(QTranslatableSettings& buttonFile,
 
 void QDeviceButtonManager::loadButtons(bool factory)
 {
-    m_Buttons.clear();
+    while (m_Buttons.count()) delete m_Buttons.takeLast();
     QTranslatableSettings globalButtonFile(Qtopia::defaultButtonsFile(),QSettings::IniFormat);
     loadButtonSettings(globalButtonFile,false,factory);
     QTranslatableSettings localButtonFile("Trolltech","ButtonSettings");

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "qtaskmodel.h"
@@ -24,8 +22,6 @@
 #include <QIcon>
 #include <QDebug>
 
-#include "qrecordiomerge_p.h"
-
 QMap<QTaskModel::Field, QString> QTaskModel::k2i;
 QMap<QString, QTaskModel::Field> QTaskModel::i2k;
 QMap<QTaskModel::Field, QString>  QTaskModel::k2t;
@@ -33,11 +29,13 @@ QMap<QTaskModel::Field, QString>  QTaskModel::k2t;
 class QTaskModelData
 {
 public:
-    QTaskModelData() {}
+    QTaskModelData() : defaultio(0) {}
     ~QTaskModelData() {}
 
     static QIcon getCachedIcon(const QString& path);
     static QHash<QString, QIcon> cachedIcons;
+
+    QTaskSqlIO *defaultio;
 };
 
 QHash<QString, QIcon> QTaskModelData::cachedIcons;
@@ -160,8 +158,11 @@ QTaskModel::Field QTaskModel::identifierField(const QString &identifier)
 
 /*!
   \class QTaskModel
-  \mainclass
-  \module qpepim
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+
   \ingroup pim
   \brief The QTaskModel class provides access to Tasks data.
 
@@ -240,10 +241,11 @@ QTaskModel::QTaskModel(QObject *parent)
     d = new QTaskModelData;
     QtopiaSql::instance()->openDatabase();
 
-    QTaskIO *access = new QTaskSqlIO(this);
+    QTaskSqlIO *access = new QTaskSqlIO(this);
     QTaskDefaultContext *context = new QTaskDefaultContext(this, access);
 
-    addAccess(access);
+    setAccess(access);
+    d->defaultio = access;
     addContext(context);
 }
 
@@ -279,10 +281,7 @@ QTask QTaskModel::task(const QModelIndex &index) const
 */
 QTask QTaskModel::task(const QUniqueId & identifier) const
 {
-    const QTaskIO *model = qobject_cast<const QTaskIO *>(access(identifier));
-    if (model)
-        return model->task(identifier);
-    return QTask();
+    return d->defaultio->task(identifier);
 }
 
 /*!
@@ -290,11 +289,7 @@ QTask QTaskModel::task(const QUniqueId & identifier) const
 */
 QTask QTaskModel::task(int row) const
 {
-    const QTaskIO *model = qobject_cast<const QTaskIO*>(access(row));
-    int r = accessRow(row);
-    if (model)
-        return model->task(r);
-    return QTask();
+    return d->defaultio->task(row);
 }
 
 /*!
@@ -485,22 +480,13 @@ void QTaskModel::setSortField(Field field)
     if (field == sortField())
         return;
 
-    foreach(QRecordIO *model, accessModels()) {
-        QTaskIO *taskModel = qobject_cast<QTaskIO *>(model);
-        taskModel->setSortKey(field);
-    }
+    d->defaultio->setSortKey(field);
 }
 
 /*! \internal */
 QTaskModel::Field QTaskModel::sortField() const
 {
-    QList<QRecordIO*> &list = accessModels();
-    if (list.count()) {
-        QTaskIO *taskModel = qobject_cast<QTaskIO *>(list[0]);
-        if (taskModel)
-            return taskModel->sortKey();
-    }
-    return Invalid;
+    return d->defaultio->sortKey();
 }
 
 /*!
@@ -511,10 +497,7 @@ void QTaskModel::setFilterCompleted(bool completedOnly)
     if (completedOnly == filterCompleted())
         return;
 
-    foreach(QRecordIO *model, accessModels()) {
-        QTaskIO *taskModel = qobject_cast<QTaskIO *>(model);
-        taskModel->setCompletedFilter(completedOnly);
-    }
+    d->defaultio->setCompletedFilter(completedOnly);
 }
 
 /*!
@@ -522,13 +505,7 @@ void QTaskModel::setFilterCompleted(bool completedOnly)
 */
 bool QTaskModel::filterCompleted() const
 {
-    QList<QRecordIO*> &list = accessModels();
-    if (list.count()) {
-        QTaskIO *taskModel = qobject_cast<QTaskIO *>(list[0]);
-        if (taskModel)
-            return taskModel->completedFilter();
-    }
-    return false;
+    return d->defaultio->completedFilter();
 }
 
 /*!
@@ -544,17 +521,12 @@ bool QTaskModel::filterCompleted() const
 QVariant QTaskModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
-        QTaskIO * io = qobject_cast<QTaskIO*>(access(index.row()));
-        if (io)
-            return io->taskField(index.row(), (Field) index.column());
+        return d->defaultio->taskField(index.row(), (Field) index.column());
     } else if (role == Qt::DecorationRole && index.column() == 0) {
-        QTaskIO * io = qobject_cast<QTaskIO*>(access(index.row()));
-        if (io) {
-            if (io->taskField(index.row(), Completed).toBool())
-                return d->getCachedIcon(":icon/ok");
-            else if(io->taskField(index.row(), Priority).toInt() <= 2)
-                return d->getCachedIcon(":icon/priority");
-        }
+        if (d->defaultio->taskField(index.row(), Completed).toBool())
+            return d->getCachedIcon(":icon/ok");
+        else if(d->defaultio->taskField(index.row(), Priority).toInt() <= 2)
+            return d->getCachedIcon(":icon/priority");
     }
     return QVariant();
 }
@@ -589,10 +561,10 @@ bool QTaskModel::setData(const QModelIndex &index, const QVariant &value, int ro
    */
 
     int i = index.row();
-    const QTaskIO *model = qobject_cast<const QTaskIO*>(d->mio->model(i));
+    const QTaskIO *model = qobject_cast<const QTaskSqlIO*>(d->mio->model(i));
     int r = d->mio->row(i);
     if (model)
-        return ((QTaskIO *)model)->setTaskField(r, (Field)index.column(), value);
+        return ((QTaskSqlIO *)model)->setTaskField(r, (Field)index.column(), value);
     return false;
 #endif
 }

@@ -1,28 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 /*!
   \class QImageDocumentSelector
+    \inpublicgroup QtBaseModule
   \ingroup documentselection
-  \mainclass
+
   \brief The QImageDocumentSelector widget allows the selection an image from
   a list of image documents available on the device.
 
@@ -90,7 +89,7 @@
         this, SLOT(openImage(QContent)) );
   \endcode
 
-  QImageDocumentSelector is often the first widget seen in a \l {Qtopia - Main Document Widget}{document-oriented application }. When used
+  QImageDocumentSelector is often the first widget seen in a \l {Main Document Widget}{document-oriented application}. When used
   with \l QStackedWidget, an application
   allows choosing of a document using the selector before revealing
   the document viewer or editor.
@@ -414,8 +413,9 @@ QDrmRights::Permissions QImageDocumentSelector::mandatoryPermissions() const
 
 /*!
   \class QImageDocumentSelectorDialog
+    \inpublicgroup QtBaseModule
   \ingroup documentselection
-  \mainclass
+
   \brief The QImageDocumentSelectorDialog class allows the user to select an image
   from a list of image documents available on the device.
 

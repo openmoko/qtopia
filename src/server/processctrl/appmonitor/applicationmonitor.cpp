@@ -1,25 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "applicationmonitor.h"
+#include "windowmanagement.h"
 #include <QStringList>
 #include <QtopiaChannel>
 #include <QTime>
@@ -74,6 +73,7 @@ private slots:
     void sysMessage(const QString &, const QByteArray &);
     void applicationTerminated(const QString &);
     void heartBeatTimer();
+    void topLevelWindowChanged();
 
 private:
 
@@ -132,6 +132,29 @@ UIApplicationMonitorPrivate::UIApplicationMonitorPrivate()
     ApplicationLauncher *launcher = qtopiaTask<ApplicationLauncher>();
     QObject::connect(launcher, SIGNAL(applicationTerminated(QString,ApplicationTypeLauncher::TerminationReason,bool)), this, SLOT(applicationTerminated(QString)));
     QObject::connect(launcher, SIGNAL(applicationNotFound(QString)), this, SLOT(applicationTerminated(QString)));
+
+    // For tracking of active window
+    WindowManagement *man = new WindowManagement(this);
+    QObject::connect(man, SIGNAL(windowActive(QString,QRect,WId)),
+                this, SLOT(topLevelWindowChanged()));
+}
+
+void UIApplicationMonitorPrivate::topLevelWindowChanged()
+{
+    QString app = WindowManagement::activeAppName();
+    //find currently active one
+    for(Applications::Iterator iter = m_appsList.begin();
+            iter != m_appsList.end(); ++iter) {
+        if ( (*iter & UIApplicationMonitor::Active) && iter.key() != app) {
+            doChange(iter, *iter & ~UIApplicationMonitor::Active);
+            break;
+        }
+    }
+
+    //set new active app
+    Applications::Iterator iter = m_appsList.find(app);
+    if (iter != m_appsList.end())
+        doChange(iter, *iter | UIApplicationMonitor::Active);
 }
 
 int UIApplicationMonitorPrivate::notRespondingTimeout()
@@ -202,8 +225,9 @@ void UIApplicationMonitorPrivate::updateRunningList()
 
     for(QStringList::Iterator iter = apps.begin(); iter != apps.end(); ++iter)
     {
-        if(m_apps->value(*iter + "/Tasks/UI").toBool())
+        if(m_apps->value(*iter + "/Tasks/UI").toBool()) {
             runningApps.insert(*iter);
+        }
     }
 
     for(Applications::Iterator iter = m_appsList.begin();
@@ -223,10 +247,10 @@ void UIApplicationMonitorPrivate::updateRunningList()
 
         runningApps.erase(riter);
     }
-
     for(QSet<QString>::ConstIterator iter = runningApps.begin();
         iter != runningApps.end();
         ++iter) {
+
         Applications::Iterator newIter = m_appsList.insert(*iter, UIApplicationMonitor::NotRunning);
         doChange(newIter, UIApplicationMonitor::Running);
     }
@@ -286,8 +310,10 @@ void UIApplicationMonitorPrivate::sysMessage(const QString &message,
         ds >> app;
 
         Applications::Iterator iter = m_appsList.find(app);
-        if(iter != m_appsList.end())
-            doChange(iter, *iter & ~UIApplicationMonitor::NotResponding);
+        if(iter != m_appsList.end()) {
+            doChange(iter, (*iter & ~UIApplicationMonitor::NotResponding));
+            stopHeartBeat(app);
+        }
     }
 }
 
@@ -320,10 +346,11 @@ void UIApplicationMonitorPrivate::doChange(Applications::Iterator iter,
 
     bool wasVisible = (*iter & UIApplicationMonitor::StateMask);
     bool isVisible = (newState & UIApplicationMonitor::StateMask);
+
     UIApplicationMonitor::ApplicationState visibleState =
-        isVisible?UIApplicationMonitor::NotRunning:newState;
+        !isVisible?UIApplicationMonitor::NotRunning:newState;
     if(isSysBusy)
-        visibleState = visibleState & UIApplicationMonitor::Busy;
+        visibleState = visibleState | UIApplicationMonitor::Busy;
 
     *iter = newState;
 
@@ -397,6 +424,7 @@ UIApplicationMonitorPrivate::applicationState(const QString &app) const
 // define UIApplicationMonitor
 /*!
   \class UIApplicationMonitor
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::AppLaunch
   \brief The UIApplicationMonitor class monitors the running state of UI
          applications.
@@ -420,7 +448,7 @@ UIApplicationMonitorPrivate::applicationState(const QString &app) const
   \row \o \c {/System/Applications/<app name>/Tasks/UI} \o True when the application is showing UI, false if not.
   \endtable
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 /*!

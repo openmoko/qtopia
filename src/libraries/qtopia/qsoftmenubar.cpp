@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -32,6 +30,7 @@
 #include <QClipboard>
 #ifndef QT_NO_WIZARD
 # include <QWizard>
+# include <QAbstractButton>
 #endif
 
 #include <QtopiaInputMethod>
@@ -43,11 +42,12 @@
 
 /*!
   \class QSoftMenuBar
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QSoftMenuBar class allows the labels in the phone
   soft menu bar to be set.
 
-  QSoftMenuBar is only available in the Qtopia phone edition.  It is
+  QSoftMenuBar is
   used to set the icon/text in the soft menu bar to describe the action
   performed when pressing the associated soft button.  Keep in
   mind that not all phones have soft keys and therefore may not have
@@ -57,7 +57,7 @@
   The labels are updated whenever a widget gains or loses focus
   or their navigation focus state changes.  Therefore, the labels should
   be set for each widget that may gain focus, and will respond to a
-  soft key.  The standard Qt and Qtopia widgets
+  soft key.  The standard Qt and Qt Extended widgets
   set the labels appropriately, so this is usually only necessary for
   custom widgets.
 
@@ -75,7 +75,7 @@
   QSoftMenuBar labels specify both a pixmap and a text label.  The user
   can choose whether the text or pixmap labels are shown.
 
-  QSoftMenuBar is only available in the Qtopia Phone Edition.
+  QSoftMenuBar is only available in the Qt Extended Phone Edition.
 
   \ingroup userinput
 */
@@ -105,6 +105,7 @@
   \value EndEdit
   \value RevertEdit
   \value Deselect
+  \value Finish
 */
 
 /*!
@@ -356,6 +357,7 @@ private slots:
     void menuDestroyed();
     void help();
     void inputMethod();
+    void rotationChanged();
 
 private:
     struct WidgetData {
@@ -377,8 +379,10 @@ private:
     QPointer<QAction> inputMethodAction;
     QPointer<QAction> cancelAction;
     QPointer<QAction> previousAction;
+    QPointer<QAction> nextAction;
     static QPointer<MenuManager> mmgr;
     QPointer<QMenu> activeMenu;
+    QSettings gConfig;
 };
 
 QPointer<MenuManager> MenuManager::mmgr = 0;
@@ -486,7 +490,7 @@ int QSoftMenuBar::menuKey()
 /*!
   Creates and returns a standard "Edit" menu used for QLineEdit and QTextEdit.
 
-  Returns 0 if the clipboard functionality has been disabled in Qtopia Core.
+  Returns 0 if the clipboard functionality has been disabled in Qt for Embedded Linux.
 */
 QMenu *QSoftMenuBar::createEditMenu()
 {
@@ -513,8 +517,15 @@ MenuManager::MenuManager()
     , inputMethodAction(0)
     , cancelAction(0)
     , previousAction(0)
+    , nextAction(0)
     , activeMenu(0)
+    , gConfig("Trolltech", "qpe")
 {
+#ifdef QT_QWS_DYNAMIC_TRANSFORMATION
+    QValueSpaceItem *rotation = new QValueSpaceItem("/UI/Rotation/Current");
+    QObject::connect(rotation, SIGNAL(contentsChanged()),
+                     this, SLOT(rotationChanged()));
+#endif
 }
 
 QMenu *MenuManager::menuFor(QWidget *w, QSoftMenuBar::FocusState state)
@@ -576,7 +587,7 @@ void MenuManager::addMenuTo(QWidget *w, QMenu *menu, QSoftMenuBar::FocusState st
     QSoftMenuBar::setLabel(fw, key(), QSoftMenuBar::Options, state);
     QSoftMenuBar::setLabel(w, key(), QSoftMenuBar::Options, state);
     QSoftMenuBar::setLabel(menu, key(), "options-hide", tr("Hide"), QSoftMenuBar::AnyFocus);
-    if (QApplication::style()->inherits("Series60Style"))   //HACK
+    if (QApplication::style()->inherits("Series60Style"))
         QSoftMenuBar::setLabel(menu, key(), "select", tr("Select"), QSoftMenuBar::AnyFocus);
 
     if (state & QSoftMenuBar::EditFocus)
@@ -742,7 +753,7 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
         }
         return false;
     }
-    
+
     if (e->type() == QEvent::Resize) {
         QMenu *menu = qobject_cast<QMenu*>(o);
         if (menu && menu->isVisible()) {    //menu needs to be moved when resized (since it is bottom-anchored)
@@ -774,7 +785,7 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
 #else
         return false;
 #endif
-    } else if (QApplication::style()->inherits("Series60Style") && menu) {  //HACK
+    } else if (QApplication::style()->inherits("Series60Style") && menu) {
         QAction *a = menu->activeAction();
         if (a) emit a->trigger();
     }
@@ -933,6 +944,12 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
         delete previousAction;
         previousAction = 0;
     }
+
+    if (nextAction ) {
+        delete nextAction;
+        nextAction = 0;
+    }
+
     // for now, refresh every time, in case input method has changed it's action
     // TODO: InputMethods should let us know when the IMMenu changes
     if(inputMethodAction)
@@ -989,25 +1006,43 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
         }
 #ifndef QT_NO_WIZARD
         if (QWizard *wizard = qobject_cast<QWizard*>(tlw)) {
-            if (wizard->currentId() != wizard->startId())
+            QAbstractButton *button = wizard->button(QWizard::BackButton);
+            if (button && button->isEnabled())
                 previousAction = menu->addAction(QIcon(":icon/previous"), tr("Previous"), tlw, SLOT(back()));
+
+            button = wizard->button(QWizard::NextButton);
+            if (button && button->isEnabled())
+                nextAction = menu->addAction(QIcon(":icon/next"), tr("Next"), tlw, SLOT(next()));
+
+            button = wizard->button(QWizard::FinishButton);
+            if (button && button->isEnabled())
+                nextAction = menu->addAction(QIcon(":icon/done"), tr("Finish"), tlw, SLOT(accept()));
         }
 #endif
     }
 
-    if( !helpAction && !cancelAction && !inputMethodAction && !previousAction && sepAction ) {
+    if( !helpAction && !cancelAction && !inputMethodAction && !previousAction && !nextAction && sepAction ) {
         delete sepAction;
         sepAction = 0;
     }
 
     if (menu->actions().count()) {
-#ifndef GREENPHONE_EFFECTS
         QDesktopWidget *desktop = QApplication::desktop();
         QRect r = desktop->availableGeometry(desktop->primaryScreen());
-        bool rtl = !( QApplication::layoutDirection() == Qt::LeftToRight );
-        int x = rtl ? r.right() - menu->sizeHint().width()+1 : r.left();
+        int x = 0;
+        gConfig.beginGroup(QLatin1String("Style"));
+        QString mpos = gConfig.value("MenuAlignment", "left").toString();
+        gConfig.endGroup();
+        if (mpos.contains(QLatin1String("hcenter"), Qt::CaseInsensitive)) {
+            x = r.left() + (r.width()-menu->sizeHint().width())/2;
+        } else {
+            bool rtl = !( QApplication::layoutDirection() == Qt::LeftToRight );
+            if (mpos.contains(QLatin1String("right"), Qt::CaseInsensitive))
+                rtl = !rtl;
+            x = rtl ? r.right() - menu->sizeHint().width()+1 : r.left();
+        }
         menu->popup(QPoint(x, r.bottom()), menu->actions().last());  //last item at bottom of screen
-#endif
+
         if (!Qtopia::mousePreferred()) {
             //select first action by default
             foreach (QAction *a, menu->actions()) {
@@ -1027,13 +1062,6 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
                 }
             }
         }
-#ifdef GREENPHONE_EFFECTS
-        QDesktopWidget *desktop = QApplication::desktop();
-        QRect r = desktop->availableGeometry(desktop->primaryScreen());
-        bool rtl = !( QApplication::layoutDirection() == Qt::LeftToRight );
-        int x = rtl ? r.right() - menu->sizeHint().width()+1 : r.left();
-        menu->popup(QPoint(x, r.bottom()), menu->actions().last());  //last item at bottom of screen
-#endif
     }
 }
 
@@ -1128,6 +1156,16 @@ QPoint MenuManager::positionForMenu(const QMenu *menu)
         pos = QPoint(x, r.bottom() - menu->sizeHint().height() + 1);
     }
     return pos;
+}
+
+void MenuManager::rotationChanged()
+{
+#ifdef QT_QWS_DYNAMIC_TRANSFORMATION
+    QMenu *menu = getActiveMenu();
+    if (menu && menu->isVisible() ) {
+        menu->hide();
+    }
+#endif
 }
 
 #include "qsoftmenubar.moc"

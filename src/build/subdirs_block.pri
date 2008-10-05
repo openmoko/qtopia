@@ -40,28 +40,37 @@ for(s,SUBDIRS) {
             printsubdirsdependrules.commands+=\
                 echo DEPENDS: $$s depends on $$LITERAL_SQUOTE$$dep$$LITERAL_SQUOTE
             QTOPIA_DEPENDS-=$$dep
-            files=$$files($$fixpath($$PROJECT_ROOT/$$dep))
-            for(file,files) {
-                file=$$fixpath($$file)
-                file~=s,$$fixpath($$PROJECT_ROOT/),,q
-                dir=$$file
-                pro=$$fixpath($$file/$$tail($$file).pro)
-                # Make sure that the project exists
-                # Don't let a project depend on itself
-                exists($$fixpath($$PROJECT_ROOT/$$pro)):!equals(s,$$file) {
-                    QTOPIA_DEPENDS+=$$unixpath($$file)
-                    dir=$$unixpath($$dir)
+            wildcard=$$fetch_wildcard($$dep)
+            isEmpty(wildcard) {
+                files=$$files($$fixpath($$PROJECT_ROOT/$$dep))
+                for(file,files) {
+                    file=$$fixpath($$file)
+                    file~=s,$$fixpath($$PROJECT_ROOT/),,q
+                    dir=$$file
+                    pro=$$fixpath($$file/$$tail($$file).pro)
+                    # Make sure that the project exists
+                    # Don't let a project depend on itself
+                    exists($$fixpath($$PROJECT_ROOT/$$pro)):!equals(s,$$file) {
+                        wildcard+=$$unixpath($$file)
+                        dir=$$unixpath($$dir)
+                        echo($$s depends on $$dir)
+                        printsubdirsdependrules.commands+=$$LINE_SEP\
+                            echo DEPENDS: $$LITERAL_SQUOTE$$dep$$LITERAL_SQUOTE depends on $$dir
+                        noprintdeps*=$$dir
+                    }
+                }
+                store_wildcard($$dep,$$wildcard)
+            } else {
+                wildcard=$$split(wildcard," ")
+                for(dir,wildcard) {
                     echo($$s depends on $$dir)
                     printsubdirsdependrules.commands+=$$LINE_SEP\
                         echo DEPENDS: $$LITERAL_SQUOTE$$dep$$LITERAL_SQUOTE depends on $$dir
                     noprintdeps*=$$dir
                 }
             }
-            deps=$$files($$dep)
-            for(d,deps) {
-                d=$$unixpath($$d)
-                QTOPIA_DEPENDS+=$$d
-            }
+            #message(QTOPIA_DEPENDS+=$$wildcard)
+            QTOPIA_DEPENDS+=$$wildcard
         }
     }
     subdirconf=$$cache.CONFIG

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef QMAILMESSAGE_H
@@ -93,6 +91,9 @@ public:
     static QByteArray removeComments(const QByteArray& input);
     static QByteArray removeWhitespace(const QByteArray& input);
 
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
+
 protected:
     void parse(const QByteArray& text, FieldType fieldType);
 
@@ -102,6 +103,12 @@ private:
 
     void output(QDataStream& out) const;
 };
+
+template <typename Stream> 
+Stream& operator<<(Stream &stream, const QMailMessageHeaderField& field) { field.serialize(stream); return stream; }
+
+template <typename Stream> 
+Stream& operator>>(Stream &stream, QMailMessageHeaderField& field) { field.deserialize(stream); return stream; }
 
 
 class QTOPIAMAIL_EXPORT QMailMessageContentType : public QMailMessageHeaderField
@@ -191,6 +198,9 @@ public:
 
     QList<const QByteArray*> fieldList() const;
 
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
+
 private:
     friend class QMailMessageHeaderPrivate;
     friend class QMailMessagePartContainerPrivate;
@@ -199,6 +209,12 @@ private:
 
     void output(QDataStream& out, const QList<QByteArray>& exclusions, bool stripInternal) const;
 };
+
+template <typename Stream> 
+Stream& operator<<(Stream &stream, const QMailMessageHeader& header) { header.serialize(stream); return stream; }
+
+template <typename Stream> 
+Stream& operator>>(Stream &stream, QMailMessageHeader& header) { header.deserialize(stream); return stream; }
 
 
 class QMailMessageBodyPrivate;
@@ -252,6 +268,9 @@ public:
     TransferEncoding transferEncoding() const;
     QMailMessageContentType contentType() const;
 
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
+
 private:
     friend class QMailMessagePartContainerPrivate;
 
@@ -261,6 +280,12 @@ private:
 
     void output(QDataStream& out, bool includeAttachments) const;
 };
+
+template <typename Stream> 
+Stream& operator<<(Stream &stream, const QMailMessageBody& body) { body.serialize(stream); return stream; }
+
+template <typename Stream> 
+Stream& operator>>(Stream &stream, QMailMessageBody& body) { body.deserialize(stream); return stream; }
 
 class QTOPIAMAIL_EXPORT QMailMessagePartContainer : public QPrivatelyImplemented<QMailMessagePartContainerPrivate>
 {
@@ -316,22 +341,22 @@ public:
 
     QList<QMailMessageHeaderField> headerFields() const;
 
-    void setHeaderField( const QString &id, const QString& content );
-    void setHeaderField( const QMailMessageHeaderField &field );
+    virtual void setHeaderField( const QString &id, const QString& content );
+    virtual void setHeaderField( const QMailMessageHeaderField &field );
 
-    void appendHeaderField( const QString &id, const QString& content );
-    void appendHeaderField( const QMailMessageHeaderField &field );
+    virtual void appendHeaderField( const QString &id, const QString& content );
+    virtual void appendHeaderField( const QMailMessageHeaderField &field );
 
-    void removeHeaderField( const QString &id );
+    virtual void removeHeaderField( const QString &id );
 
 protected:
     template<typename Subclass>
     QMailMessagePartContainer(Subclass* p);
 
+    virtual void setHeader(const QMailMessageHeader& header, const QMailMessagePartContainerPrivate* parent = 0);
+
 private:
     friend class QMailMessagePartContainerPrivate;
-
-    void setHeader(const QMailMessageHeader& header, const QMailMessagePartContainerPrivate* parent = 0);
 
     uint indicativeSize() const;
 
@@ -387,7 +412,13 @@ public:
     QString identifier() const;
 
     QString attachmentPath() const;
-    bool detachAttachment(const QString& path);
+    bool detachAttachment(const QString &path);
+
+    QString detachFileName() const;
+    QString writeBodyTo(const QString &path) const;
+
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
 
 private:
     friend class QMailMessagePrivate;
@@ -398,66 +429,147 @@ private:
     void output(QDataStream& out, bool includeAttachments, bool stripInternal) const;
 };
 
-class QMailMessagePrivate;
+template <typename Stream> 
+Stream& operator<<(Stream &stream, const QMailMessagePart& part) { part.serialize(stream); return stream; }
 
-class QTOPIAMAIL_EXPORT QMailMessage : public QMailMessagePartContainer
+template <typename Stream> 
+Stream& operator>>(Stream &stream, QMailMessagePart& part) { part.deserialize(stream); return stream; }
+
+class QMailMessageMetaDataPrivate;
+
+class QTOPIAMAIL_EXPORT QMailMessageMetaData : public QPrivatelyImplemented<QMailMessageMetaDataPrivate>
 {
 public:
-    typedef QMailMessagePrivate ImplementationType;
+    typedef QMailMessageMetaDataPrivate ImplementationType;
+
+    enum MessageType
+    {
+        Mms     = 0x1,
+        // was: Ems = 0x2
+        Sms     = 0x4,
+        Email   = 0x8,
+        System  = 0x10,
+        Instant = 0x20,
+        None    = 0,
+        AnyType = Mms | Sms | Email | System | Instant
+    };
+
+    static const quint64 &Incoming;
+    static const quint64 &Outgoing;
+    static const quint64 &Sent;
+    static const quint64 &Replied;
+    static const quint64 &RepliedAll;
+    static const quint64 &Forwarded;
+    static const quint64 &Downloaded;
+    static const quint64 &Read;
+    static const quint64 &Removed;
+    static const quint64 &ReadElsewhere;
+    static const quint64 &UnloadedData;
+    static const quint64 &New;
+
+    enum ContentType {
+        UnknownContent   = 0,
+        NoContent        = 1,
+        PlainTextContent = 2,
+        RichTextContent  = 3,
+        HtmlContent      = 4,
+        ImageContent     = 5,
+        AudioContent     = 6,
+        VideoContent     = 7,
+        MultipartContent = 8,
+        SmilContent      = 9,
+        VoicemailContent = 10,
+        VideomailContent = 11,
+        VCardContent     = 12,
+        VCalendarContent = 13,
+        ICalendarContent = 14,
+        UserContent      = 64
+    };
+
+    QMailMessageMetaData();
+    QMailMessageMetaData(const QMailMessageId& id);
+    QMailMessageMetaData(const QString& uid, const QMailAccountId& accountId);
+
+    virtual QMailMessageId id() const;
+    virtual void setId(const QMailMessageId &id);
+
+    virtual QMailFolderId parentFolderId() const;
+    virtual void setParentFolderId(const QMailFolderId &id);
+
+    virtual MessageType messageType() const;
+    virtual void setMessageType(MessageType t);
+
+    virtual QMailAddress from() const;
+    virtual void setFrom(const QMailAddress &s);
+
+    virtual QString subject() const;
+    virtual void setSubject(const QString &s);
+
+    virtual QMailTimeStamp date() const;
+    virtual void setDate(const QMailTimeStamp &s);
+
+    virtual QList<QMailAddress> to() const;
+    virtual void setTo(const QList<QMailAddress>& s);
+    virtual void setTo(const QMailAddress& s);
+
+    virtual quint64 status() const;
+    virtual void setStatus(quint64 newStatus);
+    virtual void setStatus(quint64 mask, bool set);
+
+    virtual QString fromAccount() const;
+    virtual void setFromAccount(const QString &s);
+
+    virtual QMailAccountId parentAccountId() const;
+    virtual void setParentAccountId(const QMailAccountId& id);
+
+    virtual QString fromMailbox() const;
+    virtual void setFromMailbox(const QString &s);
+
+    virtual QString serverUid() const;
+    virtual void setServerUid(const QString &s);
+
+    virtual uint size() const;
+    virtual void setSize(uint i);
+
+    virtual uint indicativeSize() const;
+
+    virtual ContentType content() const;
+    virtual void setContent(ContentType type);
+
+    virtual QMailFolderId previousParentFolderId() const;
+    virtual void setPreviousParentFolderId(const QMailFolderId &id);
+
+    static quint64 statusMask(const QString &flagName);
+
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
+
+private:
+    friend class QMailMessage;
+    friend class QMailMessagePrivate;
+    friend class QMailStore;
+    friend class QMailStorePrivate;
+
+    virtual bool dataModified() const;
+    virtual void committed();
+
+    static void initStore();
+};
+
+class LongString;
+
+class QMailMessagePrivate;
+
+class QTOPIAMAIL_EXPORT QMailMessage : public QMailMessageMetaData, public QMailMessagePartContainer
+{
+public:
+    using QMailMessageMetaData::MessageType;
+    using QMailMessageMetaData::ContentType;
 
     // Mail content needs to use CRLF explicitly
     static const char CarriageReturn;
     static const char LineFeed;
     static const char* CRLF;
-
-    static QMailMessage fromRfc2822(const QByteArray &ba);
-    static QMailMessage fromRfc2822File(const QString& fileName);
-
-    enum EncodingFormat
-    {
-        HeaderOnlyFormat = 1,
-        StorageFormat = 2,
-        TransmissionFormat = 3,
-        IdentityFormat = 4,
-        SerializationFormat = 5
-    }; 
-
-    QByteArray toRfc2822(EncodingFormat format = TransmissionFormat) const;
-    void toRfc2822(QDataStream& out, EncodingFormat format = TransmissionFormat) const;
-
-    enum MailDataSelection
-    {
-        Header,
-        HeaderAndBody	
-    };
-
-    QMailMessage();
-    QMailMessage(const QMailId& id, MailDataSelection selection = HeaderAndBody);
-    QMailMessage(const QString& uid, const QString& account, MailDataSelection selection = HeaderAndBody);
-
-    enum MessageType
-    {
-        Mms     = 0x1,
-        Sms     = 0x4,
-        Email   = 0x8,
-        System  = 0x10,
-        None    = 0,
-        AnyType = Mms | Sms | Email | System
-    };
-
-    enum MessageStatusFlag {
-        Incoming       = 0x0001,
-        Outgoing       = 0x0002,
-        Sent           = 0x0004,
-        Replied        = 0x0008,
-        RepliedAll     = 0x0010,
-        Forwarded      = 0x0020,
-        Downloaded     = 0x0040,
-        Read           = 0x0080,
-        Removed        = 0x0100,
-        ReadElsewhere  = 0x0200,
-    };
-    Q_DECLARE_FLAGS(Status, MessageStatusFlag)
 
     enum AttachmentsAction {
         LinkToAttachments = 0,
@@ -465,83 +577,109 @@ public:
         CopyAndDeleteAttachments
     };
 
-    QMailId id() const;
-    void setId(QMailId id);
+    static QMailMessage fromRfc2822(const QByteArray &ba);
+    static QMailMessage fromRfc2822File(const QString& fileName);
 
-    QMailId parentFolderId() const;
-    void setParentFolderId(QMailId val);
+    QMailMessage();
+    QMailMessage(const QMailMessageId& id);
+    QMailMessage(const QString& uid, const QMailAccountId& accountId);
 
-    MessageType messageType() const;
-    void setMessageType(MessageType t);
+    enum EncodingFormat
+    {
+        HeaderOnlyFormat = 1,
+        StorageFormat = 2,
+        TransmissionFormat = 3,
+        IdentityFormat = 4,
+    }; 
 
-    QMailAddress from() const;
-    void setFrom(const QMailAddress &s);
+    QByteArray toRfc2822(EncodingFormat format = TransmissionFormat) const;
+    void toRfc2822(QDataStream& out, EncodingFormat format = TransmissionFormat) const;
 
-    QString subject() const;
-    void setSubject(const QString &s);
+    // Overrides of QMMPC functions where the data needs to be stored to the meta data also:
 
-    QMailTimeStamp date() const;
-    void setDate(const QMailTimeStamp &s);
+    virtual void setHeaderField( const QString &id, const QString& content );
+    virtual void setHeaderField( const QMailMessageHeaderField &field );
 
-    QList<QMailAddress> to() const;
-    void setTo(const QList<QMailAddress>& s);
-    void setTo(const QMailAddress& s);
+    virtual void appendHeaderField( const QString &id, const QString& content );
+    virtual void appendHeaderField( const QMailMessageHeaderField &field );
 
-    QList<QMailAddress> cc() const;
-    void setCc(const QList<QMailAddress>& s);
-    QList<QMailAddress> bcc() const;
-    void setBcc(const QList<QMailAddress>& s);
+    virtual void removeHeaderField( const QString &id );
 
-    QList<QMailAddress> recipients() const;
-    bool hasRecipients() const;
+    // Overrides of QMMMD functions where the data needs to be stored to the part container also:
 
-    QMailAddress replyTo() const;
-    void setReplyTo(const QMailAddress &s);
+    virtual void setFrom(const QMailAddress &s);
 
-    QString inReplyTo() const;
-    void setInReplyTo(const QString &s);
+    virtual void setSubject(const QString &s);
+    
+    virtual void setDate(const QMailTimeStamp &s);
 
-    Status status() const;
-    void setStatus(Status s);
-    void setStatus(MessageStatusFlag flag, bool set);
+    virtual void setTo(const QList<QMailAddress>& s);
+    virtual void setTo(const QMailAddress& s);
 
-    QString fromAccount() const;
-    void setFromAccount(const QString &s);
+    virtual uint indicativeSize() const;
 
-    QString fromMailbox() const;
-    void setFromMailbox(const QString &s);
+    // Convenience functions:
 
-    QString serverUid() const;
-    void setServerUid(const QString &s);
+    virtual QList<QMailAddress> cc() const;
+    virtual void setCc(const QList<QMailAddress>& s);
+    virtual QList<QMailAddress> bcc() const;
+    virtual void setBcc(const QList<QMailAddress>& s);
 
-    uint size() const;
-    void setSize(uint i);
+    virtual QList<QMailAddress> recipients() const;
+    virtual bool hasRecipients() const;
 
-    uint indicativeSize() const;
+    virtual QMailAddress replyTo() const;
+    virtual void setReplyTo(const QMailAddress &s);
+
+    virtual QString inReplyTo() const;
+    virtual void setInReplyTo(const QString &s);
 
     template <typename Stream> void serialize(Stream &stream) const;
     template <typename Stream> void deserialize(Stream &stream);
+
+protected:
+    virtual void setHeader(const QMailMessageHeader& header, const QMailMessagePartContainerPrivate* parent = 0);
 
 private:
     friend class QMailStore;
     friend class QMailStorePrivate;
 
-    bool uncommittedChanges() const;
-    bool uncommittedMetadataChanges() const;
-    void changesCommitted();
+    QMailMessageMetaDataPrivate* metaDataImpl();
+    const QMailMessageMetaDataPrivate* metaDataImpl() const;
+
+    QMailMessagePrivate* partContainerImpl();
+    const QMailMessagePrivate* partContainerImpl() const;
+    
+    virtual bool contentModified() const;
+    virtual void committed();
+
+    QByteArray duplicatedData(const QString&) const;
+    void updateMetaData(const QByteArray& id, const QString& value);
+
+    static QMailMessage fromRfc2822(LongString& ls);
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(QMailMessage::Status)
+typedef QList<QMailMessage> QMailMessageList;
+typedef QList<QMailMessageMetaData> QMailMessageMetaDataList;
+typedef QList<QMailMessage::MessageType> QMailMessageTypeList;
 
+Q_DECLARE_USER_METATYPE_ENUM(QMailMessageBody::TransferEncoding)
+Q_DECLARE_USER_METATYPE_ENUM(QMailMessagePartContainer::MultipartType)
 Q_DECLARE_USER_METATYPE_ENUM(QMailMessage::MessageType)
+Q_DECLARE_USER_METATYPE_ENUM(QMailMessage::ContentType)
 Q_DECLARE_USER_METATYPE_ENUM(QMailMessage::AttachmentsAction)
 
+#ifndef SUPPRESS_REGISTER_QMAILMESSAGE_METATYPES
 Q_DECLARE_USER_METATYPE(QMailMessage)
-
-typedef QList<QMailMessage> QMailMessageList;
+Q_DECLARE_USER_METATYPE(QMailMessageMetaData)
 
 Q_DECLARE_METATYPE(QMailMessageList)
+Q_DECLARE_METATYPE(QMailMessageMetaDataList)
+Q_DECLARE_METATYPE(QMailMessageTypeList)
 Q_DECLARE_USER_METATYPE_TYPEDEF(QMailMessageList, QMailMessageList)
+Q_DECLARE_USER_METATYPE_TYPEDEF(QMailMessageMetaDataList, QMailMessageMetaDataList)
+Q_DECLARE_USER_METATYPE_TYPEDEF(QMailMessageTypeList, QMailMessageTypeList)
+#endif
 
 
 // There is no good place to put this code; define it here, but we won't expose it to external clients

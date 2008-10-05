@@ -1,32 +1,30 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef PIMSQLIO_PRIVATE_H
-#define PIMSQLIO_PRIVATE_H
+#ifndef QPIMSQLIO_P_H
+#define QPIMSQLIO_P_H
 
 //
 //  W A R N I N G
 //  -------------
 //
-// This file is not part of the Qtopia API.  It exists purely as an
+// This file is not part of the Qt Extended API.  It exists purely as an
 // implementation detail.  This header file may change from version to
 // version without notice, or even be removed.
 //
@@ -34,12 +32,13 @@
 //
 
 #include <qcategorymanager.h>
-#include <qtopia/pim/qpimrecord.h>
+#include <qpimrecord.h>
 #include <QSqlRecord>
 #include <QSqlError>
 #include <QDateTime>
 
 #include <QCache>
+#include <QObject>
 
 #include "qsqlpimtablemodel_p.h"
 
@@ -47,25 +46,36 @@ class QFile;
 class QTimer;
 class QPimSource;
 class QPimQueryCache;
-class QTOPIA_AUTOTEST_EXPORT QPimSqlIO {
+class QValueSpaceItem;
+class QValueSpaceObject;
+class QTOPIA_AUTOTEST_EXPORT QPimSqlIO : public QObject
+{
+    Q_OBJECT
 public:
-    QPimSqlIO(const QUuid &scope, const char *table, const char *catTable,
-            const char *customTable, const char *updateText, const char *insertText);
+    QPimSqlIO(QObject *parent, const QUuid &scope, const char *table, const char *catTable,
+            const char *customTable, const char *updateText, const char *insertText, const char *valueSpaceKey);
     virtual ~QPimSqlIO();
 
     static int sourceContext(const QPimSource &, bool = true);
+    static QPimSource contextSource(int);
     static QDateTime lastSyncTime(const QPimSource &);
     static bool setLastSyncTime(const QPimSource &, const QDateTime &);
     static QSqlDatabase database();
 
     int context(const QUniqueId &) const;
+    QPimSource source(const QUniqueId &) const;
 
     // leave to let old code work
-    bool startSync(const QPimSource &, const QDateTime &syncTime);
+    bool startSyncTransaction(const QPimSource &, const QDateTime &syncTime);
 
-    bool startSync(const QSet<QPimSource> &sources, const QDateTime &syncTime);
-    bool abortSync();
-    bool commitSync();
+    bool startSyncTransaction(const QSet<QPimSource> &sources, const QDateTime &syncTime);
+    bool abortSyncTransaction() { return abortTransaction(); }
+    bool commitSyncTransaction() { return commitTransaction(); }
+
+    bool startTransaction();
+    bool startTransaction(const QDateTime &syncTime);
+    bool abortTransaction();
+    bool commitTransaction();
 
     QList<QUniqueId> removed(const QSet<QPimSource> &sources, const QDateTime &) const;
     QList<QUniqueId> added(const QSet<QPimSource> &sources, const QDateTime &) const;
@@ -78,25 +88,39 @@ public:
     QSet<int> contextFilter() const;
     ContextFilterType contextFilterType() const;
 
-    virtual void invalidateCache();
+    int count() const;
 
-protected:
     void setCategoryFilter(const QCategoryFilter &f);
     QCategoryFilter categoryFilter() const;
 
-    QUniqueId recordId(int row) const;
-    QList<QUniqueId> recordIds(const QList<int> &rows) const;
+    QUniqueId id(int row) const;
+    QList<QUniqueId> ids(const QList<int> &rows) const;
     int row(const QUniqueId & tid) const;
     bool contains(const QUniqueId & tid) const;
-    int count() const;
-
-    void setSimpleQueryCache(QPimQueryCache *cache) { model.setSimpleQueryCache(cache); }
-
-    void setContextFilter(const QSet<int> &, ContextFilterType);
+    bool exists(const QUniqueId & id) const;
+    void setContextFilter(const QSet<int> &, ContextFilterType = ExcludeContexts);
 
     /* convenience functions, change sets to invalidate cache? */
     QStringList orderBy() const { return model.orderBy(); }
     void setOrderBy(const QStringList &list) { model.setOrderBy(list); invalidateCache();}
+
+
+    bool moveRecord(const QUniqueId &, const QPimSource &);
+
+//test:
+    static void setDatabase(QSqlDatabase *);
+
+signals:
+    void recordsUpdated();
+
+protected slots:
+    virtual void invalidateCache();
+    virtual void propagateChanges();
+
+protected:
+
+    void setSimpleQueryCache(QPimQueryCache *cache) { model.setSimpleQueryCache(cache); }
+
 
     void setFilter(const QString &filter) { model.setFilter(filter); invalidateCache();}
     void setFilters(const QStringList &list) { model.setFilters(list); invalidateCache();}
@@ -113,14 +137,17 @@ protected:
     QUniqueId addRecord(const QPimRecord &, const QPimSource &, bool = true);
     QUniqueId addRecord(const QPimRecord &, int, bool = true);
 
+    bool moveRecord(const QUniqueId &, int context);
 
     QString selectText(const QStringList &list = QStringList()) const
     { return model.selectText(list); }
     QString selectText(const QString &field, const QStringList &list = QStringList()) const
     { return model.selectText(field, list); }
+
 protected:
     QSqlPimTableModel model;
     QDateTime mSyncTime;
+    int mTransactionStack;
 
     virtual bool updateExtraTables(uint, const QPimRecord &);
     virtual bool insertExtraTables(uint, const QPimRecord &);
@@ -132,6 +159,8 @@ protected:
 
     QUniqueIdGenerator idGenerator;
 
+    static QMap<QPimSource, int> sourceMap;
+
     // yes, I do mean const.
     const QString tableText;
     const QString updateRecordText;
@@ -141,7 +170,7 @@ protected:
     const QString selectCategoriesText;
     const QString deleteCategoriesText;
     const QString insertCategoriesText;
-    // not done for extra tables, uknown number of.
+    // not done for extra tables, unknown number of.
     const QString deleteRecordText;
     const QString insertRecordText;
 
@@ -152,6 +181,11 @@ protected:
     mutable QPreparedSqlQuery changeLogQuery;
     mutable QPreparedSqlQuery addRecordQuery;
     mutable QPreparedSqlQuery contextQuery;
+    mutable QPreparedSqlQuery moveRecordQuery;
+
+    QValueSpaceItem *vsItem;
+    QValueSpaceObject *vsObject;
+    int vsValue;
 };
 
 #endif

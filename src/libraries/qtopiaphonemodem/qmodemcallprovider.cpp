@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -25,13 +23,14 @@
 #include <qatutils.h>
 #include <qatresult.h>
 #include <qatresultparser.h>
-#include <qtopiaphonemodem/private/qmodempppdmanager_p.h>
+#include "qmodempppdmanager_p.h"
 #include <qtopialog.h>
 #include <qtimer.h>
 
 /*!
     \class QModemCallProvider
-    \mainclass
+    \inpublicgroup QtCellModule
+
     \brief The QModemCallProvider class implements a mechanism for AT-based phone call providers to hook into the telephony system.
     \ingroup telephony::modem
 
@@ -221,26 +220,11 @@ void QModemCallProvider::hangupRemote( QModemCall *call )
         //bool wasActive = ( call->state() == QPhoneCall::Connected );
         call->setState( QPhoneCall::HangupRemote );
 
-    #if 0
-        // If there are no other active calls, then activate the held call.
-        if ( wasActive && !hasGroup( QPhoneCall::Connected ) ) {
-            changeGroup( QPhoneCall::Hold, QPhoneCall::Connected,
-                         QPhoneCallImpl::Hold | QPhoneCallImpl::Tone |
-                         QPhoneCallImpl::Transfer );
-        }
-    #endif
-
     } else {
 
         // The active call has hung up.
         changeGroup( QPhoneCall::Connected, QPhoneCall::HangupRemote,
                      QPhoneCallImpl::None );
-    #if 0
-        changeGroup( QPhoneCall::Hold, QPhoneCall::Connected, // XXX
-                     QPhoneCallImpl::Hold | QPhoneCallImpl::Tone |
-                     QPhoneCallImpl::Transfer );
-    #endif
-
     }
     endStateTransaction();
 
@@ -308,7 +292,7 @@ QString QModemCallProvider::resolveCallMode( int mode ) const
     seconds while a call is incoming, and stops sending \c RING if
     the caller hangs up.  Returns false if the modem does not resend
     \c RING every few seconds and instead uses some other mechanism
-    to notify Qtopia that a remote hangup has occurred.  The default
+    to notify Qt Extended that a remote hangup has occurred.  The default
     return value is true.
 
     \sa ringing()

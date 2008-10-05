@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -31,7 +29,7 @@
 #include <QSettings>
 #include <QValueSpaceObject>
 
-#include <qtopiacomm/qbluetoothaddress.h>
+#include <qbluetoothaddress.h>
 
 #include <unistd.h>
 
@@ -71,19 +69,20 @@ BtPowerServicePrivate::~BtPowerServicePrivate()
 
 /*!
     \class BtPowerService
+    \inpublicgroup QtBluetoothModule
     \ingroup QtopiaServer::Task::Bluetooth
     \internal
-    \brief The BtPowerService class provides the Qtopia Bluetooth Power service.
+    \brief The BtPowerService class provides the Qt Extended Bluetooth Power service.
 
     The \i BtPower service enables applications to notify the server
     of Bluetooth device useage, such that the server can intelligently
     manage the bluetooth device for maximum power efficiency.
 
-    The \i BtPower service is typically supplied by the Qtopia server,
+    The \i BtPower service is typically supplied by the Qt Extended server,
     but the system integrator might change the application that
     implements this service.
 
-    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
+    This class is part of the Qt Extended server and cannot be used by other QtopiaApplications.
     \sa QCommDeviceController, QCommDeviceSession
  */
 
@@ -252,6 +251,7 @@ bool BtPowerService::shouldBringDown(QUnixSocket *) const
 
 /*!
   \class BtPowerServiceTask
+    \inpublicgroup QtBluetoothModule
   \ingroup QtopiaServer::Task::Bluetooth
   \brief The BtPowerServiceTask class provides the BtPowerService.
 
@@ -259,11 +259,11 @@ bool BtPowerService::shouldBringDown(QUnixSocket *) const
   of Bluetooth device useage, such that the server can intelligently
   manage the bluetooth device for maximum power efficiency.
 
-  The \i BtPower service is typically supplied by the Qtopia server,
+  The \i BtPower service is typically supplied by the Qt Extended server,
   but the system integrator might change the application that
   implements this service.
   
-  This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
+  This class is part of the Qt Extended server and cannot be used by other QtopiaApplications.
 */
 
 /*!

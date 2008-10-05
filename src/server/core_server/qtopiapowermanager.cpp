@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "qtopiapowermanager.h"
@@ -32,10 +30,10 @@
 #include <qwindowsystem_qws.h>
 #endif
 #include "applicationlauncher.h"
-#include "systemsuspend.h"
 #include "qtopiapowermanagerservice.h"
 #include "qtopiaserverapplication.h"
 #include "systemsuspend.h"
+#include "windowmanagement.h"
 
 static bool forced_off = false;
 static int currentBacklight = -1;
@@ -44,7 +42,6 @@ QValueSpaceObject *QtopiaPowerManager::m_vso = 0;
 /*  Apply light/power settings for current power source */
 static void applyLightSettings(QPowerStatus *p)
 {
-    int initbright;
     int intervalDim;
     int intervalLightOff;
     int intervalSuspend;
@@ -87,9 +84,6 @@ static void applyLightSettings(QPowerStatus *p)
         config.setValue("Suspend", suspend);
     }
 
-    initbright = config.value("Brightness",  qpe_sysBrightnessSteps()).toInt();
-    config.setValue("Brightness", initbright);
-
     dim = config.value("Dim", true).toBool();
     config.setValue("Dim", dim);
     lightoff = config.value("LightOff", false).toBool();
@@ -128,6 +122,9 @@ QtopiaPowerManager::QtopiaPowerManager() : m_powerConstraint(QtopiaApplication::
     // Create the screen saver and the associated service.
 #ifdef Q_WS_QWS
     QWSServer::setScreenSaver(this);
+
+    //QWSServer takes ownership of task
+    QtopiaServerApplication::excludeFromTaskCleanup( this, true );
 #endif
     (void)new QtopiaPowerManagerService( this, this );
 
@@ -158,7 +155,7 @@ void QtopiaPowerManager::powerStatusChanged()
 */
 void QtopiaPowerManager::setIntervals(int *v, int size)
 {
-    Q_UNUSED(v);
+    Q_UNUSED( v );
 
     QSettings cfg( QLatin1String("Trolltech"), QLatin1String("qpe"));
     if (powerstatus.wallStatus() == QPowerStatus::Available) {
@@ -249,13 +246,19 @@ void QtopiaPowerManager::setBacklight(int bright)
             config.beginGroup( "ExternalPower" );
         else
             config.beginGroup( "BatteryPower" );
-        bright = config.value("Brightness", qpe_sysBrightnessSteps()).toInt();
+        bright = config.value("Brightness", 255).toInt();
+        bright = bright * qpe_sysBrightnessSteps() / 255;
+        if ( bright < 1 )
+            bright = 1;
     }
     qpe_setBrightness(bright);
     currentBacklight = bright;
 
     if (m_vso)
         m_vso->setAttribute("Display/0/Backlight", bright);
+
+    QtopiaIpcEnvelope e( "Qtopia/PowerStatus", "brightnessChanged(int)" );
+    e << bright;
 }
 
 /*!
@@ -274,7 +277,10 @@ int QtopiaPowerManager::backlight()
             config.beginGroup( "ExternalPower" );
         else
             config.beginGroup( "BatteryPower" );
-        currentBacklight = config.value("Brightness", qpe_sysBrightnessSteps()).toInt();
+        currentBacklight = config.value("Brightness", 255).toInt();
+        currentBacklight = currentBacklight * qpe_sysBrightnessSteps() / 255;
+        if ( currentBacklight < 1 )
+            currentBacklight = 1;
     }
     return currentBacklight;
 }
@@ -317,7 +323,7 @@ void QtopiaPowerManager::restore()
 /*!
     \fn bool QtopiaPowerManager::save(int level)
 
-    This function is called by Qtopia when a timeout has occurred
+    This function is called by Qt Extended when a timeout has occurred
     and dynamically maps \a level onto a power saving action.
 
     This function needs to be reimplemented by subclasses.
@@ -352,41 +358,42 @@ void QtopiaPowerManager::forceSuspend()
 //------------------------------------------------------------
 
 /*!
-  \class QtopiaPowerManager
-  \ingroup QtopiaServer::Control
-  \brief The QtopiaPowerManager class implements default device power management behaviour.
+    \class QtopiaPowerManager
+    \inpublicgroup QtBaseModule
+    \ingroup QtopiaServer
+    \brief The QtopiaPowerManager class implements default device power management behaviour.
 
-  Qtopia provides an implementation for a phone device.
-  These implementations support the following three timeouts and actions.
+    Qt Extended provides an implementation for a phone device.
+    These implementations support the following three timeouts and actions.
 
-   PhonePowerManager (phone/phonepowermanager.cpp)
-   \list
+    PhonePowerManager (phone/phonepowermanager.cpp)
+    \list
     \o dim backlight
     \o turn backlight off
     \o suspend device
-   \endlist
+    \endlist
 
-   To extend Qtopia's default behaviour it is necessary to subclass either PhonePowerManager
-   or QtopiaPowerManager. A minimal subclass of QtopiaPowerManager has to reimplement the
-   following functions:
+    To extend the default behaviour it is necessary to subclass either PhonePowerManager
+    or QtopiaPowerManager. A minimal subclass of QtopiaPowerManager has to reimplement the
+    following functions:
 
-   \list
-   \o \c{setIntervals(int*, int)}
-   \o \c{save(int)}
-   \endlist
+    \list
+    \o \c{setIntervals(int*, int)}
+    \o \c{save(int)}
+    \endlist
 
-   Applications can interact with the Qtopia power management via the QtopiaPowerManagerService.
-   For more details on how to utilize services see the \l {Services}{Services} documentation.
+    Applications can interact with the Qt Extended power management via the QtopiaPowerManagerService.
+    For more details on how to utilize services see the \l {Services}{Services} documentation.
 
-   This class provides functionality to temporarily restrict power management.
-   It might be necessary to surpress the diming of the backlight e.g., when the mediaplayer is
-   showing a video or to prevent the suspension of the device when the user is playing music.
-   The QtopiaPowerConstraintManager ensures that application cannot request restriction
-   beyond their own life time.
+    This class provides functionality to temporarily restrict power management.
+    It might be necessary to surpress the diming of the backlight e.g., when the mediaplayer is
+    showing a video or to prevent the suspension of the device when the user is playing music.
+    The QtopiaPowerConstraintManager ensures that application cannot request restriction
+    beyond their own life time.
 
-   This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
-   \sa setIntervals(), save(), PhonePowerManager, QtopiaPowerManagerService, QtopiaPowerConstraintManager
+    \sa setIntervals(), save(), PhonePowerManager, QtopiaPowerManagerService, QtopiaPowerConstraintManager
 */
 
 
@@ -400,11 +407,12 @@ void QtopiaPowerManager::forceSuspend()
 static QtopiaPowerConstraintManager *g_managerinstance= 0;
 
 /*!
-  \ingroup QtopiaServer::Control
+    \ingroup QtopiaServer
     \class QtopiaPowerConstraintManager
-    \brief The QtopiaPowerConstraintManager class keeps track of power management constraints set by Qtopia applications.
+    \inpublicgroup QtBaseModule
+    \brief The QtopiaPowerConstraintManager class keeps track of power management constraints set by Qt Extended applications.
 
-    In some use cases Qtopia applications may want to disable
+    In some use cases Qt Extended applications may want to disable
     power saving acitivities in order to perform their tasks (e.g. videos app
     disables the dimming of the backlight when it plays a video). This monitor
     keeps track of all of all constraints set by applications and applies a common denominator
@@ -412,7 +420,7 @@ static QtopiaPowerConstraintManager *g_managerinstance= 0;
 
     QtopiaPowerConstraintManager is a singleton, which you can access through QtopiaPowerConstraintManager::instance().
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
     \sa QtopiaPowerManager
 */
@@ -440,6 +448,10 @@ QtopiaPowerConstraintManager::QtopiaPowerConstraintManager(QObject *parent)
     if(launcher) {
         QObject::connect(launcher, SIGNAL(applicationTerminated(QString,ApplicationTypeLauncher::TerminationReason)), this, SLOT(applicationTerminated(QString)));
     }
+
+    WindowManagement *windowManager = new WindowManagement(this);
+    QObject::connect(windowManager, SIGNAL(windowActive(QString,QRect,WId)),
+                     this, SLOT(topLevelWindowChanged()));
 }
 
 /*!
@@ -448,6 +460,7 @@ QtopiaPowerConstraintManager::QtopiaPowerConstraintManager(QObject *parent)
 void QtopiaPowerConstraintManager::setConstraint(QtopiaApplication::PowerConstraint mode, const QString &app)
 {
     removeOld(app);
+
     switch(mode) {
         case QtopiaApplication::Disable:
             sStatus[0].append(app);
@@ -479,19 +492,19 @@ bool QtopiaPowerConstraintManager::removeOld(const QString &pid)
             return true;
         }
     }
+
     return false;
 }
 
 void QtopiaPowerConstraintManager::updateAll()
 {
     int mode = QtopiaApplication::Enable;
-    if ( sStatus[0].count() ) {
+    if (sStatus[0].contains(WindowManagement::activeAppName()))
         mode = QtopiaApplication::Disable;
-    } else if ( sStatus[1].count() ) {
+    else if (sStatus[1].contains(WindowManagement::activeAppName()))
         mode = QtopiaApplication::DisableLightOff;
-    } else if ( sStatus[2].count() ) {
+    else if (sStatus[0].count() || sStatus[1].count() || sStatus[2].count())
         mode = QtopiaApplication::DisableSuspend;
-    }
 
     if ( mode != currentMode ) {
 #ifdef QTOPIA_MAX_SCREEN_DISABLE_TIME
@@ -520,8 +533,16 @@ void QtopiaPowerConstraintManager::updateAll()
 */
 void QtopiaPowerConstraintManager::applicationTerminated(const QString &app)
 {
-    if ( removeOld(app) )
+    if (removeOld(app))
         updateAll();
+}
+
+/*!
+  The top level window has changed.  Update only when visible power constraints.
+*/
+void QtopiaPowerConstraintManager::topLevelWindowChanged()
+{
+    updateAll();
 }
 
 int QtopiaPowerConstraintManager::timerValue()

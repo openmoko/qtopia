@@ -32,8 +32,9 @@ if ( $move ) {
     print "make[1]: Entering `".fixpath(getcwd())."'\n";
 }
 my $ret = system(opt("make")." ".join(" ", @ARGV)." MAKE=".fixpath("$QPEDIR/bin/winmake.exe"));
+$ret = $ret >> 8;
 if ( $move ) {
     print "make[1]: Leaving `".fixpath(getcwd())."'\n";
 }
-exit ( $ret != 0 );
+exit $ret;
 

@@ -1,53 +1,36 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _CELLMODEMMANAGER_H_
-#define _CELLMODEMMANAGER_H_
+#ifndef CELLMODEMMANAGER_H
+#define CELLMODEMMANAGER_H
 
-#include <qcalllist.h>
-#include <qspeeddial.h>
 #include <qvaluespace.h>
-#include <qsmsmessage.h>
 #include <qcbsmessage.h>
 #include <qnetworkregistration.h>
 #include <qcallforwarding.h>
 #include <qsupplementaryservices.h>
-#include <QObject>
-#include <QSound>
 #include <QPinManager>
-#include <QPhoneProfile>
-#include <QPhoneProfileManager>
 #include <QPhoneBook>
 #include "qtopiaserverapplication.h"
 #include "qabstractcallpolicymanager.h"
 
 class QPinManager;
-class DialerControl;
-class CallHistory;
-class CallScreen;
-class QuickDial;
-class Dialer;
-class QSimCommand;
-class MessageBox;
-class ModemManager;
 
 class QtopiaServiceDescription;
 class QLabel;
@@ -77,6 +60,9 @@ public:
     QString callTypeIcon() const;
     QAbstractCallPolicyManager::CallHandling handling(const QString& number);
     bool isAvailable(const QString& number);
+    void updateOnThePhonePresence( bool isOnThePhone );
+    bool doDnd();
+    bool supportsPresence() const;
     QString registrationMessage() const;
     QString registrationIcon() const;
 
@@ -134,10 +120,7 @@ private slots:
     void simNotInserted();
     void readPhoneBooks();
     void fetchEmergencyNumbers();
-    void fetchCallHistory();
     void emergencyNumbersFetched
-        ( const QString& store, const QList<QPhoneBookEntry>& list );
-    void callHistoryEntriesFetched
         ( const QString& store, const QList<QPhoneBookEntry>& list );
 
 private:
@@ -156,7 +139,5 @@ private:
     void stopAutoRegisterTimer();
     CellModemManagerPrivate *d;
 };
-QTOPIA_TASK_INTERFACE(CellModemManager);
 
-#endif // _CELLMODEMMANAGER_H_
-
+#endif

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -67,6 +65,7 @@ void QDeviceIndicatorsPrivate::update()
         QDeviceIndicators::IndicatorState newState =
             (QDeviceIndicators::IndicatorState)m_item->value(subPath).toInt();
 
+
         Indicators::Iterator iter = m_states.find(subPath);
         if(iter == m_states.end()) {
             m_states.insert(subPath, newState);
@@ -85,7 +84,7 @@ void QDeviceIndicatorsPrivate::update()
             continue;
 
         QDeviceIndicators::IndicatorState newState =
-            (QDeviceIndicators::IndicatorState)m_item->value(subPath).toInt();
+            (QDeviceIndicators::IndicatorState)m_item->value(subPath,QDeviceIndicators::Off).toInt();
 
         if(*iter != newState) {
             *iter = newState;
@@ -97,57 +96,68 @@ void QDeviceIndicatorsPrivate::update()
 // define QDeviceIndicatorsPrivate
 
 /*!
-  \class QDeviceIndicators
-  \mainclass
-  \brief The QDeviceIndicators class allows applications to query, enable
-         and disable indicator lights on a device.
+    \class QDeviceIndicators
+    \inpublicgroup QtBaseModule
 
-  The QDeviceIndicators class can be used by applications to control visual
-  lights on a device.  For example, many devices have an "Email" light that is
-  illuminated whenever there are new messages.  The exact names of the
-  available indicators is device specific, and can be queried through the
-  supportedIndicators() and isIndicatorSupported() methods.
+    \brief The QDeviceIndicators class allows applications to control indicator lights.
 
-  QDeviceIndicators acts as a thin convenience wrapper around entries in the
-  Qtopia Value Space.  The current status on indicators is located under the
-  \c {/Hardware/IndicatorLights} path.  For example, the "Email" indicator
-  status could be read and set directly through the
-  \c {/Hardware/IndicatorLights/Email} item.
+    The QDeviceIndicators class can be used by applications to control visual
+    lights on a device.  For example, many devices have an "Email" light that is
+    illuminated whenever there are new messages.  Each light has a name, and is manipulated
+    through it's state such as On or Flash and attributes such as Color.  The names of each indicator,
+    and their supported states and attributes are device specific.
+    Typically the implementer of QDeviceIndicatorsProvider would document these and
+    provide them to the user of QDeviceIndicators.
 
-  \ingroup hardware
-  \sa QDeviceIndicatorsProvider
+    QDeviceIndicators acts as a thin convenience wrapper around entries in the
+    Qt Extended Value Space.  The current status on indicators is located under the
+    \c {/Hardware/IndicatorLights} path.  For example, the "Email" indicator
+    state could be read and set directly through the
+    \c {/Hardware/IndicatorLights/Email} item.
+
+    \i {Note:} Because QDeviceIndicators uses Value Space, it is not thread
+    safe and may only be used from an application's main thread.
+
+
+    \ingroup hardware
+    \sa QDeviceIndicatorsProvider
  */
 
 /*!
-  \enum QDeviceIndicators::IndicatorState
+    \enum QDeviceIndicators::IndicatorState
 
-  Represents the state of a device indicator.
-  \value Off The indicator light is not illuminated.
-  \value On The indicator light is illuminated.
+    Represents the state of a device indicator.
+    \value Off The indicator light is not illuminated.
+    \value On The indicator light is illuminated.
+    \value Flash The indicator is flashing on and off.
+    \value Throb The indicator is smoothly cycling from zero
+        intensity to full intensity and back again
  */
 
 /*!
-  Create a new QDeviceIndicators instance with the provided \a parent.
+    Create a new QDeviceIndicators instance with the provided \a parent.
  */
 QDeviceIndicators::QDeviceIndicators(QObject *parent)
 : QObject(parent), d(0)
 {
     d = deviceIndicators();
     QObject::connect(d,
-                     SIGNAL(indicatorStateChanged(QString,IndicatorState)),
-                     this,
-                     SIGNAL(indicatorStateChanged(QString,IndicatorState)));
+                    SIGNAL(indicatorStateChanged(QString,QDeviceIndicators::IndicatorState)),
+                    this,
+                    SIGNAL(indicatorStateChanged(QString,QDeviceIndicators::IndicatorState)));
 }
 
 /*!
-  Destroys the instance.
+    Destroys the instance.
  */
 QDeviceIndicators::~QDeviceIndicators()
 {
 }
 
 /*!
-  Returns the list of all indicators supported by the device.
+    Returns the list of all indicators supported by the device.
+
+    \sa isIndicatorSupported()
  */
 QStringList QDeviceIndicators::supportedIndicators() const
 {
@@ -155,7 +165,9 @@ QStringList QDeviceIndicators::supportedIndicators() const
 }
 
 /*!
-  Returns true if the indicator \a name is supported by the device.
+    Returns true if the indicator \a name is supported by the device.
+
+    \sa supportedIndicators()
  */
 bool QDeviceIndicators::isIndicatorSupported(const QString &name)
 {
@@ -163,20 +175,59 @@ bool QDeviceIndicators::isIndicatorSupported(const QString &name)
 }
 
 /*!
-  Returns true if the indicator \a name supports the given \a state.
+    Returns true if the indicator \a name supports a given \a state.
+    Returns false if the \a state is not supported or the indicator \a name
+    is not recognised.
+
+    \sa indicatorState(), setIndicatorState()
  */
 bool QDeviceIndicators::isIndicatorStateSupported(const QString &name,
                                                   IndicatorState state)
 {
-    Q_UNUSED(state);
-    return isIndicatorSupported(name);
+    if (!d->m_states.contains(name))
+        return false;
+    QList<QVariant> states = d->m_item->value(name + "/SupportedStates").toList();
+    for (int i=0; i < states.count(); i++ )
+    {
+        if (state == states.at(i).toInt() )
+            return true;
+    }
+    return false;
 }
 
 /*!
-  Returns the current indicator state for \a name.
+    Returns the value of the \a attribute of the given indcator's \a name.
+    An invalid QVariant is returned if the indicator \a name does not exist
+    or \a attribute is not supported.
+*/
+QVariant QDeviceIndicators::indicatorAttribute(const QString &name, const QString &attribute) const
+{
+    if (!d->m_states.contains(name))
+        return QVariant();
+    else
+        return d->m_item->value(name + '/' + attribute);
+}
+/*!
+    Attempts to set the \a attribute of indicator \a name to \a value.  Setting an attribute
+    is an asynchronous event.  Honoring or ignoring the request is up to the implementation of
+    QDeviceIndicatorsProvider, typically valid requests would always be honored.
+*/
+void QDeviceIndicators::setIndicatorAttribute(const QString &name, const QString &attribute,
+                                    const QVariant &value)
+{
+    if (isIndicatorSupported(name))
+    {
+        d->m_item->setValue(name + '/' + attribute, value);
+        d->m_item->sync();
+    }
+}
+
+/*!
+    Returns the current indicator state for \a name.
+
+    \sa isIndicatorStateSupported()
  */
-QDeviceIndicators::IndicatorState
-QDeviceIndicators::indicatorState(const QString &name)
+QDeviceIndicators::IndicatorState QDeviceIndicators::indicatorState(const QString &name)
 {
     QDeviceIndicatorsPrivate::Indicators::ConstIterator iter = d->m_states.find(name);
     if(iter == d->m_states.end())
@@ -186,21 +237,26 @@ QDeviceIndicators::indicatorState(const QString &name)
 }
 
 /*!
-  Attempts to change the indicator \a name to the provided \a state.  Setting
-  an indicator is an asynchronous event.  If necessary, callers should monitor
-  the indicatorStateChanged() signal to determine when the state change occurs.
+    Attempts to change the indicator \a name to the provided \a state.  Setting
+    an indicator is an asynchronous event.  If necessary, callers should monitor
+    the indicatorStateChanged() signal to determine when the state change occurs.
+
+    \sa isIndicatorStateSupported()
  */
 void QDeviceIndicators::setIndicatorState(const QString &name,
                                           IndicatorState state)
 {
     d->m_item->setValue(name, state);
+    d->m_item->sync();
 }
 
 /*!
-  \fn void QDeviceIndicators::indicatorStateChanged(const QString &name, IndicatorState newState)
+    \fn void QDeviceIndicators::indicatorStateChanged(const QString &name, IndicatorState newState)
 
-  Emitted whenever the indicator \a name changes state.  \a newState will be
-  set to the new indicator state.
+    Emitted whenever the indicator \a name changes state.  \a newState will be
+    set to the new indicator state.
+
+    \sa indicatorState(), setIndicatorState()
  */
 
 #include "qdeviceindicators.moc"

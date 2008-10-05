@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -31,67 +29,35 @@
 #include <qcontentset.h>
 #include <qtopiaipcadaptor.h>
 #include "qtopiaserverapplication.h"
-#include <qtopia/private/contentserverinterface_p.h>
 #include <QtopiaDocumentServer>
+#include <QThread>
+#include <QMutex>
 
 class ServerInterface;
 class AppLoaderPrivate;
 class QValueSpaceObject;
 
-class ContentServer : public ContentServerInterface
+class ContentServer : public QThread
 {
     Q_OBJECT
 public:
-    static ContentServer *getInstance();
-
     ContentServer( QObject *parent = 0 );
     ~ContentServer();
+
     virtual void run();
 
-    void removeContent(QContentIdList cids);
-    void addContent(const QFileInfo &fi);
+signals:
+    void scan(const QString &path, int priority);
+
+public slots:
+    void scanAll();
 
 private slots:
-    void initDocScan();
-    void processContent();
+    void scanning(bool scanning);
 
 private:
-    QContentIdList removeList;
-    QList<QFileInfo> addList;
-    QTimer contentTimer;
+    QtopiaIpcAdaptor *requestQueue;
     QValueSpaceObject *scannerVSObject;
-    QMutex guardMutex;
-    friend class ContentProcessor;
-    friend class DirectoryScannerManager;
-};
-
-/*!
-  \internal
-  \class RequestQueue
-  Models all registered QContentSet objects and on receipt of requests to
-  update the database from new path information, forwards updates to those
-  objects which are affected.
-  
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
-*/
-class RequestQueue : public QtopiaIpcAdaptor
-{
-    Q_OBJECT
-public:
-    RequestQueue();
-    ~RequestQueue();
-public slots:
-    //void newRequest( const QString &msg, const QByteArray &data );
-    void receiveUpdate();
-    void reflectMirror( QContentId cid, QContent::ChangeType ctype );
-    void scanPath(const QString &newPath, int priority);
-    void registerCLS(const QString& CLSid, const QContentFilter& filters, int index);
-    void unregisterCLS(const QString& CLSid, int index);
-private:
-    friend class ContentServer;
-    QContentSet *cls;
-    QHash<QString, QContentSet *> mirrors;
-    QHash<QContentSet *, QString> mirrorsByPtr;
 };
 
 // declare ContentServerTask
@@ -104,13 +70,10 @@ public:
     virtual bool systemRestart();
     virtual bool systemShutdown();
 
-private slots:
-    void finished();
-
 private:
     void doShutdown();
 
-    bool m_finished;
+    ContentServer m_server;
 };
 
 class DocumentServerTask : public SystemShutdownHandler

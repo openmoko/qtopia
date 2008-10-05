@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,7 +21,6 @@
 #include "gsmkeyfilter.h"
 #include "qabstractmessagebox.h"
 #include "dialercontrol.h"
-#include "qabstractdialerscreen.h"
 #include <QTelephonyConfiguration>
 #include <QCallSettings>
 #include <QSupplementaryServices>
@@ -33,6 +30,7 @@
 
 /*!
     \class GsmKeyActions
+    \inpublicgroup QtCellModule
     \brief The GsmKeyActions class handles special GSM actions for requesting and controlling supplementary services.
 
     The GsmKeyActions class handles special GSM actions for requesting and
@@ -66,7 +64,8 @@
     Supplementary service actions that are not recognized are sent
     to the network for processing.
     
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+    \internal
 */
 
 class GsmKeyActionsPrivate
@@ -194,18 +193,6 @@ GsmKeyActions::GsmKeyActions( QObject *parent )
 GsmKeyActions::~GsmKeyActions()
 {
     delete d;
-}
-
-/*!
-    Set the \a dialer that will be used to accept digits from the user
-    so that key filtering can be applied to it.
-*/
-void GsmKeyActions::setDialer( QAbstractDialerScreen *dialer )
-{
-    connect( dialer, SIGNAL(filterKeys(QString,bool&)),
-             this, SLOT(filterKeys(QString,bool&)) );
-    connect( dialer, SIGNAL(filterSelect(QString,bool&)),
-             this, SLOT(filterSelect(QString,bool&)) );
 }
 
 /*!
@@ -478,7 +465,7 @@ void GsmKeyActions::changePassword( const QString& request )
         type = barringType( args[0].toInt(), valid );
     if ( !valid ) {
         // We don't know what this is, so let the network deal with it.
-        d->supp->sendSupplementaryServiceData( "*03*" + request + "#" );
+        d->supp->sendSupplementaryServiceData( "*03*" + request + QChar('#') );
         return;
     }
 

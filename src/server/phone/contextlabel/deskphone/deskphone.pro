@@ -1,0 +1,15 @@
+!qbuild{
+qtopia_project(server_lib)
+TARGET=qpe_phone_contextlabel_deskphone
+
+depends(server/core_server)
+depends(server/phone/contextlabel/abstract)
+depends(server/infrastructure/softmenubar)
+depends(server/phone/themecontrol)
+
+idep(INCLUDEPATH+=$$PWD)
+idep(LIBS+=-l$$TARGET)
+idep(app:register_static_dependency($$TARGET))
+}
+
+include(deskphone.pri)

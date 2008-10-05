@@ -82,6 +82,7 @@ for(it,INSTALLS) {
             contains(hint,non_qt_headers):qtheaders=
             else:qtheaders=-qt
             INSTALLS-=$$it
+            isEmpty($${it}.target):eval($${it}.target=\$$ORIG_TARGET)
             eval($${it}.CONFIG*=no_default_install)
             commands=$$eval($${it}.commands)
             !isEmpty(commands) {
@@ -94,7 +95,7 @@ for(it,INSTALLS) {
                 eval(syncqtopia_$${it}.CONFIG=no_link no_dependencies explicit_dependencies no_build combine ignore_no_exist no_clean)
                 commands=$$COMMAND_HEADER\
                     $$fixpath($$QBS_BIN/syncqtopia) $$qtheaders $$fixpath($$eval($${it}.path))\
-                        $$ORIG_TARGET ${QMAKE_FILE_IN} $$LINE_SEP\
+                        $$eval($${it}.target) ${QMAKE_FILE_IN} $$LINE_SEP\
                     echo foo=bar > $$fixpath($$OUT_PWD/syncqtopia.pri)
                 eval(syncqtopia_$${it}.commands=\$$commands)
                 eval(syncqtopia_$${it}.input=$${it}.files)
@@ -116,6 +117,7 @@ for(it,INSTALLS) {
                 else:qtheaders=-qt
                 # This was already taken out above
                 #INSTALLS+=$$it
+                isEmpty($${it}.target):eval($${it}.target=\$$ORIG_TARGET)
                 eval($${it}.CONFIG*=no_default_install)
                 commands=$$eval($${it}.commands)
                 !isEmpty(commands) {
@@ -128,7 +130,7 @@ for(it,INSTALLS) {
                     eval(sdk_syncqtopia_$${it}.CONFIG=no_link no_dependencies explicit_dependencies no_build combine ignore_no_exist no_clean)
                     commands=$$COMMAND_HEADER\
                         $$fixpath($$QBS_BIN/syncqtopia) -sdk $(INSTALL_ROOT) $$qtheaders $$fixpath($$eval($${it}.path))\
-                            $$ORIG_TARGET ${QMAKE_FILE_IN}
+                            $$eval($${it}.target) ${QMAKE_FILE_IN}
                     eval(sdk_syncqtopia_$${it}.commands=\$$commands)
                     eval(sdk_syncqtopia_$${it}.input=$${it}.files)
                     eval(sdk_syncqtopia_$${it}.output=dummy_sdk_syncqtopia_$$it)
@@ -150,13 +152,13 @@ for(it,INSTALLS) {
         command=\
             $$fixpath($$QPEDIR/bin/content_installer) $$fixpath($(INSTALL_ROOT)/qtopia_db.sqlite)\
                 $$QTOPIA_PREFIX $$fixpath($$path) $$LITERAL_QUOTE$$categories$$LITERAL_QUOTE $$fixpath($$files)
-        command+=$$LINE_SEP_VERBOSE
+        command+=$$LINE_SEP
         # find running qpe processes that are using the target database
         command+=\
             for qtopia in $$fixpath(/tmp/qtopia-*); do\
                 if [ -f \$$qtopia/$(INSTALL_ROOT)/qtopia_db.sqlite ]; then\
                     for pid in `fuser \$$qtopia/$(INSTALL_ROOT)/qtopia_db.sqlite 2>/dev/null`; do\
-                        qpe_binary=`ls -l /proc/\$$pid/exe 2>/dev/null | awk $$LITERAL_QUOTE{print \\\\\$$NF}$$LITERAL_QUOTE`;\
+                        qpe_binary=`readlink /proc/\$$pid/exe 2>/dev/null | sed \'s/ (deleted)\$$//g\'`;\
                         if [ $$LITERAL_QUOTE\$$qpe_binary$$LITERAL_QUOTE = $$LITERAL_QUOTE$$fixpath($(INSTALL_ROOT)/bin/qpe)$$LITERAL_QUOTE ]; then\
                             QWS_DISPLAY=QVFb:\$${qtopia$$LITERAL_HASH$$LITERAL_HASH*-} $$fixpath($$QPEDIR/bin/content_installer) -qcop \
                                 \$$qtopia$$fixpath($(INSTALL_ROOT)/qtopia_db.sqlite)\
@@ -239,7 +241,7 @@ for(it,INSTALLS) {
         for(f,files) {
             !isEmpty(commands):commands+=$$LINE_SEP
             destfile=$$path/$$tail($$f)
-            commands+=$$QPEDIR/bin/sxe_installer $(INSTALL_ROOT) $$destfile $$domain
+            commands+=$$QPEDIR/bin/sxe_installer $$QTOPIA_PREFIX $(INSTALL_ROOT) $$destfile $$domain
         }
         eval(register_domain_$${it}.commands=\$$commands)
         eval(register_domain_$${it}.path=/etc/domain)

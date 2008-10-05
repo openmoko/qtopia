@@ -1,0 +1,13 @@
+TEMPLATE=lib
+CONFIG+=qtopia hide_symbols singleexec
+TARGET=qmstroke
+VERSION=4.0.0
+
+MODULE_NAME=handwriting
+
+include(handwriting.pro)
+
+STRING_LANGUAGE=en_US
+AVAILABLE_LANGUAGES=$$QTOPIA_AVAILABLE_LANGUAGES
+LANGUAGES=$$QTOPIA_LANGUAGES
+

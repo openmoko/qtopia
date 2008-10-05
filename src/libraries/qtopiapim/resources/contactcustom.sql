@@ -4,3 +4,6 @@ CREATE TABLE contactcustom (
     fieldvalue VARCHAR(255) COLLATE NOCASE, 
     UNIQUE(recid, fieldname), 
     FOREIGN KEY(recid) REFERENCES contacts(recid));
+
+CREATE INDEX contactcustomindex ON contactcustom(recid,fieldname);
+CREATE INDEX contactcustomnameindex on contactcustom(fieldname);

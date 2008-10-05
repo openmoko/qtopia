@@ -1,22 +1,19 @@
-// -*-C++-*-
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -32,17 +29,16 @@
 
 static const int MIN_MEM_LIMIT = 10000;
 
-#undef DEBUG_MEMORY_MONITOR
-
 /*!
   \class GenericMemoryMonitorTask
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \ingroup QtopiaServer::Memory
   \brief The GenericMemoryMonitorTask class implements a simple page-fault
          driven memory monitor task.
 
-  The GenericMemoryMonitorTask provides a Qtopia Server Task.  Qtopia Server 
-  Tasks are documented in full in the QtopiaServerApplication class 
+  The GenericMemoryMonitorTask provides a Qt Extended Server Task.  Qt Extended Server
+  Tasks are documented in full in the QtopiaServerApplication class
   documentation.
 
   \table
@@ -54,7 +50,7 @@ static const int MIN_MEM_LIMIT = 10000;
   The GenericMemoryMonitorTask uses a simple page-fault rate driven algorithm to
   approximate the memory "pressure" on the device.
 
-  The GenericMemoryMonitorTask task exports the following informational value 
+  The GenericMemoryMonitorTask task exports the following informational value
   space items.
 
   \table
@@ -63,11 +59,11 @@ static const int MIN_MEM_LIMIT = 10000;
   \row \o \c {/ServerTasks/GenericMemoryMonitorTask/ChangedTime} \o The date and time at which the memory level last changed.
   \endtable
 
-  As polling is used to sample memory usage information from the /c {/proc} 
-  filesystem, the GenericMemoryMonitorTask should generally be replaced by 
+  As polling is used to sample memory usage information from the /c {/proc}
+  filesystem, the GenericMemoryMonitorTask should generally be replaced by
   system integrators with a more efficient, system specific mechanism.
-  
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 /*!
@@ -130,7 +126,7 @@ GenericMemoryMonitorTask::GenericMemoryMonitorTask()
     if (m_vmStatType != VMUnknown) {
         m_vmMonitor = new QTimer(this);
         connect(m_vmMonitor,SIGNAL(timeout()),this,SLOT(memoryMonitor()));
-	restartTimer();
+        restartTimer();
     }
 }
 
@@ -148,16 +144,16 @@ void
 GenericMemoryMonitorTask::restartTimer()
 {
     if (m_percent_available > m_percent_threshhold) {
-	m_vmMonitor->start(m_long_interval);
-	if (!m_useLongInterval)
-	    qLog(OOM) << "Using long interval:" << m_long_interval;
-	m_useLongInterval = true;
+        m_vmMonitor->start(m_long_interval);
+        if (!m_useLongInterval)
+            qLog(OOM) << "Using long interval:" << m_long_interval;
+        m_useLongInterval = true;
     }
     else {
-	m_vmMonitor->start(m_short_interval);
-	if (m_useLongInterval)
-	    qLog(OOM) << "Using short interval:" << m_short_interval;
-	m_useLongInterval = false;
+        m_vmMonitor->start(m_short_interval);
+        if (m_useLongInterval)
+            qLog(OOM) << "Using short interval:" << m_short_interval;
+        m_useLongInterval = false;
     }
 }
 
@@ -174,8 +170,8 @@ GenericMemoryMonitorTask::computeMemoryValues()
 
     QFile file("/proc/meminfo");
     if (!file.open(QIODevice::ReadOnly)) {
-	qLog(OOM) << "Could not open /proc/meminfo";
-	return;
+        qLog(OOM) << "Could not open /proc/meminfo";
+        return;
     }
 
     QTextStream meminfo(&file);
@@ -223,13 +219,11 @@ GenericMemoryMonitorTask::computeMemoryValues()
     m_memory_available = buffers + cached + memfree;
     m_percent_available = total ? (100 * m_memory_available / total) : 0;
 
-#ifdef DEBUG_MEMORY_MONITOR    
     qLog(OOM) << "  MemTotal:        " << total;
     qLog(OOM) << "  MemFree:         " << memfree;
     qLog(OOM) << "  Buffers:         " << buffers;
     qLog(OOM) << "  Cached:          " << cached;
     qLog(OOM) << "  memory available:" << m_percent_available << "\%";
-#endif
 }
 
 /*!
@@ -240,7 +234,7 @@ GenericMemoryMonitorTask::computeMemoryValues()
   \c Critical. The algorithm does not act to recover memory,
   if it is low, very low, or critical, but whenever a change
   in the level is detected a signal is emitted to notify the
-  \l {LowMemoryTask} {low memory task} of the change. 
+  \l {LowMemoryTask} {low memory task} of the change.
  */
 void
 GenericMemoryMonitorTask::memoryMonitor()
@@ -300,8 +294,7 @@ GenericMemoryMonitorTask::memoryMonitor()
   cycle. For example, if there are 10 samples in a cycle
   and we are gradually running out of memory, we might have
   seen three \c normal samples, 2 \c low samples, and 5
-  \c verylow samples. 
-
+  \c verylow samples.
  */
 void
 GenericMemoryMonitorTask::computePageFaultValues()
@@ -326,9 +319,9 @@ GenericMemoryMonitorTask::computePageFaultValues()
 
     }
     else if (m_vmStatType == VMLinux_2_4) {
-	/*
-	  Can this be right? !!!!
-	 */
+        /*
+          XXX - Can this be right? !!!!
+         */
         QFile vmstat("/proc/"+QString::number(::getpid())+"/stat");
         if (vmstat.open(QIODevice::ReadOnly)) {
             QTextStream t(&vmstat);
@@ -342,26 +335,24 @@ GenericMemoryMonitorTask::computePageFaultValues()
     long current = majfaults.toInt(&ok);
     long difference = current - m_previousFaults;
 
-#ifdef DEBUG_MEMORY_MONITOR    
     qLog(OOM) << "  previous faults: " << m_previousFaults;
     qLog(OOM) << "  current faults:  " << current;
     qLog(OOM) << "  new faults:      " << difference;
-#endif    
 
     /*
       First time through only.
      */
     if (!m_previousFaults) {
-	m_previousFaults = current;
-	return;
+        m_previousFaults = current;
+        return;
     }
 
     /*
       Corrupted data.
      */
     if (!ok)
-	return;
-    
+        return;
+
     m_previousFaults = current;
 
     /*
@@ -370,18 +361,18 @@ GenericMemoryMonitorTask::computePageFaultValues()
       values are scaled for the long interval.
      */
     if (!m_useLongInterval)
-	difference = difference * m_long_interval / m_short_interval;
+        difference = difference * m_long_interval / m_short_interval;
 
     /*
       Determine the memory state for this sample interval.
      */
     MemState nextState = MemNormal;
     if (difference > m_critical_threshhold)
-	nextState = MemCritical;
+        nextState = MemCritical;
     else if (difference > m_verylow_threshhold)
-	nextState = MemVeryLow;
+        nextState = MemVeryLow;
     else if (difference > m_low_threshhold)
-	nextState = MemLow;
+        nextState = MemLow;
 
     /*
       If the previous memory state for this sample interval
@@ -391,39 +382,39 @@ GenericMemoryMonitorTask::computePageFaultValues()
       of each memory state in the current sample cycle.
      */
     if (nextState != m_memStates[m_count]) {
-	switch (m_memStates[m_count]) {
-	  case MemCritical:
-	      --m_critical_count;
-	      break;
-	  case MemVeryLow:
-	      --m_verylow_count;
-	      break;
-	  case MemLow:
-	      --m_low_count;
-	      break;
-	  case MemNormal:
-	      --m_normal_count;
-	      break;
-	  case MemUnknown:
-	      break;
-	};
-	switch (nextState) {
-	  case MemCritical:
-	      ++m_critical_count;
-	      break;
-	  case MemVeryLow:
-	      ++m_verylow_count;
-	      break;
-	  case MemLow:
-	      ++m_low_count;
-	      break;
-	  case MemNormal:
-	      ++m_normal_count;
-	      break;
-	  case MemUnknown:
-	      break;
-	};
-	m_memStates[m_count] = nextState;
+        switch (m_memStates[m_count]) {
+          case MemCritical:
+              --m_critical_count;
+              break;
+          case MemVeryLow:
+              --m_verylow_count;
+              break;
+          case MemLow:
+              --m_low_count;
+              break;
+          case MemNormal:
+              --m_normal_count;
+              break;
+          case MemUnknown:
+              break;
+        };
+        switch (nextState) {
+          case MemCritical:
+              ++m_critical_count;
+              break;
+          case MemVeryLow:
+              ++m_verylow_count;
+              break;
+          case MemLow:
+              ++m_low_count;
+              break;
+          case MemNormal:
+              ++m_normal_count;
+              break;
+          case MemUnknown:
+              break;
+        };
+        m_memStates[m_count] = nextState;
     }
 
     /*
@@ -456,27 +447,24 @@ GenericMemoryMonitorTask::computeMemoryState()
       They are untested.
      */
 
-#ifdef DEBUG_MEMORY_MONITOR    
-    //avg = rand() % 511;
     qLog(OOM) << "average faults:" << avg;
-#endif
     MemState newState = MemNormal;
     if (avg > m_critical_threshhold) // (2.6,250) (2.4,50)
-	newState = MemCritical;
+        newState = MemCritical;
     else if (avg > m_verylow_threshhold) // (2.6,120) (2.4,25)
-	newState = MemVeryLow;
+        newState = MemVeryLow;
     else if (avg > m_low_threshhold) // (2.6,60) (2.4,20)
-	newState = MemLow;
+        newState = MemLow;
 
     if (newState == m_memoryState)
-	return;
+        return;
 
     m_memoryState = newState;
     m_lastChanged = QDateTime::currentDateTime();
 
     if (!m_vso) {
-	QByteArray t = "GenericMemoryMonitorTask";
-	QByteArray p = QtopiaServerApplication::taskValueSpaceObject(t);
+        QByteArray t = "GenericMemoryMonitorTask";
+        QByteArray p = QtopiaServerApplication::taskValueSpaceObject(t);
         if (!p.isNull())
             m_vso = new QValueSpaceObject(p,this);
     }

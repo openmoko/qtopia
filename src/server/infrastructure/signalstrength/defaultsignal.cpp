@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -27,6 +25,8 @@
 
 /*! 
    \class DefaultSignal
+    \inpublicgroup QtConnectivityModule
+    \inpublicgroup QtTelephonyModule
    \ingroup QtopiaServer::Task
    \brief The DefaultSignal class provides a proxy for another system signal.
 
@@ -38,11 +38,11 @@
    The Signal to proxy can be manually configured by setting the 
    \c {SignalSources/DefaultSignalSource} key in the \c {Trolltech/HardwareAccessories}
    configuration file.  If this setting is missing, the DefaultSignal class 
-   will proxy the first available signal source of type modem. If Qtopia is configured
+   will proxy the first available signal source of type modem. If Qt Extended is configured
    without a modem the first wlan signal source that becomes available will be used.
 
    The DefaultSignal class provides the \c {DefaultSignal} task.
-   It is part of the Qtopia server and cannot be used by other Qtopia applications.
+   It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   */
 
 /*!

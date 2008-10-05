@@ -2,10 +2,10 @@ exists($$QPEDIR/src/build/trace_on):message(packages.prf)
 # Package creation
 #
 # struct package {
-#     name       # eg. $name.qpk
+#     name       # eg. $name.ipk
 #     desc       # one line summary
 #     domain     # SXE security domains
-#     deps       # packages that this package depends(ipk only)
+#     deps       # packages that this ipk depends on
 #     multi      # put multiple projects in a single package
 #     version    # package version
 #     license    # package license
@@ -19,7 +19,7 @@ isEmpty(DEFAULT_LICENSE) {
     else:DEFAULT_LICENSE=Unspecified
 }
 isEmpty(DEFAULT_MAINTAINER) {
-    depotProject:qtopia_depot:DEFAULT_MAINTAINER=Trolltech (www.trolltech.com)
+    depotProject:qtopia_depot:DEFAULT_MAINTAINER=Qt Extended <info@qtextended.org>
     else:DEFAULT_MAINTAINER=Unspecified
 }
 isEmpty(DEFAULT_VERSION) {

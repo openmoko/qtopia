@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef LAUNCHERVIEW_H
@@ -24,16 +22,10 @@
 #include <QWidget>
 #include <QListView>
 #include <QList>
+#include <QSize>
 #include <QContentSet>
 #include <QSortFilterProxyModel>
-
-#ifdef GREENPHONE_EFFECTS
-#define ENABLE_SMOOTHLIST
-#endif
-
-#ifdef ENABLE_SMOOTHLIST
-#include <private/qsmoothlist_p.h>
-#endif
+#include <QSmoothList>
 
 class QContentSetMultiColumnProxyModel;
 class QAbstractMessageBox;
@@ -42,7 +34,7 @@ class QCategoryDialog;
 class QLauncherProxyModel;
 class QAbstractProxyModel;
 class QVBoxLayout;
-//class QSortFilterProxyModel;
+class LauncherViewDelegate;
 
 class LauncherViewListView : public QListView
 {
@@ -61,22 +53,29 @@ protected:
     virtual void focusOutEvent(QFocusEvent *);
     virtual void focusInEvent(QFocusEvent *);
     virtual bool viewportEvent(QEvent *e);
-    void ensureSelected();
 };
 
 class LauncherView : public QWidget 
 {
     Q_OBJECT
 
-    public:
-        LauncherView( QWidget* parent = 0, Qt::WFlags fl = 0);
-        virtual ~LauncherView() {};
-        virtual void resetSelection();
-        void setBusy(bool);
-        void setBusy(const QModelIndex &, bool);
-        void setItemDelegate(QAbstractItemDelegate *);
-        void setViewMode( QListView::ViewMode m );
-        QListView::ViewMode viewMode() const;
+public:
+    LauncherView( QWidget* parent = 0, Qt::WFlags fl = 0);
+
+    static LauncherView* createLauncherView( const QByteArray &name, QWidget *parent = 0, Qt::WFlags flags = 0);
+    virtual ~LauncherView() {};
+    virtual void resetSelection();
+    void clearSelection();
+    void setBusy(bool);
+    void setBusy(const QModelIndex &, bool);
+    void setItemDelegate(QAbstractItemDelegate *);
+    void setViewMode( QListView::ViewMode m );
+    QListView::ViewMode viewMode() const;
+    void setFlow(QListView::Flow f);
+    QListView::Flow flow() const;
+    QContentSetModel *model() const { return m_model; }
+    void setModel(QContentSetModel* model);
+    static QSize listIconSize(QWidget *widget);
 
     void removeAllItems();
     void addItem(QContent* app, bool resort=true);
@@ -85,84 +84,54 @@ class LauncherView : public QWidget
     void setColumns(int);
     virtual void setFilter(const QContentFilter &filter);
     const QContent currentItem() const;
+    QModelIndex currentIndex() const;
 
     enum SortingStyle { NoSorting, LanguageAwareSorting };
 
-        QAbstractItemView *view() const { return icons; }
+protected:
+    virtual void changeEvent(QEvent *e);
+    virtual void showEvent(QShowEvent *e);
+    virtual void calculateGridSize(bool force = false);
+    virtual void timerEvent( QTimerEvent * event );
 
-    protected:
-        friend class QLauncherProxyModel;
-
-        LauncherViewListView *icons;
-#ifdef ENABLE_SMOOTHLIST
-        QSmoothList *smoothicons;
-#endif
-        QContentSet *contentSet;
-        QContentSetModel *model;
-        QContentFilter mainFilter;
-        QContentFilter categoryFilter;
-        QContentFilter typeFilter;
-        QContentFilter auxiliaryFilter;
-        int nColumns;
-        int busyTimer;
-        QVBoxLayout *mainLayout;
-        bool mNeedGridSize;
-
-        virtual void changeEvent(QEvent *e);
-        virtual void showEvent(QShowEvent *e);
-        virtual void calculateGridSize(bool force = false);
-        virtual void timerEvent( QTimerEvent * event );
-
-        virtual void handleReturnPressed(const QModelIndex &item);
-        virtual void handleItemClicked(const QModelIndex &item, bool setCurrentIndex);
-        virtual void handleItemPressed(const QModelIndex &item);
+    virtual void handleReturnPressed(const QModelIndex &item);
+    virtual void handleItemClicked(const QModelIndex &item, bool setCurrentIndex);
+    virtual void handleItemPressed(const QModelIndex &item);
 signals:
-        void clicked( QContent );
-        void rightPressed( QContent );
+    void clicked( QContent );
+    void rightPressed( QContent );
 
-    protected slots:
-        void returnPressed(const QModelIndex &item) { handleReturnPressed(item); }
-        void itemClicked(const QModelIndex &item) { handleItemClicked(item, true); }
-        void itemPressed(const QModelIndex &item){ handleItemPressed(item); }
-        void resizeEvent(QResizeEvent *);
+protected slots:
+    void returnPressed(const QModelIndex &item) { handleReturnPressed(item); }
+    void itemClicked(const QModelIndex &item) { handleItemClicked(item, true); }
+    void itemPressed(const QModelIndex &item){ handleItemPressed(item); }
+    void resizeEvent(QResizeEvent *);
+    virtual void currentChanged( const QModelIndex &current, const QModelIndex &previous );
 
-    public slots:
-        void showType( const QContentFilter & );
-        void showCategory( const QContentFilter & );
-        void setAuxiliaryFilter( const QContentFilter & );
+public slots:
+    void showType( const QContentFilter & );
+    void showCategory( const QContentFilter & );
+    void setAuxiliaryFilter( const QContentFilter & );
 
-    private:
-        void init();
+protected:
+    QContentSet *m_contentSet;
+    QContentSetModel *m_model;
+    QContentFilter mainFilter;
+    QContentFilter categoryFilter;
+    QContentFilter typeFilter;
+    QContentFilter auxiliaryFilter;
+    QVBoxLayout *m_mainLayout;
+    LauncherViewListView *m_icons;
+    QSmoothList *m_smoothList;
+
+private:
+    void init();
+    void initListView();
+    void initIconView();
+
+    int nColumns;
+    bool mNeedGridSize;
+    QAbstractItemDelegate *m_itemDelegate;
 };
 
-class ApplicationLauncherView : public LauncherView {
-    Q_OBJECT
-
-    public:
-        ApplicationLauncherView(QWidget * = 0);
-        ApplicationLauncherView(const QString &, QWidget * = 0);
-    private slots:
-        void addSpeedDial();
-        void launcherRightPressed(QContent);
-    private:
-        QMenu *rightMenu;
-};
-
-class QLauncherProxyModel : public QSortFilterProxyModel
-{
-    public:
-        QLauncherProxyModel(QObject *parent=0) : QSortFilterProxyModel(parent), sortingStyle(LauncherView::NoSorting) { }
-        virtual QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
-
-        void setBusyItem(const QModelIndex&);
-        void clearBusyItems();
-        bool hasBusy() const {return items.count() != 0;}
-        void setSorting(LauncherView::SortingStyle);
-        enum Roles { BusyRole = Qt::UserRole+2 };
-
-    private:
-        QList<QModelIndex> items;
-        LauncherView::SortingStyle sortingStyle;
-};
-
-#endif // LAUNCHERVIEW_H
+#endif

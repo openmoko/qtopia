@@ -1,26 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "gprsmonitor.h"
-#ifdef QTOPIA_CELL
 
 #include "qtopiaserverapplication.h"
 
@@ -34,6 +31,7 @@
 
 /*!
   \class GPRSMonitor
+    \inpublicgroup QtCellModule
   \brief The GPRSMonitor class keeps track of the state of GPRS accounts.
   \ingroup QtopiaServer
 
@@ -51,16 +49,16 @@
         /Network/UMTSConnected
   \endcode
 
-  GPRS is considered to be enabled if Qtopia has at least one GPRS account which
+  GPRS is considered to be enabled if Qt Extended has at least one GPRS account which
   could be started/is configured. GPRS is connected when the IP connection to the 
   operator network has been established. The EDGE indicator always takes precedence over the GPRS indicator and the UMTS 
   indicator has precedence over GPRS and EDGE. GPRS, EDGE and UMTS are 
   mutually exclusive options.
 
-  Note: The EDGE field is not enabled as Qtopia cannot detect EDGE as bearer yet.
+  Note: The EDGE field is not enabled as Qt Extended cannot detect EDGE as bearer yet.
   
-  The GPRSMonitor is a Qtopia server task and is automatically started by the server.
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  The GPRSMonitor is a Qt Extended server task and is automatically started by the server.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 */
 
 /*!
@@ -211,6 +209,3 @@ void GPRSMonitor::gprsStateChanged()
 }
 
 QTOPIA_TASK(GPRSMonitor,GPRSMonitor);
-
-#endif //QTOPIA_CELL
-

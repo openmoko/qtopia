@@ -1,38 +1,45 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "contentsetlauncherview.h"
+#include "qtopiaserverapplication.h"
+#include "uifactory.h"
 #include <qdocumentproperties.h>
 #include <qtopiaapplication.h>
 #include <QSoftMenuBar>
 #include <QtDebug>
 #include <QAction>
 #include <QMenu>
+#include <QtopiaChannel>
 
 /*!
     \class ContentSetLauncherView
-    \brief Displays a content set received by the "ContentSetView" service.
-    \internal
-    
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    \inpublicgroup QtDrmModule
+    \brief The ContentSetLauncherView class displays a content set received via the "ContentSetView" service.
+    \ingroup QtopiaServer::GeneralUI
+   
+    Any entity that creates this widget should show it on reception of the \c showContentSetView()
+    message on the \c QPE/System qcop channel. Currently this view is only deployed if Qt Extended has been configured with a drm agent.
+
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+    \sa LauncherView, ContentSetViewService
 */
 
 /*!
@@ -59,7 +66,7 @@ ContentSetLauncherView::ContentSetLauncherView( QWidget* parent, Qt::WFlags flag
 void ContentSetLauncherView::showContentSet()
 {
     setWindowTitle( ContentSetViewService::instance()->title() );
-    *contentSet = ContentSetViewService::instance()->contentSet();
+    *m_contentSet = ContentSetViewService::instance()->contentSet();
 }
 
 void ContentSetLauncherView::showProperties()
@@ -76,13 +83,14 @@ void ContentSetLauncherView::showProperties()
     }
 }
 
+UIFACTORY_REGISTER_WIDGET(ContentSetLauncherView);
 /*!
     \service ContentSetViewService ContentSetView
-    \brief Provides the Qtopia ContentSetView service.
+    \inpublicgroup QtDrmModule
+    \brief The ContentSetViewService class provides the ContentSetView service.
 
     The \i ContentSetView service raises a launcher menu on the homescreen which displays a custom QContentSet.
-
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    Currently this service is only required if Qt Extended has been configured with a drm agent.
 */
 
 
@@ -145,6 +153,7 @@ void ContentSetViewService::showContentSet( const QContentSet &set )
     m_contentSet = set;
 
     emit showContentSet();
+    QtopiaChannel::send("QPE/System", "showContentSetView()");
 }
 
 /*!
@@ -158,6 +167,7 @@ void ContentSetViewService::showContentSet( const QString &title, const QContent
     m_contentSet = set;
 
     emit showContentSet();
+    QtopiaChannel::send("QPE/System", "showContentSetView()");
 }
 
 /*!
@@ -168,3 +178,5 @@ void ContentSetViewService::showContentSet( const QString &title, const QContent
     can be retrieved using \c ContentSetViewService::contentSet() and the title of the set
     using \c ContentSetViewService::title().
 */
+
+QTOPIA_STATIC_TASK(ContentSetViewService, ContentSetViewService::instance());

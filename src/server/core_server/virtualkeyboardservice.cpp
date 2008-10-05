@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,6 +24,7 @@
 
 /*!
   \service VirtualKeyboardService VirtualKeyboard
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task
   \brief The VirtualKeyboardService class provides a service to simulate keypresses on a device.
 
@@ -34,7 +33,7 @@
   device.
 
   The VirtualKeyboardService class provides the \c {VirtualKeyboard} task.
-  It is part of the Qtopia server and cannot be used by other Qtopia applications.
+  It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 /*!
@@ -65,6 +64,23 @@ void VirtualKeyboardService::keyPress( int key )
 {
     QtopiaInputEvents::processKeyEvent(QChar(key).unicode(), key, 0, true, false);
     QtopiaInputEvents::processKeyEvent(QChar(key).unicode(), key, 0, false, false);
+}
+
+/*!
+  Simulate the press and release of \a keySequence.  This is equivalent to calling the
+  QtopiaInputEvents::processKeyEvent() method for a press and then a release.
+
+  This slot corresponds to the QCop service message \c{VirtualKeyboard::keyPress(QString)}.
+
+  \sa QKeySequence
+ */
+void VirtualKeyboardService::keyPress( QString keySequence )
+{
+    QKeySequence ks(keySequence);
+    for (uint i = 0; i < ks.count(); ++i) {
+        QtopiaInputEvents::processKeyEvent(0xffff, ks[i], 0, true, false);
+        QtopiaInputEvents::processKeyEvent(0xffff, ks[i], 0, false, false);
+    }
 }
 
 /*!

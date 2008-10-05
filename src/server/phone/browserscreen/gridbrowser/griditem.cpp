@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -40,11 +38,12 @@ const qreal GridItem::SELECTED_IMAGE_SIZE_FACTOR = 0.4;
 /*!
   \internal
   \class GridItem
+    \inpublicgroup QtBaseModule
 
   \brief GridItem is a graphical object used to populate the scene required by
   PhoneLauncherView.
 
-  \mainclass Each GridItem object stores its own row and column indices for its
+  Each GridItem object stores its own row and column indices for its
   position in the grid in which it will be displayed.
 
   In addition to using \a basicPixmap to draw itself, GridItem creates and
@@ -56,10 +55,10 @@ const qreal GridItem::SELECTED_IMAGE_SIZE_FACTOR = 0.4;
   Note that GridItem objects cannot be copied or assigned to.
 
   It is possible to create an 'empty' GridItem object, i.e. one that contains no content. Such an
-  object can be used in those cases where a particular version of Qtopia will not release all of
+  object can be used in those cases where a particular version of Qt Extended will not release all of
   the available applications.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   \sa PhoneLauncherView
   \sa SelectedItem
 */

@@ -1,27 +1,26 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <math.h>
 
 #include "calibrate.h"
+#include "uifactory.h"
 
 #include <QScreen>
 #include <QPainter>
@@ -42,16 +41,12 @@ Calibrate::Calibrate(QWidget* parent, Qt::WFlags f)
     setObjectName("calibrate");
     setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint);
     setWindowState(Qt::WindowFullScreen);
-    activateWindow();
-    raise();
     timer = new QTimer( this );
     connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
 
     QMenu *contextMenu = QSoftMenuBar::menuFor(this);
     connect (contextMenu,SIGNAL(triggered(QAction*)),
              this,SLOT(menuTriggered(QAction*)));
-
-    qLog(Input)<<"Starting Calibrate!";
 }
 
 Calibrate::~Calibrate()
@@ -61,16 +56,17 @@ Calibrate::~Calibrate()
 
 void Calibrate::showEvent(QShowEvent *e )
 {
-    qLog(Input) << "Calibrate::showEvent()";
     showCross = true;
     pressed = false;
     anygood = false;
-    const int offset = 30;
 
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desk = desktop->screenGeometry(desktop->primaryScreen());
+    const int offset = desk.width() / 10;
     setGeometry(desk);
-    logo = QPixmap(":image/qpelogo");
+
+    int size = qMin(desk.width(),  desk.height() ) / 1.875;
+    logo = QPixmap(":image/Qtopia4_Logo-shaded-128px").scaled(size ,size);
 
     cd.screenPoints[QWSPointerCalibrationData::TopLeft] = QPoint( offset, offset );
     cd.screenPoints[QWSPointerCalibrationData::BottomLeft] = QPoint( offset, qt_screen->deviceHeight() - offset );
@@ -167,42 +163,45 @@ bool Calibrate::sanityCheck()
 void Calibrate::moveCrosshair( QPoint pt )
 {
     showCross = false;
-    repaint( crossPos.x()-8, crossPos.y()-8, 17, 17 );
+    repaint( crossPos.x()-20, crossPos.y()-20, 42, 42 );
     showCross = true;
     crossPos = pt;
-    repaint( crossPos.x()-8, crossPos.y()-8, 17, 17 );
+    repaint( crossPos.x()-20, crossPos.y()-20, 42, 42 );
 }
 
 void Calibrate::paintEvent( QPaintEvent * )
 {
     QPainter p( this );
 
-    int y = height()/2;
-
-    if ( !logo.isNull() ) {
-      y = height() / 2 - (logo.height()+p.font().pixelSize()) - 15;
-      p.drawPixmap( (width() - logo.width())/2, y, logo );
-      y += logo.height()+5;
-    }
-
-    y = height()/2 + 20;
+    int y = height() / 60;
 
     QFont f = p.font(); f.setBold(true);
     p.setFont( f );
     p.drawText( 0, y, width(), height() - y, Qt::AlignHCenter|Qt::TextWordWrap,
-        tr("Welcome to Qtopia") );
+                tr("Recalibration") );
+
+    if ( !logo.isNull() ) {
+        y = (height() - logo.height()) / (qMin(height(), width()) / 24);
+        p.drawPixmap( (width() - logo.width()) / 2, y, logo );
+        y += logo.height()+5;
+    }
 
     y = height() / 2 + 65;
 
     f.setBold(false);
     p.setFont( f );
-    QString rt(tr("Touch the crosshairs firmly and accurately to calibrate your screen."));
+    QString rt(tr("Touch the crosshairs firmly\nand accurately to\nrecalibrate the screen."));
     p.drawText( 20, y, width()-40, height()-y, Qt::AlignHCenter|Qt::TextWordWrap, rt);
+
     if ( showCross ) {
-      p.drawRect( crossPos.x()-1, crossPos.y()-8, 2, 7 );
-      p.drawRect( crossPos.x()-1, crossPos.y()+1, 2, 7 );
-      p.drawRect( crossPos.x()-8, crossPos.y()-1, 7, 2 );
-      p.drawRect( crossPos.x()+1, crossPos.y()-1, 7, 2 );
+        QRect rectangle(  crossPos.x() - 10 , crossPos.y() - 10, 20, 20);
+        p.drawEllipse(rectangle);
+
+        p.drawRect( crossPos.x()-1, crossPos.y()-20, 2, 19 );
+        p.drawRect( crossPos.x()-1, crossPos.y()+1, 2, 19 );
+
+        p.drawRect( crossPos.x()-20, crossPos.y()-1, 19, 2 );
+        p.drawRect( crossPos.x()+1, crossPos.y()-1, 19, 2 );
     }
 }
 
@@ -216,7 +215,6 @@ void Calibrate::keyPressEvent( QKeyEvent *e )
     // The Hangup key is special because we must exit and then pass it
     // on to the server (by pretending to ignore it), so that the server
     // can terminate all other applications too.
-
     if (( e->key() == Qt::Key_Escape ) || ( e->key() == Qt::Key_Back ) ||
         ( e->key() == Qt::Key_Hangup )) {
         reset();
@@ -340,3 +338,4 @@ void Calibrate::menuTriggered(QAction * /*action*/)
     hide();
 }
 
+UIFACTORY_REGISTER_WIDGET( Calibrate );

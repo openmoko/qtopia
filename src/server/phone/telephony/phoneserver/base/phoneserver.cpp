@@ -1,59 +1,53 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "phoneserver.h"
 #include <qtopiaservices.h>
 #include <qtopiaipcenvelope.h>
-#ifdef QTOPIA_MODEM
-#include "phoneserverdummymodem.h"
-#include <qmodemservice.h>
-#endif
 #include <QValueSpaceObject>
 
 /*!
     \class PhoneServer
+    \inpublicgroup QtTelephonyModule
     \brief The PhoneServer class represents the central dispatch server for phone requests.
 
-    \ingroup QtopiaServer
+    \ingroup QtopiaServer::Telephony
 
     Typical phone hardware only allows one process to access the
-    AT command stream at any one time.  Because of this, Qtopia Phone
+    AT command stream at any one time.  Because of this, Qt Extended Phone
     multiplexes multiple process' requests through the phone server,
     which is the only process that may access the actual hardware.
 
-    The Qtopia phone server is responsible for starting all telephony
+    The Qt Extended phone server is responsible for starting all telephony
     services, including those for GSM, VoIP, and other network types.
 
-    At start up, the Qtopia phone server sends a \c{start()} message to
+    At start up, the Qt Extended phone server sends a \c{start()} message to
     all applications that are registered as implementing the
     \l{TelephonyService}{Telephony} service.  This is the usual method
     for starting VoIP and third-party telephony services.
 
-    If Qtopia is configured with the \c{QTOPIA_MODEM} flag, it will also
+    If Qt Extended is not configured with the \c -no-modem flags, it will also
     start the default built-in AT command handler for the \c modem service using
-    QModemService::createVendorSpecific().  If Qtopia is not configured
-    with this flag, then the \c modem service is either not required, or will
-    be provided by a third-party telephony service implementation.
+    QModemService::createVendorSpecific(); otherwise the \c modem service is either not required, or 
+    is provided via a \l{TelephonyService}{Telephony} service implementation.
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
     \sa QTelephonyService, QModemService
 */
 
@@ -61,7 +55,7 @@
     \internal
     Returns the number of telephony services available.
 */
-static bool executeTelephony( const QString& message )
+static int executeTelephony( const QString& message )
 {
     QStringList channels = QtopiaService::channels( "Telephony" );  // No tr
     int count = 0;
@@ -85,18 +79,25 @@ PhoneServer::PhoneServer( QObject* parent )
 
     // Create the AT-based modem service.  If QTOPIA_PHONE_DUMMY is set,
     // we create a dummy handler for testing purposes.
-#ifdef QTOPIA_MODEM
     char *env = getenv( "QTOPIA_PHONE_DUMMY" );
-    QTelephonyService *service;
-    if ( env && *env == '1' ) {
-        service = new QTelephonyServiceDummy( "modem", this );
-    } else {
-        service = QModemService::createVendorSpecific
-            ( "modem", QString(), this );
+    QTelephonyService *service = 0;
+    QByteArray target("ATModemService");
+    if ( env && *env == '1' )
+        target = "DummyModemService";
+
+    QList<TelephonyServiceFactory *> providers = ::qtopiaTasks<TelephonyServiceFactory>();
+    foreach( TelephonyServiceFactory* factory, providers )
+    {
+        if ( factory->serviceName() == target ) {
+            service = factory->service();
+            service->setParent( this ); //take ownership as factory doesn't own it
+        }
+
     }
-    service->initialize();
-    serviceCount++;
-#endif
+    if (service) {
+        service->initialize();
+        serviceCount++;
+    }
 
     status->setAttribute("AvailableServiceCount", serviceCount);
 }
@@ -112,4 +113,3 @@ PhoneServer::~PhoneServer()
 }
 
 QTOPIA_TASK(PhoneServer, PhoneServer);
-QTOPIA_TASK_PROVIDES(PhoneServer, PhoneServer);

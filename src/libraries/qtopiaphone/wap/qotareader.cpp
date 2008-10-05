@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -135,7 +133,8 @@ public:
 
 /*!
     \class QOtaCharacteristic
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QOtaCharacteristic class encapsulates characteristics from an Over-The-Air (OTA) network configuration message
 
     The QOtaCharacteristic class describes a network configuration
@@ -296,7 +295,8 @@ QOtaCharacteristic& QOtaCharacteristic::operator=( const QOtaCharacteristic& c )
 
 /*!
     \class QOtaCharacteristicList
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QOtaCharacteristicList class encapsulates a list of characteristics from an OTA network configuration message
 
     The QOtaCharacteristicList class contains a list of network configuration
@@ -328,7 +328,7 @@ QOtaCharacteristic& QOtaCharacteristic::operator=( const QOtaCharacteristic& c )
 /*!
     Convert an Over-The-Air (OTA) network configuration characteristics
     list into a NetworkInterfaceProperties object suitable for use
-    by Qtopia's network configuration system.
+    by the Qt Extended network configuration system.
 */
 QtopiaNetworkProperties QOtaCharacteristicList::toConfig() const
 {
@@ -689,7 +689,8 @@ static void set(QWbXmlTagSet& s, int i, const char* v)
 
 /*!
     \class QOtaReader
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QOtaReader class provides support for parsing Over-The-Air (OTA) network configuration messages
 
     The QOtaReader class provides support for reading Over-The-Air (OTA)

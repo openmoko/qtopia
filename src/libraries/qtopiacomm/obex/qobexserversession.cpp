@@ -1,29 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include "qobexserversession.h"
-#include <private/qobexserversession_p.h>
+#include "qobexserversession_p.h"
 #include <qobexheader.h>
-#include <private/qobexheader_p.h>
-#include <private/qobexauthenticationchallenge_p.h>
-#include <private/qobexauthenticationresponse_p.h>
+#include "qobexheader_p.h"
+#include "qobexauthenticationchallenge_p.h"
+#include "qobexauthenticationresponse_p.h"
 
 #include <qtopialog.h>
 
@@ -48,6 +46,8 @@ QObexServerSessionPrivate::QObexServerSessionPrivate(QIODevice *device, QObexSer
     m_socket->setObexServer(this);
 
     QObject::connect(m_socket->device(), SIGNAL(aboutToClose()),
+                        this, SLOT(socketDisconnected()));
+    QObject::connect(m_socket->device(), SIGNAL(readChannelFinished()),
                         this, SLOT(socketDisconnected()));
     QObject::connect(m_socket->device(), SIGNAL(destroyed()),
                         this, SLOT(socketDisconnected()));
@@ -325,7 +325,7 @@ QObex::ResponseCode QObexServerSessionPrivate::readAuthenticationResponse(const 
     Invoke a user callback to notify about a request.
     Need to call the callbacks through invokeMethod() through Qt meta system
     instead of calling the callbacks directly as methods, because the slots
-    are not virtual. (This is to be consistent within Qt/Qtopia APIs.)
+    are not virtual. (This is to be consistent within Qt/Qt Extended APIs.)
 
     (The request callbacks are slots because this allows us to reject an
     request when a REQHINT is received if we can see that the subclass doesn't
@@ -387,6 +387,8 @@ void QObexServerSessionPrivate::socketDisconnected()
     // to socketDisconnected()
     if (m_socket) {
         QObject::disconnect(m_socket->device(), SIGNAL(aboutToClose()),
+                            this, SLOT(socketDisconnected()));
+        QObject::disconnect(m_socket->device(), SIGNAL(readChannelFinished()),
                             this, SLOT(socketDisconnected()));
         QObject::disconnect(m_socket->device(), SIGNAL(destroyed()),
                             this, SLOT(socketDisconnected()));
@@ -468,6 +470,7 @@ QLatin1String QObexServerSessionPrivate::getRequestSlot(QObex::Request request)
 
 /*!
     \class QObexServerSession
+    \inpublicgroup QtBaseModule
     \brief The QObexServerSession class provides an abstract base class for implementing an OBEX server.
 
     To implement an OBEX server, subclass QObexServerSession and override
@@ -675,35 +678,8 @@ QLatin1String QObexServerSessionPrivate::getRequestSlot(QObex::Request request)
     error() so that it can be notified of \c Abort requests and perform
     any clean-up actions that might be necessary.
 
-
-    \section1 Handling socket disconnections
-
-    You should ensure that the QIODevice provided in the constructor emits
-    QIODevice::aboutToClose() or QObject::destroyed() when the associated
-    transport connection is disconnected. If one of these signals
-    are emitted, QObexServerSession will know the transport connection has
-    been lost, and will call error() with the argument set to ConnectionError.
-
-    This is particularly an issue for socket classes such as QTcpSocket that
-    do not emit QIODevice::aboutToClose() when a \c disconnected() signal is
-    emitted. In these cases, QObexServerSession will not know that the
-    transport has been disconnected. To avoid this, you can make the socket
-    emit QIODevice::aboutToClose() when it is disconnected:
-
-    \code
-    // make the socket emit aboutToClose() when disconnected() is emitted
-    QObject::connect(socket, SIGNAL(disconnected()), socket, SIGNAL(aboutToClose()));
-    \endcode
-
-    Or, if the socket can be discarded as soon as it is disconnected:
-
-    \code
-    // delete the socket when the transport is disconnected
-    QObject::connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
-    \endcode
-
     \ingroup qtopiaobex
-    \sa QObexClientSession
+    \sa QObexClientSession, {Simple OBEX Demo}
 */
 
 /*!

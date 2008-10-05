@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -27,35 +25,105 @@
 
 #include <qtopialog.h>
 
+
+int QPreparedSqlQuery::errorCount() const
+{
+    return mErrorList.count();
+}
+
+QStringList QPreparedSqlQuery::errors() const
+{
+    return mErrorList;
+}
+
+void QPreparedSqlQuery::clearErrors()
+{
+    mErrorList.clear();
+}
+
 #ifdef SQLITE_DIRECT
 
+/*!
+    \class QPreparedSqlQuery
+    \inpublicgroup QtUiModule
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtTelephonyModule
+    \inpublicgroup QtPimModule
+    \brief The QPreparedSqlQuery class provides additional features
+    to that found for QSqlQuery.
+    \internal
+
+    QPreparedSqlQuery provides a near feature equivalent API to
+    QSqlQuery with a few additions.
+
+    Primarily it maps directly to SQLite, avoiding some of the layers
+    of abstraction included with QSqlQuery, improving performance.  It
+    also uses qLog easing coding so that code using QPreparedSqlQuery
+    does not need to check for errors unless it would take a different
+    code path.  The error values are still kept and returned properly.
+
+    QPreparedSqlQuery also can be constructed before a database is opened,
+    so long as the database is opened before the query is prepared.  This
+    allows the class to be member variables of PIM classes which in
+    some cases open the database after they have been constructed.
+    If no database is provided in the constructor to QPreparedSqlQuery
+    the database as provided by QPimSQLIO::database() will be used.
+
+    \sa QSqlQuery
+*/
+
+/*!
+    Constructs a new QPreparedSqlQuery
+*/
 QPreparedSqlQuery::QPreparedSqlQuery()
     : mHandle(0), mDBHandle(0), skip_step(false)
 {
 }
 
-QPreparedSqlQuery::QPreparedSqlQuery(QSqlDatabase db)
-    : mHandle(0), mDBHandle(*static_cast<sqlite3**>(db.driver()->handle().data())), skip_step(false)
+/*!
+    Constructs a new QPrepraredSqlQuery that is connected to the
+    given \a database.  It is required that the database uses the
+    SQLite driver.
+*/
+QPreparedSqlQuery::QPreparedSqlQuery(QSqlDatabase database)
+    : mHandle(0), mDBHandle(*static_cast<sqlite3**>(database.driver()->handle().data())), skip_step(false)
 {
 }
 
 
-// +1, hash being different from statement means not prepared.
-QPreparedSqlQuery::QPreparedSqlQuery(const QString &statement)
-    : mText(statement), mHandle(0), mDBHandle(0), skip_step(false)
+/*!
+    Constructs a QPreparedSqlQuery object using the SQL \a query.
+    Unlike the constructor for QSqlQuery, it will not prepare nor
+    execute the query until explicitly made to do so using the
+    prepare() and exec() functions.
+*/
+QPreparedSqlQuery::QPreparedSqlQuery(const QString &query)
+    : mText(query), mHandle(0), mDBHandle(0), skip_step(false)
 {
 }
 
+/*!
+    Destorys the object and frees any allocated resources.
+*/
 QPreparedSqlQuery::~QPreparedSqlQuery()
 {
-    clear();
+    if (mHandle)
+        clear();
 }
 
+/*!
+    Returns true if the query is currently positioned on a valid
+    record; otherwise returns false.
+*/
 bool QPreparedSqlQuery::isValid() const
 {
     return (mHandle != 0);
 }
 
+/*!
+    Prepares the previously specified query string.  Returns true if
+    the query was successfully prepared.
+*/
 bool QPreparedSqlQuery::prepare()
 {
     qLog(Sql) << "QPreparedSqlQuery::prepare()";
@@ -63,8 +131,15 @@ bool QPreparedSqlQuery::prepare()
         return false;
     }
     if (mHandle) {
-        reset();
-        return true; // e.g. once prepared, always prepared until cleared.
+        if (!sqlite3_expired(mHandle)) {
+            reset();
+            return true; // e.g. once prepared, always prepared until cleared.
+        } else {
+            // Hmm, our query expired
+            qLog(Sql) << "QPreparedSqlQuery::prepare() - prepared query expired";
+            sqlite3_finalize(mHandle);
+            mHandle = 0;
+        }
     }
     qLog(Sql) << "QPreparedSqlQuery::prepare() - parse statement:" << mText;
 
@@ -80,18 +155,37 @@ bool QPreparedSqlQuery::prepare()
         default:
             mError.setDriverText(QString::fromUtf8(sqlite3_errmsg(mDBHandle)));
             qLog(Sql) << "prepare query error:" << mError.driverText();
+            mErrorList.append(mError.driverText());
             return false;
     }
 }
 
-bool QPreparedSqlQuery::prepare(const QString &text)
+/*!
+    Prepares the given SQL \a query for execution.  Returns true
+    if the query is prepared successfully.
+
+    The query may
+    contain placeholders for binding values. Both Oracle style
+    colon-name (e.g., \c{:surname}), and ODBC style (\c{?})
+    placeholders are supported; but they cannot be mixed in the same
+    query. See the \l{QSqlQuery examples}{Detailed Description} for examples.
+*/
+bool QPreparedSqlQuery::prepare(const QString &query)
 {
-    if (mHandle && text != mText)
+    if (mHandle && query != mText)
         clear();
-    mText = text;
+    mText = query;
     return prepare();
 }
+/*!
+    Instruct the database driver that no more data will be fetched
+    from this query until it is re-executed.  Calling this function
+    will free resources such as locks or cursors, but doesn't clear
+    bound values or the prepared statement.  For frequently called
+    queries this can lead to very significant performance improvements.
 
+    \sa QSqlQuery::finish()
+*/
 void QPreparedSqlQuery::reset()
 {
     qLog(Sql) << "QPreparedSqlQuery::reset() -" << mText;
@@ -103,6 +197,13 @@ void QPreparedSqlQuery::reset()
     skip_step = false;
 }
 
+/*!
+    Clears the result set and releases any resources held by the
+    query.  In addition to resources released with reset() will also
+    release resources for bound values and the prepared statement.
+
+    This function is called automatically when the object is destroyed.
+*/
 void QPreparedSqlQuery::clear()
 {
     qLog(Sql) << "QPreparedSqlQuery::clear() - " << mText;
@@ -115,6 +216,19 @@ void QPreparedSqlQuery::clear()
     }
     mHandle = 0;
 }
+
+/*!
+    Set the placeholder \a placeholder to be bound to value \a val in
+    the prepared statement. Note that the placeholder mark (e.g \c{:})
+    must be included when specifying the placeholder name. If \a paramType
+    is QSql::Out or QSql::InOut, the placeholder will be
+    overwritten with data from the database after the exec() call.
+
+    To bind a NULL value, use a null QVariant; for example, use
+    \c {QVariant(QVariant::String)} if you are binding a string.
+
+    \sa addBindValue(), prepare(), exec(), boundValue() boundValues()
+*/
 void QPreparedSqlQuery::bindValue( const QString & placeholder, const QVariant & value, QSql::ParamType )
 {
     if (mHandle) {
@@ -125,6 +239,14 @@ void QPreparedSqlQuery::bindValue( const QString & placeholder, const QVariant &
 
 }
 
+/*!
+    \overload
+
+    Set the placeholder in position \a pos to be bound to value \a val
+    in the prepared statement. Field numbering starts at 0. If \a paramType
+    is QSql::Out or QSql::InOut, the placeholder will be
+    overwritten with data from the database after the exec() call.
+*/
 void QPreparedSqlQuery::bindValue( int pos, const QVariant & value, QSql::ParamType )
 {
     qLog(Sql) << "QPreparedSqlQuery::bindValue(" << pos << value << ") -" << mText;
@@ -169,8 +291,9 @@ void QPreparedSqlQuery::bindValue( int pos, const QVariant & value, QSql::ParamT
             }
         }
         /* assume lack of step before rebind... */
-        if (res == SQLITE_MISUSE)
+        if (res == SQLITE_MISUSE) {
             sqlite3_reset(mHandle);
+        }
     }
 
     if (res != SQLITE_OK) {
@@ -180,12 +303,30 @@ void QPreparedSqlQuery::bindValue( int pos, const QVariant & value, QSql::ParamT
     }
 }
 
+/*!
+    Returns a map of the bound values.
+
+    With named binding, the bound values can be examined in the
+    following ways:
+
+    \snippet doc/src/snippets/sqldatabase/sqldatabase.cpp 14
+
+    With positional binding, the code becomes:
+
+    \snippet doc/src/snippets/sqldatabase/sqldatabase.cpp 15
+
+    \sa boundValue() bindValue() addBindValue()
+*/
 QMap<QString, QVariant> QPreparedSqlQuery::boundValues() const
 {
     qLog(Sql) << "boundValues not supported in QPreparedSqlQuery";
     return QMap<QString, QVariant>(); // sqlite doesn't let you query bound values
 }
 
+/*!
+    Executes a previously prepared SQL query. Returns true if the
+    query executed successfully.
+*/
 bool QPreparedSqlQuery::exec()
 {
     qLog(Sql) << "QPreparedSqlQuery::exec()";
@@ -202,30 +343,57 @@ bool QPreparedSqlQuery::exec()
             skip_step = true;
             step_res = res;
             qLog(Sql) << "exec succeeded";
-            return true;
+            break;
         default:
             mError.setDriverText( sqlite3_errmsg(mDBHandle) );
             qLog(Sql) << "exec error:" << res << mError.driverText();
-            break;
+            mErrorList.append(mError.driverText());
+            return false;
     }
     return true;
 }
 
+/*!
+    Returns true if the query is active and positioned on a valid
+    record and the \a field is NULL; otherwise returns false. Note
+    that for some drivers, isNull() will not return accurate
+    information until after an attempt is made to retrieve data.
+
+    \sa isActive(), isValid(), value()
+*/
 bool QPreparedSqlQuery::isNull( int field ) const
 {
     return sqlite3_column_type(mHandle, field) == SQLITE_NULL;
 }
 
+/*!
+    Returns error information about the last error (if any) that
+    occurred with this query.
+
+    \sa QSqlError, QSqlDatabase::lastError()
+*/
 QSqlError QPreparedSqlQuery::lastError() const
 {
     return mError;
 }
 
+/*!
+    Returns the text of the current query being used, or an empty
+    string if there is no current query text.
+
+    \sa executedQuery()
+*/
 QString QPreparedSqlQuery::lastQuery() const
 {
     return mText;
 }
 
+/*!
+    Retrieves the next record in the result, if available, and
+    positions the query on the retrieved record.
+
+    Returns true if it was able to move to the next record.
+*/
 bool QPreparedSqlQuery::next()
 {
     if (skip_step) {
@@ -259,6 +427,11 @@ bool QPreparedSqlQuery::next()
 //{
 //}
 
+/*!
+    Returns the value of field \a index in the current record.
+
+    \sa QSqlQuery::value()
+*/
 QVariant QPreparedSqlQuery::value( int index ) const
 {
     switch(sqlite3_column_type(mHandle, index)) {
@@ -323,10 +496,12 @@ bool QPreparedSqlQuery::prepare()
         res = true;
     } else
         res = false;
-    if (res)
+    if (res) {
         qLog(Sql) << "prepare query succeeded";
-    else
+    } else {
         qLog(Sql) << "prepare query error:" << mQuery->lastError().text();
+        mErrorList.append(mQuery->lastError.text());
+    }
     return res;
 }
 
@@ -391,8 +566,9 @@ bool QPreparedSqlQuery::exec()
         if (!res)
             qLog(Sql) << "QPreparedSqlQuery::exec() -" << mQuery->lastError();
         return res;
-    } else
-        qLog(Sql) << "QPreparedSqlQuery::exec() - query not prepared";
+    }
+    qLog(Sql) << "QPreparedSqlQuery::exec() - query not prepared";
+    mErrorList.append(mQuery->lastError());
     return false;
 }
 

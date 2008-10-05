@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -34,118 +32,41 @@
 #include <QMap>
 #include <QByteArray>
 #include <QValueSpaceObject>
-#include <Qtopia>
+#include <qtopianamespace.h>
 #include <qconstcstring.h>
 #include <qtopialog.h>
-#include <QPerformanceLog>
+#include <QPluginManager>
+#include <ServerTaskPlugin>
+
+#include <idletaskstartup.h>
+#include <qtopiaservertasks_p.h>
 
 #include <unistd.h>
 
-class TaskStartupInfo;
-
-// declare QtopiaServerTasksPrivate
-class QtopiaServerTasksPrivate : public QObject
-{
-Q_OBJECT
-public:
-    QtopiaServerTasksPrivate() : argc(0), argv(0),
-                                 taskList(0), application(0),
-                                 m_shutdown(QtopiaServerApplication::NoShutdown),
-   m_constructingTask(false) {}
-    virtual ~QtopiaServerTasksPrivate() { qDeleteAll(m_availableTasks); delete taskList; }
-
-    static QString taskConfigFile();
-    struct Task;
-
-    void enableTaskReporting();
-    bool determineStartupOrder(const QList<QByteArray> &, QList<Task *> &);
-    void determineStartupOrder(const QByteArray &, bool, bool,
-                               TaskStartupInfo &);
-
-    void setupInterfaceList(const QList<Task *> &);
-    QObject* startTask(Task *, bool onlyActive);
-    QObject* taskForInterface(Task *task, const QConstCString &iface, bool onlyActive);
-
-    int *argc;
-    char **argv;
-    QValueSpaceObject *taskList;
-    QtopiaApplication *application;
-
-    struct Task {
-        Task() {}
-        Task(const QConstCString &_name) : name(_name),
-                                           object(0),
-                                           staticOrder(0),
-                                           launchOrder(0),
-                                           interfaceOrder(0),
-                                           create(0),
-                                           createArg(0),
-                                           excluded(false),
-                                           demand(false) {}
-        Task(const Task &other) : name(other.name),
-                                  object(other.object),
-                                  staticOrder(other.staticOrder),
-                                  launchOrder(other.launchOrder),
-                                  interfaceOrder(other.interfaceOrder),
-                                  create(other.create),
-                                  createArg(other.createArg),
-                                  interfaces(other.interfaces),
-                                  excluded(other.excluded),
-                                  demand(other.demand) {}
-
-        QConstCString name;
-        QObject *object;
-        QObjectList aggregates;
-        unsigned int staticOrder;
-        unsigned int launchOrder;
-        unsigned int interfaceOrder;
-        QtopiaServerApplication::CreateTaskFunc create;
-        void *createArg;
-        QList<QConstCString> interfaces;
-        bool excluded;
-        bool demand;
-    };
-
-    QMap<QObject *, Task *> m_activeTasks;
-    QMap<QConstCString, Task *> m_availableTasks;
-    QMap<QConstCString, QList<Task *> > m_availableInterfaces;
-    QMap<QConstCString, QList<QPointer<QObject> > > m_additionalInterfaces;
-
-    QList<SystemShutdownHandler *> m_shutdownObjects;
-    QtopiaServerApplication::ShutdownType m_shutdown;
-    bool shutdownDone() const { return m_shutdownObjects.isEmpty(); }
-    void setShutdownObjects(const QList<SystemShutdownHandler *> &objs);
-    void ackShutdownObject(SystemShutdownHandler *obj);
-
-    bool m_constructingTask;
-    QMap<QObject *, QList<QObject *> > m_constructingAggregates;
-
-public slots:
-    void shutdownProceed();
-};
 Q_GLOBAL_STATIC(QtopiaServerTasksPrivate, qtopiaServerTasks);
 
 
 /*!
   \class QtopiaServerApplication
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer
   \ingroup QtopiaServer::Task
   \brief The QtopiaServerApplication class provides additional QtopiaApplication
          functionality.
 
-  \section1 Qtopia Server Tasks
+  \section1 Qt Extended Server Tasks
 
   The QtopiaServerApplication class acts as a QtopiaApplication instance in
-  Qtopia Server.  QtopiaServerApplication is primarily responsible for bringing
-  up and shutting down the Qtopia server and acts as the "core" controller in
-  the system. This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  Qt Extended Server.  QtopiaServerApplication is primarily responsible for bringing
+  up and shutting down the Qt Extended server and acts as the "core" controller in
+  the system. This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
-  The Qtopia server is structured as a collection of largely independent
+  The Qt Extended server is structured as a collection of largely independent
   \i tasks that are responsible for performing a small, well defined portion
   of work or functionality which often form the "backend" to other system
-  capabilities.  For example, Qtopia's network management APIs ultimately
+  capabilities.  For example, the network management APIs ultimately
   communicate with the QtopiaNetworkServer task, other tasks may operate more
-  independently.  Tasks can be thought of as the building blocks that form the Qtopia server, when arranged appropriately.
+  independently.  Tasks can be thought of as the building blocks that form the Qt Extended server, when arranged appropriately.
 
   Tasks are QObjects and may work together by exporting C++ interfaces.
   Other tasks or modules within the server may request tasks that support a
@@ -198,9 +119,12 @@ The following group names are reserved and have a special purpose:
 \table
   \header \o Group Name \o Description
 \row
-    \o prestartup  \o  The \c {prestartup} contains tasks that will be started immediately after Qtopia is executed.
+    \o prestartup  \o  The \c {prestartup} contains tasks that will be started immediately after Qt Extended is executed.
 \row
     \o startup \o The \c {startup} group contains tasks to be launched at startup.
+\row
+    \o idle \o  The \c {idle} group contains tasks which will be launched after the UI is shown
+                while the system is idle.
 \row
     \o exclude \o The \c {exclude} group contains tasks that, while present in the
             server, will \c {never} be created.  Adding a task to the \c {exclude}
@@ -221,6 +145,8 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
 \row
     \o Preemptive Tasks \o  Preemptive tasks are those started by the system
         during startup, regardless of whether or not any other task has asked for it.
+        Some preemptive tasks can have their construction delayed by being placed
+        in the \i {idle} group.
 \row
     \o On-demand Tasks \o On-demand tasks are those whose creation is deferred
         until another task requests it be started.  Tasks in the \i {startup}
@@ -234,6 +160,21 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
   system.  Instead, requesters ask the system to return a task that
   supports a given interface.  Doing so allows a particular implementation to
   be switched out without any code changes to the requestor.
+
+
+  \section2 Marking Preemptive Tasks for Delayed Construction
+
+  By default, preemptive tasks are created before the user interface is displayed.
+  This means a task which is expensive to construct delays showing the user
+  interface.
+  To avoid this, tasks in the \c {Tasks.cfg} file can be marked as suitable for
+  delayed construction by placing them in the \i {idle} group.
+
+  Tasks in this group will be started shortly after the UI is displayed
+  if the system is idle.  If the user interacts with the system, their construction
+  may be further delayed.
+  Tasks which provide background services without any user-visible components are
+  suitable for this group.
 
 
   \section2 Marking Tasks to be Started on Demand
@@ -263,9 +204,9 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
   in this list, with duplicates removed.
 
   As a special "catch-all", primarily to prevent incorrect configuration, the special
-  \c {All} task can be added to the \c {startup} group.  This has the effect
-  of inserting all tasks not otherwise in the \c {startup} or \c {exclude}
-  groups or explicitly marked as demand started tasks.
+  \c {All} task can be added to the \c {startup} or \c {idle} group.  This has the effect
+  of inserting all tasks not otherwise assigned to a group or explicitly marked as demand
+  started tasks.
 
 
   While the QtopiaServerApplication class itself is not strictly a task,
@@ -291,17 +232,23 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
   A tutorial on how to develop new server tasks can be found in 
   the \l{Integration guide#Server Tasks}{Device Integration guide}.
 
-  \section1 Qtopia Server Widgets
+  \section2 Server task plug-ins
+  
+  The above server tasks are linked into the Qt Extended server at build time. To increase the flexibility server tasks can be provided via a plug-in mechanism. This allows the addition of new tasks after the deployment of the server binary. Server task plugins must implement the ServerTaskPlugin interface in order to be recognized by the system. 
 
-  There are many cases of Qt widgets being used throughout the Qtopia server
+  For more information on how to develop plug-in based server tasks refer to the \l {Tutorial: Writing server task plugin}{Server task plug-in tutorial}.
+
+  \section1 Qt Extended Server Widgets
+
+  There are many cases of Qt widgets being used throughout the Qt Extended server
   that may need to be customized to achieve a desired look and feel.  For
   example, while it supports customization through theming, a customer that
-  wants to replace the Qtopia phone dialer with a "rotary dial" style dialer
+  wants to replace the Qt Extended phone dialer with a "rotary dial" style dialer
   would need to replace the entire dialer widget.
 
   To simplify the task and minimize the code changes needed to replace visual
-  components of the Qtopia Server, the concept of Qtopia Server Widgets exists.
-  Qtopia Server Widgets splits the definition of a visual component - or server
+  components of the Qt Extended Server, the concept of Qt Extended Server Widgets exists.
+  Qt Extended Server Widgets splits the definition of a visual component - or server
   widget - into two parts: the server widget interface (hereafter referred to as
   the AbstractWidget) and the concrete server widget implementation
   (ConcreteWidget).  While not technically necessary, the AbstractWidget is
@@ -363,8 +310,46 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
 
   \image WidgetSelectionRules.png "Selecting the correct Server Widget"
 
-  A tutorial on how to develop new server widgets can be found in the QAbstractServerInterface
-  class documentation and the \l{integration-guide.html#server-widgets}{Device Integration guide}.
+  \section2 Singleton pattern
+
+    Usually each call to qtopiaWidget() returns a new server widget instance. In some cases this
+    behaviour is not desired. If it is necessary to return a reference to an already existing instance
+    of a server widget Qt's meta system class info should be used to mark an
+    abstract server widget as singleton. This means that every concrete implementation of
+    this abstract widget will follow the singleton pattern. The \c SingletonServerWidget string is reserved
+    to enable this feature. If the class info tag is missing Qt Extended assumes that the class
+    does not follow the singleton pattern.
+
+    For example:
+    \code
+    //qabstracthomescreen.h
+    class QAbstractHomeScreen : public QWidget
+    {
+       QOBJECT
+       Q_CLASSINFO("SingletonServerWidget", "true");
+       // ...
+    };
+    \endcode
+
+    The following code segment demonstrates the difference:
+
+    \code
+    QAbstractHomeScreen* ref1 = qtopiaWidget<QAbstractHomeScreen>();
+    QAbstractHomeScreen* ref2 = qtopiaWidget<QAbstractHomeScreen>();
+
+    if ( ref1 == ref2 ) {
+        ...
+        //The SingletonServerWidget class info is set to true for
+        //QAbstractHomeScreen (as seen in above example).
+    } else {
+        ...
+        //The SingletonServerWidget class info is set to false
+        //or not defined at all.";
+    }
+    \endcode
+
+    A tutorial on how to develop new server widgets can be found in the QAbstractServerInterface
+    class documentation and the \l{integration-guide.html#server-widgets}{Device Integration guide}.
  */
 
 /*!
@@ -488,6 +473,18 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
 */
 
 /*!
+    \enum QtopiaServerApplication::StartupType
+
+    This enum determines how tasks are started when QtopiaServerApplication::startup()
+    is called.
+
+    \value ImmediateStartup Requested tasks are started immediately.  The call to startup()
+                            will block until all requested tasks have been started.
+    \value IdleStartup Requested tasks are queued to be started when the server is idle.
+                       The call to startup() is non-blocking.
+*/
+
+/*!
   \fn QtopiaServerApplication::shutdownRequested()
 
   Emitted whenever the user or an application requests that the system shutdown.
@@ -562,6 +559,7 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
   replacement system.  The macro should appear inline with the \a AbstractWidget
   declaration, and must have visibility of the \a ConcreteWidget's declaration.
 
+
   For example,
   \code
   // qabstractbrowserscreen.h
@@ -573,6 +571,10 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
   #include "wheelbrowserscreen.h"
   QTOPIA_REPLACE_WIDGET_OVERRIDE(QAbstractBrowserScreen, WheelBrowserScreen);
   \endcode
+  
+  Note that any server widget that uses this marco will not work with 
+  singleton server widgets. Calling qtopiaWidget() on such widgets will always return 
+  a new instance.
 */
 
 /*!
@@ -583,7 +585,14 @@ Tasks are constructed in one of two ways: preemptively or on-demand.
   \a flags.  Concrete implementations are provided with the
   QTOPIA_REPLACE_WIDGET(), QTOPIA_REPLACE_WIDGET_WHEN() and
   QTOPIA_REPLACE_WIDGET_OVERRIDE() macros and selected as described in the
-  \l {Qtopia Server Widgets} overview.
+  \l {Qt Extended Server Widgets} overview.
+
+  Each call to this function returns a new instance of the requested server widget unless
+  the server widget has been marked as singleton widget via
+
+  \code
+   Q_CLASSINFO("SingletonServerWidget", "true");
+  \endcode
 */
 
 static QValueSpaceItem* serverWidgetVsi = 0;
@@ -605,6 +614,8 @@ QtopiaServerApplication::QtopiaServerApplication(int& argc, char **argv)
     serverWidgetVsi = new QValueSpaceItem( "/System/ServerWidgets" );
     connect( serverWidgetVsi, SIGNAL(contentsChanged()),
              this, SLOT(serverWidgetVsChanged()) );
+
+    QtopiaServerApplication::excludeFromTaskCleanup(this, true);
 
 #ifdef Q_WS_QWS
     // Check that the display size is specified
@@ -630,9 +641,6 @@ QtopiaServerApplication::QtopiaServerApplication(int& argc, char **argv)
 QtopiaServerApplication::~QtopiaServerApplication()
 {
     Q_ASSERT(m_instance);
-#ifdef Q_WS_QWS
-    Q_ASSERT(m_filters.isEmpty());
-#endif
     m_instance = 0;
 }
 
@@ -640,10 +648,11 @@ QtopiaServerApplication::~QtopiaServerApplication()
 
 /*!
   \class QtopiaServerApplication::QWSEventFilter
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer
   \brief The QWSEventFilter class provides an interface for filtering Qt Window System events.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 /*!
@@ -712,11 +721,6 @@ bool QtopiaServerApplication::qwsEventFilter(QWSEvent *e)
 {
     for(int ii = 0; ii < m_filters.count(); ++ii)
         if(m_filters.at(ii)->qwsEventFilter(e)) {
-#ifdef QTOPIA_USE_TEST_SLAVE
-            if (testSlave()) {
-                testSlave()->qwsEventFilter(e);
-            }
-#endif
             return true;
         }
 
@@ -1153,10 +1157,13 @@ QObject* QtopiaServerTasksPrivate::startTask(Task *task, bool onlyActive)
     if(onlyActive)
         return 0;
 
-    if(task->create) {
+    if(task->create || task->plugin) {
         bool wasConstructing = m_constructingTask;
         m_constructingTask = true;
-        task->object = task->create(task->createArg);
+        if ( task->create )
+            task->object = task->create(task->createArg);
+        else
+            task->object = task->plugin->initTask(task->createArg);
         if(task->object) {
             QMap<QObject *, QList<QObject *> >::Iterator iter =
                 m_constructingAggregates.find(task->object);
@@ -1169,8 +1176,11 @@ QObject* QtopiaServerTasksPrivate::startTask(Task *task, bool onlyActive)
         Q_ASSERT(m_constructingTask || m_constructingAggregates.isEmpty());
     }
 
-    if(task->object)
+    if(task->object) {
         m_activeTasks.insert(task->object, task);
+        QPointer<QObject> pointer = task->object;
+        m_startedTaskObjects.append(pointer);
+    }
 
     if(!application && QConstCString("QtopiaApplication", 17) == task->name)
         application = qobject_cast<QtopiaApplication *>(task->object);
@@ -1185,6 +1195,21 @@ QObject* QtopiaServerTasksPrivate::startTask(Task *task, bool onlyActive)
     }
 
     return task->object;
+}
+
+void QtopiaServerTasksPrivate::cleanupTasks()
+{
+    //clean tasks in reverse startup order
+    while (m_startedTaskObjects.count()) {
+        QObject* o = m_startedTaskObjects.takeLast();
+        if (!o) continue;
+        if (!m_excludedManagement.contains(o)) {
+            qLog(QtopiaServer) << "Deleting task" << o->metaObject()->className();
+            o->deleteLater();
+        } else {
+            qLog(QtopiaServer) << o->metaObject()->className() << "excluded from task cleanup";
+        }
+    }
 }
 
 void QtopiaServerTasksPrivate::setShutdownObjects(const QList<SystemShutdownHandler *> &objs)
@@ -1254,20 +1279,47 @@ char **QtopiaServerApplication::argv()
 }
 
 /*!
-  Launches server tasks.  This method is used to start the Qtopia server and
+    During the server shutdown all object based server tasks are deleted. However some tasks may not require
+    such management as they install themselves into some form of backend functionality
+    which may take care of the tasks life time. Setting \a exclude to true excludes \a task
+    from the task system's memory management.
+
+    An example is the QtopiaPowerManager and its sub class which installs itself as the
+    screensaver. The QWS server owns the screen saver object and therefore takes already care
+    of the objects life time.
+*/
+void QtopiaServerApplication::excludeFromTaskCleanup(QObject* task, bool exclude)
+{
+    QtopiaServerTasksPrivate *qst = qtopiaServerTasks();
+    if (!qst) return;
+
+    if (exclude)
+        qst->m_excludedManagement.insert(task);
+    else
+        qst->m_excludedManagement.remove(task);
+}
+
+/*!
+  Launches server tasks.  This method is used to start the Qt Extended server and
   should never be called from other code.  Returns true on success,
   false on failure.
 
   \a argc and \a argv should be the values passed to the main() function.
   \a startupGroups contains a list of Task groups to start.
+  \a type determines the behavior for launching the tasks.
  */
-bool QtopiaServerApplication::startup(int &argc, char **argv, const QList<QByteArray> &startupGroups)
+bool QtopiaServerApplication::startup(int &argc, char **argv, const QList<QByteArray> &startupGroups,
+    QtopiaServerApplication::StartupType type)
 {
     QtopiaServerTasksPrivate *qst = qtopiaServerTasks();
     Q_ASSERT(qst);
 
     qLog(QtopiaServer) << "Starting tasks...";
-    QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "tasks";
+
+    if ( !qst->m_taskPluginLoader ) {
+        loadTaskPlugins();
+    }
+
     qst->argc = &argc;
     qst->argv = argv;
 
@@ -1276,14 +1328,77 @@ bool QtopiaServerApplication::startup(int &argc, char **argv, const QList<QByteA
     if(!qst->determineStartupOrder(startupGroups, startupOrder))
         return false;
 
-    // Actually start the tasks
-    for(int ii = 0; ii < startupOrder.count(); ++ii) {
-        qLog(QtopiaServer) << "Starting task" << startupOrder.at(ii)->name.toByteArray();
-        QPerformanceLog("QtopiaServer") << QPerformanceLog::Begin << "task" << startupOrder.at(ii)->name.toByteArray();
-        qst->startTask(startupOrder.at(ii), false);
+    if (!startupOrder.count())
+        return true;
+
+    if (type == ImmediateStartup) {
+        // Actually start the tasks
+        for(int ii = 0; ii < startupOrder.count(); ++ii) {
+            QtopiaServerTasksPrivate::Task* task = startupOrder.at(ii);
+            if (task->launchOrder > 0) {
+                qLog(QtopiaServer) << "Would start task, but already started:" << task->name.toByteArray();
+            } else {
+                qLog(QtopiaServer) << "Starting task" << task->name.toByteArray();
+                qst->startTask(task, false);
+            }
+        }
+    }
+
+    else if (type == IdleStartup) {
+        IdleTaskStartup* idler = new IdleTaskStartup(qst, startupOrder);
+
+        // Delete the task starter when it completes its duty.
+        if (!connect(idler, SIGNAL(finished()), idler, SLOT(deleteLater())))
+            Q_ASSERT(0);
+
+        // Start the task starter once we get to the event loop.
+        QTimer::singleShot(0, idler, SLOT(start()));
+    }
+
+    else {
+        qWarning() << "Invalid type parameter to QtopiaServerApplication::startup:" << type;
+        return false;
     }
 
     return true;
+}
+
+
+void QtopiaServerApplication::loadTaskPlugins()
+{
+    QtopiaServerTasksPrivate *qst = qtopiaServerTasks();
+    if(!qst) return;
+
+    QObject* o = 0;
+    ServerTaskPlugin* plugin = 0;
+    qst->m_taskPluginLoader = new QPluginManager( "servertask" );
+    qLog(QtopiaServer) << "Loading server task plugins";
+    foreach ( const QString name, qst->m_taskPluginLoader->list() )
+    {
+        o = qst->m_taskPluginLoader->instance( name );
+        if ( !o ) continue;
+        plugin = qobject_cast<ServerTaskPlugin*>( o );
+        if ( !plugin )  { delete o; continue; }
+
+        QConstCString t( plugin->name().constData(), plugin->name().length() );
+        qLog(QtopiaServer) << "Found plugin based task:" << t.data();
+        QMap<QConstCString, QtopiaServerTasksPrivate::Task *>::Iterator iter =
+            qst->m_availableTasks.find(t);
+        if(qst->m_availableTasks.end() == iter) {
+            QtopiaServerTasksPrivate::Task *newTask =
+                new QtopiaServerTasksPrivate::Task(t);
+            //create a permanent refernece to plugin->name() that can be used by QConstCString
+            newTask->taskPluginName = plugin->name();
+            QConstCString task( newTask->taskPluginName.constData() );
+            newTask->name = task;
+            newTask->demand = plugin->demand();
+            iter = qst->m_availableTasks.insert(task, newTask);
+        }
+
+        Q_ASSERT(0 == (*iter)->plugin);
+        (*iter)->plugin = plugin;
+        (*iter)->createArg = 0;
+    }
 }
 
 /*!
@@ -1539,11 +1654,25 @@ void QtopiaServerApplication::_shutdown(ShutdownType type)
     t.start();
     while(!qst->shutdownDone())
     {
+        struct Remaining {
+            static inline QString handlers(QtopiaServerTasksPrivate* qst) {
+                QStringList ret;
+                foreach (SystemShutdownHandler* h, qst->m_shutdownObjects) {
+                    ret << QString("%1(0x%2)").arg(h->metaObject()->className()).arg(quintptr(h), 0, 16);
+                }
+                return ret.join(",");
+            }
+        };
         // If this assert fires, then some of the server shutdown tasks above
         // have failed to exit correctly, and require bug-fixing
-        Q_ASSERT_X( t.elapsed() < 5000, "shutdown", "at least one shutdown handler failed to complete" );
+        Q_ASSERT_X( t.elapsed() < SystemShutdownHandler::timeout() + 1000, "shutdown",
+                qPrintable(QString("Shutdown handlers failed to complete: %1").arg(Remaining::handlers(qst)))
+        );
         QApplication::instance()->processEvents();
     }
+
+    //delete all running tasks as we are about to shutdown
+    qst->cleanupTasks();
     QApplication::instance()->quit();
 }
 
@@ -1555,6 +1684,7 @@ struct ClassReplacement {
 
     typedef QHash<QByteArray, QPair<_ReplacementInstaller::CreateFunc, QByteArray> > CreateFuncs;
     CreateFuncs options;
+    QPointer<QWidget> singletonInstance;
 };
 
 // declare Replacements
@@ -1631,8 +1761,14 @@ void Replacements::add(const QMetaObject *you,
         iter->optionName = themName;
         iter->lastUsed = 0;
         iter->lastUsedSet = false;
+        iter->singletonInstance = 0;
     }
 
+    qLog(Component) <<  "Registering server widget:"
+        << them->className() << "->" << you->className()
+        << (!feature.isEmpty()
+                ? ("(depends on " + feature + ")").constData()
+                : QByteArray().constData());
     iter->options.insert(youName, qMakePair(create, feature));
 }
 
@@ -1668,7 +1804,7 @@ QWidget *wrapValueSpace( QWidget* widget, const QMetaObject* them )
         return 0;
 
     //qtopiaWidget<> creates a new instance each time it is called.
-    //we are only interested in one only
+    //we are only interested in one
     QValueSpaceItem item( QLatin1String("/System/ServerWidgets/") );
     QStringList sub = item.subPaths();
     if ( sub.contains( them->className() ) )
@@ -1689,13 +1825,27 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
     if(!re) return 0;
 
     Replacements::Classes::Iterator classIter = re->m_classes.find(them);
-    if(classIter == re->m_classes.end()) return 0;
+    if(classIter == re->m_classes.end()) {
+        qLog(QtopiaServer) << "No replacements found for widget" << them->className();
+        return 0;
+    }
+
+    int infoIndex = them->indexOfClassInfo( "SingletonServerWidget" );
+    bool singleton = false;
+    if ( infoIndex >= 0 && 0 == strcmp(them->classInfo(infoIndex).value(), "true") )
+        singleton = true;
 
     if(classIter->lastUsedSet) {
-        if(classIter->lastUsed)
-            return wrapValueSpace(classIter->lastUsed(parent, flags), them);
-        else
+        if(classIter->singletonInstance)
+            return classIter->singletonInstance;
+        if(classIter->lastUsed) {
+            QWidget* w = wrapValueSpace(classIter->lastUsed(parent, flags), them);
+            if ( singleton )
+                classIter->singletonInstance = w;
+            return w;
+        } else {
             return 0;
+        }
     }
 
     re->loadConfig();
@@ -1708,6 +1858,7 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
         if("None" == *configIter) {
             classIter->lastUsedSet = true;
             classIter->lastUsed = 0;
+            qLog(QtopiaServer) << "Server widget" << them->className() << "maps to None";
             return 0;
         }
 
@@ -1732,6 +1883,10 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
                 classIter->lastUsedSet = true;
                 qLog(QtopiaServer) << "Server widget mapping (based on default):"
                     << classIter->optionName << "->" << createIter.key();
+            } else {
+                qLog(QtopiaServer) << "Server widget" << them->className()
+                    << ": can't use" << createIter.key() << "because it requires"
+                    << createIter->second;
             }
         }
     }
@@ -1770,14 +1925,22 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
                 classIter->lastUsedSet = true;
                 qLog(QtopiaServer) << "Server widget mapping (random pick):"
                     << classIter->optionName << "->" << createIter.key();
+            } else {
+                qLog(QtopiaServer) << "Server widget" << them->className()
+                    << ": can't use" << createIter.key() << "because it requires"
+                    << createIter->second;
             }
         }
 
     }
 
     classIter->lastUsedSet = true;
-    if(classIter->lastUsed)
-        return wrapValueSpace(classIter->lastUsed(parent, flags), them);
+    if(classIter->lastUsed) {
+        QWidget *w = wrapValueSpace(classIter->lastUsed(parent, flags), them);
+        if ( singleton )
+            classIter->singletonInstance = w;
+        return w;
+    }
     else
         return 0;
 }
@@ -1785,15 +1948,15 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
 // define SystemShutdownHandler
 /*!
   \class SystemShutdownHandler
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Task::Interfaces
   \ingroup QtopiaServer::AppLaunch
   \brief The SystemShutdownHandler class notifies tasks when the system is shutting down or restarting.
 
-  The SystemShutdownHandler provides a Qtopia Server Task interface.  Qtopia 
-  Server Tasks are documented in full in the QtopiaServerApplication class 
+  The SystemShutdownHandler provides a Qt Extended Server Task interface.  Qt Extended Server Tasks are documented in full in the QtopiaServerApplication class
   documentation.
 
-  Server components can use the SystemShutdownHandler to integrate into Qtopia's
+  Server components can use the SystemShutdownHandler to integrate into the
   shutdown mechanism.
 
   Tasks that provide the SystemShutdownHandler interface are called when the
@@ -1807,9 +1970,12 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
   shutdown or restart will not occur until all such incomplete handlers have
   emitted the proceed() signal.
 
+  All shutdown handlers must successfully complete shutdown within
+  timeout() milliseconds.
+
   Shutdown is controlled through the QtopiaServerApplication::shutdown() method.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   \sa QtopiaServerApplication
  */
 
@@ -1821,6 +1987,15 @@ QWidget *_ReplacementInstaller::widget(const QMetaObject *them,
   the completion of a shutdown or restart by returning false from the
   systemRestart() or systemShutdown() methods.
  */
+
+/*!
+  \fn int SystemShutdownHandler::timeout()
+
+  Returns an upper bound on the amount of time a shutdown handler may take to process
+  a shutdown request, in milliseconds.
+  If a shutdown handler has not finished in this time, the server may forcibly
+  proceed with the shutdown.
+*/
 
 /*!
   Invoked whenever the system is restarting.  If the implementer returns

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,7 +21,8 @@
 
 /*!
     \class QPhoneBookEntry
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QPhoneBookEntry class specifies the contents of a single entry in a device's phone book.
 
     Phone book entries are retrieved by a call to QPhoneBook::getEntries().
@@ -112,7 +111,8 @@
 
 /*!
     \class QPhoneBook
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QPhoneBook class provides an interface to the SIM phone books of a device.
 
     \ingroup telephony
@@ -123,7 +123,7 @@
     book on the user's SIM card.
 
     The QPhoneBook class allows applications to access the contents of
-    SIM phone books.  For access to Qtopia's full phone book information,
+    SIM phone books.  For access to full phone book information,
     including SIM phone books and on-disk phone books, use QContactModel.
 
     The following phone book stores are commonly provided on SIM's according
@@ -384,7 +384,8 @@ QStringList QPhoneBook::storages()
 
 /*!
     \class QPhoneBookLimits
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QPhoneBookLimits class specifies the limits of a phone book's storage capacity.
 
     The limits of a phone book may be retrieved using QPhoneBook::requestLimits().
@@ -443,7 +444,7 @@ QPhoneBookLimits::QPhoneBookLimits( const QPhoneBookLimits& other )
 */
 QPhoneBookLimits::~QPhoneBookLimits()
 {
-    // Nothing to do here.
+    delete d;
 }
 
 /*!

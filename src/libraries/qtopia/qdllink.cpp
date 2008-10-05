@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -80,7 +78,8 @@ QDLLinkPrivate::QDLLinkPrivate()
 
 /*!
     \class QDLLink
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QDLLink class fully describes a QDL link.
 
     The QDLLink class contains all the information for a QDL link. It allows
@@ -90,7 +89,7 @@ QDLLinkPrivate::QDLLinkPrivate()
 
     A QDL link is activated by the QDLLink::activate() method. The
     application specific data required to activate the link is then transfered
-    to the QDL source through the Qtopia service.
+    to the QDL source through the Qt Extended service.
 
     When the QDL source needs to delete the linked data
     QDLLink::setBroken() should be called to inform clients that link
@@ -113,7 +112,7 @@ QDLLink::QDLLink()
 
 /*!
     Constructs a QDLLink with \a description and an \a icon name.
-    The Qtopia service \a service contains a QDS service for activating the
+    The Qt Extended service \a service contains a QDS service for activating the
     QDLLink on the QDL source and application specific data for the
     activation is stored in \a data.
 */
@@ -225,7 +224,7 @@ bool QDLLink::isBroken() const
 }
 
 /*!
-    Returns the Qtopia service which contains the QDS service to activate the
+    Returns the Qt Extended service which contains the QDS service to activate the
     link.
 */
 QString QDLLink::service() const
@@ -324,7 +323,7 @@ void QDLLink::activate() const
 }
 
 /*!
-    Sets the Qtopia service which contains the QDS service for link activation to
+    Sets the Qt Extended service which contains the QDS service for link activation to
     \a service.
 */
 void QDLLink::setService( const QString &service )

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -120,6 +118,13 @@ QString QSqlPimTableModel::selectText(const QString &retrieve, const QStringList
 
     QStringList j = joins();
     foreach(QString join, j) {
+        // contactpresence sometimes needs a left join
+        if (join.startsWith("LEFT ")) {
+            join = join.mid(5);
+            qtext += " LEFT";
+        }
+
+        // Special case for simcardidmap (different recid column name)
         if (join == "simcardidmap")
             qtext += " JOIN simcardidmap ON (t1.recid = simcardidmap.sqlid) ";
         else
@@ -281,7 +286,7 @@ bool QSqlPimTableModel::contextFilterExcludes() const
   \internal
   Returns the identifier for the record at \a row in the filtered records.
 */
-QUniqueId QSqlPimTableModel::recordId(int row) const
+QUniqueId QSqlPimTableModel::id(int row) const
 {
     // works now, not later.
     if (!cachedIndexes.contains(row)) {
@@ -471,15 +476,14 @@ int QSqlPimTableModel::row(const QUniqueId & tid) const
 
     QList<QVariant> keys = orderKey(tid);
     int r = predictedRow(keys)-1;
-    if (r > -1 && recordId(r) == tid)
+    if (r > -1 && id(r) == tid)
         return r;
     return -1;
 }
 
 bool QSqlPimTableModel::contains(const QUniqueId &id) const
 {
-    QStringList filter;
-    filter << "t1.recid = :id";
+    QStringList filter("t1.recid = :id");
     QPreparedSqlQuery q;
     q.prepare(selectText(filter));
     q.bindValue(":id", id.toUInt());
@@ -520,8 +524,7 @@ int QSqlPimTableModel::predictedRow(const QList<QVariant> &keys) const
         filter += ")";
         i++;
     }
-    QStringList filters;
-    filters << filter;
+    QStringList filters(filter);
     QString querytext = selectText("count(distinct t1.recid)", filters);
 
     QPreparedSqlQuery rowByIdQuery(QPimSqlIO::database());

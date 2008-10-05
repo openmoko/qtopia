@@ -1,25 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "bluetoothserialportservice.h"
+#include "qtopiaserverapplication.h"
 
 #include <qbluetoothabstractservice.h>
 #include <qbluetoothlocaldevicemanager.h>
@@ -31,7 +30,9 @@
 #include <qtopiaservices.h>
 #include <qtopialog.h>
 #include <qvaluespace.h>
+#include <Qtopia>
 
+#include <QFile>
 #include <QStringList>
 #include <QTimer>
 
@@ -84,6 +85,7 @@ public:
 
 /*!
     \class QBluetoothSerialPortService
+    \inpublicgroup QtBluetoothModule
     \brief
     The QBluetoothSerialPortService class is a Bluetooth service implementation
     for the Bluetooth Serial Port Profile.
@@ -100,7 +102,7 @@ public:
     An incoming Bluetooth connection is automatically forwarded to the modem
     emulator.
   
-    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
+    This class is part of the Qt Extended server and cannot be used by other QtopiaApplications.
 */
 
 /*!
@@ -123,7 +125,7 @@ public:
     user visible (translatable) name for this service is \a serviceName.
     \a parent is the standard parent parameter defined by QObject.
 
-    A new service is registered in the Qtopia Bluetooth framework when the
+    A new service is registered in the Qt Extended Bluetooth framework when the
     constructor is called.
 */
 QBluetoothSerialPortService::QBluetoothSerialPortService( const QString& serviceID, const QString& serviceName, const QBluetoothSdpRecord &record, QObject* parent )
@@ -282,3 +284,47 @@ void QBluetoothSerialPortService::emulatorStateChanged()
             d->m_session->endSession();
     }
 }
+
+/*!
+  \class BtSerialServiceTask
+    \inpublicgroup QtBluetoothModule
+  \brief The BtSerialServiceTask class provides server side support for the Bluetooth 
+  Serial profile.
+  \ingroup QtopiaServer::Task::Bluetooth
+
+  This task listens for incoming Bluetooth Serial connections, forwards the request to 
+  the modem emulator and manages the life time of these connections. This task relies 
+  on QBluetoothSerialPortService.
+  
+  The BtSerialServiceTask class provides the \c {BtSerialServiceTask} task.
+  This class is part of the Qt Extended server and cannot be used by other QtopiaApplications.
+
+  \sa QBluetoothSerialPortService
+  */
+
+/*!
+  Constructs the BtSerialServiceTask instance with the given \a parent.
+  */
+BtSerialServiceTask::BtSerialServiceTask( QObject* parent )
+    : QObject( parent )
+{
+    qLog(Bluetooth) << "Initializing Bluetooth SerialService";
+
+    QFile file(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/spp.xml");
+    file.open(QIODevice::ReadOnly);
+    QBluetoothSdpRecord record = QBluetoothSdpRecord::fromDevice(&file);
+
+    provider = new QBluetoothSerialPortService( QLatin1String("SerialPortProfile"),
+            tr("Serial port profile"),
+            record,
+            this );
+}
+
+/*!
+  Destroys the BtSerialServiceTask instance.
+  */
+BtSerialServiceTask::~BtSerialServiceTask()
+{
+}
+
+QTOPIA_TASK(BtSerialServiceTask,BtSerialServiceTask);

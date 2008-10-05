@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -23,11 +21,13 @@
 
 /*!
     \class QAbstractCallPolicyManager
+    \inpublicgroup QtTelephonyModule
     \brief The QAbstractCallPolicyManager class provides an interface for the management of calls across multiple call types.
-    \ingroup QtopiaServer
+    \ingroup QtopiaServer::Task::Interfaces
+    \ingroup QtopiaServer::Telephony
 
     When the user enters a number or URI to be dialed, or selects one from
-    their list of contacts, Qtopia needs to decide how to place and
+    their list of contacts, Qt Extended needs to decide how to place and
     manage the call.  This decision can be quite complex when multiple
     call types (e.g. GSM and VoIP) are registered with the system.
     Some examples are:
@@ -42,10 +42,10 @@
     \endlist
 
     The purpose of the QAbstractCallPolicyManager class is to allow these
-    decisions to be separated from the core Qtopia code, and to ease the
+    decisions to be separated from the core Qt Extended code, and to ease the
     integration of new call types in the future.
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
     \sa CellModemManager, VoIPManager
 */
 
@@ -53,6 +53,22 @@
     \fn QAbstractCallPolicyManager::QAbstractCallPolicyManager(QObject *parent)
 
     Create a new call policy manager and attach it to \a parent.
+*/
+
+/*!
+    \fn void QAbstractCallPolicyManager::updateOnThePhonePresence( bool isOnThePhone )
+    
+    If \a isOnThePhone is true, updates the local presence to away.
+    Otherwise updates the local presence to online. 
+    If the call policy manager does
+    not support presence, this function should do nothing.
+*/
+
+/*!
+    \fn bool QAbstractCallPolicyManager::doDnd()
+
+    Toggles the status between Do not disturb and normal status.
+    Returns true if Do Not Disturb state is activated, otherwise returns false.
 */
 
 /*!
@@ -120,6 +136,12 @@
 */
 
 /*!
+    \fn bool QAbstractCallPolicyManager::supportsPresence() const
+
+    Returns \c true if the policy manager supports presence.
+*/
+
+/*!
     \fn bool QAbstractCallPolicyManager::isAvailable(const QString& number)
 
     If the call policy manager supports presence, determine if the party
@@ -161,3 +183,32 @@
 
     \sa registrationState(), registrationMessage(), registrationIcon()
 */
+
+/*!
+    \fn void QAbstractCallPolicyManager::setCellLocation(const QString &location)
+
+    Sets the current cell location to \a location.
+*/
+
+/*!
+  Returns a reference to the call policy manager that handles call of \a type; 
+  otherwise returns 0.
+
+  \code
+    QString t = "Voice";
+    QAbstractCallPolicyManager* m = QAbstractCallPolicyManager::managerforCallType( t );
+    if (m) {
+        Q_ASSERT(m->calltype() == "Voice");
+    }
+  \endcode
+  */
+QAbstractCallPolicyManager* QAbstractCallPolicyManager::managerForCallType( const QString &type )
+{
+    QList<QAbstractCallPolicyManager *> managers = qtopiaTasks<QAbstractCallPolicyManager>();
+    for (int i = 0; i < managers.count(); i++) {
+        if ( managers.at(i)->callType() == type )
+            return managers.at(i);
+    }
+
+    return 0;
+}

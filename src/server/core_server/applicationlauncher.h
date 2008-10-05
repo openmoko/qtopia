@@ -1,34 +1,30 @@
-// -*-C++-*-
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _APPLICATIONLAUNCHER_H_
-#define _APPLICATIONLAUNCHER_H_
+#ifndef APPLICATIONLAUNCHER_H
+#define APPLICATIONLAUNCHER_H
 
 #include <QObject>
 #include <QMap>
 #include <QList>
 #include <QProcess>
 #include "qtopiaserverapplication.h"
-#include "oommanager.h"
 
 class QValueSpaceObject;
 
@@ -68,6 +64,7 @@ class ApplicationTypeLauncher : public QObject
 				ApplicationTypeLauncher::ApplicationState);
     void terminated(const QString&,
                     ApplicationTypeLauncher::TerminationReason);
+    void pidStateChanged(const QString&,Q_PID);
 };
 QTOPIA_TASK_INTERFACE(ApplicationTypeLauncher);
 
@@ -118,7 +115,6 @@ class ApplicationLauncher : public QObject
     QMap<QString, ApplicationTypeLauncher *> m_runningApps;
     QList<ApplicationTypeLauncher *> m_launchers;
     QValueSpaceObject *m_vso;
-    OomManager	oom_manager;
     QStringList busyApps;
 };
 QTOPIA_TASK_INTERFACE(ApplicationLauncher);
@@ -192,37 +188,15 @@ public:
     virtual QString name() {
 	return QString("SimpleExeApplicationLauncher");
     }
+
 protected:
-    void setupPackageLaunch(const QString &exec, QProcess *proc);
+        void setupPackageLaunch(const QString &exec, QProcess *proc);
 
 private:
     static QStringList applicationExecutable(const QString &app);
 
     SimpleExeApplicationLauncherPrivate *d;
 };
-
-#ifndef QT_NO_SXE
-class SandboxedExeApplicationLauncherPrivate;
-class SandboxedExeApplicationLauncher: public SimpleExeApplicationLauncher
-{
-Q_OBJECT
-public:
-    SandboxedExeApplicationLauncher();
-    virtual ~SandboxedExeApplicationLauncher();
-
-    virtual bool canLaunch(const QString &app);
-    virtual void launch(const QString &app);
-    virtual QString name() {
-	return QString("SandboxedExeApplicationLauncher");
-    }
-private slots:
-    void init();
-private:
-    static QStringList applicationExecutable(const QString &app);
-
-    SandboxedExeApplicationLauncherPrivate *d;
-};
-#endif
 
 class ConsoleApplicationLauncherPrivate;
 class ConsoleApplicationLauncher : public ApplicationTypeLauncher,
@@ -251,7 +225,7 @@ private slots:
     void appExited(int);
     void appError(QProcess::ProcessError error);
 
-private:
+private: 
     QStringList applicationExecutable(const QString &app);
     ConsoleApplicationLauncherPrivate *d;
 };
@@ -278,6 +252,7 @@ public:
 	return QString("BuiltinApplicationLauncher");
     }
 
+    bool eventFilter(QObject* o, QEvent *e);
     typedef QWidget *(*BuiltinFunc)();
     static void install(const char *, BuiltinFunc);
 
@@ -287,6 +262,7 @@ private slots:
 private:
     friend class _BuiltinInstaller;
     BuiltinApplicationLauncherPrivate *d;
+    QValueSpaceObject *vso;
 };
 
 class _BuiltinInstaller
@@ -298,5 +274,4 @@ public:
 
 #define QTOPIA_SIMPLE_BUILTIN(ApplicationName, createFunc) _BuiltinInstaller _builtin_install_ ## ApplicationName(# ApplicationName, createFunc)
 
-
-#endif // _APPLICATIONLAUNCHER_H_
+#endif

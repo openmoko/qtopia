@@ -1,29 +1,34 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include "qmediavideocontrolserver.h"
+#include <QValueSpaceItem>
+#include <QVideoSurface>
+#include <QDebug>
 
+#include "qmediahandle_p.h"
+#include "qmediaabstractcontrolserver.h"
+#include "qmediavideocontrolserver.h"
+#include "qtopiamedia/media.h"
 
 /*!
     \class QMediaVideoControlServer
+    \inpublicgroup QtMediaModule
     \preliminary
     \brief The QMediaVideoControlServer class is used by Media Engines to
             inform clients that video is available for the associated media session.
@@ -47,6 +52,59 @@
     \ingroup multimedia
 */
 
+class QMediaVideoControlServerPrivate: public QMediaAbstractControlServer
+{
+    Q_OBJECT
+
+public:
+    QMediaVideoControlServerPrivate(QMediaHandle const& handle);
+    ~QMediaVideoControlServerPrivate();
+
+public:
+    void setRenderTarget(WId wid);
+
+signals:
+    void videoTargetAvailable();
+    void videoTargetRemoved();
+
+public:
+    QValueSpaceItem* videoRotation;
+    QValueSpaceItem* videoScaleMode;
+};
+
+QMediaVideoControlServerPrivate::QMediaVideoControlServerPrivate(QMediaHandle const& handle):
+    QMediaAbstractControlServer(handle, "Video")
+{
+    proxyAll();
+
+    setValue("rotation", QVariant(int(QtopiaVideo::Rotate0)));
+    setValue("scaleMode", QVariant(int(QtopiaVideo::FitWindow)));
+
+    videoRotation = new QValueSpaceItem("/Media/Control/" + handle.toString() + "/Video/rotation", this);
+    videoScaleMode = new QValueSpaceItem( "/Media/Control/" + handle.toString() + "/Video/scaleMode", this);
+}
+
+QMediaVideoControlServerPrivate::~QMediaVideoControlServerPrivate()
+{
+}
+
+void QMediaVideoControlServerPrivate::setRenderTarget(WId wid)
+{
+    if (wid == WId()) {
+        setValue("hasVideo", false);
+        setValue("windowId", quint32(0));
+
+        emit videoTargetRemoved();
+    }
+    else {
+        setValue("hasVideo", true);
+        setValue("windowId", quint32(wid));
+
+        emit videoTargetAvailable();
+    }
+}
+
+
 /*!
     Constructs a QMediaVideoControlServer with the session \a handle, and
     optionally the video \a target widget for sharing with the client and the
@@ -56,20 +114,16 @@
 QMediaVideoControlServer::QMediaVideoControlServer
 (
  QMediaHandle const& handle,
- QWidget*       target,
- QObject*       parent
+ QWidget    *target,
+ QObject    *parent
 ):
-    QMediaAbstractControlServer(handle, "Video", parent)
+    QObject(parent),
+    d(new QMediaVideoControlServerPrivate(handle))
 {
-    proxyAll();
+    setRenderTarget(target);
 
-    if (target != 0)
-        setRenderTarget(target);
-    else
-    {
-        setValue("hasVideo", false);
-        setValue("windowId", -1);
-    }
+    connect(d->videoRotation, SIGNAL(contentsChanged()), SLOT(updateVideoRotation()));
+    connect(d->videoScaleMode, SIGNAL(contentsChanged()), SLOT(updateVideoScaleMode()));
 }
 
 /*!
@@ -78,6 +132,7 @@ QMediaVideoControlServer::QMediaVideoControlServer
 
 QMediaVideoControlServer::~QMediaVideoControlServer()
 {
+    delete d;
 }
 
 /*!
@@ -93,7 +148,7 @@ QMediaVideoControlServer::~QMediaVideoControlServer()
 
 void QMediaVideoControlServer::setRenderTarget(QWidget* renderTarget)
 {
-    setRenderTarget(renderTarget == 0 ? -1 : int(renderTarget->winId()));
+    setRenderTarget(renderTarget == 0 ? WId() : renderTarget->winId());
 }
 
 /*!
@@ -107,17 +162,9 @@ void QMediaVideoControlServer::setRenderTarget(QWidget* renderTarget)
     different widget states, for example whether the widget is hidden or visible.
 */
 
-void QMediaVideoControlServer::setRenderTarget(int wid)
+void QMediaVideoControlServer::setRenderTarget(WId wid)
 {
-    if (wid == -1)
-        unsetRenderTarget();
-    else
-    {
-        setValue("hasVideo", true);
-        setValue("windowId", wid);
-
-        emit videoTargetAvailable();
-    }
+    d->setRenderTarget(wid);
 }
 
 /*!
@@ -127,30 +174,59 @@ void QMediaVideoControlServer::setRenderTarget(int wid)
     into the QWidget set in setRenderTarget(). The Session client will be notified that the
     widget is no longer valid.
 */
-
 void QMediaVideoControlServer::unsetRenderTarget()
 {
-    setValue("hasVideo", false);
-    setValue("windowId", -1);
-
-    emit videoTargetRemoved();
+    d->setRenderTarget(WId());
 }
 
 /*!
-    \fn void QMediaVideoControlServer::videoTargetAvailable();
+    Return the current video rotation value.
+*/
+QtopiaVideo::VideoRotation QMediaVideoControlServer::videoRotation() const
+{
+    return QtopiaVideo::VideoRotation(d->videoRotation->value().toInt());
+}
 
-    This signal is emitted when a render target has been set. It will indicate
-    to the client QMediaVideoControl class, that a video widget is available to
-    be displayed.
+/*!
+    Return the current video scale mode value.
+*/
+QtopiaVideo::VideoScaleMode QMediaVideoControlServer::videoScaleMode() const
+{
+    return QtopiaVideo::VideoScaleMode(d->videoScaleMode->value().toInt());
+}
+
+
+void QMediaVideoControlServer::updateVideoRotation()
+{
+    emit rotationChanged(videoRotation());
+}
+
+void QMediaVideoControlServer::updateVideoScaleMode()
+{
+    emit scaleModeChanged(videoScaleMode());
+}
+
+
+/*!
+    \fn void QMediaVideoControlServer::rotationChanged(QtopiaVideo::VideoRotation rotation);
+
+    This signal is emitted when video rotation value was changed, the value is
+    given by \a rotation.
+
+    \sa videoRotation()
+    \sa QtopiaVideo::VideoRotation
 */
 
 /*!
-    \fn void QMediaVideoControlServer::videoTargetRemoved();
+    \fn void QMediaVideoControlServer::scaleModeChanged(QtopiaVideo::VideoScaleMode scaleMode);
 
-    This signal is emitted when a render target has been removed. It will indicate
-    to the client QMediaVideoControl class, that the Media Engine is no longer rendering
-    video for this session.
+    This signal is emitted when video scale mode was changed, the value is given by
+    \a scaleMode.
+
+    \sa videoScaleMode()
+    \sa QtopiaVideo::VideoScaleMode
+
 */
 
 
-
+#include "qmediavideocontrolserver.moc"

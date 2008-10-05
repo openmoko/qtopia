@@ -63,6 +63,7 @@ defineTest(qt_inc) {
     qd=
     qtopiadesktop:qd=qtopiadesktop/
     idep(INCLUDEPATH+=$$QPEDIR/include/$$qd$$NAME,INCLUDEPATH)
+    idep(INCLUDEPATH+=$$QPEDIR/include/$$qd$$NAME/module,INCLUDEPATH)
 }
 
 # resolve_variables() resolve variables from a .pri file
@@ -84,7 +85,7 @@ defineTest(resolve_variables) {
 
 # resolve_include() convenience function that calls resolve_variables
 defineTest(resolve_include) {
-    resolve_variables($$PREFIX,FORMS HEADERS SOURCES PRIVATE_FORMS PRIVATE_HEADERS PRIVATE_SOURES)
+    resolve_variables($$PREFIX,FORMS HEADERS SOURCES PRIVATE_FORMS PRIVATE_HEADERS SEMI_PRIVATE_HEADERS PRIVATE_SOURES)
     resolve_variables(PRIVATE,FORMS HEADERS SOURCES)
 }
 
@@ -257,21 +258,29 @@ defineTest(qtopia_project) {
 
 # Turn a value as it appears in the QT variable into the Qt library name it represents
 defineReplace(resolveqt) {
-    equals(1,core):return(QtCore)
-    else:equals(1,gui):return(QtGui)
+    # Adapted from $QT_DEPOT/mkspecs/features/qt.prf
+    equals(1,gui):return(QtGui)
     else:equals(1,network):return(QtNetwork)
     else:equals(1,xml):return(QtXml)
+    else:equals(1,xmlpatterns):return(QtXmlPatterns)
+    else:equals(1,opengl):return(QtOpenGL)
     else:equals(1,sql):return(QtSql)
+    else:equals(1,core):return(QtCore)
+    else:equals(1,canvas):return(QtCanvas)
+    else:equals(1,qt3support):return(Qt3Support)
     else:equals(1,svg):return(QtSvg)
     else:equals(1,script):return(QtScript)
-    else:equals(1,opengl):return(QtOpenGL)
+    else:equals(1,testlib):return(QtTest)
+    else:equals(1,dbus):return(QtDBus)
+    else:equals(1,phonon):return(phonon)
+    else:equals(1,webkit):return(QtWebKit)
+    # Qtopia-specific additions
     else:equals(1,qtestlib):return(QtTest)
     else:equals(1,winmain):return(qtmain)
     else:equals(1,control):return(QAxServer)
     else:equals(1,container):return(QAxContainer)
-    else:equals(1,script):return(QtScript)
-    else:equals(1,qt3support):return(Qt3Support)
     else:equals(1,uitools):return(QtUiTools)
+    else:equals(1,WebCore):return(QtWebKit)
     else:error(functions.prf: Unknown QT value $$1)
 }
 
@@ -537,5 +546,87 @@ defineTest(isProjectEnabled) {
     include($$root/projects.pri)
     isEmpty(PROJECTS)|contains(PROJECTS,$$proj):return(1)
     return(0)
+}
+
+# qmake doesn't do dependencies on .a files so we need to do it manually
+defineTest(register_static_dependency) {
+    file=$$QPEDIR/lib/lib$${1}.a
+    create_raw_dependency($$TARGET,$$file)
+}
+
+# Grab a wildcard match (used in subdirs and depends when matching dependencies with *)
+defineReplace(fetch_wildcard) {
+    dep=$$1
+    #message(fetch_wildcard $$dep)
+    ret=
+    for(w,WILD_CARD_MATCHES) {
+        #message(iterating matches $$w)
+        containstext($$w,$$dep::) {
+            ret=$$w
+            ret~=s,$$dep::,,q
+            #message(found match $$ret)
+            break()
+        }
+    }
+    return($$ret)
+}
+
+# Store a wildcard match (used in subdirs and depends when matching dependencies with *)
+defineTest(store_wildcard) {
+    dep=$$1
+    deps=$$2
+    #message(storing wildcard match $$dep::$$deps)
+    WILD_CARD_MATCHES="$$dep::$$deps"
+    export(WILD_CARD_MATCHES)
+}
+
+# Allow files in device/$$path to override files in $$path
+defineReplace(device_overrides) {
+    file=$$1
+    ret=
+    !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH$$file) {
+        ret=$$DEVICE_CONFIG_PATH$$file
+    } else:isEmpty(DEVICE_CONFIG_PATH):exists($$QTOPIA_DEPOT_PATH/devices/default$$file) {
+        ret=$$QTOPIA_DEPOT_PATH/devices/default$$file
+    } else:exists($$QTOPIA_DEPOT_PATH/editions/$$QTOPIA_EDITION$$file) {
+        ret=$$QTOPIA_DEPOT_PATH/editions/$$QTOPIA_EDITION$$file
+    } else:exists($$QTOPIA_DEPOT_PATH$$file) {
+        ret=$$QTOPIA_DEPOT_PATH$$file
+    }
+    return($$ret)
+}
+
+# This is how you pull in a module in projects.pri
+defineTest(add_module) {
+    m=$$1
+    exists($$QTOPIA_DEPOT_PATH/src/module_$${m}.pri):eval(include($$QTOPIA_DEPOT_PATH/src/module_$${m}.pri))
+    else:error(Missing module_$${m}.pri)
+}
+
+# Conditional sources (for compatibility with QBuild)
+defineTest(CONDITIONAL_SOURCES) {
+    cs=$$1
+    cs_type=$$eval($${cs}.TYPE)
+    !contains(cs_type,CONDITIONAL_SOURCES):error(ERROR: Missing $${cs}.TYPE=CONDITIONAL_SOURCES)
+    cs_cond=$$eval($${cs}.CONDITION)
+    cs_prefix=$$eval($${cs}.PREFIX)
+    VARS=HEADERS SOURCES FORMS PRIVATE_HEADERS SEMI_PRIVATE_HEADERS RESOURCES
+    cs_ret=0
+    eval($${cs_cond}:cs_ret=1)
+    equals(cs_ret,1) {
+        #message($$cs is ON)
+        for(v,VARS) {
+            isEmpty(cs_prefix):cs_out=$$v
+            else:cs_out=$${cs_prefix}_$$v
+            eval($${cs_out}*=\$$eval(\$${cs}.$${v}))
+            export($$cs_out)
+        }
+    } else {
+        #message($$cs is OFF)
+        for(v,VARS) {
+            eval(TRANSLATABLES*=\$$eval(\$${cs}.$${v}))
+        }
+        export(TRANSLATABLES)
+    }
 }
 

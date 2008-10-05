@@ -1,32 +1,30 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef APPOINTMENT_SQLIO_PRIVATE_H
-#define APPOINTMENT_SQLIO_PRIVATE_H
+#ifndef QAPPOINTMENTSQLIO_P_H
+#define QAPPOINTMENTSQLIO_P_H
 
 //
 //  W A R N I N G
 //  -------------
 //
-// This file is not part of the Qtopia API.  It exists purely as an
+// This file is not part of the Qt Extended API.  It exists purely as an
 // implementation detail.  This header file may change from version to
 // version without notice, or even be removed.
 //
@@ -35,12 +33,13 @@
 
 #include <qlist.h>
 #include <qdatetime.h>
-#include <qtopia/pim/qappointment.h>
+#include <qappointment.h>
 #include <qtopiasql.h>
 #include <qsqlquery.h>
-#include "qappointmentio_p.h"
 #include "qpimsqlio_p.h"
 #include "qpimsource.h"
+
+#include "qappointmentmodel.h"
 
 class QAppointmentSqlIO;
 class QAppointmentDefaultContext : public QAppointmentContext
@@ -82,13 +81,17 @@ private:
     QAppointmentSqlIO *mAccess;
 };
 
-class QAppointmentSqlIO : public QAppointmentIO, public QPimSqlIO {
+class QAppointmentSqlIO : public QPimSqlIO {
 
     Q_OBJECT
 
 public:
     explicit QAppointmentSqlIO(QObject *parent = 0);
     ~QAppointmentSqlIO();
+
+    static QDateTime nextAlarm(const QAppointment &appointment);
+    static void removeAlarm(const QAppointment &appointment);
+    static void addAlarm(const QAppointment &appointment);
 
     bool editableByRow() const { return true; }
     bool editableByField() const { return true; }
@@ -110,10 +113,10 @@ public:
     QUniqueId replaceRemaining(const QUniqueId &original,
             const QAppointment &, const QDate &);
 
-    QUuid contextId() const;
+    QVariant appointmentField(int row, QAppointmentModel::Field k) const;
+    bool setAppointmentField(int row, QAppointmentModel::Field k,  const QVariant &);
 
-    void setCategoryFilter(const QCategoryFilter &);
-    QCategoryFilter categoryFilter() const;
+    QUuid contextId() const;
 
     void setRangeFilter(const QDateTime &earliest, const QDateTime &latest);
     QDateTime rangeStart() const;
@@ -121,35 +124,8 @@ public:
 
     void setDurationType(QAppointmentModel::DurationType);
 
-    void setContextFilter(const QSet<int> &);
-    QSet<int> contextFilter() const;
-
-    bool startSyncTransaction(const QSet<QPimSource> &sources, const QDateTime &syncTime) { return QPimSqlIO::startSync(sources, syncTime); }
-    bool abortSyncTransaction() { return QPimSqlIO::abortSync(); }
-    bool commitSyncTransaction() { return QPimSqlIO::commitSync(); }
-
-    QList<QUniqueId> removed(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
-    { return QPimSqlIO::removed(sources, timestamp); }
-
-    QList<QUniqueId> added(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
-    { return QPimSqlIO::added(sources, timestamp); }
-
-    QList<QUniqueId> modified(const QSet<QPimSource> &sources, const QDateTime &timestamp) const
-    { return QPimSqlIO::modified(sources, timestamp); }
-
     QAppointment appointment(const QUniqueId &) const;
     QAppointment appointment(int row) const;
-
-    QVariant appointmentField(int row, QAppointmentModel::Field k) const;
-
-    int count() const { return QPimSqlIO::count(); }
-    bool exists(const QUniqueId & id) const { return !appointment(id).uid().isNull(); }
-    bool contains(const QUniqueId & id) const { return row(id) != -1; }
-
-    QVariant key(const QUniqueId &) const;
-    QVariant key(int row) const;
-    QUniqueId id(int row) const;
-    int row(const QUniqueId &) const;
 
     bool nextAlarm(QDateTime &when, QUniqueId &) const;
 
@@ -175,9 +151,12 @@ public:
 
 
     QList<QAppointment> fastRange(const QDateTime &start, const QDateTime &end, int count) const;
+
+protected:
+    void invalidateCache();
+
 private:
 
-    void invalidateCache();
 
     QStringList currentFilters() const;
 

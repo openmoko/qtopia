@@ -16,8 +16,9 @@ if ( $isWindows ) {
 
 
 use constant DEBUG => 0;
+my $silent = "-silent";
 
-# Usage: nct_lupdate [ -nowarn ] [ -depot path ] [ -content trtarget ] DQTDIR "lang1 lang2 ... langn" files
+# Usage: nct_lupdate [ -nowarn ] [ -depot path ] [ -content trtarget ] "lang1 lang2 ... langn" string_language files
 
 my $global = 0;
 my $depot;
@@ -38,8 +39,8 @@ if ( $ARGV[0] eq "-content" ) {
     $content = 1;
     $trtarget = shift(@ARGV);
 }
-my $DQTDIR = shift(@ARGV);
 my @LANGS = split(/\s+/,shift(@ARGV));
+my $STRING_LANGUAGE = shift(@ARGV);
 my %contextinfo;
 
 my @files;
@@ -191,9 +192,13 @@ for my $tsfile ( keys %contextinfo ) {
         }
     }
     close CPP;
+    my @output;
+    push(@output, "SOURCES += $tmp");
+
     open CPP, ">$tmp.pro" or die "Can't write $tmp.pro";
-    print CPP "SOURCES += $tmp\n";
+    print CPP join("\n", @output)."\n";
     for my $lang ( @LANGS ) {
+        next if ( $lang eq $STRING_LANGUAGE );
 	my $filename;
 	if ( $global ) {
 	    $filename = $depot."/i18n/".$lang;
@@ -207,9 +212,31 @@ for my $tsfile ( keys %contextinfo ) {
         print CPP "TRANSLATIONS += $filename\n";
     }
     close CPP;
-    my $cmd = "$DQTDIR/bin/lupdate $tmp.pro";
-    DEBUG and print "$cmd\n";
+    my $cmd = "$HOST_QT_BINS/lupdate $silent $tmp.pro";
+    print "$cmd\n";
     system($cmd);
+
+    if ( $STRING_LANGUAGE ) {
+        # Now strip out the languages and re-run lupdate for the string language with -pluralonly
+        open CPP, ">$tmp.pro" or die "Can't write $tmp.pro";
+        print CPP join("\n", @output)."\n";
+	my $filename;
+	if ( $global ) {
+	    $filename = $depot."/i18n/".$STRING_LANGUAGE;
+            if ( ! -e $filename ) {
+                mkdir ($filename, 0755) || print "Failed to create $filename\n";
+            }
+	    $filename = $filename."/".$tsfile.".ts";
+	} else {
+	    $filename = $tsfile."-".$STRING_LANGUAGE.".ts";
+	}
+        print CPP "TRANSLATIONS += $filename\n";
+        close CPP;
+        $cmd = "$HOST_QT_BINS/lupdate $silent -pluralonly $tmp.pro";
+        print "$cmd\n";
+        system($cmd);
+    }
+
     unlink $tmp;
     unlink "$tmp.pro";
 }

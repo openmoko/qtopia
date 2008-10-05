@@ -19,7 +19,7 @@ if ( $isWindows ) {
 
 use constant DEBUG => 0;
 
-if ( scalar(@ARGV) != 5 ) {
+if ( scalar(@ARGV) != 4 ) {
     usage();
 }
 
@@ -27,8 +27,6 @@ my $trtarget = shift;
 DEBUG and print "TRTARGET = $trtarget\n";
 my @translations = split(/\s+/, shift);
 DEBUG and print "TRANSLATIONS = ".join(" ", @translations)."\n";
-my $dqtdir = shift;
-DEBUG and print "DQTDIR = $dqtdir\n";
 my $instprefix = shift;
 DEBUG and print "INSTPREFIX = $instprefix\n";
 my $srcdir = shift;
@@ -57,7 +55,8 @@ LANG: for my $lang ( @translations ) {
             }
         }
         if ( $copy ) {
-            my $cmd = "$dqtdir/bin/lrelease ".join(" ", @tsfiles)." -qm $destfile";
+            my $cmd = "$HOST_QT_BINS/lrelease -silent -compress -nounfinished -removeidentical ".
+                      join(" ", @tsfiles)." -qm $destfile";
             print "$cmd\n";
             system($cmd);
         }
@@ -72,7 +71,7 @@ exit 0;
 
 sub usage
 {
-    print "Usage:  ".script_name($0)." trtarget \"translations\" dqtdir instprefix srcdir\n";
+    print "Usage:  ".script_name($0)." trtarget \"translations\" instprefix srcdir\n";
     exit 2;
 }
 

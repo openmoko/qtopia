@@ -19,19 +19,28 @@ if ( $isWindows ) {
     check_script($0, "$depotpath/bin", $ARGV[0]);
 }
 
+my $assistant;
+if ( -f "$HOST_QT_BINS/assistant_adp" ) {
+    $assistant = "$HOST_QT_BINS/assistant_adp";
+} else {
+    $assistant = "$HOST_QT_BINS/assistant";
+}
+
 # Load the Qtopia content files
-for my $file ( "$QPEDIR/doc/html/qtopia.dcf",
-               "$QPEDIR/doc/html/buildsystem/buildsystem.dcf",
-               "$QPEDIR/doc/html/qtopiadesktop/qtopiadesktop.dcf" ) {
+for my $file ( "$SDKROOT/doc/html/qtopia.dcf",
+               "$SDKROOT/doc/html/qbuild/qbuild.dcf",
+               "$SDKROOT/doc/html/buildsystem/buildsystem.dcf",
+               "$SDKROOT/doc/html/qtopiadesktop/qtopiadesktop.dcf" ) {
     if ( -f $file ) {
-        system("$DQTDIR/bin/assistant", "-addContentFile", $file);
+        system($assistant, "-addContentFile", $file);
     }
 }
 
-my @cmd = ("$DQTDIR/bin/assistant", @ARGV);
+my @cmd = ($assistant, @ARGV);
 if ( $isWindows ) {
     unshift(@cmd, "start", "/b");
 }
 my $ret = system(@cmd);
+$ret = $ret >> 8;
 exit $ret;
 

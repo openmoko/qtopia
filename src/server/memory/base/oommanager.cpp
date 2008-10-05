@@ -1,26 +1,24 @@
-// -*-C++-*-
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "oommanager.h"
+#include "qtopiaserverapplication.h"
 #include <QDir>
 #include <QSet>
 #include <QMap>
@@ -28,8 +26,14 @@
 #include <QStringList>
 #include <qtopialog.h>
 
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 /**
   \class OomPrivate
+    \inpublicgroup QtDevToolsModule
+    \inpublicgroup QtBaseModule
   \brief The OomPrivate class contains all the Out Of Memory data.
 
   There is one instance of OomPrivate, which is a Q_GLOBAL_STATIC.
@@ -38,16 +42,16 @@
 
   This class contains three sets of application names. The first
   set is called \c critical. It contains the names of all the
-  Qtopia applications that must not be killed, when Qtopia runs
-  out of memory, eg Qtopia itself (qpe) is in the critical set.
+  Qt Extended applications that must not be killed, when Qt Extended runs
+  out of memory, eg Qt Extended itself (qpe) is in the critical set.
 
   The second set is called \c expendable. It contains the names
   of the applications that the user wants killed first, when
-  Qtopia runs out of memory.
+  Qt Extended runs out of memory.
 
   The third set is called \c important. It contains the names of
   applications the user wants to avoid killing, if possible, when
-  Qtopia runs out of memory. Important processes will not be killed
+  Qt Extended runs out of memory. Important processes will not be killed
   if there are expendable processes running, but expendable processes
   can be killed. Only critical processes are not killable.
 
@@ -90,7 +94,7 @@
   Hopefully, if the OOM Manager and the MemoryMonitor do the
   right stuff, they will prevent any hard out-of-memory events.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   \internal
  */
 
@@ -186,6 +190,8 @@ OomPrivate::OomPrivate()
         }
         printOomValues(true);
     }
+
+    //we assume we run as part of the server. Add the server to the list of apps.
 }
 
 /*!
@@ -205,8 +211,7 @@ OomPrivate::~OomPrivate()
   expendable, or important process. This hopefully guarantees
   that if an OOM occurs that is not detected by Qtopia, then
   when Linux kills a process it will not kill any process
-  that is critical to Qtopia. eg, it will not kill the Qtopia
-  server itself.
+  that is critical to Qtopia. eg, it will not kill the Qt Extended server itself.
   \internal
  */
 void OomPrivate::insert(const QString& app, int pid)
@@ -393,10 +398,12 @@ Q_GLOBAL_STATIC(OomPrivate, oomPrivate);
 
 /*!
   \class OomManager
+    \inpublicgroup QtDevToolsModule
+    \inpublicgroup QtBaseModule
   \ingroup QtopiaServer::Memory
   \brief The OomManager class manages low and out of memory situations.
 
-  This class is a wrapper for Qtopia's \l{Handling Out Of Memory}{Out-of-memory manager}.
+  This class is a wrapper for the \l{Handling Out Of Memory}{Out-of-memory manager}.
   It is used in sublasses of the
   \l {ApplicationTypeLauncher} class that launch applications
   as linux processes. It is also used in \l {ApplicationLauncher}
@@ -404,16 +411,16 @@ Q_GLOBAL_STATIC(OomPrivate, oomPrivate);
 
   This class contains three sets of application names. The first
   set is called \c critical. It contains the names of all the
-  Qtopia applications that must not be killed, when Qtopia runs
-  out of memory, eg Qtopia itself (qpe) is in the critical set.
+  Qt Extended applications that must not be killed, when Qt Extended runs
+  out of memory, eg Qt Extended itself (qpe) is in the critical set.
 
   The second set is called \c expendable. It contains the names
   of the applications that the user wants killed first, when
-  Qtopia runs out of memory.
+  Qt Extended runs out of memory.
 
   The third set is called \c important. It contains the names of
   applications the user wants to avoid killing, if possible, when
-  Qtopia runs out of memory. Important processes will not be killed
+  Qt Extended runs out of memory. Important processes will not be killed
   if there are expendable processes running, but expendable processes
   can be killed. Only critical processes are not killable.
 
@@ -456,15 +463,28 @@ Q_GLOBAL_STATIC(OomPrivate, oomPrivate);
   \bold{Note:} All OomManager instances share the same internal list
   of applications.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
+
 
 /*!
   This constrcutor creates a new OomManager instance.
  */
 OomManager::OomManager() : d(oomPrivate())
 {
-    // nothing.
+    QSet<ApplicationTypeLauncher*> connected;
+    QList<ApplicationTypeLauncher*> m_al = qtopiaTasks<ApplicationTypeLauncher>();
+    for (int i=0; i<m_al.count(); i++) {
+        ApplicationTypeLauncher* atl = m_al.at(i);
+        if ( connected.contains(atl) )
+            continue;
+        
+        connect( atl, SIGNAL(pidStateChanged(QString,Q_PID)),
+                 this, SLOT(pidStateChanged(QString,Q_PID)) );
+    }
+
+    //we assume we are running as part of the server
+    d->insert("qpe", ::getpid());
 }
 
 /*!
@@ -472,7 +492,7 @@ OomManager::OomManager() : d(oomPrivate())
  */
 OomManager::~OomManager()
 {
-    // nothing.
+    d->remove("qpe");
 }
 
 /*!
@@ -593,3 +613,19 @@ bool OomManager::isImportant(const QString& app) const
 {
     return d->isImportant(app);
 }
+
+/*!
+  \internal
+  Monitors what process come and go.
+ */
+void OomManager::pidStateChanged(const QString& app, Q_PID pid)
+{
+    if ( 0 == pid ) {
+        d->remove(app);
+    } else {
+        d->insert( app, pid );
+    }
+}
+
+QTOPIA_TASK( OomManager, OomManager );
+QTOPIA_TASK_PROVIDES( OomManager, OomManager );

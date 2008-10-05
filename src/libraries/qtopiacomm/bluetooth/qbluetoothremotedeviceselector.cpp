@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -24,7 +22,7 @@
 #include <qbluetoothremotedevice.h>
 #include <qbluetoothlocaldevice.h>
 #include <qbluetoothaddress.h>
-#include <qtopiacomm/private/qbluetoothnamespace_p.h>
+#include "qbluetoothnamespace_p.h"
 
 #include <qtopianamespace.h>
 #include <qtopiaapplication.h>
@@ -583,7 +581,8 @@ void QBluetoothRemoteDeviceSelectorPrivate::currentRowChanged(const QModelIndex 
 /*!
     \internal
     \class QBluetoothRemoteDeviceSelector
-    \mainclass
+    \inpublicgroup QtBluetoothModule
+
     \brief The QBluetoothRemoteDeviceSelector class provides a widget that allows the user to select a bluetooth device from a group of devices.
 
     This provides consistent presentation of a group of bluetooth devices when
@@ -786,6 +785,41 @@ void QBluetoothRemoteDeviceSelector::selectDevice(const QBluetoothAddress &addre
     QModelIndex i = m_data->m_model->indexFromAddress(address);
     if (i.isValid())
         m_data->m_view->setCurrentIndex(i);
+}
+
+/*!
+    Returns whether the device with \a address is currently hidden.
+*/
+bool QBluetoothRemoteDeviceSelector::isDeviceHidden(const QBluetoothAddress &address) const
+{
+    QModelIndex i = m_data->m_model->indexFromAddress(address);
+    if (i.isValid())
+        return m_data->m_view->isRowHidden(i.row());
+    return false;    
+}
+
+/*!
+    Hides the device with \a address.
+
+    \sa showDevice(), isDeviceHidden()
+*/
+void QBluetoothRemoteDeviceSelector::hideDevice(const QBluetoothAddress &address)
+{
+    QModelIndex i = m_data->m_model->indexFromAddress(address);
+    if (i.isValid())
+        m_data->m_view->setRowHidden(i.row(), true);
+}
+
+/*!
+    Shows the device with \a address.
+
+    \sa hideDevice(), isDeviceHidden()
+*/
+void QBluetoothRemoteDeviceSelector::showDevice(const QBluetoothAddress &address)
+{
+    QModelIndex i = m_data->m_model->indexFromAddress(address);
+    if (i.isValid())
+        m_data->m_view->setRowHidden(i.row(), false);
 }
 
 

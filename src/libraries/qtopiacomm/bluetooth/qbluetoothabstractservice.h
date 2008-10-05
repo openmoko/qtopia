@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef __QBLUETOOTHABSTRACTSERVICE_H__
-#define __QBLUETOOTHABSTRACTSERVICE_H__
+#ifndef QBLUETOOTHABSTRACTSERVICE_H
+#define QBLUETOOTHABSTRACTSERVICE_H
 
 #include <qbluetoothnamespace.h>
 
@@ -33,7 +31,21 @@ class QBLUETOOTH_EXPORT QBluetoothAbstractService : public QObject
     Q_OBJECT
 
 public:
-    explicit QBluetoothAbstractService(const QString &name, const QString &displayName, QObject *parent = 0);
+    enum Error {
+        NoError,
+        InvalidArguments,
+        NotConnected,
+        NotAuthorized,
+        NotAvailable,
+        DoesNotExist,
+        Failed,
+        Rejected,
+        Canceled,
+        UnknownError
+    };
+
+    QBluetoothAbstractService(const QString &name, const QString &displayName, QObject *parent = 0);
+    QBluetoothAbstractService(const QString &name, const QString &displayName, const QString &description, QObject *parent = 0);
     virtual ~QBluetoothAbstractService();
 
     virtual void start() = 0;
@@ -42,18 +54,31 @@ public:
 
     QString name() const;
     QString displayName() const;
+    QString description() const;
 
 protected:
     quint32 registerRecord(const QBluetoothSdpRecord &record);
     quint32 registerRecord(const QString &filename);
+    bool updateRecord(quint32 handle, const QBluetoothSdpRecord &record);
+    bool updateRecord(quint32 handle, const QString &filename);
     bool unregisterRecord(quint32 handle);
 
+    bool requestAuthorization(const QBluetoothAddress &addr, const QString &uuid = QString());
+    bool cancelAuthorization(const QBluetoothAddress &addr, const QString &uuid = QString());
+
+    QBluetoothAbstractService::Error error() const;
+    QString errorString() const;
+
 private:
+    friend class QBluetoothAbstractServicePrivate;
     QBluetoothAbstractServicePrivate *m_data;
 
 signals:
     void started(bool error, const QString &description);
     void stopped();
+
+    void authorizationSucceeded();
+    void authorizationFailed();
 };
 
 #endif

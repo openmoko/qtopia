@@ -6,6 +6,7 @@
 <file alias="contactaddresses">resources/contactaddresses.sql</file>
 <file alias="contactcategories">resources/contactcategories.sql</file>
 <file alias="contactcustom">resources/contactcustom.sql</file>
+<file alias="contactpresence">resources/contactpresence.sql</file>
 <file alias="tasks">resources/tasks.sql</file>
 <file alias="taskcategories">resources/taskcategories.sql</file>
 <file alias="taskcustom">resources/taskcustom.sql</file>
@@ -14,6 +15,8 @@
 <file alias="appointmentcustom">resources/appointmentcustom.sql</file>
 <file alias="appointmentexceptions">resources/appointmentexceptions.sql</file>
 <file alias="simcardidmap">resources/simcardidmap.sql</file>
+<file alias="simlabelidmap">resources/simlabelidmap.sql</file>
+<file alias="currentsimcard">resources/currentsimcard.sql</file>
 <file alias="googleid">resources/googleid.sql</file>
 <file alias="sqlsources">resources/sqlsources.sql</file>
 <file alias="changelog">resources/changelog.sql</file>
@@ -26,6 +29,7 @@
 <file alias="contactaddresses">resources/contactaddresses.sql</file>
 <file alias="contactcategories">resources/contactcategories.sql</file>
 <file alias="contactcustom">resources/contactcustom.sql</file>
+<file alias="contactpresence">resources/contactpresence.sql</file>
 <file alias="tasks">resources/tasks.sql</file>
 <file alias="taskcategories">resources/taskcategories.sql</file>
 <file alias="taskcustom">resources/taskcustom.sql</file>
@@ -34,6 +38,7 @@
 <file alias="appointmentcustom">resources/appointmentcustom.sql</file>
 <file alias="appointmentexceptions">resources/appointmentexceptions.sql</file>
 <file alias="simcardidmap">resources/simcardidmap.sql</file>
+<file alias="currentsimcard">resources/currentsimcard.sql</file>
 <file alias="googleid">resources/googleid.sql</file>
 <file alias="sqlsources">resources/sqlsources.sql</file>
 <file alias="changelog">resources/changelog.sql</file>

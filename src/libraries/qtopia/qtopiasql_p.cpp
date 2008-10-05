@@ -1,26 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <QtopiaSql>
-#include <qtopia/private/qtopiasql_p.h>
+#include "qtopiasql_p.h"
 #ifndef QTOPIA_CONTENT_INSTALLER
 #include <QApplication>
 #include <qtopiasqlmigrateplugin_p.h>
@@ -37,7 +35,9 @@
 // #define Q_USE_MIMER
 // #define Q_USE_MYSQL
 
+#ifndef QTOPIA_HOST
 #define USE_LOCALE_AWARE
+#endif
 
 #ifdef USE_LOCALE_AWARE
 #ifdef Q_USE_SQLITE
@@ -98,22 +98,15 @@ void QtopiaSqlPrivate::systemMessage(const QString &message, const QByteArray &d
     {
         // okay we need to flush all (old) the database handles here...
 
-        QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QSqlDatabase> >::iterator hash;
+        QHash<QtopiaDatabaseId, QSqlDatabase>::iterator hash;
         for( hash = dbs.begin(); hash != dbs.end(); hash++ )
         {
-            foreach(QtopiaDatabaseId id, hash->keys())
+            if(!masterAttachedConns.contains(hash.key()))
             {
-                if(!masterAttachedConns.contains(id))
+                dbs.take(hash.key()).close();
+                if(connectionNames.keys().contains(hash.key()))
                 {
-                    hash->take(id).close();
-                    QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QString> >::iterator hash2;
-                    for( hash2 = connectionNames.begin(); hash2 != connectionNames.end(); hash2++ )
-                    {
-                        if(hash2->keys().contains(id))
-                        {
-                            QSqlDatabase::removeDatabase(hash2->take(id));
-                        }
-                    }
+                    QSqlDatabase::removeDatabase(connectionNames.take(hash.key()));
                 }
             }
         }
@@ -165,9 +158,24 @@ void QtopiaSqlPrivate::disksChanged(QtopiaSqlMigratePlugin *migratePlugin)
         // Have I seen this database already?
         if( !fs->isConnected() && fs->contentDatabase() ) {
             if ( !fs->prevPath().isEmpty() && dbPaths.key( fs->prevPath(), quint32(-1) ) != quint32(-1) ) {
-                // Better late than never... detach this database now
-                qLog(Sql) << "Detaching database for path" << fs->prevPath();
-                QtopiaSql::instance()->detachDB(fs->prevPath());
+                bool detach = true;
+
+                // Don't detach if another storage device is connected on the same mount point.
+                foreach (const QFileSystem *f, fileSystems) {
+                    if (f != fs
+                        && f->isConnected()
+                        && f->contentDatabase()
+                        && fs->prevPath() == f->path()) {
+                        detach = false;
+                        break;
+                    }
+                }
+
+                if (detach) {
+                    // Better late than never... detach this database now
+                    qLog(Sql) << "Detaching database for path" << fs->prevPath();
+                    QtopiaSql::instance()->detachDB(fs->prevPath());
+                }
             }
         } else if ( fs->contentDatabase() ) {
             QtopiaDatabaseId databaseId = QtopiaSql::instance()->databaseIdForPath(fs->path());
@@ -256,30 +264,6 @@ void QtopiaSqlPrivate::disksChanged(QtopiaSqlMigratePlugin *migratePlugin)
 #endif
 }
 
-void QtopiaSqlPrivate::threadTerminated()
-{
-    QThread *senderThread=qobject_cast<QThread *>(sender());
-    if (senderThread != QThread::currentThread())
-    {
-        qWarning() << "Terminated not called from current thread!!";
-        QObject::disconnect(senderThread, SIGNAL(finished()), this, SLOT(threadTerminated()));
-        QObject::disconnect(senderThread, SIGNAL(terminated()), this, SLOT(threadTerminated()));
-        return;
-    }
-    //qLog(Sql) << "thread Terminated call for thread:" << QThread::currentThreadId();
-    QtopiaSqlPrivate::dbs.remove(QThread::currentThreadId());
-
-    if (QtopiaSqlPrivate::connectionNames.contains(QThread::currentThreadId()))
-    {
-        foreach(QString conname, QtopiaSqlPrivate::connectionNames[QThread::currentThreadId()])
-            QSqlDatabase::removeDatabase(conname);
-
-        QtopiaSqlPrivate::connectionNames.remove(QThread::currentThreadId());
-    }
-    QObject::disconnect(senderThread, SIGNAL(finished()), this, SLOT(threadTerminated()));
-    QObject::disconnect(senderThread, SIGNAL(terminated()), this, SLOT(threadTerminated()));
-}
-
 QString QtopiaSqlPrivate::databaseFile(const QString &path)
 {
     QString file = QDir::cleanPath(path+QLatin1String("/")+QFileInfo(name).fileName());
@@ -309,7 +293,10 @@ void QtopiaSqlPrivate::installSorting( QSqlDatabase &db)
         } else {
             qLog(Sql) << "handle variant returned typename " << v.typeName();
         }
+#else
+    Q_UNUSED(db);
 #endif
+
 }
 
 Q_GLOBAL_STATIC(QtopiaSqlPrivate, internalinstance);
@@ -318,3 +305,17 @@ QtopiaSqlPrivate *QtopiaSqlPrivate::instance()
 {
     return internalinstance();
 }
+
+void QtopiaSqlPrivate::preSetupDefaultConnection()
+{
+#ifdef Q_USE_SQLITE
+ #if SQLITE_VERSION_NUMBER > 3003000
+    sqlite3_enable_shared_cache(true);
+ #endif
+#endif
+}
+
+void QtopiaSqlPrivate::postSetupDefaultConnection()
+{
+}
+

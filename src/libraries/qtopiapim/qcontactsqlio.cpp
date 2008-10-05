@@ -1,29 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#include <qtopia/pim/qcontact.h>
-#include <qtopia/pim/qcontactmodel.h>
+#include <qcontact.h>
+#include <qcontactmodel.h>
 
 #include <qtopialog.h>
-#include <qtopia/pim/qphonenumber.h>
+#include <qphonenumber.h>
 
 #include <qtopiaipcenvelope.h>
 #include "qcontactsqlio_p.h"
@@ -34,7 +32,6 @@
 #include <unistd.h>
 #endif
 
-// both... until I can get all the required widgets sorted out.
 #include <qcategorymanager.h>
 #include "qsqlpimtablemodel_p.h"
 
@@ -46,6 +43,12 @@
 #include <QSqlField>
 #include <QSqlDriver>
 #include <QTcpSocket>
+#include <QTranslatableSettings>
+
+#include "qcollectivenamespace.h"
+#include "qcollectivepresenceinfo.h"
+
+#include "qfielddefinition.h"
 
 // For contact birthday/anniversary feature:
 #include "qappointment.h"
@@ -61,14 +64,11 @@ static const char *contextsource = "default";
 title firstname middlename lastname suffix default_phone default_email jobtitle department company b_webpage office profession assistant manager h_webpage spouse gender birthday anniversary nickname children portrait lastname_pronunciation firstname_pronunciation company_pronunciation
 
 data bindings
-:t, :fn, :mn, :ln, :su, :dp, :de, :jt, :d, :c, :bphone, :bfax, :bmobile, :bstreet, :bcity, :bstate, :bzip, :bcountry, :bpager, :bwebpage, :o, :profession, :assistant, :manager, :hphone, :hfax, :hmobile, :hstreet, :hcity, :hstate, :hzip, :hcountry, :hwebpage, :sp, :g, :b, :a, :nickname, :childern, :portrait, :lnp, :fnp, :cp
+:t, :fn, :mn, :ln, :su, :dp, :de, :jt, :d, :c, :bphone, :bfax, :bmobile, :bstreet, :bcity, :bstate, :bzip, :bcountry, :bpager, :bwebpage, :o, :profession, :assistant, :manager, :hphone, :hfax, :hmobile, :hstreet, :hcity, :hstate, :hzip, :hcountry, :hwebpage, :sp, :g, :b, :a, :nickname, :children, :portrait, :lnp, :fnp, :cp
 */
 
 
-// XXX because of the large number of fields.... will _HAVE_ to implement 'sub field retrival' as
-// time taken to check and set that many strings will probably be too much.
-
-class ContactSimpleQueryCache : public QPimQueryCache 
+class ContactSimpleQueryCache : public QPimQueryCache
 {
 public:
     struct ContactRow
@@ -76,10 +76,10 @@ public:
         ContactRow(const QVariant &a, const QVariant &b, const QVariant &c,
                 const QVariant &d, const QVariant &e, const QVariant &f,
                 const QVariant &g, const QVariant &h, const QVariant &i,
-                const QVariant &j)
+                const QVariant &j, const QVariant &k)
             : recid(a), nameTitle(b), firstName(c), middleName(d),
                     lastName(e), suffix(f), phoneNumber(g), email(h),
-                    company(i), portraitFile(j)
+                    company(i), portraitFile(j), label(k)
         {}
 
         QVariant recid;
@@ -92,6 +92,7 @@ public:
         QVariant email;
         QVariant company;
         QVariant portraitFile;
+        QVariant label;
     };
 
     ContactSimpleQueryCache()
@@ -101,7 +102,7 @@ public:
 
     QString fields() const
     {
-        static const QString result("t1.title, t1.firstname, t1.middlename, t1.lastname, t1.suffix, t1.default_phone, t1.default_email, t1.company, t1.portrait");
+        static const QString result("t1.title, t1.firstname, t1.middlename, t1.lastname, t1.suffix, t1.default_phone, t1.default_email, t1.company, t1.portrait, t1.label");
         return result;
 
         //(select categoryid from contactcategories where contactcategories.recid = contacts.recid and categoryid = 'Business')
@@ -109,7 +110,7 @@ public:
 
     void cacheRow(int row, const QPreparedSqlQuery &q)
     {
-        cache.insert(row, new ContactRow(q.value(0), q.value(2), q.value(3), q.value(4), q.value(5), q.value(6), q.value(7), q.value(8), q.value(9), q.value(10))); 
+        cache.insert(row, new ContactRow(q.value(0), q.value(2), q.value(3), q.value(4), q.value(5), q.value(6), q.value(7), q.value(8), q.value(9), q.value(10), q.value(11)));
     }
 
     void setMaxCost(int m) { cache.setMaxCost(m); contactCache.setMaxCost(m); }
@@ -120,52 +121,13 @@ public:
 
 };
 
-// may be better to over ride order text.
-QStringList ContactSqlIO::sortColumns() const
+QString ContactSqlIO::sqlColumn(QContactModel::Field k)
 {
-    QList<QContactModel::Field> mOrder = formatFieldOrder();
-    QStringList sc;
-    foreach(QContactModel::Field f, mOrder) {
-        sc << sqlColumn(f);
-    }
-    return sc;
-}
-
-QVariant ContactSqlIO::key(int row) const
-{
-    QList<QContactModel::Field> mOrder = formatFieldOrder();
-    QStringList sc;
-    foreach(QContactModel::Field f, mOrder) {
-        sc << contactField(row, f).toString();
-    }
-    return sc;
-}
-
-QVariant ContactSqlIO::key(const QUniqueId &id) const
-{
-    QStringList keys = sortColumns();
-    QString keystring = keys.join(", ");
-    QPreparedSqlQuery q(database());
-    q.prepare("SELECT " + keystring + " FROM contacts"
-            " WHERE recid = :id");
-
-    q.bindValue(":id", id.toUInt());
-
-    if (q.exec() && q.next()) {
-        QStringList sl;
-        for (int i = 0; i < keys.count(); i++)
-            sl << q.value(i).toString();
-        return sl;
-    }
-    return QVariant();
-}
-
-QString ContactSqlIO::sqlColumn(QContactModel::Field k) const {
     switch(k) {
         default:
             return QString();
         case QContactModel::Label:
-            return sqlLabelCache;
+            return "label";
         case QContactModel::NameTitle:
             return "title";
         case QContactModel::FirstName:
@@ -189,7 +151,7 @@ QString ContactSqlIO::sqlColumn(QContactModel::Field k) const {
 
         // email
         case QContactModel::DefaultEmail:
-        case QContactModel::Emails:
+        case QContactModel::Emails: // This is in a different table
             return "default_email";
 
         // business
@@ -235,50 +197,11 @@ QString ContactSqlIO::sqlColumn(QContactModel::Field k) const {
     return QString();
 }
 
-QString ContactSqlIO::sqlLabel() const
-{
-    int fc = formatCount();
-    QString expression = "(CASE ";
-    for (int i = 0; i < fc; i++) {
-        QList<QVariant> f = format(i);
-        expression += "WHEN ";
-        bool firstkey = true;
-        QListIterator<QVariant> it(f);
-        while(it.hasNext()) {
-            QVariant v = it.next();
-            if (v.type() == QVariant::String)
-                continue;
-            if (!firstkey)
-                expression += "AND ";
-            firstkey = false;
-            QContactModel::Field k = (QContactModel::Field)v.toInt();
-            if (k == QContactModel::Invalid || k == QContactModel::Label)
-                return sqlColumn(QContactModel::FirstName); // soft fail.
-            expression += sqlColumn(k) + " IS NOT NULL ";
-        }
-        expression += "THEN ";
-        QListIterator<QVariant> fit(f);
-        while(fit.hasNext()) {
-            QVariant v = fit.next();
-            if (v.type() == QVariant::Int) {
-                QContactModel::Field k = (QContactModel::Field)v.toInt();
-                if (k == QContactModel::Invalid || k == QContactModel::Label)
-                    return sqlColumn(QContactModel::FirstName); // soft fail.
-                expression += sqlColumn(k) + " ";
-            } else if (v.type() == QVariant::String) {
-                expression += "\"" + v.toString() + "\" ";
-            }
-            if (fit.hasNext())
-                expression += "|| ";
-        }
-    }
-    expression += "ELSE NULL END)";
-    return expression;
-}
+QSet<ContactSqlIO*> ContactSqlIO::allIos;
 
 ContactSqlIO::ContactSqlIO(QObject *parent, const QString &)
-    : QContactIO(parent),
-    QPimSqlIO( contextId(), "contacts", "contactcategories", "contactcustom",
+    :
+    QPimSqlIO( parent, contextId(), "contacts", "contactcategories", "contactcustom",
 
             "title = :t, firstname = :fn, middlename = :mn, lastname = :ln, suffix = :su, "
             "default_phone = :dp, default_email = :de, jobtitle = :jt, department = :d, company = :c, "
@@ -286,24 +209,26 @@ ContactSqlIO::ContactSqlIO(QObject *parent, const QString &)
             "assistant = :assistant, manager = :manager, "
             "h_webpage = :hwebpage, spouse = :sp, "
             "gender = :g, birthday = :b, anniversary = :a, nickname = :nickname, "
-            "children = :childern, portrait = :portrait, "
+            "children = :children, portrait = :portrait, "
             "lastname_pronunciation = :lnp, firstname_pronunciation = :fnp, "
-            "company_pronunciation = :cp",
+            "company_pronunciation = :cp, "
+            "label = :lab",
 
             "(recid, context, title, firstname, middlename, lastname, suffix, default_phone, default_email, "
             "jobtitle, department, company, "
             "b_webpage, office, profession, assistant, manager, "
             "h_webpage, spouse, gender, birthday, anniversary, nickname, children, portrait, "
             "lastname_pronunciation, firstname_pronunciation, "
-            "company_pronunciation)"
+            "company_pronunciation, label)"
             " VALUES "
             "(:i, :context, :t, :fn, :mn, :ln, :su, :dp, :de, :jt, :d, :c, "
             ":bwebpage, :o, "
             ":profession, :assistant, :manager, "
-            ":hwebpage, :sp, :g, :b, :a, :nickname, :childern, "
-            ":portrait, :lnp, :fnp, :cp)"),
+            ":hwebpage, :sp, :g, :b, :a, :nickname, :children, "
+            ":portrait, :lnp, :fnp, :cp, :lab)",
+            "PIM/Contacts"),
 
-            orderKey(QContactModel::Label), contactByRowValid(false),
+            contactByRowValid(false),
             tmptable(false),
             contactQuery("SELECT recid, title, firstname, " // 3
                     "middlename, lastname, suffix, " // 7
@@ -319,23 +244,30 @@ ContactSqlIO::ContactSqlIO(QObject *parent, const QString &)
             insertEmailsQuery("INSERT INTO emailaddresses (recid, addr) VALUES (:i, :a)"),
             insertAddressesQuery("INSERT INTO contactaddresses (recid, addresstype, street, city, state, zip, country) VALUES (:i, :t, :s, :c, :st, :z, :co)"),
             insertPhoneQuery("INSERT INTO contactphonenumbers (recid, phone_type, phone_number) VALUES (:i, :t, :ph)"),
+            insertPresenceQuery("INSERT INTO contactpresence (recid, uri, status, statusstring, message, displayname, updatetime,capabilities) "
+                    "SELECT :i,uri,status,statusstring,message,displayname,updatetime,capabilities FROM contactpresence WHERE uri=:u AND recid=0"),
             removeEmailsQuery("DELETE from emailaddresses WHERE recid = :i"),
             removeAddressesQuery("DELETE from contactaddresses WHERE recid = :i"),
-            removePhoneQuery("DELETE from contactphonenumbers WHERE recid = :i")
+            removePhoneQuery("DELETE from contactphonenumbers WHERE recid = :i"),
+            removePresenceQuery("DELETE FROM contactpresence WHERE recid = :i")
 {
     simpleCache = new ContactSimpleQueryCache;
     setSimpleQueryCache(simpleCache);
 
-    QPimSqlIO::setOrderBy(sortColumns());
+    QList<QContactModel::SortField> l;
+    l << qMakePair(QContactModel::Label, Qt::AscendingOrder);
+    setOrderBy(l);
 
-    sqlLabelCache = sqlLabel();
     initMaps();
+
+    allIos.insert(this);
 
     connect(this, SIGNAL(labelFormatChanged()), this, SLOT(updateSqlLabel()));
 }
 
 ContactSqlIO::~ContactSqlIO()
 {
+    allIos.remove(this);
 }
 
 QUuid ContactSqlIO::contextId() const
@@ -370,11 +302,12 @@ void ContactSqlIO::bindFields(const QPimRecord& r, QPreparedSqlQuery &q) const
     q.bindValue(":b", t.birthday());
     q.bindValue(":a", t.anniversary());
     q.bindValue(":nickname", t.nickname());
-    q.bindValue(":childern", t.children());
+    q.bindValue(":children", t.children());
     q.bindValue(":portrait", t.portraitFile());
     q.bindValue(":lnp", t.lastNamePronunciation());
     q.bindValue(":fnp", t.firstNamePronunciation());
     q.bindValue(":cp", t.companyPronunciation());
+    q.bindValue(":lab", t.label()); // We store this, but we don't set it back to the contact when we're done
 }
 
 // by uid doesn't neeed caching... always fast and unlikely to be in order?
@@ -404,7 +337,6 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
     }
 
     if ( contactQuery.next() ) {
-        // XXX should check uid against u.
         QString defaultPhone;
 
         t.setUid(QUniqueId::fromUInt(contactQuery.value(0).toUInt()));
@@ -454,7 +386,6 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
         if (addressesQuery.prepare()) {
             addressesQuery.bindValue(":id", u.toUInt());
             addressesQuery.exec();
-            QStringList tlist;
             while(addressesQuery.next()) {
                 QContactAddress a;
                 QContact::Location l;
@@ -469,11 +400,10 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
             addressesQuery.reset();
         }
 
-        // and contact addresses
+        // and phone numbers
         if (phoneQuery.prepare()) {
             phoneQuery.bindValue(":id", u.toUInt());
             phoneQuery.exec();
-            QString tlist;
             while(phoneQuery.next()) {
                 QString number;
                 QContact::PhoneType type;
@@ -497,54 +427,40 @@ QContact ContactSqlIO::contact( const QUniqueId & u ) const
     return t;
 }
 
-void ContactSqlIO::setSortKey(QContactModel::Field s)
-{
-    if (orderKey != s) {
-        orderKey = s;
-        invalidateCache();
-    }
-}
-
-void ContactSqlIO::setCategoryFilter(const QCategoryFilter &f)
-{
-    if (f != categoryFilter()) {
-        QPimSqlIO::setCategoryFilter(f);
-        emit filtersUpdated();
-    }
-}
-
-void ContactSqlIO::setContextFilter(const QSet<int> &list, ContextFilterType type)
-{
-    if (list != contextFilter() || type != contextFilterType()) {
-        QPimSqlIO::setContextFilter(list, type);
-        invalidateCache();
-    }
-}
-
-QContactModel::Field ContactSqlIO::sortKey() const
-{
-    return orderKey;
-}
-
 void ContactSqlIO::invalidateCache()
 {
     QPimSqlIO::invalidateCache();
     contactByRowValid = false;
     mLocalNumberCache.clear();
-    emit filtersUpdated();
 }
 
 // if filtering/sorting/contacts doesn't change.
 QContact ContactSqlIO::contact(int row) const
 {
-    return contact(recordId(row));
+    return contact(id(row));
 }
 
 void ContactSqlIO::updateSqlLabel()
 {
-    sqlLabelCache = sqlLabel();
-    setOrderBy(sortColumns());
+    // If the original sort contained label, we should reset this now
+    setOrderBy(mSortList);
     invalidateCache();
+}
+
+void ContactSqlIO::setOrderBy(QList<QContactModel::SortField> list)
+{
+    /* Create the sort keys */
+    QStringList sl;
+    foreach (QContactModel::SortField pair, list) {
+        QString column = sqlColumn(pair.first);
+        if (pair.second == Qt::DescendingOrder)
+            column.append(QLatin1String(" DESC")); // no tr
+        sl.append(column);
+    }
+    QPimSqlIO::setOrderBy(sl);
+
+    // Store the list, in case our label changes
+    mSortList = list;
 }
 
 // assumes storage is row based.
@@ -552,7 +468,7 @@ void ContactSqlIO::updateSqlLabel()
 QVariant ContactSqlIO::contactField(int row, QContactModel::Field k) const
 {
     if (!simpleCache->cache.contains(row))
-        recordId(row);
+        id(row);
 
     ContactSimpleQueryCache::ContactRow *cr = simpleCache->cache.object(row);
     if (cr) {
@@ -578,16 +494,164 @@ QVariant ContactSqlIO::contactField(int row, QContactModel::Field k) const
             case QContactModel::Portrait:
                 return cr->portraitFile;
             case QContactModel::Label:
-                {
-                    QContact c = simpleContact(row);
-                    return c.label();
-                }
+                return cr->label;
+                // Meta stuff
+            case QContactModel::PresenceStatus:
+                return qVariantFromValue(presenceStatus(QUniqueId::fromUInt(cr->recid.toUInt())));
+            case QContactModel::PresenceStatusString:
+                return qVariantFromValue(presenceStatusString(QUniqueId::fromUInt(cr->recid.toUInt())));
+            case QContactModel::PresenceMessage:
+                return qVariantFromValue(presenceMessage(QUniqueId::fromUInt(cr->recid.toUInt())));
+            case QContactModel::PresenceDisplayName:
+                return qVariantFromValue(presenceDisplayName(QUniqueId::fromUInt(cr->recid.toUInt())));
+            case QContactModel::PresenceAvatar:
+                return qVariantFromValue(presenceAvatar(QUniqueId::fromUInt(cr->recid.toUInt())));
+            case QContactModel::PresenceCapabilities:
+                return qVariantFromValue(presenceCapabilities(QUniqueId::fromUInt(cr->recid.toUInt())));
+            case QContactModel::PresenceUpdateTime:
+                return qVariantFromValue(presenceUpdateTime(QUniqueId::fromUInt(cr->recid.toUInt())));
             default:
                 break;
         }
     }
 
-    return QContactIO::contactField(row, k);
+    return QContactModel::contactField(contact(row), k);
+}
+
+QPresenceTypeMap ContactSqlIO::presenceStatus(const QUniqueId& id)
+{
+    QPresenceTypeMap ret;
+
+    if (!id.isNull()) {
+        static QPreparedSqlQuery presenceStatusQuery("SELECT uri,status FROM contactpresence WHERE recid=:i");
+        presenceStatusQuery.prepare();
+        presenceStatusQuery.bindValue(":i", id.toUInt());
+        presenceStatusQuery.exec();
+
+        while (presenceStatusQuery.next()) {
+            ret.insert(presenceStatusQuery.value(0).toString(), (QCollectivePresenceInfo::PresenceType) presenceStatusQuery.value(1).toUInt());
+        }
+
+        presenceStatusQuery.reset();
+    }
+    return ret;
+}
+
+QPresenceStringMap ContactSqlIO::presenceStatusString(const QUniqueId& id)
+{
+    QPresenceStringMap ret;
+
+    if (!id.isNull()) {
+        static QPreparedSqlQuery presenceQuery("SELECT uri,statusstring FROM contactpresence WHERE recid=:i");
+        presenceQuery.prepare();
+        presenceQuery.bindValue(":i", id.toUInt());
+        presenceQuery.exec();
+
+        while (presenceQuery.next()) {
+            ret.insert(presenceQuery.value(0).toString(), presenceQuery.value(1).toString());
+        }
+
+        presenceQuery.reset();
+    }
+    return ret;
+}
+
+
+QPresenceStringMap ContactSqlIO::presenceMessage(const QUniqueId& id)
+{
+    QPresenceStringMap ret;
+
+    if (!id.isNull()) {
+        static QPreparedSqlQuery presenceQuery("SELECT uri,message FROM contactpresence WHERE recid=:i");
+        presenceQuery.prepare();
+        presenceQuery.bindValue(":i", id.toUInt());
+        presenceQuery.exec();
+
+        while (presenceQuery.next()) {
+            ret.insert(presenceQuery.value(0).toString(), presenceQuery.value(1).toString());
+        }
+
+        presenceQuery.reset();
+    }
+    return ret;
+}
+
+
+QPresenceStringMap ContactSqlIO::presenceAvatar(const QUniqueId& id)
+{
+    QPresenceStringMap ret;
+
+    if (!id.isNull()) {
+        static QPreparedSqlQuery presenceQuery("SELECT uri,avatar FROM contactpresence WHERE recid=:i");
+        presenceQuery.prepare();
+        presenceQuery.bindValue(":i", id.toUInt());
+        presenceQuery.exec();
+
+        while (presenceQuery.next()) {
+            ret.insert(presenceQuery.value(0).toString(), presenceQuery.value(1).toString());
+        }
+
+        presenceQuery.reset();
+    }
+    return ret;
+}
+
+
+QPresenceStringMap ContactSqlIO::presenceDisplayName(const QUniqueId& id)
+{
+    QPresenceStringMap ret;
+
+    if (!id.isNull()) {
+        static QPreparedSqlQuery presenceQuery("SELECT uri,displayname FROM contactpresence WHERE recid=:i");
+        presenceQuery.prepare();
+        presenceQuery.bindValue(":i", id.toUInt());
+        presenceQuery.exec();
+
+        while (presenceQuery.next()) {
+            ret.insert(presenceQuery.value(0).toString(), presenceQuery.value(1).toString());
+        }
+
+        presenceQuery.reset();
+    }
+    return ret;
+}
+
+QPresenceCapabilityMap ContactSqlIO::presenceCapabilities(const QUniqueId& id)
+{
+    QPresenceCapabilityMap ret;
+
+    if (!id.isNull()) {
+        static QPreparedSqlQuery presenceQuery("SELECT uri,capabilities FROM contactpresence WHERE recid=:i");
+        presenceQuery.prepare();
+        presenceQuery.bindValue(":i", id.toUInt());
+        presenceQuery.exec();
+
+        while (presenceQuery.next()) {
+            ret.insert(presenceQuery.value(0).toString(), presenceQuery.value(1).toString().split(','));
+        }
+
+        presenceQuery.reset();
+    }
+    return ret;
+}
+
+QPresenceDateTimeMap ContactSqlIO::presenceUpdateTime(const QUniqueId& id)
+{
+    QPresenceDateTimeMap ret;
+    if (!id.isNull()) {
+        static QPreparedSqlQuery presenceQuery("SELECT uri,updatetime FROM contactpresence WHERE recid=:i");
+        presenceQuery.prepare();
+        presenceQuery.bindValue(":i", id.toUInt());
+        presenceQuery.exec();
+
+        while (presenceQuery.next()) {
+            ret.insert(presenceQuery.value(0).toString(), presenceQuery.value(1).toDateTime());
+        }
+
+        presenceQuery.reset();
+    }
+    return ret;
+
 }
 
 QContact ContactSqlIO::simpleContact(int row) const
@@ -596,7 +660,7 @@ QContact ContactSqlIO::simpleContact(int row) const
         return *(simpleCache->contactCache.object(row));
 
     if (!simpleCache->cache.contains(row))
-        recordId(row);
+        id(row);
     ContactSimpleQueryCache::ContactRow *cr = simpleCache->cache.object(row);
     if (cr) {
 #ifdef GREENPHONE_EFFECTS
@@ -645,7 +709,7 @@ void ContactSqlIO::initMaps()
         { QContactModel::MiddleName, "middlename", true },
         { QContactModel::LastName, "lastname", true },
         { QContactModel::Suffix, "suffix", true },
-        { QContactModel::Label, 0, false }, // meta field
+        { QContactModel::Label, "label", false }, // Not directly updateable
 
         { QContactModel::JobTitle, "jobtitle", true },
         { QContactModel::Department, "department", true },
@@ -682,6 +746,7 @@ void ContactSqlIO::initMaps()
         { QContactModel::LastNamePronunciation, "lastname_pronunciation", true },
         { QContactModel::FirstNamePronunciation, "firstname_pronunciation", true },
         { QContactModel::CompanyPronunciation, "company_pronunciation", true },
+
         { QContactModel::Invalid, 0, false }
     };
 
@@ -697,9 +762,6 @@ void ContactSqlIO::initMaps()
 
 QString ContactSqlIO::sqlField(QContactModel::Field k) const
 {
-    // special for the label field
-    if (k == QContactModel::Label)
-        return sqlLabelCache;
     if (mFields.contains(k))
         return mFields[k];
     return QString();
@@ -754,7 +816,7 @@ bool ContactSqlIO::canUpdate(QContactModel::Field k) const
 
 bool ContactSqlIO::removeContact(int row)
 {
-    QUniqueId u = recordId(row);
+    QUniqueId u = id(row);
     return removeContact(u);
 }
 
@@ -764,8 +826,6 @@ bool ContactSqlIO::removeContact(const QUniqueId & id)
         return false;
 
     if (QPimSqlIO::removeRecord(id)) {
-        notifyRemoved(id);
-        emit recordsUpdated();
         return true;
     }
     return false;
@@ -778,15 +838,12 @@ bool ContactSqlIO::removeContact(const QContact &t)
 
 bool ContactSqlIO::removeContacts(const QList<int> &rows)
 {
-    QList<QUniqueId> ids = recordIds(rows);
-    return removeContacts(ids);
+    return removeContacts(ids(rows));
 }
 
 bool ContactSqlIO::removeContacts(const QList<QUniqueId> &ids)
 {
     if (QPimSqlIO::removeRecords(ids)) {
-        notifyRemoved(ids);
-        emit recordsUpdated();
         return true;
     }
     return false;
@@ -794,9 +851,12 @@ bool ContactSqlIO::removeContacts(const QList<QUniqueId> &ids)
 
 bool ContactSqlIO::updateContact(const QContact &t)
 {
+    // Make sure we've initialized the labels before we add
+    // in case we need to update the label field via setFormat (can't nest transactions)
+    if (mFormat.count() == 0)
+        initFormat();
+
     if (QPimSqlIO::updateRecord(t)) {
-        notifyUpdated(t.uid());
-        emit recordsUpdated();
         return true;
     }
     return false;
@@ -807,12 +867,15 @@ QUniqueId ContactSqlIO::addContact(const QContact &contact, const QPimSource &so
     QPimSource s;
     s.identity = contextsource;
     s.context = contextId();
+
+    // Make sure we've initialized the labels before we add
+    // in case we need to update the label field via setFormat (can't nest transactions)
+    if (mFormat.count() == 0)
+        initFormat();
     QUniqueId i = addRecord(contact, source.isNull() ? s : source, createuid);
     if (!i.isNull()) {
         QContact added = contact;
         added.setUid(i);
-        notifyAdded(i);
-        invalidateCache();
     }
     return i;
 }
@@ -827,7 +890,7 @@ bool ContactSqlIO::updateExtraTables(uint uid, const QPimRecord &r)
 bool ContactSqlIO::removeExtraTables(uint uid)
 {
     removeEmailsQuery.prepare();
-    if (!removeAddressesQuery.prepare() || !removePhoneQuery.prepare())
+    if (!removeAddressesQuery.prepare() || !removePhoneQuery.prepare() || !removePresenceQuery.prepare())
         return false;
 
     removeEmailsQuery.bindValue(":i", uid);
@@ -845,6 +908,11 @@ bool ContactSqlIO::removeExtraTables(uint uid)
         return false;
     removePhoneQuery.reset();
 
+    removePresenceQuery.bindValue(":i", uid);
+    if (!removePresenceQuery.exec())
+        return false;
+    removePresenceQuery.reset();
+
     return true;
 }
 
@@ -855,6 +923,7 @@ bool ContactSqlIO::insertExtraTables(uint uid, const QPimRecord &r)
     insertEmailsQuery.prepare();
     insertAddressesQuery.prepare();
     insertPhoneQuery.prepare();
+    insertPresenceQuery.prepare();
 
     QStringList e = c.emailList();
     foreach(QString i, e) {
@@ -888,7 +957,6 @@ bool ContactSqlIO::insertExtraTables(uint uid, const QPimRecord &r)
     insertAddressesQuery.reset();
 
     /* all phone numbers */
-    /* home address, business address */
     QMap<QContact::PhoneType, QString> ph = c.phoneNumbers();
     QMapIterator<QContact::PhoneType, QString> phi(ph);
     while(phi.hasNext()) {
@@ -901,13 +969,84 @@ bool ContactSqlIO::insertExtraTables(uint uid, const QPimRecord &r)
     }
     insertPhoneQuery.reset();
 
+    /* Presence stuff */
+    QStringList fields = QContactFieldDefinition::fields("chat");
+
+    foreach(QString field, fields) {
+        QContactFieldDefinition def(field);
+        if (!def.value(c).toString().isEmpty() && !def.provider().isEmpty()) {
+            insertPresenceQuery.bindValue(":u", QCollective::encodeUri(def.provider(), def.value(c).toString()));
+            insertPresenceQuery.bindValue(":i", uid);
+            if (!insertPresenceQuery.exec())
+                return false;
+        }
+    }
+
+    insertPresenceQuery.reset();
+
     return true;
+}
+
+void ContactSqlIO::setPresenceFilter(QList<QCollectivePresenceInfo::PresenceType> types)
+{
+    // Passing in an empty list might mean 'contacts with no presence information'
+    // but we have an enum for that.
+    if (types.count() == 0) {
+        // fail the query
+        mPresenceFilter = "(1 = 0)";
+    } else {
+        QString inclause;
+
+        bool matchNone = false;
+        foreach(QCollectivePresenceInfo::PresenceType type, types) {
+            if (type == QCollectivePresenceInfo::None)
+                matchNone = true;
+            else {
+                if (!inclause.isEmpty())
+                    inclause.append(',');
+                inclause.append(QString::number((unsigned int)type));
+            }
+        }
+
+        if (matchNone) {
+            // We have a match for "no presence information",
+            // which means a left join
+            mPresenceJoins = QStringList("LEFT contactpresence");
+
+            // We want something like:
+            // WHERE (contactpresence.recid IS NULL OR (contactpresence.recid = t1.recid AND contactpresence.status IN (...)))
+            if (inclause.isEmpty()) {
+                inclause = "(contactpresence.recid IS NULL)";
+            } else {
+                inclause.prepend("(contactpresence.recid IS NULL OR contactpresence.status IN (");
+                inclause.append("))");
+            }
+            mPresenceFilter = inclause;
+        } else {
+            inclause.prepend("(contactpresence.status IN (");
+            inclause.append("))");
+
+            mPresenceFilter = inclause;
+            mPresenceJoins = QStringList("contactpresence"); // normal inner join
+        }
+    }
+
+    updateFilters();
+}
+
+void ContactSqlIO::clearPresenceFilter()
+{
+    mPresenceFilter.clear();
+    mPresenceJoins.clear();
+
+    updateFilters();
 }
 
 void ContactSqlIO::setFilter(const QString &text, int flags)
 {
     /* assume text is not empty */
-    QString mSearchFilter;
+    QString searchFilter;
+    QString chatFilter;
 
     QSqlDriver *driver = database().driver();
 
@@ -919,16 +1058,14 @@ void ContactSqlIO::setFilter(const QString &text, int flags)
     field.setValue("\% "+text+"\%");
     QString escapedWordStartsWith = driver->formatValue(field);
 
-#ifdef QTOPIA_PHONE
-    /* should do on construction? or in QContactIO construction */
+    /* should do on construction? or in ContactSqlIO construction */
     QMap<QChar, QString> pbt = phoneButtonText();
 
     QRegExp simIndex("^(\\d{1,3})#$");
     if (simIndex.exactMatch(text)) {
-        QStringList sl; 
-        sl.append("simcardidmap");
-        QPimSqlIO::setJoins(sl);
-        QPimSqlIO::setFilter("simcardidmap.cardindex = " + simIndex.cap(1));
+        mTextFilter = "simcardidmap.cardindex = " + simIndex.cap(1);
+        mTextJoins = QStringList("simcardidmap");
+        updateFilters();
         return;
     }
     bool allNumbers = true;
@@ -942,74 +1079,70 @@ void ContactSqlIO::setFilter(const QString &text, int flags)
         bool first = true;
         foreach (QContactModel::Field f, labelSearchFields()) {
             if (!first)
-                mSearchFilter += " or ";
+                searchFilter += " or ";
             else
                 first = false;
-            mSearchFilter += "(";
+            searchFilter += "(";
             QString fname = "t1."+sqlColumn(f);
             int i;
             /* Handle first letter with > and <, as will work on index and hence
                cut search results down much faster */
             QChar firstChar = text[0];
-            mSearchFilter += fname + " >= '" + QString(pbt[firstChar][0]) + "'";
+            searchFilter += fname + " >= '" + QString(pbt[firstChar][0]) + "'";
             if(firstChar.isDigit()) {
                 int firstCharVal = firstChar.digitValue();
                 QChar nextCharVal('0'+firstCharVal+1);
                 if (firstCharVal < 9 && pbt.contains(nextCharVal))
-                    mSearchFilter += " and " + fname + " < '" + QString(pbt[nextCharVal][0]) + "'";
+                    searchFilter += " and " + fname + " < '" + QString(pbt[nextCharVal][0]) + "'";
             }
             for (i= 0; i < text.length(); i++) {
-                mSearchFilter += " and ";
-                /* changes based of db, Mimer for example is
-                   substring(string from index for length)
-                   */
-#if 0
-                mSearchFilter += "substring(" + fname + " from " + QString::number(i+1) + " for 1) in (";
+                searchFilter += " and ";
+#ifdef QTOPIA_SQL_DIALECT_MIMER
+                searchFilter += "substring(" + fname + " from " + QString::number(i+1) + " for 1) in (";
 #else
-                mSearchFilter += "lower(substr(" + fname + ", " + QString::number(i+1) + ", 1)) in (";
+                searchFilter += "lower(substr(" + fname + ", " + QString::number(i+1) + ", 1)) in (";
 #endif
                 QString letters = pbt[text[i]];
                 for (int pos = 0; pos < letters.length(); ++pos) {
                     //if (letters[pos] == '\'' || letters[pos] == '@')
                         //break;
                     if (pos != 0)
-                        mSearchFilter += ", ";
+                        searchFilter += ", ";
                     if (letters[pos] == '\'')
-                        mSearchFilter += "''''";
+                        searchFilter += "''''";
                     else
-                        mSearchFilter += "'" + letters[pos] + "'";
+                        searchFilter += "'" + letters[pos] + "'";
                 }
-                mSearchFilter += ")";
+                searchFilter += ")";
             }
-            mSearchFilter += ")";
+            searchFilter += ")";
         }
-    } else
-#endif
-    if (!text.isEmpty()) {
+    } else if (!text.isEmpty()) {
         /* text fields as mere 'starts with' */
         bool first = true;
         foreach (QContactModel::Field f, labelSearchFields()) {
             if (!first)
-                mSearchFilter += " or ";
+                searchFilter += " or ";
             else
                 first = false;
 
             QString fname = "t1."+sqlColumn(f);
             // starts with
-            mSearchFilter += "lower("+fname+") like " + escapedStartsWith + " ";
+            searchFilter += "lower("+fname+") like " + escapedStartsWith + " ";
             // or contains a word starting with
-            mSearchFilter += "or lower("+fname+") like " + escapedWordStartsWith + " ";
+            searchFilter += "or lower("+fname+") like " + escapedWordStartsWith + " ";
         }
     }
 
     /* flags
-       ContainsMobileNumber
-       inner join contactphonenumbers on recid group by contacts.recid;
-       ContainsEmail
-       inner join emailaddresses on recid group by contacts.recid;
-       ContainsMailing
-       inner join contactaddresses on recid group by contacts.recid;
-
+        ContainsMobileNumber
+            inner join contactphonenumbers on recid group by contacts.recid;
+        ContainsEmail
+            inner join emailaddresses on recid group by contacts.recid;
+        ContainsMailing
+            inner join contactaddresses on recid group by contacts.recid;
+        ContainsChat
+            [depends on fields that have chat defined]
      */
     QStringList joins;
     if (flags & QContactModel::ContainsPhoneNumber)
@@ -1018,49 +1151,127 @@ void ContactSqlIO::setFilter(const QString &text, int flags)
         joins += "emailaddresses";
     if (flags & QContactModel::ContainsMailing)
         joins += "contactaddresses";
+    if (flags & QContactModel::ContainsChat) {
+        QStringList customNames;
+        QStringList fields = QContactFieldDefinition::fields("chat");
 
-    if (!joins.isEmpty())
-        QPimSqlIO::setJoins(joins);
-    if (!mSearchFilter.isEmpty()) {
-        mSearchFilter = "(" + mSearchFilter + ")";
-        QPimSqlIO::setFilter(mSearchFilter);
-    } else {
-        QPimSqlIO::clearFilter();
+        bool needsPhoneNumbers = false;
+        foreach(QString field, fields) {
+            QContactFieldDefinition def(field);
+            QContactModel::Field f = QContactModel::identifierField(def.id());
+            if (f == QContactModel::Invalid)
+                customNames.append(def.id());
+            else
+                needsPhoneNumbers = true; // Assumed to be phonenumbers...
+        }
+        if (needsPhoneNumbers)
+            joins += "contactphonenumbers";
+
+        if (customNames.count() > 0) {
+            joins += "contactcustom";
+            QStringList escapedNames;
+            foreach(QString name, customNames) {
+                QSqlField field("fieldname", QVariant::String);
+                field.setValue(name);
+                escapedNames.append(driver->formatValue(field));
+            }
+
+            chatFilter = "(contactcustom.fieldname IN (" + escapedNames.join(",") + "))";
+        }
     }
-    emit filtersUpdated();
+    mTextJoins = joins;
+    if (!searchFilter.isEmpty() || !chatFilter.isEmpty()) {
+        mTextFilter = "(";
+        if (!searchFilter.isEmpty()) {
+            mTextFilter.append('(');
+            mTextFilter.append(searchFilter);
+            mTextFilter.append(')');
+            if (!chatFilter.isEmpty())
+                mTextFilter.append(" AND ");
+        }
+        if (!chatFilter.isEmpty())
+            mTextFilter.append(chatFilter);
+        mTextFilter.append(')');
+    } else
+        mTextFilter.clear();
+
+    updateFilters();
 }
 
 void ContactSqlIO::clearFilter()
 {
-    QPimSqlIO::setFilters(QStringList());
-    QPimSqlIO::setJoins(QStringList());
-    emit filtersUpdated();
+    mTextFilter.clear();
+    mTextJoins.clear();
+    updateFilters();
 }
 
-int ContactSqlIO::predictedRow(const QVariant &k, const QUniqueId &id) const
+void ContactSqlIO::updateFilters()
 {
-    /* key is likely string list, turn into QList with id bytearray
-       at end */
-    if (k.type() == QVariant::StringList) {
-        QStringList sl = k.toStringList();
-        QStringListIterator it(sl);
-        QList<QContactModel::Field> mOrder = formatFieldOrder();
-        QList<QVariant> keys;
+    QStringList joins = mTextJoins + mPresenceJoins;
+    QPimSqlIO::setJoins(joins);
 
-        for (int i= 0; i < mOrder.count(); i++) {
-            if (it.hasNext())
-                keys.append(it.next());
-            else
-                keys.append(QVariant());
-        }
-        keys.append(id.toUInt());
+    QString filter = mTextFilter;
+    if (!filter.isEmpty() && !mPresenceFilter.isEmpty())
+        filter += " AND ";
+    filter += mPresenceFilter;
 
-        return model.predictedRow(keys);
-    }
-    return count(); // all at end if don't match sort key
+    if (!filter.isEmpty())
+        QPimSqlIO::setFilter(filter);
+    else
+        QPimSqlIO::clearFilter();
 }
 
-#ifdef QTOPIA_PHONE
+QList<QUniqueId> ContactSqlIO::matchChatAddress(const QString &address, const QString& provider) const
+{
+    if (address.isEmpty())
+        return QList<QUniqueId>();
+
+    QString chatFilter;
+    QList<QContactFieldDefinition> customFields;
+
+    QStringList fields = QContactFieldDefinition::fields("chat");
+
+    // First grab any phone number fields..
+    QList<QUniqueId> matched;
+
+    foreach(QString field, fields) {
+        QContactFieldDefinition def(field);
+        if (provider.isEmpty() || def.provider() == provider) {
+            QContactModel::Field f = QContactModel::identifierField(def.id());
+            if (f == QContactModel::Invalid)
+                customFields.append(def);
+            else {
+                QString uri = "collective:" + def.provider() + "/" + address;
+                matched += match(f, uri, Qt::MatchExactly);
+            }
+        }
+    }
+
+    // Now find any custom fields (we already know the provider matches)
+    foreach(QContactFieldDefinition def, customFields) {
+        QPreparedSqlQuery q(database());
+        QSqlDriver *driver = database().driver();
+        QSqlField sqlfield("fieldtype", QVariant::String);
+
+        QStringList conditions;
+
+        sqlfield.setValue(address);
+        conditions.append(QString("contactcustom.fieldvalue=%1").arg(driver->formatValue(sqlfield)));
+        sqlfield.setValue(def.id()); // XXX def.id() is the custom field name
+        conditions.append(QString("contactcustom.fieldname=%1").arg(driver->formatValue(sqlfield)));
+
+        QString query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactcustom on (t1.recid = contactcustom.recid) "));
+        q.prepare(query);
+        q.exec();
+
+        while (q.next())
+            matched << QUniqueId::fromUInt(q.value(0).toUInt());
+    }
+
+    // Let something else do the ranking
+    return matched;
+}
+
 QUniqueId ContactSqlIO::matchPhoneNumber(const QString &phnumber, int &bestMatch) const
 {
     QString local = QPhoneNumber::localNumber(phnumber);
@@ -1078,7 +1289,7 @@ QUniqueId ContactSqlIO::matchPhoneNumber(const QString &phnumber, int &bestMatch
     if (mLocalNumberCache.isEmpty()) {
         QPreparedSqlQuery q(database());
         // Ensure numbers are added in a deterministic order
-        q.prepare("SELECT recid, phone_number FROM contactphonenumbers ORDER BY recid"); 
+        q.prepare("SELECT recid, phone_number FROM contactphonenumbers ORDER BY recid");
         q.exec();
 
         while (q.next()) {
@@ -1130,7 +1341,635 @@ QUniqueId ContactSqlIO::matchPhoneNumber(const QString &phnumber, int &bestMatch
     qLog(Sql) << "QContactSqlIO::matchPhoneNumber() result:" << bestMatch << bestContact.toString();
     return bestContact;
 }
-#endif
+
+QList<QUniqueId> ContactSqlIO::match(QContactModel::Field field, const QVariant& value, Qt::MatchFlags flags) const
+{
+    QList<QUniqueId> matches;
+    QPreparedSqlQuery q(database());
+
+    QSqlDriver *driver = database().driver();
+    QSqlField sqlfield("firstname", QVariant::String);
+
+    QString text = value.toString();
+    QString whereClause("%1");
+    if (!(flags & Qt::MatchCaseSensitive)) {
+        whereClause = "lower(%1)";
+        text = text.toLower();
+    }
+
+    QString escapedWildcards = text;
+    escapedWildcards.replace('*', "[*]");
+    escapedWildcards.replace('?', "[?]");
+
+    // XXX Handle date & number fields differently (glob/string etc doesn't make sense)
+    QString target;
+    switch (flags & (Qt::MatchStartsWith | Qt::MatchExactly | Qt::MatchFixedString | Qt::MatchEndsWith | Qt::MatchContains | Qt::MatchWildcard)) {
+        case Qt::MatchStartsWith:
+            sqlfield.setValue(escapedWildcards + "*");
+            whereClause.append(" GLOB ");
+            whereClause.append(driver->formatValue(sqlfield));
+            break;
+
+        case Qt::MatchEndsWith:
+            sqlfield.setValue("*" + escapedWildcards);
+            whereClause.append(" GLOB ");
+            whereClause.append(driver->formatValue(sqlfield));
+            break;
+
+        case Qt::MatchContains:
+            sqlfield.setValue("*" + escapedWildcards + "*");
+            whereClause.append(" GLOB ");
+            whereClause.append(driver->formatValue(sqlfield));
+            break;
+
+        case Qt::MatchWildcard:
+            sqlfield.setValue(text); // Assume it already has any wildcards needed
+            whereClause.append(" GLOB ");
+            whereClause.append(driver->formatValue(sqlfield));
+            break;
+
+        default:
+            sqlfield.setValue(text);
+            whereClause.append(" = ");
+            whereClause.append(driver->formatValue(sqlfield));
+            break;
+    }
+
+    QString query;
+    QStringList conditions;
+    /* Some fields are not in the main table */
+    switch(field) {
+            // Phone number table
+        case QContactModel::HomePhone:
+        case QContactModel::HomeFax:
+        case QContactModel::HomeMobile:
+        case QContactModel::HomePager:
+        case QContactModel::HomeVOIP:
+        case QContactModel::BusinessPhone:
+        case QContactModel::BusinessFax:
+        case QContactModel::BusinessMobile:
+        case QContactModel::BusinessPager:
+        case QContactModel::BusinessVOIP:
+        case QContactModel::OtherPhone:
+        case QContactModel::OtherFax:
+        case QContactModel::OtherMobile:
+        case QContactModel::OtherPager:
+        case QContactModel::OtherVOIP:
+            conditions << QString("contactphonenumbers.phone_type='%1'").arg(fieldToPhoneType(field));
+            conditions << whereClause.arg("contactphonenumbers.phone_number");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactphonenumbers on (t1.recid = contactphonenumbers.recid) "));
+            break;
+
+            // contactpresence table
+        case QContactModel::PresenceStatus:
+            conditions << whereClause.arg("contactpresence.status");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactpresence on (t1.recid = contactpresence.recid)"));
+            break;
+
+        case QContactModel::PresenceStatusString:
+            conditions << whereClause.arg("contactpresence.statusstring");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactpresence on (t1.recid = contactpresence.recid)"));
+            break;
+
+        case QContactModel::PresenceMessage:
+            conditions << whereClause.arg("contactpresence.message");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactpresence on (t1.recid = contactpresence.recid)"));
+            break;
+
+        case QContactModel::PresenceDisplayName:
+            conditions << whereClause.arg("contactpresence.displayname");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactpresence on (t1.recid = contactpresence.recid)"));
+            break;
+
+        case QContactModel::PresenceUpdateTime:
+            conditions << whereClause.arg("contactpresence.updatetime");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactpresence on (t1.recid = contactpresence.recid)"));
+            break;
+
+        case QContactModel::PresenceCapabilities:
+            conditions << whereClause.arg("contactpresence.capabilities");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactpresence on (t1.recid = contactpresence.recid)"));
+            break;
+
+        case QContactModel::PresenceAvatar:
+            conditions << whereClause.arg("contactpresence.avatar");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactpresence on (t1.recid = contactpresence.recid)"));
+            break;
+
+
+            // Main table fields
+        case QContactModel::NameTitle:
+        case QContactModel::FirstName:
+        case QContactModel::MiddleName:
+        case QContactModel::LastName:
+        case QContactModel::Suffix:
+        case QContactModel::JobTitle:
+        case QContactModel::Department:
+        case QContactModel::Company:
+        case QContactModel::DefaultEmail:
+        case QContactModel::DefaultPhone:
+        case QContactModel::Office:
+        case QContactModel::Profession:
+        case QContactModel::Assistant:
+        case QContactModel::Manager:
+        case QContactModel::Spouse:
+        case QContactModel::Gender:
+        case QContactModel::Birthday:
+        case QContactModel::Anniversary:
+        case QContactModel::Nickname:
+        case QContactModel::Children:
+        case QContactModel::LastNamePronunciation:
+        case QContactModel::FirstNamePronunciation:
+        case QContactModel::CompanyPronunciation:
+        case QContactModel::HomeWebPage:
+        case QContactModel::BusinessWebPage:
+        case QContactModel::Label:
+            conditions << whereClause.arg("t1." + sqlColumn(field));
+            query = selectText("DISTINCT t1.recid", conditions);
+            break;
+
+            // Emails table
+        case QContactModel::Emails:
+            conditions << whereClause.arg("emailaddresses.addr");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN emailaddresses on (t1.recid = emailaddresses.recid) "));
+            break;
+
+        // Address table
+        case QContactModel::BusinessStreet:
+        case QContactModel::HomeStreet:
+            conditions << QString("addresstype='%1'").arg(field == QContactModel::BusinessStreet ? QContact::Business : QContact::Home);
+            conditions << whereClause.arg("contactaddresses.street");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactaddresses ON (t1.recid = contactaddresses.recid) "));
+            break;
+
+        case QContactModel::HomeCity:
+        case QContactModel::BusinessCity:
+            conditions << QString("addresstype='%1'").arg(field == QContactModel::BusinessCity ? QContact::Business : QContact::Home);
+            conditions << whereClause.arg("contactaddresses.city");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactaddresses ON (t1.recid = contactaddresses.recid) "));
+            break;
+
+        case QContactModel::HomeState:
+        case QContactModel::BusinessState:
+            conditions << QString("addresstype='%1'").arg(field == QContactModel::BusinessState ? QContact::Business : QContact::Home);
+            conditions << whereClause.arg("contactaddresses.state");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactaddresses ON (t1.recid = contactaddresses.recid) "));
+            break;
+
+        case QContactModel::HomeZip:
+        case QContactModel::BusinessZip:
+            conditions << QString("addresstype='%1'").arg(field == QContactModel::BusinessZip ? QContact::Business : QContact::Home);
+            conditions << whereClause.arg("contactaddresses.zip");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactaddresses ON (t1.recid = contactaddresses.recid) "));
+            break;
+
+        case QContactModel::HomeCountry:
+        case QContactModel::BusinessCountry:
+            conditions << QString("addresstype='%1'").arg(field == QContactModel::BusinessCountry ? QContact::Business : QContact::Home);
+            conditions << whereClause.arg("contactaddresses.country");
+            query = model.selectText("DISTINCT t1.recid", conditions, QStringList(" JOIN contactaddresses ON (t1.recid = contactaddresses.recid) "));
+            break;
+
+            // Unhandled
+        case QContactModel::Portrait:
+        case QContactModel::Notes:
+        case QContactModel::Identifier:
+        case QContactModel::Categories:
+        case QContactModel::Invalid:
+            break;
+
+    }
+
+    QString sortColumnString = "t1." + model.orderBy().join(", t1.");
+
+    if (!sortColumnString.isNull())
+        query.append(" ORDER BY " + sortColumnString + ", t1.recid");
+    else
+        query.append(" ORDER BY t1.recid");
+
+    q.prepare(query);
+    q.exec();
+
+    while (q.next()) {
+        matches << QUniqueId::fromUInt(q.value(0).toUInt());
+    }
+
+    return matches;
+}
+
+/*!
+  \internal
+
+  Sets the value for field \a k of contact at \a row for the current filter and sort settings
+  to \a v.  Returns true if successfully updated, otherwise returns false.
+*/
+bool ContactSqlIO::setContactField(int row, QContactModel::Field k,  const QVariant &v)
+{
+    QContact t = contact(row);
+    if (QContactModel::setContactField(t, k, v))
+        return updateContact(t);
+    return false;
+}
+
+QList< QList<QVariant> > ContactSqlIO::mFormat;
+QList< QContactModel::Field > ContactSqlIO::mFormatFieldOrder;
+
+void ContactSqlIO::initFormat()
+{
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "formatting" );
+    int curfmtn = config.value( "NameFormat" ).toInt();
+    QString curfmt = config.value( "NameFormatFormat"+QString::number(curfmtn) ).toString();
+    setFormat( curfmt );
+    config.endGroup();
+}
+
+/*!
+  Returns the label for \a contact based on the other fields set for \a contact
+  and the current label format set.
+
+  \sa setFormat()
+*/
+QString ContactSqlIO::formattedLabel(const QContact &contact)
+{
+    if (mFormat.count() == 0)
+        initFormat();
+    foreach(QList<QVariant> f, mFormat) {
+        QString value;
+        QListIterator<QVariant> fit(f);
+        bool match = true;
+        while(fit.hasNext()) {
+            QVariant v = fit.next();
+            if (v.type() == QVariant::Int) {
+                QContactModel::Field k = (QContactModel::Field)v.toInt();
+                QString field = QContactModel::contactField(contact, k).toString();
+                if (field.isEmpty()) {
+                    match = false;
+                    break;
+                }
+                value += field;
+            } else if (v.type() == QVariant::String) {
+                value += v.toString();
+            }
+        }
+        if (match)
+            return value;
+    }
+    return contact.firstName();
+}
+
+/*!
+  Sets the format for labels of contacts returned by the QContactModel to
+  \a value.
+
+  The format is a set of pattern separated by '|'s.  Each pattern is
+  a set of space separated tokens.  A token can either be _ for a space,
+  an identifier as from identifierKey(), or any string.  The format for label
+  will the first pattern for which all fields specified are non null for the contact.
+
+  For example:
+
+  LastName , _ FirstName | LastName | FirstName | Company
+*/
+void ContactSqlIO::setFormat(const QString &value) {
+
+    QList< QList<QVariant> > newFormat;
+    QList< QContactModel::Field > newFormatOrder;
+
+    QList<QContactModel::Field> keys = labelKeys();
+    QStringList tokens = value.split(' ');
+    QList<QVariant> last;
+    bool lastvalid = false;
+    bool initiallyEmpty = (mFormat.count() == 0);
+    while(tokens.count() > 0) {
+        QString token = tokens.takeFirst();
+        QContactModel::Field key = QContactModel::identifierField(token);
+        if (keys.contains(key)) {
+            lastvalid = true;
+            last.append(key);
+            if (!newFormatOrder.contains(key) && key != QContactModel::NameTitle && key != QContactModel::Suffix)
+                newFormatOrder.append(key);
+        } else if (token == "|") {
+            if (lastvalid)
+                newFormat.append(last);
+            lastvalid = false;
+            last.clear();
+        } else {
+            token.replace("_", " ");
+            last.append(token);
+        }
+    }
+    if (lastvalid)
+        newFormat.append(last);
+    if (newFormat.count() > 0) {
+        mFormat = newFormat;
+        mFormatFieldOrder = newFormatOrder;
+
+        // The process that calls setFormat is responsible for
+        // updating the database...
+        updateLabelField();
+
+        // if we weren't initially initializing, get our ios to change
+        if (!initiallyEmpty) {
+            foreach(ContactSqlIO * io, allIos)
+                io->emitLabelFormatChanged();
+        }
+    }
+
+}
+
+QString ContactSqlIO::sqlLabel()
+{
+    int fc = formatCount();
+    QString expression = "(CASE ";
+    for (int i = 0; i < fc; i++) {
+        QList<QVariant> f = format(i);
+        expression += "WHEN ";
+        bool firstkey = true;
+        QListIterator<QVariant> it(f);
+        while(it.hasNext()) {
+            QVariant v = it.next();
+            if (v.type() == QVariant::String)
+                continue;
+            if (!firstkey)
+                expression += "AND ";
+            firstkey = false;
+            QContactModel::Field k = (QContactModel::Field)v.toInt();
+            if (k == QContactModel::Invalid || k == QContactModel::Label)
+                return sqlColumn(QContactModel::FirstName); // soft fail.
+            expression += sqlColumn(k) + " IS NOT NULL ";
+        }
+        expression += "THEN ";
+        QListIterator<QVariant> fit(f);
+        while(fit.hasNext()) {
+            QVariant v = fit.next();
+            if (v.type() == QVariant::Int) {
+                QContactModel::Field k = (QContactModel::Field)v.toInt();
+                if (k == QContactModel::Invalid || k == QContactModel::Label)
+                    return sqlColumn(QContactModel::FirstName); // soft fail.
+                expression += sqlColumn(k) + " ";
+            } else if (v.type() == QVariant::String) {
+                expression += "\"" + v.toString() + "\" ";
+            }
+            if (fit.hasNext())
+                expression += "|| ";
+        }
+    }
+    expression += "ELSE NULL END)";
+
+    return expression;
+}
+
+void ContactSqlIO::updateLabelField()
+{
+    // We should only update if our real label format has changed
+    QSettings config( "Trolltech", "Contacts" );
+    config.beginGroup( "formatting" );
+    QString oldSql = config.value( "NameFormatSql" ).toString();
+
+    QString currentSql = sqlLabel();
+
+    if (oldSql != currentSql) {
+        // Unfortunately we need to update the database for all the contacts.  Use
+        // the constructed SQL so we don't have to read out everything and stuff it
+        // back in.
+
+        //
+        // Testing shows that dropping the contactslabelindex and recreating it
+        // gives better performance...
+        //
+        // but we have to make sure we aren't called in a transaction already.
+        // if so, we don't make the change and leave the label column as is.
+        // we don't update the ini field, however, so next time we get called
+        // we will hopefully be able to update the label.
+        QSqlQuery q(database());
+        if(database().transaction()) {
+            q.prepare("DROP INDEX contactslabelindex");
+            q.exec();
+            q.prepare("UPDATE contacts SET label=" + currentSql);
+            q.exec();
+            q.prepare("CREATE INDEX contactslabelindex ON contacts(label)");
+            q.exec();
+            database().commit();
+
+            config.setValue("NameFormatSql", currentSql);
+        }
+    }
+}
+
+void ContactSqlIO::emitLabelFormatChanged()
+{
+    emit labelFormatChanged();
+}
+
+int ContactSqlIO::formatCount()
+{
+    if (mFormat.count() == 0)
+        initFormat();
+    return mFormat.count();
+}
+
+QList<QVariant> ContactSqlIO::format(int i)
+{
+    if (mFormat.count() == 0)
+        initFormat();
+    return mFormat[i];
+}
+
+QString ContactSqlIO::format()
+{
+    if (mFormat.count() == 0)
+        initFormat();
+    QString expression;
+
+    int fc = ContactSqlIO::formatCount();
+
+    for (int i = 0; i < fc; i++) {
+        QList<QVariant> f = ContactSqlIO::format(i);
+        QListIterator<QVariant> fit(f);
+        while(fit.hasNext()) {
+            QVariant v = fit.next();
+            if (v.type() == QVariant::Int) {
+                QContactModel::Field k = (QContactModel::Field)v.toInt();
+                if (k == QContactModel::Invalid || k == QContactModel::Label)
+                    return QContactModel::fieldIdentifier(QContactModel::FirstName); // soft fail.
+                expression += QContactModel::fieldIdentifier(k) + " ";
+            } else if (v.type() == QVariant::String) {
+                QString s = v.toString();
+                if (v == " ")
+                    expression += "_ ";
+                else
+                    expression += v.toString() + " ";
+            }
+            if (fit.hasNext())
+                expression += "| ";
+        }
+    }
+    return expression;
+}
+
+QList<QContactModel::Field> ContactSqlIO::formatFieldOrder()
+{
+    if (mFormat.count() == 0)
+        initFormat();
+    return mFormatFieldOrder;
+}
+
+QList<QContactModel::Field> ContactSqlIO::labelKeys()
+{
+    QList<QContactModel::Field> result;
+    result << QContactModel::NameTitle;
+    result << QContactModel::FirstName;
+    result << QContactModel::MiddleName;
+    result << QContactModel::LastName;
+    result << QContactModel::Suffix;
+    result << QContactModel::Company;
+    result << QContactModel::Department;
+    result << QContactModel::JobTitle;
+    result << QContactModel::Office;
+    return result;
+}
+
+QStringList ContactSqlIO::labelIdentifiers()
+{
+    QList<QContactModel::Field> keys = labelKeys();
+    QStringList result;
+    foreach(QContactModel::Field k, keys) {
+        result << QContactModel::fieldIdentifier(k);
+    }
+    return result;
+
+}
+
+// Note: this logic is also in QMailAddress.  Currently qtopiamail depends
+// on qtopiapim, but not vice-versa, so a good way of sharing code will
+// need to be determined.
+static QString minimalEmailAddress(const QString& address)
+{
+    QString result;
+
+    // Email addresses can contained quoted sections (delimited with ""), or
+    // comments (including nested), delimited with parentheses.  Whitespace is
+    // legal but removed to give the canonical form.
+
+    int commentDepth = 0;
+    bool quoted = false;
+    bool escaped = false;
+
+    // Remove any whitespace or comments from the email address
+    const QChar* it = address.constData();
+    const QChar* end = it + address.length();
+    for ( ; it != end; ++it ) {
+        if ( !escaped && ( *it == '\\' ) ) {
+            escaped = true;
+            continue;
+        }
+
+        if ( *it == '(' && !escaped && !quoted ) {
+            commentDepth += 1;
+        }
+        else if ( *it == ')' && !escaped && !quoted && ( commentDepth > 0 ) ) {
+            commentDepth -= 1;
+        }
+        else if ( quoted || !(*it).isSpace() ) {
+            if ( !quoted && *it == '"' && !escaped ) {
+                quoted = true;
+            }
+            else if ( quoted && *it == '"' && !escaped ) {
+                quoted = false;
+            }
+            if ( commentDepth == 0 ) {
+                result.append( *it );
+            }
+        }
+
+        escaped = false;
+    }
+
+    return result;
+}
+
+QUniqueId ContactSqlIO::matchEmailAddress(const QString &address, int &bestMatch) const
+{
+    bestMatch = 0;
+    const QString inputAddress(minimalEmailAddress(address));
+    QList<QUniqueId> candidates = match(QContactModel::Emails, inputAddress, Qt::MatchContains);
+    foreach (QUniqueId candidate, candidates) {
+        QContact contact = ContactSqlIO::contact(candidate);
+
+        QStringList addresses = contact.emailList();
+        foreach (QString element, addresses) {
+            if (inputAddress.compare(minimalEmailAddress(element)) == 0) {
+                bestMatch = 100;
+                return candidate;
+            }
+        }
+    }
+    return QUniqueId();
+}
+
+QMap<QChar, QString> ContactSqlIO::mPhoneButtonText;
+bool ContactSqlIO::mPhoneButtonTextRead = false;
+
+QMap<QChar, QString> ContactSqlIO::phoneButtonText()
+{
+    if (mPhoneButtonTextRead)
+        return mPhoneButtonText;
+
+    QTranslatableSettings cfg(Qtopia::defaultButtonsFile(), QSettings::IniFormat); // No tr
+
+    cfg.beginGroup("TextButtons");
+
+    QString buttons = cfg.value("Buttons").toString(); // No tr
+
+    for (int i = 0; i < (int)buttons.length(); i++) {
+        QChar ch = buttons[i];
+        if (!ch.isDigit())
+            continue;
+
+        QString tapfunc("Tap"); // No tr
+        tapfunc += ch;
+
+        QString fn = cfg.value(tapfunc).toString();
+
+        if (fn[0] != '\'' && fn[0] != '"' )
+            continue;
+
+        fn = fn.mid(1);
+        mPhoneButtonText.insert(ch, fn);
+    }
+
+    mPhoneButtonTextRead = true;
+    return mPhoneButtonText;
+}
+
+
+QList<QContactModel::Field> ContactSqlIO::labelSearchFields()
+{
+    QList<QContactModel::Field> l;
+    l << QContactModel::FirstName;
+    l << QContactModel::LastName;
+    l << QContactModel::Company;
+    return l;
+}
+
+QList<QContactModel::Field> ContactSqlIO::phoneNumberSearchFields()
+{
+    QList<QContactModel::Field> l;
+    l << QContactModel::OtherPhone;
+    l << QContactModel::OtherMobile;
+    l << QContactModel::OtherFax;
+    l << QContactModel::OtherPager;
+    l << QContactModel::HomePhone;
+    l << QContactModel::HomeMobile;
+    l << QContactModel::HomeFax;
+    l << QContactModel::HomePager;
+    l << QContactModel::BusinessPhone;
+    l << QContactModel::BusinessMobile;
+    l << QContactModel::BusinessFax;
+    l << QContactModel::BusinessPager;
+    return l;
+}
 
 /***************
  * CONTEXT
@@ -1213,7 +2052,7 @@ public:
             newContextId = context->mappedContext();
         }
 
-        // XXX this should go into QUniqueId
+        // this is in QUniqueId, but private
         newId = QUniqueId::fromUInt(newContextId << 24 | contactId.toUInt() & 0x00ffffff);
 
 
@@ -1502,7 +2341,7 @@ bool QContactDefaultContext::importContacts(const QPimSource &s, const QList<QCo
 
     QDateTime syncTime = QTimeZone::current().toUtc(QDateTime::currentDateTime());
 
-    if (!d->access->startSync(s, syncTime))
+    if (!d->access->startTransaction(syncTime))
         return false;
 
     foreach(QContact c, list) {
@@ -1522,7 +2361,7 @@ bool QContactDefaultContext::importContacts(const QPimSource &s, const QList<QCo
         d->importQuery.bindValue(":c", c.company());
 
         if (!d->importQuery.exec()) {
-            d->access->abortSync();
+            d->access->abortTransaction();
             return false;
         }
         if (d->importQuery.next()) {
@@ -1536,300 +2375,7 @@ bool QContactDefaultContext::importContacts(const QPimSource &s, const QList<QCo
             addContact(c, s);
         }
     }
-    return d->access->commitSync();
-}
-
-
-struct SyncPacket
-{
-    char command[8];
-    uint size;
-    char *data;
-};
-
-// can be made generic, e.g. record(), etc.
-// This is about as simple as sync gets.
-class QContactSync : public QObject
-{
-    Q_OBJECT
-public:
-    QContactSync(const QPimSource &mSource, ContactSqlIO *mAccess)
-        : s(0), source(mSource), access(mAccess),
-        mStatus(QContactDefaultContext::NotStarted),
-        expectedServerHeader("QtopiaServer:040200\n\n"),
-        clientHeader("Qtopia:040200\n\n"),
-        nextSyncCommand("next    "),
-        lastSyncCommand("last    "),
-        replaceCommand( "replace "),
-        removeCommand(  "remove  "),
-        createCommand(  "create  "),
-        endCommand(     "end     ")
-    {
-        // for now, socket.  later, obex.
-        s = new QTcpSocket;
-        connect(s, SIGNAL(connected()), this, SLOT(sendClientHeader()));
-        connect(s, SIGNAL(readyRead()), this, SLOT(processCommand()));
-    }
-
-    void startSync() {
-        mStatus = QContactDefaultContext::InProgress;
-        s->connectToHost("localhost", 7705);
-    }
-
-    QContactDefaultContext::Status status() const { return mStatus; }
-
-public slots:
-    void sendClientHeader()
-    {
-        QDataStream stream(s);
-        nextSync = QTimeZone::current().toUtc(QDateTime::currentDateTime());
-        lastSync = access->lastSyncTime(source);
-        stream.writeRawData(clientHeader, 15);
-        stream.writeRawData(nextSyncCommand, 8);
-        stream << nextSync;
-        stream.writeRawData(lastSyncCommand, 8);
-        stream << lastSync;
-
-        // next action is to recieve the server header
-    }
-
-    void processCommand()
-    {
-        if (serverNextSync.isNull() || serverLastSync.isNull())
-            verifyServerHeader();
-        else
-            recieveServerDiff(); // should check that its sent the diff.
-    }
-
-    void verifyServerHeader()
-    {
-        QDataStream stream(s);
-        if (!compare(stream, expectedServerHeader, 21)) {
-            fail(QContactDefaultContext::BadAuthentication);
-            return;
-        }
-
-        if (!compare(stream, nextSyncCommand, 8)) {
-            fail(QContactDefaultContext::BadAuthentication);
-            return;
-        }
-        stream >> serverNextSync;
-        if (!compare(stream, lastSyncCommand, 8)) {
-            fail(QContactDefaultContext::BadAuthentication);
-            return;
-        }
-        stream >> serverLastSync;
-
-        // later, should check that the server concepts
-        // of sync time match the clients
-
-        sendClientDiff();
-    }
-
-    void sendClientDiff()
-    {
-        // date stamps tell us if we are about to sync the right data;
-        // use later;
-
-        // first get and send diff.
-        QDataStream stream(s);
-
-        QPreparedSqlQuery q;
-        q.prepare("SELECT recid, created, modified, removed FROM changelog JOIN contacts WHERE contacts.recid = changelog.recid AND modified > :m AND context = :c");
-        q.bindValue(":m", serverLastSync);
-        q.bindValue(":c", QPimSqlIO::sourceContext(source));
-        if (!q.exec()) {
-            fail(QContactDefaultContext::DataAccessError);
-            return;
-        }
-        while(q.next()) {
-            QUniqueId recid(q.value(0).toByteArray());
-            QDateTime created(q.value(1).toDateTime());
-            QDateTime modified(q.value(1).toDateTime());
-            QDateTime removed(q.value(1).toDateTime());
-
-            if (removed.isValid()) {
-                // removed contact
-                stream.writeRawData(removeCommand, 8);
-                stream << recid;
-            } else {
-                // created or modifed contact
-                QContact contact = access->contact(recid);
-                if (created > serverLastSync) {
-                    stream.writeRawData(createCommand, 8);
-                } else {
-                    stream.writeRawData(replaceCommand, 8);
-                }
-                stream << recid;
-                writeContact(stream, contact);
-            }
-        }
-        stream.writeRawData(endCommand, 8);
-        s->waitForBytesWritten(100);
-
-        // now wait for return diff from server
-    }
-
-    void recieveServerDiff()
-    {
-        QDataStream stream(s);
-
-        // int the interests of not prolonging the lock of the db,
-        // this function is not split into multiple reads nor is
-        // is the startSync or locking of the database done before this point
-        //
-        access->startSync(source, nextSync);
-
-        while(1) {
-            QByteArray command;
-            stream >> command;
-            if (command == replaceCommand) {
-                QContact contact;
-                QUniqueId recid;
-                stream >> recid;
-                // recid used on server for merge info
-                contact = readContact(stream);
-                if (contact.uid().isNull()) {
-                    fail(QContactDefaultContext::ParseError);
-                    access->abortSync();
-                    return;
-                }
-                access->updateContact(contact);
-            } else if (command == createCommand) {
-                QContact contact;
-                QUniqueId recid;
-                stream >> recid;
-                contact = readContact(stream);
-                if (contact.uid().isNull()) {
-                    fail(QContactDefaultContext::ParseError);
-                    access->abortSync();
-                    return;
-                }
-                access->addContact(contact,source);
-            } else if (command == removeCommand) {
-                QUniqueId recid;
-                stream >> recid;
-                access->removeContact(recid);
-            } else if (command == endCommand) {
-                // done
-                break;
-            } else {
-                // error
-                fail(QContactDefaultContext::ParseError);
-                access->abortSync();
-                return;
-            }
-        }
-        access->commitSync();
-        s->disconnect();
-        emit completed();
-    }
-
-signals:
-    void error(int);
-    void completed();
-
-private:
-    void fail(QContactDefaultContext::Status status)
-    {
-        mStatus = status;
-        s->disconnect();
-        emit error(mStatus);
-    }
-
-    bool compare(QDataStream &stream, const char *target, int size)
-    {
-        char buffer[128];
-        stream.readRawData(buffer, size);
-        buffer[size] = '\0';
-        return strncmp(buffer, target, size) == 0;
-    }
-
-    static void writeContact(QDataStream &stream, const QContact &c)
-    {
-        QByteArray bytes;
-        QDataStream arrayStream(&bytes, QIODevice::WriteOnly);
-        c.writeVCard(&arrayStream);
-        stream << bytes;
-    }
-
-    static QContact readContact(QDataStream &stream)
-    {
-        QByteArray bytes;
-        stream >> bytes;
-    
-        QList<QContact> list = QContact::readVCard(bytes);
-        if(list.count() == 1)
-            return list[0];
-        return QContact();
-    }
-
-
-    QTcpSocket *s;
-    QPimSource source;
-    ContactSqlIO *access;
-
-    QContactDefaultContext::Status mStatus;
-
-    QDateTime lastSync;
-    QDateTime nextSync;
-    QDateTime serverLastSync;
-    QDateTime serverNextSync;
-
-    const char *expectedServerHeader;
-    const char *clientHeader;
-    const char *nextSyncCommand;
-    const char *lastSyncCommand;
-    const char *replaceCommand;
-    const char *removeCommand;
-    const char *createCommand;
-    const char *endCommand;
-};
-
-void QContactDefaultContext::startSync()
-{
-    if (!d->syncer)
-        d->syncer = new QContactSync(defaultSource(), d->access);
-    d->syncer->startSync();
-}
-
-bool QContactDefaultContext::syncing() const
-{
-    return status() == InProgress;
-}
-
-void QContactDefaultContext::syncProgress(int &amount, int &total) const
-{
-    //  can probably do better than this ;)
-    if (syncing()) {
-        amount = 0;
-        total = 1;
-    } else {
-        amount = 1;
-        total = 1;
-    }
-}
-
-QContactDefaultContext::Status QContactDefaultContext::status() const
-{
-    return d->syncer->status();
-}
-
-QString QContactDefaultContext::statusMessage(Status status)
-{
-    switch(status) {
-        case QContactDefaultContext::NotStarted:
-        case QContactDefaultContext::Completed:
-            return QString();
-        case QContactDefaultContext::InProgress:
-            return tr("Downloading appointments.");
-        case QContactDefaultContext::ServiceUnavailable:
-            return tr("Could not contact sync destination.");
-        case QContactDefaultContext::ParseError:
-            return tr("Error processing server sync information.");
-        default:
-            return tr("An unknown error has occurred.");
-    }
+    return d->access->commitTransaction();
 }
 
 #include "qcontactsqlio.moc"

@@ -1,37 +1,60 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #ifndef QMAILVIEWER_H
 #define QMAILVIEWER_H
 
+#include <QMailMessage>
 #include <QObject>
 #include <QString>
 #include <QVariant>
 
 #include <qtopiaglobal.h>
 
+class QContact;
 class QMenu;
-class QMailMessage;
 class QUrl;
 class QWidget;
+
+class QMailViewerInterface;
+
+class QTOPIAMAIL_EXPORT QMailViewerFactory
+{
+public:
+    enum PresentationType
+    {
+        AnyPresentation = 0,
+        StandardPresentation = 1,
+        ConversationPresentation = 2,
+        UserPresentation = 64
+    };
+
+    // Yield the ID for each interface supporting the supplied type, where the
+    // value is interpreted as a ContentType value
+    static QStringList keys(QMailMessage::ContentType type = QMailMessage::UnknownContent, PresentationType pres = AnyPresentation);
+
+    // Yield the default ID for the supplied type
+    static QString defaultKey(QMailMessage::ContentType type = QMailMessage::UnknownContent, PresentationType pres = AnyPresentation);
+
+    // Use the interface identified by the supplied ID to create a viewer
+    static QMailViewerInterface *create(const QString &key, QWidget *parent = 0);
+};
 
 // The interface for objects able to view mail messages
 class QTOPIAMAIL_EXPORT QMailViewerInterface : public QObject
@@ -48,35 +71,27 @@ public:
 
     virtual void addActions(QMenu* menu) const;
 
+    virtual bool handleIncomingMessages(const QMailMessageIdList &list) const;
+    virtual bool handleOutgoingMessages(const QMailMessageIdList &list) const;
+
 public slots:
     virtual bool setMessage(const QMailMessage& mail) = 0;
     virtual void setResource(const QUrl& name, QVariant value);
     virtual void clear() = 0;
 
 signals:
+    void replyToSender();
+    void replyToAll();
+    void forwardMessage();
+    void completeMessage();
+    void deleteMessage();
+    void saveSender();
+    void contactDetails(const QContact &contact);
     void anchorClicked(const QUrl &link);
+    void messageChanged(const QMailMessageId &id);
+    void viewMessage(const QMailMessageId &id, QMailViewerFactory::PresentationType);
+    void sendMessage(const QMailMessage &message);
     void finished();
 };
 
-class QTOPIAMAIL_EXPORT QMailViewerFactory
-{
-public:
-    enum ContentType
-    {
-        StaticContent = 0,
-        SmilContent = 1,
-        AnyContent = 2
-    };
-
-    // Yield the ID for each interface supporting the supplied type, where the
-    // value is interpreted as a ContentType value
-    static QStringList keys( ContentType type = AnyContent );
-
-    // Yield the default ID for the supplied type
-    static QString defaultKey( ContentType type = AnyContent );
-
-    // Use the interface identified by the supplied ID to create a viewer
-    static QMailViewerInterface *create( const QString &key, QWidget *parent = 0 );
-};
-
-#endif // QMAILVIEWER_H
+#endif

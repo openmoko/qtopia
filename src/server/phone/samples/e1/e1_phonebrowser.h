@@ -1,36 +1,35 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef _e1_PHONEBROWSER_H_
-#define _e1_PHONEBROWSER_H_
+#ifndef E1_PHONEBROWSER_H
+#define E1_PHONEBROWSER_H
 
 #include "e1_bar.h"
 #include <QStackedWidget>
 #include <qcategorymanager.h>
-#include "phonebrowser.h"
+#include <QContentSet>
+#include "lazycontentstack.h"
+#include <QListView>
 #include <QPixmap>
 #include <QString>
 #include <QStringList>
 #include <qvaluespace.h>
-#include "launcherview.h"
 
 class E1PhoneBrowserTabs;
 
@@ -48,6 +47,7 @@ protected:
     virtual void showView(const QString &);
     virtual void raiseView(const QString &, bool reset);
     virtual void keyPressEvent(QKeyEvent *);
+    virtual QObject* currentViewObject();
 
 private slots:
     void tabChanged(const QString &);
@@ -67,6 +67,4 @@ private:
     QMap<QString, QWidget *> m_views;
 };
 
-
-#endif // _e1_PHONEBROWSER_H_
-
+#endif

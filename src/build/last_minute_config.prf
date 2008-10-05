@@ -11,3 +11,9 @@ load(implicit_deps,true)
 # Setup the install prefixes
 load(install_prefix)
 
+desktop:h=HOST
+else:h=TARGET
+INCLDEPATH+=$$eval($${h}_INCLUDEPATH)
+LIBS+=$$eval($${h}_LIBS)
+DEFINES+=$$eval($${h}_DEFINES)
+

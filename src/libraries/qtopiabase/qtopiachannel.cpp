@@ -1,28 +1,26 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <qtopiachannel.h>
 #include <QObject>
 
-#if !defined(QTOPIA_HOST) && !defined(QTOPIA_DBUS_IPC)
+#if !defined(QTOPIA_HOST)
 #if defined(Q_WS_QWS)
 #include <qcopchannel_qws.h>
 #define QTOPIA_REGULAR_QCOP
@@ -32,10 +30,7 @@
 #endif
 #endif
 
-#if defined(QTOPIA_DBUS_IPC)
-#include <qtdbus/qdbusconnection.h>
-#include <qtdbus/qdbusmessage.h>
-#elif defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
 #include <quuid.h>
 
 // Maximum size of a QCop message before it must be broken up.
@@ -47,12 +42,8 @@
 #include <QString>
 #include <QTimer>
 
-#if defined(QTOPIA_DBUS_IPC)
-#include "dbusipccommon_p.h"
-#endif
-
 class QtopiaChannel_Private
-#if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
     : public QCopChannel
 #else
     : public QObject
@@ -63,13 +54,7 @@ class QtopiaChannel_Private
 public:
     QtopiaChannel_Private(const QString &channel, QtopiaChannel *parent);
     ~QtopiaChannel_Private();
-#if defined(QTOPIA_DBUS_IPC)
-    QString m_channelName;
-
-    static bool dbusSend(const QString &channel,
-                         const QString &msg,
-                         const QByteArray &data);
-#elif defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
     QTimer *m_cleanupTimer;
 
     void receive(const QString& msg, const QByteArray &data);
@@ -85,10 +70,7 @@ public:
 #endif
     QtopiaChannel *m_parent;
 
-#if defined(QTOPIA_DBUS_IPC)
-private slots:
-    void handleSignalReceived(const QByteArray &arr, const QDBusMessage &msg);
-#elif defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
 private slots:
     void cleanup();
 #endif
@@ -96,34 +78,12 @@ private slots:
 };
 
 QtopiaChannel_Private::QtopiaChannel_Private(const QString &channel, QtopiaChannel *parent) :
-#if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
         QCopChannel(channel, parent), m_fragments(0),
 #endif
         m_parent(parent)
 {
-#if defined(QTOPIA_DBUS_IPC)
-    m_channelName = channel;
-
-    QDBusConnection dbc = QDBus::sessionBus();
-
-    if (!dbc.isConnected())
-        qFatal("Application: %s Connection to DBUS Daemon lost!!",
-               qApp->applicationName().toLatin1().constData());
-
-    QString dbusPath;
-    convert_qcop_channel_to_dbus_path(channel, dbusPath);
-
-    bool r = dbc.connect(QString(),                          // Service
-                         dbusPath,                           // Path
-                         dbusInterface,                      // Interface
-                         QString(),                          // Name
-                         this,
-                         SLOT(handleSignalReceived(QByteArray,QDBusMessage)));
-
-    if (!r)
-        qFatal("dbc.connect failed!!");
-
-#elif defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
     m_cleanupTimer = new QTimer();
     m_cleanupTimer->setSingleShot(true);
     connect(m_cleanupTimer, SIGNAL(timeout()), this, SLOT(cleanup()) );
@@ -135,70 +95,17 @@ QtopiaChannel_Private::QtopiaChannel_Private(const QString &channel, QtopiaChann
 
 QtopiaChannel_Private::~QtopiaChannel_Private()
 {
-#if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
     if (m_cleanupTimer)
         delete m_cleanupTimer;
     cleanup();
 #endif
 }
 
-#if defined(QTOPIA_DBUS_IPC)
-void QtopiaChannel_Private::handleSignalReceived(const QByteArray &arr, const QDBusMessage &msg)
-{
-    QString message;
-    convert_dbus_to_qcop_message_name(msg.member(), message);
-    emit m_parent->received(message, arr);
-}
-
-bool QtopiaChannel_Private::dbusSend(const QString &channel,
-                                     const QString &msg,
-                                     const QByteArray &data)
-{
-    QDBusConnection dbc = QDBus::sessionBus();
-    QString dbusPath;
-
-    QDBusMessage message;
-
-    // Handle this specially
-    if (channel.startsWith("QPE/Application/")) {
-        const int pref=16;
-        QString app = channel.mid(pref);
-
-        dbusPath = QString("/com/trolltech/qtopia/QPE/Application/");
-        dbusPath += app;
-
-        QString dbusService("com.trolltech.qtopia.QPE.Application.");
-        dbusService += app;
-
-        message = QDBusMessage::methodCall(dbusService, dbusPath, dbusInterface,
-                                           "appMessage", dbc);
-        message << msg;
-    }
-    else {
-        QString dbusMsg;
-        convert_qcop_message_name_to_dbus(msg, dbusMsg);
-        convert_qcop_channel_to_dbus_path(channel, dbusPath);
-        message = QDBusMessage::signal(dbusPath, dbusInterface, dbusMsg, dbc);
-    }
-
-    if (!data.isNull()) {
-        message << data;
-    } else {
-        QByteArray arr("");
-        message << arr;
-    }
-
-    bool ret = dbc.send(message);
-    if (!ret)
-        qWarning("Unable to send message: %s", dbc.lastError().message().toAscii().constData());
-
-    return ret;
-}
-#endif
-
 /*!
     \class QtopiaChannel
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \ingroup ipc
 
     \brief The QtopiaChannel class provides communication capabilities
@@ -214,7 +121,7 @@ bool QtopiaChannel_Private::dbusSend(const QString &channel,
 
     There are currently two implementations for QtopiaChannel,
     one layered over the Qt QCop mechanism, and another one for DBus.
-    QCop mechanism is currently only available on \l {Qtopia Core}.
+    QCop mechanism is currently only available on \l {Qt for Embedded Linux}.
 
     Typically, QtopiaChannel is either used to send messages to a
     channel using the provided static functions, or to listen to the
@@ -269,9 +176,7 @@ QtopiaChannel::~QtopiaChannel()
 */
 QString QtopiaChannel::channel() const
 {
-#if defined(QTOPIA_DBUS_IPC)
-    return m_data->m_channelName;
-#elif defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
     return m_data->channel();
 #else
     return QString();
@@ -279,20 +184,13 @@ QString QtopiaChannel::channel() const
 }
 
 /*!
-    Returns true if the \a channel is registered.  Note that this function
-    always returns true in the DBus implementation.  In the QCop implementation,
+    Returns true if the \a channel is registered.  In the QCop implementation,
     this function requires a round-trip to the QWS server, which may impact
     system performance.
 */
 bool QtopiaChannel::isRegistered(const QString &channel)
 {
-#if defined(QTOPIA_DBUS_IPC)
-    //TODO: There's no registration framework in DBUS for signals
-    //      will need to add this later on
-    //      For now just return whether we're connected
-    QDBusConnection dbc = QDBus::sessionBus();
-    return dbc.isConnected();
-#elif defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
     return QCopChannel::isRegistered(channel);
 #else
     Q_UNUSED(channel);
@@ -308,9 +206,7 @@ bool QtopiaChannel::isRegistered(const QString &channel)
 */
 bool QtopiaChannel::send(const QString &channel, const QString &msg)
 {
-#if defined(QTOPIA_DBUS_IPC)
-    return QtopiaChannel_Private::dbusSend(channel, msg, QByteArray(""));
-#elif defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
     return QCopChannel::send(channel, msg);
 #else
     Q_UNUSED(channel);
@@ -329,9 +225,7 @@ bool QtopiaChannel::send(const QString &channel, const QString &msg)
 bool QtopiaChannel::send(const QString &channel, const QString &msg,
                          const QByteArray &data)
 {
-#if defined(QTOPIA_DBUS_IPC)
-    return QtopiaChannel_Private::dbusSend(channel, msg, data);
-#elif defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
 
     // Send the message as-is if it is smaller than the fragment size.
     if ( data.size() <= MAX_FRAGMENT_SIZE )
@@ -375,17 +269,14 @@ bool QtopiaChannel::send(const QString &channel, const QString &msg,
 */
 bool QtopiaChannel::flush()
 {
-#if defined(QTOPIA_DBUS_IPC)
-    qWarning("QtopiaChannel::flush() - Not implemented for DBus");
-    return true;
-#elif defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
     return QCopChannel::flush();
 #else
     return false;
 #endif
 }
 
-#if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
+#if defined(QTOPIA_REGULAR_QCOP)
 
 void QtopiaChannel_Private::receive(const QString& msg, const QByteArray &data)
 {

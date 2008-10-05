@@ -1,29 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "qmediawidgets.h"
 #include <QtopiaApplication>
 
-#include <private/mediastyle_p.h>
-#include <private/activitymonitor_p.h>
+#include "mediastyle_p.h"
+#include "activitymonitor_p.h"
 
 static QImage load_scaled_image( const QString& filename, const QSize& size, Qt::AspectRatioMode mode = Qt::IgnoreAspectRatio )
 {
@@ -83,7 +81,8 @@ static QImage contrast( const QColor& color, const QImage& image )
 
 /*!
     \class QMediaStateLabel
-    \mainclass
+    \inpublicgroup QtMediaModule
+
 
     \brief The QMediaStateLabel class displays icons for the various states of
     media playback.
@@ -277,7 +276,8 @@ void SimpleLabel::paintEvent( QPaintEvent* )
 
 /*!
     \class QMediaProgressLabel
-    \mainclass
+    \inpublicgroup QtMediaModule
+
 
     \brief The QMediaProgressLabel class displays the current progress of a
     playing media content as a text label.
@@ -580,24 +580,22 @@ private:
 SlimlineProgress::SlimlineProgress( QWidget* parent )
     : QProgressBar( parent )
 {
-    static const QColor TROLLTECH_GREEN = QColor( 166, 206, 57 );
-    static const QColor TROLLTECH_BLACK = QColor::fromCmykF( 0, 0, 0, 0.9 );
+    static const QColor GREEN = QColor( 166, 206, 57 );
+    static const QColor BLACK = QColor::fromCmykF( 0, 0, 0, 0.9 );
 
     m_style = new MediaStyle;
     setStyle( m_style );
 
     QPalette custom = palette();
-    custom.setColor( QPalette::Highlight, TROLLTECH_GREEN );
-    custom.setColor( QPalette::Shadow, TROLLTECH_BLACK );
+    custom.setColor( QPalette::Highlight, GREEN );
+    custom.setColor( QPalette::Shadow, BLACK );
     setPalette( custom );
-
-    // Optimize paint event
-    setAttribute( Qt::WA_OpaquePaintEvent );
 }
 
 /*!
     \class QMediaProgressWidget
-    \mainclass
+    \inpublicgroup QtMediaModule
+
 
     \brief The QMediaProgressWidget class displays the current progress of a
     playing media content as a progress bar.
@@ -714,7 +712,8 @@ void QMediaProgressWidget::deactivate()
 
 /*!
     \class QMediaVolumeLabel
-    \mainclass
+    \inpublicgroup QtMediaModule
+
 
     \brief The QMediaVolumeLabel class displays icons for the various levels of
     volume.
@@ -916,7 +915,8 @@ void VolumeTask::execute()
 
 /*!
     \class QMediaVolumeWidget
-    \mainclass
+    \inpublicgroup QtMediaModule
+
 
     \brief The QMediaVolumeWidget class displays the current volume level of a
     media content object as a progress bar.
@@ -1372,7 +1372,8 @@ void SeekMonitor::deactivate()
 
 /*!
     \class QMediaSeekWidget
-    \mainclass
+    \inpublicgroup QtMediaModule
+
 
     \brief The QMediaSeekWidget class allows the user to seek within a media content
     object.

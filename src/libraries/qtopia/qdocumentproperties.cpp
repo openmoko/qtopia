@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -64,7 +62,6 @@ public:
         , comment(0)
         , fileSize(0)
         , fastLoad(0)
-        , doc(0)
         , licensesDialog(0)
     {
     }
@@ -78,7 +75,6 @@ public:
     QLabel *comment;
     QLabel *fileSize;
     QCheckBox *fastLoad;
-    const QContent *doc;
     QDialog *licensesDialog;
 };
 
@@ -99,8 +95,9 @@ QString QDocumentPropertiesWidgetPrivate::humanReadable(quint64 size)
 
 /*!
   \class QDocumentPropertiesWidget
+    \inpublicgroup QtBaseModule
   \ingroup content
-  \mainclass
+
   \brief The QDocumentPropertiesWidget class provides controls for viewing and modifying the
    properties of a document.
 
@@ -143,8 +140,6 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &doc, QWidg
 {
     bool isDocument = lnk.isDocument();
     d = new QDocumentPropertiesWidgetPrivate;
-
-    d->doc = &doc;
 
     QFormLayout *layout = new QFormLayout;
 
@@ -190,14 +185,15 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &doc, QWidg
         d->comment->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
     }
 
-    layout->addRow(tr("File Size"), new QLabel("<qt>" + d->humanReadable(lnk.size()) + "</qt>"));
+    if (lnk.isValid())
+        layout->addRow(tr("File Size"), new QLabel("<qt>" + d->humanReadable(lnk.size()) + "</qt>"));
 
     if (!isDocument && lnk.property("CanFastload") != "0")  {
         layout->addRow(d->fastLoad = new QCheckBox(tr("Fast load (consumes memory)")));
 
         QSettings cfg("Trolltech","Launcher");
         cfg.beginGroup("AppLoading");
-        QStringList apps = cfg.value("PreloadApps").toString().split(',');
+        QStringList apps = cfg.value("PreloadApps").toStringList();
         d->fastLoad->setChecked(apps.contains(lnk.executableName()));
     }
 
@@ -238,6 +234,15 @@ void QDocumentPropertiesWidget::applyChanges()
     if ( isDocument && lnk.name() != d->docname->text() ) {
         lnk.setName(d->docname->text());
         changed=true;
+
+        if (lnk.isValid() && !d->fastLoad && !(d->locationCombo && d->locationCombo->isChanged())) {
+            QDir dir = QFileInfo(lnk.fileName()).absoluteDir();
+
+            QString path = dir.absoluteFilePath(safeName(d->docname->text(), dir, lnk.fileName()));
+
+            if (QFile::rename(lnk.fileName(), path))
+                lnk.setFile(path);
+        }
     }
     if ( d->categoryEdit ) {
         QList<QString> tmp = d->categoryEdit->selectedCategories();
@@ -258,7 +263,7 @@ void QDocumentPropertiesWidget::applyChanges()
     if ( d->fastLoad ) {
         QSettings cfg("Trolltech","Launcher");
         cfg.beginGroup("AppLoading");
-        QStringList apps = cfg.value("PreloadApps").toString().split(',');
+        QStringList apps = cfg.value("PreloadApps").toStringList();
         QString exe = lnk.executableName();
         if ( (apps.contains(exe) > 0) != d->fastLoad->isChecked() ) {
             if ( d->fastLoad->isChecked() ) {
@@ -272,7 +277,7 @@ void QDocumentPropertiesWidget::applyChanges()
                 QtopiaIpcEnvelope("QPE/Application/"+exe,
                                "quitIfInvisible()");
             }
-            cfg.setValue("Apps", apps.join(QString(',')));
+            cfg.setValue("PreloadApps", apps);
         }
     }
 }
@@ -295,6 +300,16 @@ void QDocumentPropertiesWidget::duplicateLnk()
     \internal
 */
 QString QDocumentPropertiesWidget::safePath( const QString &name, const QString &location, const QString &type, const QString &oldPath ) const
+{
+    QDir dir(location + type);
+
+    if (!dir.exists())
+        QDir::root().mkpath(dir.absolutePath());
+
+    return dir.absoluteFilePath(safeName(name, dir, oldPath));
+}
+
+QString QDocumentPropertiesWidget::safeName(const QString &name, const QDir &directory, const QString &oldPath) const
 {
     static const char SAFE_SPACE = '_';
 
@@ -321,25 +336,14 @@ QString QDocumentPropertiesWidget::safePath( const QString &name, const QString 
     if ( pos > 0 )
         fileExtn = oldPath.mid( pos );
 
-    QString dir = location + type;
+    QString possibleName = safename + fileExtn;
 
-    QDir root;
+    int n=1;
 
-    if( !root.exists( dir ) )
-        root.mkpath( dir );
+    while (directory.exists(possibleName))
+        possibleName = safename + QLatin1Char('_') + QString::number(n++) + fileExtn;
 
-    QString fn = location + type + "/" + safename;
-    if (QFile::exists(fn + fileExtn)) {
-        int n=1;
-        QString nn = fn + "_" + QString::number(n);
-        while (QFile::exists(nn+fileExtn)) {
-            n++;
-            nn = fn + "_" + QString::number(n);
-        }
-        fn = nn;
-    }
-
-    return fn + fileExtn;
+    return possibleName;
 }
 
 /*!
@@ -359,6 +363,7 @@ bool QDocumentPropertiesWidget::moveLnk()
     QWaitWidget wait(this);
     wait.setWindowModality(Qt::WindowModal);
     wait.setCancelEnabled(true);
+    wait.setText(tr("Moving %1", "%1 name of document being moved").arg(lnk.name()));
 
     if (destination.open(QIODevice::WriteOnly)) {
         if (source.open(QIODevice::ReadWrite)) {
@@ -442,20 +447,20 @@ void QDocumentPropertiesWidget::showLicenses()
         QFormLayout *layout = new QFormLayout;
         layout->setRowWrapPolicy(QFormLayout::WrapAllRows);
 
-        if (d->doc->permissions() & QDrmRights::Play)
-            addRights(d->doc->rights(QDrmRights::Play), layout);
+        if (lnk.permissions() & QDrmRights::Play)
+            addRights(lnk.rights(QDrmRights::Play), layout);
 
-        if (d->doc->permissions() & QDrmRights::Display)
-            addRights(d->doc->rights(QDrmRights::Display ), layout);
+        if (lnk.permissions() & QDrmRights::Display)
+            addRights(lnk.rights(QDrmRights::Display ), layout);
 
-        if (d->doc->permissions() & QDrmRights::Execute)
-            addRights(d->doc->rights(QDrmRights::Execute), layout);
+        if (lnk.permissions() & QDrmRights::Execute)
+            addRights(lnk.rights(QDrmRights::Execute), layout);
 
-        if (d->doc->permissions() & QDrmRights::Print)
-            addRights(d->doc->rights(QDrmRights::Print), layout);
+        if (lnk.permissions() & QDrmRights::Print)
+            addRights(lnk.rights(QDrmRights::Print), layout);
 
-        if (d->doc->permissions() & QDrmRights::Export)
-            addRights(d->doc->rights(QDrmRights::Export), layout);
+        if (lnk.permissions() & QDrmRights::Export)
+            addRights(lnk.rights(QDrmRights::Export), layout);
 
         if (layout->rowCount() == 0)
             layout->addRow(new QLabel( tr( "<qt><u>No licenses</u></qt>" )));
@@ -513,8 +518,9 @@ void QDocumentPropertiesWidget::addRights(const QDrmRights &rights, QFormLayout 
 
 /*!
   \class QDocumentPropertiesDialog
+    \inpublicgroup QtBaseModule
   \ingroup content
-  \mainclass
+
   \brief The QDocumentPropertiesDialog class allows the user to examine and 
          modify properties of a document. 
 

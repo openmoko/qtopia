@@ -7,6 +7,8 @@
 <file alias="mapCategoryToContent">resources/mapCategoryToContent.sql</file>
 <file alias="contentProps">resources/contentProps.sql</file>
 <file alias="mimeTypeMapping">resources/mimeTypeMapping.sql</file>
+<file alias="servicehistory">resources/servicehistory.sql</file>
+<file alias="favoriteservices">resources/favoriteservices.sql</file>
 </qresource>
 <qresource prefix="/QtopiaSql/QMIMER">
 <file alias="categories">resources/categories.sql</file>

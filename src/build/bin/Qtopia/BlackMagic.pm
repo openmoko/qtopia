@@ -351,28 +351,3 @@ sub dumphash
 
 # Make this file require()able.
 1;
-__END__
-
-=head1 NAME
-
-Qtopia::BlackMagic - qmake functions written in perl.
-
-=head1 SYNOPSIS
-
-    use Qtopia::BlackMagic;
-
-=head1 DESCRIPTION
-
-This file contains a partial qmake parser and some logic duplicated from files in src/build.
-
-=head2 EXPORT
-
-=head1 AUTHOR
-
-Trolltech AS
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2006 Trolltech AS. All rights reserved.
-
-=cut

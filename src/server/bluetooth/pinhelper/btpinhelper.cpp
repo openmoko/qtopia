@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,7 +24,6 @@
 #include <QString>
 #include <QByteArray>
 #include <QTextStream>
-#include <QMessageBox>
 #include <QSettings>
 #include <QTimer>
 #include <QValueSpaceItem>
@@ -43,14 +40,15 @@
 
 /*!
     \class BluetoothPasskeyAgentTask
+    \inpublicgroup QtBluetoothModule
     \ingroup QtopiaServer::Task::Bluetooth
     \brief The BluetoothPasskeyAgentTask class provides a default passkey agent for performing Bluetooth passkey authentications.
 
-    The BluetoothPasskeyAgentTask class implements a Qtopia global passkey agent.  The
+    The BluetoothPasskeyAgentTask class implements a Qt Extended global passkey agent.  The
     internal implementation uses the QPasswordDialog to ask the user for
     the passkey.
 
-    This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
+    This class is part of the Qt Extended server and cannot be used by other QtopiaApplications.
     \sa QBluetoothPasskeyAgent
  */
 
@@ -63,6 +61,7 @@ BTPinHelper::BTPinHelper(QObject *parent)
       m_passDialog(new QPasswordDialog)
 {
     m_passDialog->setInputMode(QPasswordDialog::Plain);
+
     registerDefault();
 }
 
@@ -111,13 +110,14 @@ void BTPinHelper::requestPasskey(QBluetoothPasskeyRequest &req)
 
     m_passDialog->reset();
     m_passDialog->setPrompt(msg);
-    if (QtopiaApplication::execDialog(m_passDialog) == QDialog::Accepted) {
-        QString pairPin = m_passDialog->password();
-        if ( !pairPin.isEmpty() )
-            req.setPasskey(pairPin);
-    } else {
+    m_passDialog->setWindowModality(Qt::WindowModal);
+    QtopiaApplication::execDialog(m_passDialog);
+
+    QString pairPin = m_passDialog->password();
+    if (!pairPin.isEmpty())
+        req.setPasskey(pairPin);
+    else
         req.setRejected();
-    }
 }
 
 /*!

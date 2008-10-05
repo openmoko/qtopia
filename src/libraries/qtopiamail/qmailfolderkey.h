@@ -1,60 +1,56 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
-#ifndef __QMAILFOLDERKEY_H
-#define __QMAILFOLDERKEY_H
+#ifndef QMAILFOLDERKEY_H
+#define QMAILFOLDERKEY_H
+
+#include "qmaildatacomparator.h"
 
 #include <QList>
-#include <QVariant>
-#include <qtopiaglobal.h>
 #include <QSharedData>
-#include "qmailfolder.h"
+#include <QMailFolderId>
+#include <QVariant>
+
+#include <qtopiaglobal.h>
 
 class QMailFolderKeyPrivate;
 
 class QTOPIAMAIL_EXPORT QMailFolderKey
 {
 public:
-    enum Operand
-    {
-        LessThan,
-        LessThanEqual,
-        GreaterThan,
-        GreaterThanEqual,
-        Equal,
-        NotEqual,
-        Contains
-     };
-
     enum Property
     {
         Id,
         Name,
-        ParentId
+        ParentId,
+        ParentAccountId,
+        DisplayName,
+        Status,
+        AncestorFolderIds
     };
+
+    typedef QMailFolderId IdType;
 
 public:
     QMailFolderKey();
-    QMailFolderKey(const Property& p, const QVariant& value, const Operand& = Equal);
-    explicit QMailFolderKey(const QMailIdList& ids);
+    QMailFolderKey(Property p, const QVariant& value, QMailDataComparator::Comparator c = QMailDataComparator::Equal);
+    explicit QMailFolderKey(const QMailFolderIdList& ids);
     QMailFolderKey(const QMailFolderKey& other);
     virtual ~QMailFolderKey();
 
@@ -70,14 +66,25 @@ public:
     QMailFolderKey& operator=(const QMailFolderKey& other);
 
     bool isEmpty() const;
+    bool isNonMatching() const;
+
+    //for subqueries 
+    operator QVariant() const;
+
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
+
+    static QMailFolderKey nonMatchingKey();
 
 private:
     friend class QMailStore;
     friend class QMailStorePrivate;
 
-private:
-    QSharedDataPointer<QMailFolderKeyPrivate> d;
+    void sanityCheck(Property p, const QVariant& value, QMailDataComparator::Comparator);
 
+    QSharedDataPointer<QMailFolderKeyPrivate> d;
 };
+
+Q_DECLARE_USER_METATYPE(QMailFolderKey);
 
 #endif

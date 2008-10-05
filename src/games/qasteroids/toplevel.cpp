@@ -1,21 +1,21 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** $TROLLTECH_DUAL_LICENSE$
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
+**
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
+**
 **
 ****************************************************************************/
-
-/*
- * KAsteroids - Copyright (c) Martin R. Jones 1997
- *
- * Part of the KDE project
- */
 
 #include "toplevel.h"
 #include "ledmeter.h"
@@ -161,6 +161,7 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
     actions_.insert(Qt::Key_NumberSign,Teleport);
     actions_.insert(Qt::Key_Asterisk,Pause);
     actions_.insert(Qt::Key_Select,Shoot);
+    actions_.insert(Qt::Key_Space,Shoot);
     actions_.insert(Qt::Key_0,Shield);
     /*QSoftMenuBar::setLabel(this,
                            Qt::Key_0,
@@ -170,6 +171,7 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
 
     QString s = tr("Select (OK)");
     view_->constructMessages(s);
+    view_->setCanPause(false);
     setFocusPolicy(Qt::StrongFocus);
 }
 
@@ -533,13 +535,7 @@ KAstTopLevel::keyReleaseEvent(QKeyEvent* event)
 	    populateRocks();
 	    break;
         case Pause:
-            {
-                view_->pause(true);
-                QMessageBox::information(this,
-                                         tr("KAsteroids is paused"),
-                                         tr("Paused"));
-                view_->pause(false);
-            }
+            view_->pause();
             break;
         default:
             event->ignore();
@@ -624,7 +620,8 @@ void KAstTopLevel::populateRocks()
 void KAstTopLevel::showEvent(QShowEvent* e)
 {
     QMainWindow::showEvent(e);
-    view_->pause(false);
+    if(view_->isPaused() && view_->canPause())
+        view_->pause();
     setFocus();
 }
 
@@ -636,25 +633,31 @@ void KAstTopLevel::showEvent(QShowEvent* e)
 void KAstTopLevel::hideEvent(QHideEvent* e)
 {
     QMainWindow::hideEvent(e);
-    view_->pause(true);
+    if(!view_->isPaused() && view_->canPause())
+        view_->pause();
 }
 
 /*!
-  Takes the game out of its paused state and gives the
+  Takes the game in or out of its paused state and gives the
   game the keyboard input focus.
  */
-void KAstTopLevel::focusInEvent(QFocusEvent* )
+bool KAstTopLevel::event( QEvent * e )
 {
-    view_->pause(false);
-    setFocus();
-}
-
-/*!
-  Puts the game into its paused state.
- */
-void KAstTopLevel::focusOutEvent(QFocusEvent* )
-{
-    view_->pause(true);
+    switch(e->type())
+    {
+        case QEvent::WindowActivate:
+            if(view_->isPaused() && view_->canPause())
+                view_->pause();
+            setFocus();
+            break;
+        case QEvent::WindowDeactivate:
+            if(!view_->isPaused() && view_->canPause())
+                view_->pause();
+            break;
+        default:
+            break;
+    }
+    return QMainWindow::event(e);
 }
 
 /*!
@@ -663,7 +666,6 @@ void KAstTopLevel::focusOutEvent(QFocusEvent* )
 void KAstTopLevel::startNewGame()
 {
 #if 0
-    //QTOPIA_PHONE
     QSoftMenuBar::setLabel(this,
                            Qt::Key_Select,
                            "qasteroids/powerups/shoot",
@@ -731,6 +733,7 @@ void KAstTopLevel::slotShipKilled()
     if (shipCount_ > 0)
 	view_->reportShipKilled();
     else {
+        view_->setCanPause(false);
         endGame();
         reportStatistics();
     }

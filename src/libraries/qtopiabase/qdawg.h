@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #ifndef QDAWG_H
@@ -23,6 +21,7 @@
 
 #include <qtopiaglobal.h>
 #include <qstringlist.h>
+#include <cstdio>
 
 class QIODevice;
 class QDawgPrivate;
@@ -52,30 +51,26 @@ public:
         quint16 val;
         static const quint16 isword = 0x8000;
         static const quint16 islast = 0x4000;
-        static const quint16 valmask = 0x3fff; // Maximum val
         qint32 offset;
         Node() { val = 0; /*set zero for better compression*/ }
+        inline void setValue(uint i) { val = (val & ~MaxValue) | (i & MaxValue); }
+        inline void setIsWord(bool isWord) { isWord ? val |= isword : val &= ~isword; }
+        inline void setIsLast(bool isLast) { isLast ? val |= islast : val &= ~islast; }
+
     public:
         QChar letter() const { return QChar((ushort)let); }
         inline bool isWord() const { return isword & val; }
         inline bool isLast() const { return islast & val; }
-        inline void setIsWord(bool isWord) { isWord ? val |= isword : val &= ~isword; }
-        inline void setIsLast(bool isLast) { isLast ? val |= islast : val &= ~islast; }
         const Node* next() const { return (islast & val) ? 0 : this+1; }
         const Node* jump() const { return offset ? this+offset : 0; }
 
-#ifdef QTOPIA_INTERNAL_QDAWG_TRIE
-        inline int value() const { return val & valmask; }
-        inline void setValue(uint i) { val = (val & ~valmask) | (i & valmask); }
-#endif
+        static const quint16 MaxValue = 0x3fff; // also a mask
+        inline int value() const { return val & MaxValue; }
     };
 
     const Node* root() const;
 
     void dump() const; // debug
-#ifdef QTOPIA_INTERNAL_QDAWG_TRIE
-    bool createTrieFromWords(QIODevice* dev);
-#endif
 
 private:
     friend class QDawgPrivate;

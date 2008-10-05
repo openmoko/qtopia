@@ -4,19 +4,29 @@
 for(dep,QTOPIA_DEPENDS) {
     containstext($$dep,*) {
         QTOPIA_DEPENDS-=$$dep
-        files=$$files($$fixpath($$PROJECT_ROOT/$$dep))
-        for(file,files) {
-            file~=s,$$fixpath($$PROJECT_ROOT/),,q
-            pro=$$file/$$tail($$file).pro
-            # Make sure that the project exists
-            # Make sure that the project is enabled (in PROJECTS)
-            # Don't let a project depend on itself
-            exists($$PROJECT_ROOT/$$pro):contains(PROJECTS,$$file):!equals(s,$$file) {
+        wildcard=$$fetch_wildcard($$dep)
+        isEmpty(wildcard) {
+            files=$$files($$fixpath($$PROJECT_ROOT/$$dep))
+            for(file,files) {
+                file~=s,$$fixpath($$PROJECT_ROOT/),,q
+                pro=$$file/$$tail($$file).pro
+                # Make sure that the project exists
+                # Make sure that the project is enabled (in PROJECTS)
+                # Don't let a project depend on itself
+                exists($$PROJECT_ROOT/$$pro):contains(PROJECTS,$$file):!equals(s,$$file) {
+                    echo(Dependency $$dep caused dependency on $$file)
+                    wildcard+=$$file
+                }
+            }
+            store_wildcard($$dep,$$wildcard)
+        } else {
+            wildcard=$$split(wildcard," ")
+            for(file,wildcard) {
                 echo(Dependency $$dep caused dependency on $$file)
-                QTOPIA_DEPENDS+=$$file
             }
         }
-        #QTOPIA_DEPENDS+=$$files($$dep)
+
+        QTOPIA_DEPENDS+=$$wildcard
     }
 }
 
@@ -77,7 +87,7 @@ for(it,QTOPIA_DEPENDS) {
         equals(founddisabled,1) {
             disabled_deps_are_non_fatal {
                 warning($$self depends on $$it but it is not listed in PROJECTS!)
-                requires("contains(PROJECTS,$$it)")
+                requires(contains(PROJECTS,$$it))
             } else {
                 error($$self depends on $$it but it is not listed in PROJECTS!)
             }

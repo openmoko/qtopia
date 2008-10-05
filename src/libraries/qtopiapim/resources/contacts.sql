@@ -37,8 +37,14 @@ CREATE TABLE contacts (
 
         context INTEGER NOT NULL,
 
+        label NVARCHAR(255) COLLATE NOCASE,
+
 	PRIMARY KEY(recid)
 );
+
+-- Most important index (this gets dropped and recreated when change label format, too)
+-- (if this changes, have to change ContactSqlIO::updateLabels
+CREATE INDEX contactslabelindex ON contacts(label);
 
 -- two most common sort orderings.  If likely to have other common sort orderings
 -- highly recommended to create and maintain indexes.
@@ -48,3 +54,4 @@ CREATE INDEX contactslfcindex ON contacts (lastname, firstname, company, recid);
 CREATE INDEX contactsfindex ON contacts (firstname);
 CREATE INDEX contactslindex ON contacts (lastname);
 CREATE INDEX contactscindex ON contacts (company);
+CREATE INDEX contactscdindex ON contacts (company, department);

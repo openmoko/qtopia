@@ -1,6 +1,9 @@
+qbuild {
+SOURCEPATH+=obex
+} else {
 PREFIX=OBEX
 VPATH+=obex
-
+}
 DEFINES+=QTOPIA_OBEX
 
 OBEX_HEADERS+=\
@@ -42,12 +45,14 @@ OBEX_PRIVATE_HEADERS+=\
     qobexserversession_p.h \
     qobexfolderlisting_p.h
 
+qbuild {
+HEADERS+=$$OBEX_HEADERS
+SOURCES+=$$OBEX_SOURCES
+PRIVATE_HEADERS+=$$OBEX_PRIVATE_HEADERS
+} else {
 sdk_obex_headers.files=$$OBEX_HEADERS
 sdk_obex_headers.path=/include/qtopia/comm
 sdk_obex_headers.hint=sdk headers
 INSTALLS+=sdk_obex_headers
+}
 
-sdk_obex_private_headers.files=$$OBEX_PRIVATE_HEADERS
-sdk_obex_private_headers.path=/include/qtopiacomm/private
-sdk_obex_private_headers.hint=sdk headers
-INSTALLS+=sdk_obex_private_headers

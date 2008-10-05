@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -37,6 +35,7 @@
 #include <qtopialog.h>
 
 #include "windowmanagement.h"
+#include "uifactory.h"
 
 #ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
@@ -54,7 +53,6 @@
 #include <QPainter>
 #include <QApplication>
 
-static InputMethods* m_instance = 0;
 /*
   Slightly hacky: We use WStyle_Tool as a flag to say "this widget
   belongs to the IM system, so clicking it should not cause a reset".
@@ -75,6 +73,7 @@ public:
 
 /*!
   \class InputMethodSelector
+    \inpublicgroup QtInputMethodsModule
   \ingroup QtopiaServer::InputMethods
   \brief The InputMethodSelector class Provides the user-visible aspects of the Input Method system.
 
@@ -99,7 +98,7 @@ InputMethodSelector::InputMethodSelector(QWidget *parent)
     hb->setMargin(0);
     hb->setSpacing(0);
 
-    pop = new QMenu( this );
+    pop = new QMenu;
     pop->setFocusPolicy( Qt::NoFocus ); //don't reset IM
 
     mButtonStack = new QStackedWidget;
@@ -263,22 +262,30 @@ void InputMethodSelector::showList()
         map.insert(a, method);
     }
 
-    bool rtl = QApplication::isRightToLeft();
     QPoint pt;
+    QSize s = pop->sizeHint();
+
+#if 0 // The following doesn't work until mapToGlobal works with QGraphicsView items
+    bool rtl = QApplication::isRightToLeft();
     if ( !rtl )
         pt = mapToGlobal(mChoice->geometry().topRight());
     else
         pt = mapToGlobal(mChoice->geometry().topLeft());
-    QSize s = pop->sizeHint();
-    pt.ry() -= s.height();
+
+    if (pt.y() > s.height()) // room to pop above?
+        pt.ry() -= s.height();
     if ( !rtl )
         pt.rx() -= s.width();
+#else // just center for now
+    QDesktopWidget *desktop = QApplication::desktop();
+    pt.setX((desktop->screenGeometry(desktop->primaryScreen()).width()-s.width())/2);
+    pt.setY((desktop->screenGeometry(desktop->primaryScreen()).height()-s.height())/2);
+#endif
 
     QAction *selected = pop->exec( pt );
     if ( selected == 0 )
         return;
     setInputMethod(map[selected]);
-
 }
 
 /*!
@@ -516,34 +523,33 @@ void InputMethodSelector::showChoice( bool on)
 
 /*!
   \class InputMethods
-  \brief The InputMethods class provides an implementation of Qtopia server input method handling.
+  \inpublicgroup QtInputMethodsModule
+  \brief The InputMethods class provides an implementation of Qt Extended server input method handling.
   \ingroup QtopiaServer::InputMethods
 
-    InputMethods is the core class for the Qtopia servers input method handling.
-    It is very closely related to the \l InputMethodService and \l InputMethodSelector classes.
-
-    InputMethods is primarily resposible for loading input method plugins and maintaining the hints set for different widgets. It also acts on the messages from the \l InputMethodService, either taking direct action or passing them on to the  \l InputMethodSelector.
+    InputMethods is the core class for the Qt Extended servers input method handling.
+    It is very closely related to the \l {InputMethodService}{InputMethod} service and \l InputMethodSelector classes.
+ 
+    InputMethods is primarily resposible for loading input method plugins and maintaining the hints 
+    set for different widgets. It also acts on the messages from the \l {InputMethodService}{InputMethod} service, either taking 
+    direct action or passing them on to the  \l InputMethodSelector.
     
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 */
 
 /*!
-    Create a new InputMethods object with \a parent that handles input according to \a t.
+    Create a new InputMethods object with \a parent and \a flags that handles input according to \a t.
 */
-InputMethods::InputMethods( QWidget *parent, IMType t ) :
-    QWidget( parent ),
+InputMethods::InputMethods( QWidget *parent, Qt::WFlags flags, IMType t ) :
+    QWidget( parent, flags ),
     loader(0), type(t),
 #ifdef Q_WS_QWS
     currentIM(0),
 #endif
     lastActiveWindow(0), m_IMVisibleVS("/UI/IMVisible"), m_IMVisible(false)
 {
-    // Start up the input method service via \l{Qtopia IPC Layer}{IPC}.
+    // Start up the input method service via \l{Qt Extended IPC Layer}{IPC}.
     new InputMethodService( this );
-    if(!m_instance)
-        m_instance = this;
-    else
-        qWarning("Multiple InputMethods instantiated");
 
     //overrideWindowFlags(Qt::Tool);
     setObjectName("InputMethods");
@@ -554,7 +560,6 @@ InputMethods::InputMethods( QWidget *parent, IMType t ) :
 
     selector = new InputMethodSelector;
     hbox->addWidget(selector);
-
 
     connect(selector, SIGNAL(activated(QtopiaInputMethod*)),
             this, SLOT(choose(QtopiaInputMethod*)));
@@ -568,9 +573,6 @@ InputMethods::InputMethods( QWidget *parent, IMType t ) :
     connect( qwsServer, SIGNAL(windowEvent(QWSWindow*,QWSServer::WindowEvent)),
             this, SLOT(updateHintMap(QWSWindow*,QWSServer::WindowEvent)));
 #endif
-
-    setVisible(false);
-    // might also add own win id since wouldn't have been added at start up.
 }
 
 /*!
@@ -589,18 +591,6 @@ InputMethods::InputMethods( QWidget *parent, IMType t ) :
 InputMethods::~InputMethods()
 {
     unloadInputMethods();
-}
-
-/*!
-    Returns the instance of the InputMethods object used by the server.
-*/
-InputMethods* InputMethods::instance()
-{
-    if(m_instance)
-        return m_instance;
-
-    return m_instance=new InputMethods;
-
 }
 
 /*!
@@ -1023,14 +1013,15 @@ bool InputMethods::selectorShown() const
 
 /*!
     \service InputMethodService InputMethod
-    \brief Provides the Qtopia InputMethod service.
+    \inpublicgroup QtInputMethodsModule
+    \brief The InputMethodService class provides the InputMethod service.
 
-    The InputMethod service enables applications to adjust the input
+    The \i InputMethod service enables applications to adjust the input
     method that is being used on text entry fields.
 
     The messages in this service are sent as ordinary QtopiaIpc messages
     on the \c{QPE/InputMethod} channel.  The service is provided by
-    the Qtopia server.
+    the Qt Extended server.
 
     Normally applications won't need to send these messages directly,
     as they are handled by methods in the QtopiaApplication class.
@@ -1061,7 +1052,7 @@ InputMethodService::~InputMethodService()
     for \a hint are specified in QtopiaApplication::InputMethodHint.
     This method should not be used if the \c Named hint is requested.
 
-    This slot corresponds to the \l{Qtopia IPC Layer}{IPC} message
+    This slot corresponds to the \l{Qt Extended IPC Layer}{IPC} message
     \c{inputMethodHint(int,int)} on the \c QPE/InputMethod channel.
 */
 void InputMethodService::inputMethodHint( int hint, int windowId )
@@ -1073,7 +1064,7 @@ void InputMethodService::inputMethodHint( int hint, int windowId )
     Set the input method \a hint for \a windowId.  This method should
     be used for \c Named hints.
 
-    This slot corresponds to the \l{Qtopia IPC Layer}{IPC} message
+    This slot corresponds to the \l{Qt Extended IPC Layer}{IPC} message
     \c{inputMethodHint(QString,int)} on the \c QPE/InputMethod channel.
 */
 void InputMethodService::inputMethodHint( const QString& hint, int windowId )
@@ -1096,7 +1087,7 @@ void InputMethodService::inputMethodPasswordHint(bool passwordFlag, int windowId
     The current input method may still indicated in the taskbar, but no
     longer takes up screen space, and can no longer be interacted with.
 
-    This slot corresponds to the \l{Qtopia IPC Layer}{IPC} message
+    This slot corresponds to the \l{Qt Extended IPC Layer}{IPC} message
     \c{hideInputMethod()} on the \c QPE/InputMethod channel.
 
     \sa showInputMethod()
@@ -1114,7 +1105,7 @@ void InputMethodService::hideInputMethod()
     of the bottom of the screen, to allow the user to interact (input
     characters) with it.
 
-    This slot corresponds to the \l{Qtopia IPC Layer}{IPC} message
+    This slot corresponds to the \l{Qt Extended IPC Layer}{IPC} message
     \c{showInputMethod()} on the \c QPE/InputMethod channel.
 
     \sa hideInputMethod()
@@ -1202,3 +1193,5 @@ void InputMethodService::unloadInputMethods()
 {
     parent->unloadInputMethods();
 };
+
+UIFACTORY_REGISTER_WIDGET( InputMethods );

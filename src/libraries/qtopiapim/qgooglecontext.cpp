@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <qtopiasql.h>
@@ -1011,7 +1009,7 @@ void QGoogleCalendarFetcher::fetchAuthentication()
     QList< QPair<QString, QString> > postData;
     postData.append(QPair<QString, QString>("Email", mEmail));
     postData.append(QPair<QString, QString>("Passwd", mPassword));
-    postData.append(QPair<QString, QString>("source", "Trolltech-Calendar-4.3.0"));
+    postData.append(QPair<QString, QString>("source", "Qt-Extended-Calendar-4.3.0"));
     postData.append(QPair<QString, QString>("service", "cl"));
 
 #if 0
@@ -1103,7 +1101,7 @@ void QGoogleCalendarFetcher::parseRemaining()
         }
 
         if (parsed) {
-            if (!mAccess->startSync(mContext, syncTime)) {
+            if (!mAccess->startSyncTransaction(mContext, syncTime)) {
                 FAIL_TRANSACTION;
             }
 
@@ -1112,13 +1110,13 @@ void QGoogleCalendarFetcher::parseRemaining()
                 // does its own transactioning... um, they probably don't stack.
                 if (mAccess->exists(a.uid())) {
                     if (!mAccess->updateAppointment(a)) {
-                        mAccess->abortSync();
+                        mAccess->abortSyncTransaction();
                         FAIL_TRANSACTION;
                         return;
                     }
                 } else {
                     if (mAccess->addAppointment(a, mContext, false).isNull()) {
-                        mAccess->abortSync();
+                        mAccess->abortSyncTransaction();
                         FAIL_TRANSACTION;
                         return;
                     }
@@ -1128,13 +1126,13 @@ void QGoogleCalendarFetcher::parseRemaining()
                 if (!mAccess->exists(id))
                     continue; // an appointment may have been created, then delted before syncing.
                 if (!mAccess->removeAppointment(id)) {
-                    mAccess->abortSync();
+                    mAccess->abortSyncTransaction();
                     FAIL_TRANSACTION;
                     return;
                 }
             }
-            if (!mAccess->commitSync()) {
-                mAccess->abortSync();
+            if (!mAccess->commitSyncTransaction()) {
+                mAccess->abortSyncTransaction();
                 FAIL_TRANSACTION;
                 return;
             }

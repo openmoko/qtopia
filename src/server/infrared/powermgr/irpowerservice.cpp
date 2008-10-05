@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -27,6 +25,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QTimer>
+#include <QSettings>
 
 class IrPowerService_Private
 {
@@ -40,6 +39,8 @@ public:
 IrPowerService_Private::IrPowerService_Private(const QByteArray &devId)
 {
     m_device = new QIrLocalDevice(devId);
+    // Bring the device down at startup
+    m_device->bringDown();
 }
 
 IrPowerService_Private::~IrPowerService_Private()
@@ -49,18 +50,19 @@ IrPowerService_Private::~IrPowerService_Private()
 
 /*!
     \class IrPowerService
+    \inpublicgroup QtInfraredModule
     \ingroup QtopiaServer
-    \brief The IrPowerService class provides the Qtopia Infrared Power service.
+    \brief The IrPowerService class provides the Qt Extended Infrared Power service.
 
     The \i IrPower service enables applications to notify the server
     of Infrared useage, such that the server can intelligently manage
     the infrared port for maximum power efficiency.
 
-    The \i IrPower service is typically supplied by the Qtopia server,
+    The \i IrPower service is typically supplied by the Qt Extended server,
     but the system integrator might change the application that
     implements this service.
 
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
     \sa QCommDeviceController, QCommDeviceSession
  */
 
@@ -151,12 +153,13 @@ bool IrPowerService::shouldBringDown(QUnixSocket *) const
 
 /*!
   \class IrPowerServiceTask
+    \inpublicgroup QtInfraredModule
   \ingroup QtopiaServer::Task
   \brief The IrPowerServiceTask class provides the IrPowerService as a server task.
 
     The IrPowerServiceTask manages the lifetime of an IrPowerService object.
   
-    This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
  */
 
 /*!

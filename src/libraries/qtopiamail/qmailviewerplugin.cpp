@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,7 +24,9 @@
 
 /*!
     \class QMailViewerPluginInterface
-    \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
     \brief The QMailViewerPluginInterface class defines the interface to plug-ins that provide mail message viewers.
     \ingroup messaginglibrary
 
@@ -43,13 +43,14 @@
 */
 
 /*!
-    \fn bool QMailViewerPluginInterface::isSupported( QMailViewerFactory::ContentType type ) const
+    \fn bool QMailViewerPluginInterface::isSupported(QMailMessage::ContentType type, QMailViewerFactory::PresentationType pres) const
 
-    Returns true if the viewer provided by this plug-in can display a mail message with \a type content; otherwise returns false.
+    Returns true if the viewer provided by this plug-in can display a mail message with \a type content using
+    the presentation type \a pres; otherwise returns false.
 */
 
 /*!
-    \fn QMailViewerInterface* QMailViewerPluginInterface::create( QWidget* parent )
+    \fn QMailViewerInterface* QMailViewerPluginInterface::create(QWidget* parent)
 
     Creates an instance of the message viewer class provided by the plug-in, setting the returned object to 
     have the parent widget \a parent.
@@ -57,7 +58,9 @@
 
 /*!
     \class QMailViewerPlugin
-    \mainclass
+    \inpublicgroup QtMessagingModule
+    \inpublicgroup QtPimModule
+
     \brief The QMailViewerPlugin class defines a base class for implementing mail message viewer plug-ins.
     \ingroup messaginglibrary
 

@@ -1,27 +1,25 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <QtopiaDocumentServer>
-#include <qtopia/private/qcategorystoreserver_p.h>
-#include <qtopia/private/qcontentstoreserver_p.h>
-#include <qtopia/private/qdocumentselectorsocketserver_p.h>
+#include "qcategorystoreserver_p.h"
+#include "qcontentstoreserver_p.h"
+#include "qdocumentselectorsocketserver_p.h"
 
 class QtopiaDocumentServerPrivate
 {
@@ -33,11 +31,12 @@ public:
 
 /*!
     \class QtopiaDocumentServer
-    \mainclass
-    \brief The QtopiaDocumentServer class provides an instance of the Qtopia Document Server.
+    \inpublicgroup QtBaseModule
 
-    The Qtopia Document Server provides applications with a mechanism to interact with the
-    \l{Document System}{Qtopia Document System} without having direct access to the document databases or
+    \brief The QtopiaDocumentServer class provides an instance of the Qt Extended Document Server.
+
+    The Qt Extended Document Server provides applications with a mechanism to interact with the
+    \l{Document System}{Qt Extended Document System} without having direct access to the document databases or
     even the file system.  A single instance of the document server runs in a server process, and client
     applications connect to this server in order to gain access to the functionality provided by the document
     system API.
@@ -48,9 +47,9 @@ public:
 */
 
 /*!
-    Constructs a new Qtopia document server with the parent \a parent.
+    Constructs a new Qt Extended document server with the parent \a parent.
 
-    Only one instance of the document server should ever exist at once across all Qtopia applications.
+    Only one instance of the document server should ever exist at once across all Qt Extended applications.
 */
 QtopiaDocumentServer::QtopiaDocumentServer( QObject *parent )
     : QObject( parent )

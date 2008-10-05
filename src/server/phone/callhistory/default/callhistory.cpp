@@ -1,55 +1,54 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <QTabWidget>
 #include <QLayout>
 #include <QAction>
-#include <QTextDocument>
-#include <QAbstractTextDocumentLayout>
-#include <QMessageBox>
-#include <QTimer>
 #include <QListWidget>
 #include <QDebug>
 #include <QLineEdit>
 #include <QTextEntryProxy>
 #include <QMenu>
-#include <QTextFrame>
-#include <QTextDocumentFragment>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QFormLayout>
 #include <QScrollArea>
 #include <QPushButton>
+#include <QItemDelegate>
+#include <QPainter>
+#include <QStyle>
+#include <QTimer>
+#include <QToolButton>
 
 #include <qtopianamespace.h>
-#include <qtopia/pim/qphonenumber.h>
+#include <qphonenumber.h>
 
 #include <qsoftmenubar.h>
-#include <qtopiaapplication.h>
 #include <qtopianamespace.h>
-#include <qthumbnail.h>
 #include <qtopiaservices.h>
 #include <qtopiaipcenvelope.h>
+#include <QtopiaItemDelegate>
 
+#include "dialercontrol.h"
 #include "callhistory.h"
 #include "savetocontacts.h"
+#include "qabstractmessagebox.h"
 #include "servercontactmodel.h"
 
 // -------------------------------------------------------------
@@ -59,7 +58,7 @@ CallHistoryModel::CallHistoryModel( QCallList & callList, QObject* parent )
     : CallContactModel(callList, parent), mType(QCallList::All), mDirty(true)
 {
     //alt method would be to listen to QPE/PIM for addedContact
-    connect(ServerContactModel::instance(), SIGNAL(modelReset()), 
+    connect(ServerContactModel::instance(), SIGNAL(modelReset()),
              this, SLOT(updateContacts()));
 }
 
@@ -126,8 +125,11 @@ void CallHistoryModel::refresh()
         else
             continue; //skip items that aren't part of this list type
 
-        const QString number = clItem.number();
+        QString number = clItem.number();
         const QUniqueId contactId = clItem.contact();
+
+        if (number.startsWith(QLatin1String("sip:")))
+            number = number.mid(4);
 
         //find all contacts that match the user-specified filter and this call item number
         bool hasContact = false;
@@ -157,8 +159,150 @@ void CallHistoryModel::refresh()
     reset(); //update views
 }
 
+#ifdef QTOPIA_HOMEUI
+// -------------------------------------------------------------
+// DeskphoneCallItemDelegate
+
+class DeskphoneCallItemDelegate : public QtopiaItemDelegate
+{
+    Q_OBJECT
+public:
+    DeskphoneCallItemDelegate( QObject * parent = 0 )
+        : QtopiaItemDelegate(parent)
+    {}
+
+    virtual ~DeskphoneCallItemDelegate() {}
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
+    {
+        QWidget *w = qobject_cast<QWidget*>(parent());
+        QFontMetrics fm(titleFont(option));
+        QSize hint(w ? w->width() : 200, fm.height() * 7/4);
+        return hint;
+    }
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        QStyleOptionViewItem opt = option;
+        bool selected = opt.state & QStyle::State_Selected;
+        QFont titleFont = this->titleFont(opt);
+
+        // prepare
+        painter->save();
+        if (hasClipping())
+            painter->setClipRect(opt.rect);
+
+        drawBackground(painter, option, index);
+
+        painter->setRenderHint(QPainter::Antialiasing);
+
+        int iconSize = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+
+        QString title, subtitle, duration;
+        QIcon icon;
+        CallContactItem *item = ((CallContactModel*)index.model())->itemAt(index);
+        if (item) {
+            QContact c = item->contact();
+            QCallListItem clItem = item->callListItem();
+
+            QCallListItem::CallType st = clItem.type();
+            if ( st == QCallListItem::Dialed )
+                icon = QIcon(":icon/phone/outgoingcall");
+            else if ( st == QCallListItem::Received )
+                icon = QIcon(":icon/phone/incomingcall");
+            else if ( st == QCallListItem::Missed )
+                icon = QIcon(":icon/phone/missedcall");
+
+            QDateTime dt = clItem.start();
+            QDate callDate = dt.date();
+            QTime callTime = dt.time();
+            QString when("%1, %2 ");
+            when = when.arg(QTimeString::localMD(callDate, QTimeString::Short))
+            .arg(QTimeString::localHM(callTime, QTimeString::Medium));
+            subtitle = when;
+
+            if (clItem.type() == QCallListItem::Missed) {
+                subtitle += tr("(missed)");
+            } else if(!clItem.end().isNull()) {
+                QString buf;
+                const int SECS_PER_HOUR= 3600;
+                const int SECS_PER_MIN  = 60;
+                int duration = clItem.start().secsTo( clItem.end() );
+                int hour = duration/SECS_PER_HOUR;
+                int minute = (duration % SECS_PER_HOUR)/SECS_PER_MIN;
+                int second = duration % SECS_PER_MIN;
+                buf.sprintf( " (%.1d:%.2d:%.2d)", hour, minute, second );
+                subtitle += buf;
+            }
+        }
+
+        //draw call button
+	QRect cbrect (callButtonRect(opt.rect));
+        if (cbrect.isValid()) {
+            QIcon callicon(":icon/deskphone/call_green");
+            painter->drawPixmap(cbrect.x() + (cbrect.width()-iconSize)/2,
+                                cbrect.y() + (cbrect.height()-iconSize)/2,
+                                callicon.pixmap(iconSize, iconSize));
+        }
+
+        if (selected)
+            painter->setPen(opt.palette.color(QPalette::HighlightedText));
+        else
+            painter->setPen(opt.palette.color(QPalette::Text));
+
+        //draw call details
+        QFontMetrics fm(opt.font);
+        int detailsWidth = fm.width(subtitle);
+        QRect detailsRect = QRect(0, 0, detailsWidth, opt.rect.height());
+        detailsRect.moveLeft(opt.rect.width()-detailsWidth-cbrect.width()-2);
+        painter->drawText(detailsRect, Qt::AlignRight | Qt::AlignVCenter, fm.elidedText(subtitle, opt.textElideMode, opt.rect.width()));
+
+        //draw name/number
+        QFontMetrics titlefm(titleFont);
+        QRect titleRect = opt.rect;
+        titleRect.setX(iconSize+8);
+        titleRect.setRight(detailsRect.left()-4);
+        QString text;
+        QVariant value = index.data(Qt::DisplayRole);
+        if (value.isValid()) {
+            text = value.toString();
+        }
+        title += text;
+        title = titlefm.elidedText(title, Qt::ElideRight, titleRect.width());
+        painter->setFont(titleFont);
+        painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignVCenter, title);
+        painter->setFont(opt.font);
+
+        // draw call type icon.
+        painter->drawPixmap(4, (opt.rect.height()-iconSize)/2, icon.pixmap(QSize(iconSize, iconSize)));
+
+        painter->restore();
+    }
+
+    static QRect callButtonRect(const QRect &rect) {
+        // FIXME: Uncomment to enable call button to right
+//        return QRect(rect.right()-32, rect.y(), 32, rect.height()-1);
+        Q_UNUSED(rect);
+        return QRect();
+    }
+
+private:
+    QFont titleFont(const QStyleOptionViewItem &option) const
+    {
+        QFont fmain = option.font;
+        fmain.setWeight(QFont::Bold);
+        return fmain;
+    }
+
+    QPoint mousePressPos;
+};
+
+#include "callhistory.moc"
+#endif
+
 // -------------------------------------------------------------
 // CallHistoryListView
+
 
 CallHistoryListView::CallHistoryListView( QWidget *parent, Qt::WFlags /*fl*/ )
 : CallContactListView( parent ), mClearList( 0 ), prevRow( -1 ), prevCount( -1 ), contactsChanging( false )
@@ -214,13 +358,14 @@ void CallHistoryListView::contactsChanged()
             QModelIndex tempidx = cclm->index( prevRow );
             CallContactItem *item = cclm->itemAt(tempidx);
             if (item && prevRow != -1
-                     && prevRow == tempidx.row() 
-                     && prevNumber == item->number() 
+                     && prevRow == tempidx.row()
+                     && prevNumber == item->number()
                      && prevCount == cclm->rowCount()) {
                 idx = tempidx;
             }
         }
-        selectionModel()->setCurrentIndex( idx, QItemSelectionModel::SelectCurrent );
+        if (!Qtopia::mousePreferred())
+            setCurrentIndex( idx );
     }
     contactsChanging = false;
 }
@@ -230,22 +375,31 @@ void CallHistoryListView::modelChanged()
     /* Hide the select button if we're empty - cclm should be valid to raise this signal*/
     if (cclm && cclm->rowCount() > 0) {
         QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::View);
-        if (!contactsChanging) {
+        if (!contactsChanging && !Qtopia::mousePreferred()) {
             // select the first item
             QModelIndex idx = cclm->index( 0 );
-            selectionModel()->setCurrentIndex( idx, QItemSelectionModel::SelectCurrent );
+            setCurrentIndex( idx );
         }
     } else {
         QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::NoLabel);
     }
 }
 
+#ifdef QTOPIA_HOMEUI
+void CallHistoryListView::mousePressEvent(QMouseEvent *e)
+{
+    cpos = e->pos();
+    QSmoothList::mousePressEvent(e);
+}
+#endif
+
 // -------------------------------------------------------------
 // CallHistoryView
 
 CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     : QWidget( parent, fl ), mHaveFocus( false ), mHaveContact( false ),
-      mPhoneType( QContactModel::Invalid ), deleteMsg(0), addContactMsg(0)
+      mPhoneType( QContactModel::Invalid ), deleteMsg(0), addContactMsg(0),
+      mContactBtn(0)
 {
     setObjectName( "callhistory-view" );
     mMenu = QSoftMenuBar::menuFor( this );
@@ -261,7 +415,7 @@ CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     connect( mDeleteAction, SIGNAL(triggered()), this, SLOT(deleteItem()) );
 
     //alt method would be to listen to QPE/PIM for addedContact
-    connect(ServerContactModel::instance(), SIGNAL(modelReset()), 
+    connect(ServerContactModel::instance(), SIGNAL(modelReset()),
              this, SLOT(contactsChanged()));
 
     //could assume this, but just to be sure the service is available
@@ -270,19 +424,17 @@ CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     // add scroll area
     QVBoxLayout *vl = new QVBoxLayout( this );
     vl->setContentsMargins(0, 0, 0, 0);
+    vl->setSpacing(0);
     QScrollArea *scrollArea = new QScrollArea( this );
     scrollArea->setWidgetResizable( true );
     scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     scrollArea->setFrameStyle( QFrame::NoFrame );
-    vl->addWidget( scrollArea );
 
     // container widget
     QWidget *container = new QWidget( this );
     QFormLayout *l = new QFormLayout( container );
 
     // new widgets
-    mCallTypePic = new QLabel( container );
-    mCallType = new QLabel( container );
     mName = new QLabel( container );
     //mName->setWordWrap( true );
     mContactTypePic = new QLabel( container );
@@ -296,12 +448,26 @@ CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     mTimeZoneLabel = new QLabel( tr("Time Zone:"), container );
 
     //heading
-    QHBoxLayout *h = new QHBoxLayout();
+    QHBoxLayout *h = 0;
+#ifdef QTOPIA_HOMEUI
+    mCallTypeHeader = new QToolButton(container);
+    QPalette pal = mCallTypeHeader->palette();
+    pal.setBrush(QPalette::Button, pal.brush(QPalette::Base));
+    pal.setColor(QPalette::ButtonText, pal.color(QPalette::Text));
+    mCallTypeHeader->setPalette(pal);
+    mCallTypeHeader->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    mCallTypeHeader->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+    vl->addWidget(mCallTypeHeader);
+#else
+    h = new QHBoxLayout();
     h->addStretch();
+    mCallTypePic = new QLabel( container );
+    mCallType = new QLabel( container );
     h->addWidget( mCallTypePic );
     h->addWidget( mCallType );
     h->addStretch();
     l->addRow( h );
+#endif
 
     l->addRow( mPortrait );
 
@@ -309,22 +475,35 @@ CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     h->addWidget( mName );
     h->addWidget( mContactTypePic );
     h->addStretch();
+    if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
+        mContactBtn = new QPushButton( tr( "Save to Contacts", "dial highlighted number" ), container );
+        mContactBtn->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+        h->addWidget( mContactBtn, 1 );
+    }
     l->addRow( tr("Name:"), h );
     h = new QHBoxLayout();
     h->addWidget( mNumber );
     h->addWidget( mPhoneTypePic );
+    h->addStretch();
     if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
         QPushButton *dialBtn = new QPushButton( tr( "Dial", "dial highlighted number" ), container );
-        h->addWidget( dialBtn );
+        dialBtn->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+        h->addWidget( dialBtn, 1 );
         connect( dialBtn, SIGNAL(released()), this, SLOT(dialNumber()) );
+        if (mContactBtn) {
+            // Give the buttons an equal width
+            int size = qMax(mContactBtn->sizeHint().width(), dialBtn->sizeHint().width()) + 4;
+            mContactBtn->setMaximumWidth(size);
+            dialBtn->setMaximumWidth(size);
+        }
     }
-    h->addStretch();
     l->addRow( tr("Number:"), h );
     l->addRow( tr("Date:"), mStartDate );
     l->addRow( tr("Time:"), mStartTime );
     l->addRow( tr("Duration:", "Duration of phone call"), mDuration );
     l->addRow( mTimeZoneLabel, mTimeZone );
 
+    vl->addWidget( scrollArea );
     scrollArea->setWidget( container );
 
     updateMenu();
@@ -387,15 +566,17 @@ void CallHistoryView::sendMessage()
 void CallHistoryView::updateMenu()
 {
     mMenu->clear();
-    if( mHaveContact ) {
-        // allow send sms regardless of type of phone number.
-        mMenu->addAction(mSendMessage);
-        mMenu->addAction(mOpenContact);
-    } else {
-        if ( !mCallListItem.number().trimmed().isEmpty() ) {
+    if ( !mContactBtn ) {
+        if( mHaveContact ) {
             // allow send sms regardless of type of phone number.
             mMenu->addAction(mSendMessage);
-            mMenu->addAction(mAddContact);
+            mMenu->addAction(mOpenContact);
+        } else {
+            if ( !mCallListItem.number().trimmed().isEmpty() ) {
+                // allow send sms regardless of type of phone number.
+                mMenu->addAction(mSendMessage);
+                mMenu->addAction(mAddContact);
+            }
         }
     }
     if( mDeleteAction )
@@ -416,7 +597,10 @@ void CallHistoryView::deleteItem()
     if( !mDeleteAction )
         return;
 
-    delete deleteMsg;
+    if ( deleteMsg ) {
+        delete deleteMsg;
+        deleteMsg = 0;
+    }
     deleteMsg = QAbstractMessageBox::messageBox( this, tr("Delete Call History Item"),
         "<qt>" + tr("Are you sure you want to delete this item from the call history?") + "</qt>",
         QAbstractMessageBox::Warning, QAbstractMessageBox::Yes, QAbstractMessageBox::No );
@@ -498,7 +682,7 @@ void CallHistoryView::update()
             photoFileName = baseDirStr + photoFileName;
             hasPhoto = true;
         } else {
-            if ( ServerContactModel::instance()->isSIMCardContact(mContact.uid()) )
+            if ( ServerContactModel::instance()->isSimCardContact(mContact.uid()) )
                 photoFileName = ":icon/addressbook/sim-contact";
             else
                 photoFileName = ":icon/addressbook/generic-contact";
@@ -518,14 +702,30 @@ void CallHistoryView::update()
     }
 
     // set values
-    mCallType->setText( callTypeString );
     QIcon callTypeIcon(callTypeFileName);
+#ifdef QTOPIA_HOMEUI
+    mCallTypeHeader->setText(callTypeString);
+    mCallTypeHeader->setIcon(callTypeIcon);
+#else
+    mCallType->setText( callTypeString );
     mCallTypePic->setPixmap( callTypeIcon.pixmap( QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize)) );
+#endif
 
-    if (mHaveContact)
+    if (mHaveContact) {
         mName->setText( mContact.label() );
-    else
+        if (mContactBtn) {
+            mContactBtn->setText(tr("Open Contact"));
+            disconnect( mContactBtn, SIGNAL(released()), 0, 0);
+            connect( mContactBtn, SIGNAL(released()), this, SLOT(openContact()) );
+        }
+    } else {
         mName->setText( tr("Unknown") );
+        if (mContactBtn) {
+            mContactBtn->setText(tr("Save to Contacts"));
+            disconnect( mContactBtn, SIGNAL(released()), 0, 0);
+            connect( mContactBtn, SIGNAL(released()), this, SLOT(addContact()) );
+        }
+    }
 
     if ( mCallListItem.number().trimmed().isEmpty() )
         mNumber->setText( tr( "Unknown Number" ) );
@@ -578,7 +778,6 @@ void CallHistoryView::update()
         mTimeZoneLabel->setVisible(false);
         mTimeZone->setVisible(false);
         mTimeZone->clear();
-        
     }
 }
 
@@ -603,7 +802,7 @@ void CallHistoryView::dialNumber()
 
 // -------------------------------------------------------------
 // CallHistoryClearList
-
+#ifndef QTOPIA_HOMEUI
 CallHistoryClearList::CallHistoryClearList( QWidget *parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
@@ -646,25 +845,34 @@ void CallHistoryClearList::setSelected( QCallList::ListType type )
 CallHistoryClearList::~CallHistoryClearList()
 {
 }
-
+#endif
 /*!
-  \class CallHistory
-  \brief The CallHistory class provides the Qtopia Phone call history widget.
-  \ingroup QtopiaServer::PhoneUI
+    \class PhoneCallHistory
+    \inpublicgroup QtTelephonyModule
+    \brief The PhoneCallHistory class provides the Qt Extended Phone call history widget.
+    \ingroup QtopiaServer::PhoneUI
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+    An image of this call history can be found in the \l{Server Widget Classes}{server widget gallery}.
+
+    This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   */
 // -------------------------------------------------------------
-// CallHistory
+// PhoneCallHistory
 
 
 /*!
+  \fn void PhoneCallHistory::PhoneCallHistory( QWidget* parent, Qt::WFlags fl)
   \internal
-  */
-CallHistory::CallHistory( QCallList &callList, QWidget *parent, Qt::WFlags fl )
-    : QWidget( parent, fl ), mView( 0 ), mCallList( callList ), mShowMissedCalls( false ),
-      mAllListShown( false ), mDialedListShown( false ), mReceivedListShown( false ), mMissedListShown( false ),
-      mClearList( 0 ), mDialedFindLE( 0 ), mReceivedFindLE( 0 ), mMissedFindLE( 0 )
+*/
+PhoneCallHistory::PhoneCallHistory( QWidget *parent, Qt::WFlags fl )
+    : QAbstractCallHistory( parent, fl ), mView( 0 ),
+      mCallList(DialerControl::instance()->callList()),
+      mShowMissedCalls( false ), mAllListShown( false ), mDialedListShown( false ),
+      mReceivedListShown( false ), mMissedListShown( false ),
+#ifndef QTOPIA_HOMEUI
+      mClearList( 0 ),
+#endif
+      mDialedFindLE( 0 ), mReceivedFindLE( 0 ), mMissedFindLE( 0 )
 
 {
     mAllList = 0;
@@ -676,7 +884,6 @@ CallHistory::CallHistory( QCallList &callList, QWidget *parent, Qt::WFlags fl )
     mReceivedFindLE = 0;
     mMissedFindLE = 0;
     mView = 0;
-
     mTabs = new QTabWidget( this );
     mTabs->setElideMode(Qt::ElideRight);
     connect( mTabs, SIGNAL(currentChanged(int)), this, SLOT(refreshOnFirstShow(int)) );
@@ -694,8 +901,12 @@ CallHistory::CallHistory( QCallList &callList, QWidget *parent, Qt::WFlags fl )
 
     QAction *clearAction = new QAction(QIcon(":icon/trash"), tr("Clear..."), this );
     connect( clearAction, SIGNAL(triggered()), this, SLOT(clearList()) );
-    CallContactDelegate* delegate = new CallContactDelegate(mTabs);
 
+#ifndef QTOPIA_HOMEUI
+    QAbstractItemDelegate* delegate = new CallContactDelegate(mTabs);
+#else
+    QAbstractItemDelegate *delegate = new DeskphoneCallItemDelegate(mTabs);
+#endif
     constructTab( QCallList::All, clearAction, delegate );
     constructTab( QCallList::Dialed, clearAction, delegate );
     constructTab( QCallList::Received, clearAction, delegate );
@@ -706,18 +917,33 @@ CallHistory::CallHistory( QCallList &callList, QWidget *parent, Qt::WFlags fl )
     setWindowTitle( tr("Call History") );
     setObjectName("callhistory");
 
+#ifdef QTOPIA_HOMEUI
+    // Show the launcher when the list is visible
+    QSoftMenuBar::setLabel(mTabs, Qt::Key_Back, QString(), "Launcher");
+
+    // set dial tone only hint
+    QtopiaServiceRequest request( "Dialer", "setDialToneOnlyHint(QString)" );
+    request << "callhistory";
+    request.send();
+#endif
+
     new CallHistoryService( this );
 }
 
 /*!
   \internal
   */
-void CallHistory::constructTab( QCallList::ListType type,
-        QAction *clearAction, CallContactDelegate *delegate )
+void PhoneCallHistory::constructTab( QCallList::ListType type,
+        QAction *clearAction, QAbstractItemDelegate *delegate )
 {
+#ifdef QTOPIA_HOMEUI
+    const bool shortText = true;
+#else
+    const bool shortText = false;
+#endif
+
     CallHistoryListView *list = 0;
     CallHistoryModel * cclm = 0;
-    QItemSelectionModel* selectModel = 0;
 
     QWidget *parent = mTabs;
     QLineEdit *findLE = 0;
@@ -743,7 +969,10 @@ void CallHistory::constructTab( QCallList::ListType type,
         mAllList = new CallHistoryListView( parent );
         list = mAllList;
         icon = QIcon( ":icon/callhistory/CallHistory" );
-        text = tr("All Calls");
+        if (shortText)
+            text = tr("All", "Short for All Calls");
+        else
+            text = tr("All Calls");
         if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
         } else if ( Qtopia::mousePreferred() ) {
             mAllFindLE = new QLineEdit( tab );
@@ -759,7 +988,10 @@ void CallHistory::constructTab( QCallList::ListType type,
         mDialedList = new CallHistoryListView( parent );
         list = mDialedList;
         icon = QIcon( ":icon/phone/outgoingcall" );
-        text = tr("Outgoing Calls");
+        if (shortText)
+            text = tr("Outgoing", "Short for Outgoing Calls");
+        else
+            text = tr("Outgoing Calls");
         if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
         } else if ( Qtopia::mousePreferred() ) {
             mDialedFindLE = new QLineEdit( tab );
@@ -775,7 +1007,10 @@ void CallHistory::constructTab( QCallList::ListType type,
         mReceivedList = new CallHistoryListView( parent );
         list = mReceivedList;
         icon = QIcon( ":icon/phone/incomingcall" );
-        text = tr("Incoming Calls");
+        if (shortText)
+            text = tr("Incoming", "Short for Incoming Calls");
+        else
+            text = tr("Incoming Calls");
         if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
         } else if ( Qtopia::mousePreferred() ) {
             mReceivedFindLE = new QLineEdit( tab );
@@ -791,7 +1026,10 @@ void CallHistory::constructTab( QCallList::ListType type,
         mMissedList = new CallHistoryListView( parent );
         list = mMissedList;
         icon = QIcon( ":icon/phone/missedcall" );
-        text = tr("Missed Calls");
+        if (shortText)
+            text = tr("Missed", "Short for Missed Calls");
+        else
+            text = tr("Missed Calls");
         if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
         } else if ( Qtopia::mousePreferred() ) {
             mMissedFindLE = new QLineEdit( tab );
@@ -813,12 +1051,10 @@ void CallHistory::constructTab( QCallList::ListType type,
     list->setModel( cclm );
     list->setItemDelegate( delegate );
     list->mClearList = clearAction;
+    connect( list, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+                list, SLOT(updateMenu()));
     connect( cclm, SIGNAL(filtered(QString)),
             this, SLOT(updateTabText(QString)) );
-
-    selectModel = list->selectionModel();
-    connect( selectModel, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-                list, SLOT(updateMenu()));
 
     // add widgets
     if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
@@ -855,7 +1091,6 @@ void CallHistory::constructTab( QCallList::ListType type,
 
         tab = container;
     }
-
     mTabs->addTab( tab, icon, text );
 
     connect( list, SIGNAL(requestedDial(QString,QUniqueId)),
@@ -864,24 +1099,25 @@ void CallHistory::constructTab( QCallList::ListType type,
             this, SLOT(viewDetails(QModelIndex)) );
     connect( list, SIGNAL(clicked(QModelIndex)),
             this, SLOT(viewDetails(QModelIndex)) );
+
     list->installEventFilter( this );
 }
 
 /*!
-  \fn void CallHistory::requestedDial(const QString&, const QUniqueId&)
+  \fn void PhoneCallHistory::requestedDial(const QString&, const QUniqueId&)
 
   \internal
   */
 
 /*!
-  \fn void CallHistory::viewedMissedCalls()
+  \fn void PhoneCallHistory::viewedMissedCalls()
   \internal
   */
 
 /*!
   \internal
   */
-void CallHistory::refreshOnFirstShow(int index)
+void PhoneCallHistory::refreshOnFirstShow(int index)
 {
     CallHistoryListView * list = 0;
 
@@ -903,15 +1139,17 @@ void CallHistory::refreshOnFirstShow(int index)
     CallHistoryModel* chm = qobject_cast<CallHistoryModel*>(list->model());
     if ( chm ) {
         chm->refresh();
+#ifndef QTOPIA_HOMEUI
         if ( qApp->keypadNavigationEnabled() && chm->rowCount() )
             list->setCurrentIndex( chm->index( 0 ) );
+#endif
     }
 }
 
 /*!
   \internal
 */
-void CallHistory::focusFindLE(int index)
+void PhoneCallHistory::focusFindLE(int index)
 {
     if (index == 0)
         mAllFindLE->setFocus();
@@ -926,7 +1164,7 @@ void CallHistory::focusFindLE(int index)
 /*!
   \internal
   */
-void CallHistory::setFilterCur( const QString &f )
+void PhoneCallHistory::setFilterCur( const QString &f )
 {
     if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
     } else if( Qtopia::mousePreferred() ) {
@@ -962,8 +1200,9 @@ void CallHistory::setFilterCur( const QString &f )
 /*!
   \internal
   */
-void CallHistory::clearList()
+void PhoneCallHistory::clearList()
 {
+#ifndef QTOPIA_HOMEUI
     if( !mClearList ) {
         mClearList = new CallHistoryClearList( this );
         QtopiaApplication::setMenuLike( mClearList, true );
@@ -982,12 +1221,15 @@ void CallHistory::clearList()
     }
 
     QtopiaApplication::showDialog( mClearList );
+#else
+    clearList( QCallList::All );
+#endif
 }
 
 /*!
   \internal
   */
-void CallHistory::clearList( QCallList::ListType type )
+void PhoneCallHistory::clearList( QCallList::ListType type )
 {
     // createa message string
     QString itemToDelete = tr("all %1 items", "%1 is either dialed, received, or missed");
@@ -1053,12 +1295,18 @@ void CallHistory::clearList( QCallList::ListType type )
         if ( chm && !chm->filter().isEmpty() )
             chm->setFilter( QString() );
     }
+
+    // update the value space
+    if (type == QCallList::All || type == QCallList::Dialed) {
+        QValueSpaceItem item( "/Communications/Calls" );
+        item.setValue("LastDialedCall", "");
+    }
 }
 
 /*!
   \internal
   */
-void CallHistory::showEvent( QShowEvent *e )
+void PhoneCallHistory::showEvent( QShowEvent *e )
 {
     QWidget::showEvent( e );
     if (mShowMissedCalls) {
@@ -1078,7 +1326,7 @@ void CallHistory::showEvent( QShowEvent *e )
 /*!
   \internal
   */
-void CallHistory::cleanup()
+void PhoneCallHistory::cleanup()
 {
     if (mView) {
         delete mView;
@@ -1102,7 +1350,7 @@ void CallHistory::cleanup()
 /*!
   \internal
   */
-void CallHistory::pageChanged(int index)
+void PhoneCallHistory::pageChanged(int index)
 {
     if( index == 3 )
         emit viewedMissedCalls();
@@ -1111,44 +1359,61 @@ void CallHistory::pageChanged(int index)
 /*!
   \internal
   */
-void CallHistory::viewDetails( const QModelIndex& idx )
+void PhoneCallHistory::viewDetails(const QModelIndex& idx)
 {
     if (!idx.isValid())
         return;
 
     CallHistoryListView *list = (CallHistoryListView *)sender();
-    if( !list )
+    if (!list)
         return;
 
     CallHistoryModel * model = qobject_cast<CallHistoryModel*>(list->model());
-    if ( !model )
+    if (!model)
         return;
 
     CallContactItem *item = model->itemAt(idx);
-    if ( !item )
+    if (!item)
         return;
 
     QCallListItem clItem = item->callListItem();
-    if( !mView ) {
+
+#ifdef QTOPIA_HOMEUI
+    QPoint pos = list->clickPos();
+    QRect itemRect = list->visualRect(idx);
+    if (DeskphoneCallItemDelegate::callButtonRect(itemRect).contains(pos)) {
+        QContact c = item->contact();
+        QString number = clItem.number();
+
+        QtopiaServiceRequest req("Dialer", "dial(QString,QUniqueId)"); // No tr
+        req << number << c.uid();
+        req.send();
+        return;
+    }
+#endif
+    if (!mView) {
         mView = new CallHistoryView();
         mView->installEventFilter(this);
-        connect( mView, SIGNAL(deleteCurrentItem()), this, SLOT(deleteCurrentItem()) );
-        connect( mView, SIGNAL(externalLinkActivated()), this, SLOT(close()) );
+        connect(mView, SIGNAL(deleteCurrentItem()), this, SLOT(deleteCurrentItem()));
+        connect(mView, SIGNAL(externalLinkActivated()), this, SLOT(close()));
     }
 
     mView->clear();
-    mView->setCallListItem( clItem );
+    mView->setCallListItem(clItem);
 
-    if( !(item->fieldType() == QContactModel::Invalid) )
-        mView->setContact( item->contact(), item->fieldType() );
+    QContact contact = item->contact();
+    if (contact != QContact())
+        mView->setContact(contact, item->fieldType());
 
     mView->showMaximized();
+    mView->raise();
+    mView->activateWindow();
 }
 
 /*!
   \internal
 */
-void CallHistory::viewDetails( QCallListItem item, QContact contact, int fieldType )
+void PhoneCallHistory::viewDetails( QCallListItem item, QContact contact, int fieldType )
 {
     mViewedItem = item;
 
@@ -1172,16 +1437,20 @@ void CallHistory::viewDetails( QCallListItem item, QContact contact, int fieldTy
 /*!
   \internal
 */
-void CallHistory::showList( QCallList::ListType type )
+void PhoneCallHistory::showList( QCallList::ListType type )
 {
+    if (type == QCallList::Missed)
+        mShowMissedCalls = true;
     mTabs->setCurrentIndex( (int)type );
     showMaximized();
+    raise();
+    activateWindow();
 }
 
 /*!
   \internal
   */
-bool CallHistory::eventFilter( QObject *o, QEvent *e )
+bool PhoneCallHistory::eventFilter( QObject *o, QEvent *e )
 {
     if( o == mAllList ||
         o == mDialedList ||
@@ -1328,7 +1597,7 @@ bool CallHistory::eventFilter( QObject *o, QEvent *e )
 /*!
   \internal
   */
-void CallHistory::reset()
+void PhoneCallHistory::reset()
 {
     mShowMissedCalls = false;
     mFilters.clear();
@@ -1353,7 +1622,7 @@ void CallHistory::reset()
 /*!
   \internal
   */
-void CallHistory::setFilter( const QString &f )
+void PhoneCallHistory::setFilter( const QString &f )
 {
     mFilters[mAllList] = mFilters[mDialedList] = mFilters[mReceivedList] = mFilters[mMissedList] = f;
     if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
@@ -1378,7 +1647,7 @@ void CallHistory::setFilter( const QString &f )
 /*!
   \internal
   */
-void CallHistory::refresh()
+void PhoneCallHistory::refresh()
 {
     CallHistoryListView *list = 0;
     switch( mTabs->currentIndex() )
@@ -1411,7 +1680,7 @@ void CallHistory::refresh()
 /*!
   \internal
   */
-void CallHistory::showMissedCalls()
+void PhoneCallHistory::showMissedCalls()
 {
     mShowMissedCalls = true;
 }
@@ -1419,7 +1688,7 @@ void CallHistory::showMissedCalls()
 /*!
   \internal
   */
-void CallHistory::deleteCurrentItem()
+void PhoneCallHistory::deleteCurrentItem()
 {
     // find current list
     CallHistoryListView *list = 0;
@@ -1434,7 +1703,7 @@ void CallHistory::deleteCurrentItem()
         return;
 
     // find current QCallListItem
-    QModelIndex idx = list->selectionModel()->currentIndex();
+    QModelIndex idx = list->currentIndex();
     CallHistoryModel *chm = qobject_cast<CallHistoryModel*>(list->model());
     if ( !chm )
         return;
@@ -1456,12 +1725,9 @@ void CallHistory::deleteCurrentItem()
 
     // preserve highlighted position
     if ( idx.row() < chm->rowCount() )
-        list->selectionModel()->
-            setCurrentIndex( idx, QItemSelectionModel::SelectCurrent );
+        list->setCurrentIndex( idx );
     else // if the last item is deleted select the new last item.
-        list->selectionModel()->
-            setCurrentIndex( chm->index( chm->rowCount() - 1 ),
-                    QItemSelectionModel::SelectCurrent );
+        list->setCurrentIndex( chm->index( chm->rowCount() - 1 ) );
 
     list->updateMenu();
 
@@ -1482,7 +1748,7 @@ void CallHistory::deleteCurrentItem()
 /*!
     \internal
 */
-void CallHistory::deleteViewedItem()
+void PhoneCallHistory::deleteViewedItem()
 {
     // remove it from the call list
     for( int i = mCallList.count()-1; i >= 0; i--) {
@@ -1496,11 +1762,11 @@ void CallHistory::deleteViewedItem()
 /*!
     \internal
 */
-void CallHistory::updateTabText( const QString & filterStr )
+void PhoneCallHistory::updateTabText( const QString & filterStr )
 {
     if ( !filterStr.isEmpty() )
         mTabs->setTabText( mTabs->currentIndex(),
-                tr( "Calls from: %1", "%1 = phone number or name" ).arg( filterStr ) );
+                tr( "Calls: %1", "%1 = phone number or name" ).arg( filterStr ) );
     else {
         switch ( mTabs->currentIndex() ) {
             case 0:
@@ -1519,16 +1785,16 @@ void CallHistory::updateTabText( const QString & filterStr )
 
 /*!
     \service CallHistoryService CallHistory
-    \brief Provides the call history service.
+    \inpublicgroup QtTelephonyModule
+    \brief The CallHistoryService class provides the CallHistory service.
 
     The \i CallHistory service enables application to view call history list or detailed view.
 */
 
 /*!
-    \fn CallHistoryService::CallHistoryService( CallHistory *parent )
-
-    \internal
-*/
+  \fn CallHistoryService::CallHistoryService( PhoneCallHistory* parent )
+  \internal
+  */
 
 /*!
     \internal
@@ -1538,11 +1804,35 @@ CallHistoryService::~CallHistoryService()
 }
 
 /*!
-    Shows the call history list of \a type.
+    Shows the call history list of \a type. The shown list will only show
+    entries that match \a filterHint. If \a filterHint is empty no filtering is applied.
+
+    The service implementation should set the \a filterHint via QAbstractCallHistory::setFilter().
 */
-void CallHistoryService::showCallHistory( QCallList::ListType type )
+void CallHistoryService::showCallHistory( QCallList::ListType type, const QString& filterHint  )
 {
+    parent->setFilter( filterHint );
     parent->showList( type );
+}
+
+/*!
+    Shows the complete call history.
+
+    The service implementation should set the filterHint via QAbstractCallHistory::setFilter().
+*/
+void CallHistoryService::showCallHistory()
+{
+    showCallHistory((QCallList::ListType)0, QString());
+}
+
+/*!
+    Shows all missed calls.
+
+    The service implementation should set the filterHint via QAbstractCallHistory::setFilter().
+*/
+void CallHistoryService::showMissedCalls()
+{
+    showCallHistory(QCallList::Missed, QString());
 }
 
 /*!
@@ -1556,4 +1846,4 @@ void CallHistoryService::viewDetails( QCallListItem item, QContact contact, int 
     parent->viewDetails( item, contact, fieldType );
 }
 
-
+QTOPIA_REPLACE_WIDGET(QAbstractCallHistory,PhoneCallHistory);

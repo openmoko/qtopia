@@ -1,29 +1,27 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "element.h"
 #include "module.h"
 #include "system.h"
-#include <qxml.h>
 #include <QDebug>
+#include <QXmlStreamAttributes>
 
 Duration Duration::operator*(const Duration &d)
 {
@@ -138,6 +136,12 @@ bool operator>(const Duration &d1, const Duration &d2)
     return false;
 }
 
+QDebug& operator <<(QDebug& out, const Duration& d)
+{
+    out << d.duration();
+    return out;
+}
+
 Duration min(const Duration &d1, const Duration &d2)
 {
     Duration r;
@@ -173,24 +177,20 @@ Duration max(const Duration &d1, const Duration &d2)
     return r;
 }
 
-//===========================================================================
-
 SmilEvent::~SmilEvent()
 {
 }
 
-//===========================================================================
-
-SmilElement::SmilElement(SmilSystem *s, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilElement::SmilElement(SmilSystem *s, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : sys(s), prnt(p), ename(n), currentState(Idle), vis(true)
 {
-    eid = atts.value("id");
+    eid = atts.value("id").toString();
 }
 
 SmilElement::~SmilElement()
 {
     QList<SmilModuleAttribute*>::Iterator mit;
-    for (mit = modules.begin(); mit != modules.end(); ++mit) {
+    for (mit = attributes.begin(); mit != attributes.end(); ++mit) {
         delete *mit;
     }
 
@@ -225,10 +225,10 @@ SmilElement *SmilElement::findChild(const QString &id, const QString &nam, bool 
     return e;
 }
 
-SmilModuleAttribute *SmilElement::module(const QString &name) const
+SmilModuleAttribute *SmilElement::moduleAttribute(const QString &name) const
 {
     QList<SmilModuleAttribute*>::ConstIterator it;
-    for (it = modules.begin(); it != modules.end(); ++it) {
+    for (it = attributes.begin(); it != attributes.end(); ++it) {
         if ((*it)->name() == name)
             return *it;
     }
@@ -236,9 +236,9 @@ SmilModuleAttribute *SmilElement::module(const QString &name) const
     return 0;
 }
 
-void SmilElement::addModule(SmilModuleAttribute *m)
+void SmilElement::addModuleAttribute(SmilModuleAttribute *m)
 {
-    modules.append(m);
+    attributes.append(m);
 }
 
 Duration SmilElement::implicitDuration()
@@ -280,7 +280,7 @@ void SmilElement::reset()
     }
 
     QList<SmilModuleAttribute*>::ConstIterator mit;
-    for (mit = modules.begin(); mit != modules.end(); ++mit) {
+    for (mit = attributes.begin(); mit != attributes.end(); ++mit) {
         (*mit)->reset();
     }
     setState(Idle);
@@ -292,18 +292,14 @@ void SmilElement::process()
     for (it = chn.begin(); it != chn.end(); ++it) {
         (*it)->process();
     }
-
-    QList<SmilModuleAttribute*>::ConstIterator mit;
-    for (mit = modules.begin(); mit != modules.end(); ++mit) {
-        (*mit)->process();
-    }
+    processAttributes();
 }
 
 
 void SmilElement::paint(QPainter *p)
 {
     QList<SmilModuleAttribute*>::ConstIterator mit;
-    for (mit = modules.begin(); mit != modules.end(); ++mit) {
+    for (mit = attributes.begin(); mit != attributes.end(); ++mit) {
         (*mit)->paint(p);
     }
 }
@@ -311,7 +307,7 @@ void SmilElement::paint(QPainter *p)
 void SmilElement::event(SmilElement *e, SmilEvent *ev)
 {
     QList<SmilModuleAttribute*>::ConstIterator mit;
-    for (mit = modules.begin(); mit != modules.end(); ++mit) {
+    for (mit = attributes.begin(); mit != attributes.end(); ++mit) {
         (*mit)->event(e, ev);
     }
 }
@@ -359,6 +355,14 @@ void SmilElement::sendEvent(SmilEvent &e)
     SmilElementList::ConstIterator it;
     for (it = listeners.begin(); it != listeners.end(); ++it) {
         (*it)->event(this, &e);
+    }
+}
+
+void SmilElement::processAttributes()
+{
+    QList<SmilModuleAttribute*>::ConstIterator mit;
+    for (mit = attributes.begin(); mit != attributes.end(); ++mit) {
+        (*mit)->process();
     }
 }
 

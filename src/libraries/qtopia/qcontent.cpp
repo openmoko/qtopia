@@ -1,28 +1,26 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 #include <QCache>
 #include <QReadWriteLock>
 
 #include <qcontent.h>
-#include <qtopia/private/drmcontent_p.h>
+#include "drmcontent_p.h"
 
 #include <qtranslatablesettings.h>
 #include <qtopiasql.h>
@@ -30,15 +28,14 @@
 #include <qtopialog.h>
 #include <qtopianamespace.h>
 #include <qtopiaipcenvelope.h>
-#include <qtopia/private/contentserverinterface_p.h>
-#include <qtopia/private/contentpluginmanager_p.h>
+#include "contentpluginmanager_p.h"
 #include <qcategorymanager.h>
 #ifndef QTOPIA_CONTENT_INSTALLER
-#include <qtopia/private/qcontent_p.h>
+#include "qcontent_p.h"
 #endif
 #include <QValueSpaceObject>
-#include <qtopia/private/qcontentstore_p.h>
-#include <qtopia/private/qfscontentengine_p.h>
+#include "qcontentstore_p.h"
+#include "qfscontentengine_p.h"
 #include <QContentSet>
 #include <QContentFilter>
 
@@ -90,9 +87,10 @@ Q_GLOBAL_STATIC_WITH_ARGS(QContent::DocumentSystemConnection, documentSystemConn
 
 /*!
   \class QContent
-  \mainclass
+    \inpublicgroup QtBaseModule
+
   \brief The QContent class represents a content carrying entity in the
-  Qtopia system, where content includes resources which an end-user may
+  Qt Extended system, where content includes resources which an end-user may
   view or manage.
 
   By creating content with a \l Role of \l Data using the setRole() method,
@@ -916,7 +914,7 @@ bool QContent::operator==( const QContent &other ) const
     If the QContent is a document then the return value will indicate if the associated application
     is preloaded
 
-    Preloaded applications are applications that are launched in the background when Qtopia is started.
+    Preloaded applications are applications that are launched in the background when Qt Extended is started.
 */
 bool QContent::isPreloaded() const
 {
@@ -925,7 +923,7 @@ bool QContent::isPreloaded() const
         return false;
     QSettings cfg("Trolltech","Launcher");
     cfg.beginGroup("AppLoading");
-    QStringList apps = cfg.value("PreloadApps").toString().split(',');
+    QStringList apps = cfg.value("PreloadApps").toStringList();
     if (apps.contains(executableName()))
         return true;
     return false;
@@ -1026,7 +1024,9 @@ QString QContent::iconName() const
     The property will not be written to the backing store until commit()
     is called.
 
-  \sa name()
+    This does not rename the underlying file, to rename a file use rename() instead.
+
+  \sa name(), rename()
  */
 void QContent::setName( const QString& name )
 {
@@ -1084,6 +1084,22 @@ bool QContent::isDocument() const
 }
 
 /*!
+    Returns a representive thumbnail of the content.  If \a size is not null the thumbnail will be resized to fit those dimensions
+    according to the given aspect ratio \a mode.
+*/
+QImage QContent::thumbnail( const QSize &size, Qt::AspectRatioMode mode ) const
+{
+#ifndef QTOPIA_CONTENT_INSTALLER
+    return QContentStore::instance()->thumbnail(*this, size, mode);
+#else
+    Q_UNUSED(size);
+    Q_UNUSED(mode);
+
+    return QImage();
+#endif
+}
+
+/*!
     \enum QContent::Property
 
     Convenience enumeration that provides some of the more common content properties. All
@@ -1104,6 +1120,7 @@ bool QContent::isDocument() const
     \value RightsIssuerUrl A URL where rights for DRM protected content may be obtained.  Typically associated with OMA DRM content.
     \value Track The content's position on an album.
     \value Version The content's version number.
+    \value Title The title of the content.
  */
 
 /*!
@@ -1182,8 +1199,9 @@ QString QContent::propertyKey( Property property )
     case RightsIssuerUrl: return QLatin1String( "RightsIssuerUrl" );
     case Track:           return QLatin1String( "Track"           );
     case Version:         return QLatin1String( "Version"         );
+    case Title:           return QLatin1String( "Title"           );
     default:
-         return QLatin1String( "Unknown"         );
+         return QLatin1String( "Unknown" );
     }
 }
 
@@ -1237,7 +1255,11 @@ bool QContent::commit(ChangeType &change)
 }
 
 /*!
-    Sets the file that this content references to \a filename
+    Sets the file that this content references to \a {filename}.
+
+    This does not move the contents of the file, to move a file use \l moveTo() instead.
+
+    \sa moveTo()
  */
 void QContent::setFile( const QString& filename )
 {
@@ -1445,6 +1467,8 @@ bool QContent::copyContent(const QContent &from)
     \a newPath.
 
     Returns true is successful, otherwise false.
+
+    \sa moveTo()
  */
 
 bool QContent::copyTo(const QString &newPath)
@@ -1463,6 +1487,8 @@ bool QContent::copyTo(const QString &newPath)
     Returns true if the contents is successfully moved, otherwise false.
 
     Note: The id() of the original file will be invalid and should not be used.
+
+    \sa copyTo(), rename()
  */
 
 bool QContent::moveTo(const QString &newPath)
@@ -1472,6 +1498,19 @@ bool QContent::moveTo(const QString &newPath)
         return false;
 
     return QContentStore::instance()->moveContentTo( this, newPath );
+}
+
+
+/*!
+    Sets the name of the content to \a name and renames the associated file to match.
+
+    Returns true if the file could be renamed and false otherwise.
+
+    \sa moveTo(), setName()
+*/
+bool QContent::rename(const QString &name)
+{
+    return QContentStore::instance()->renameContent(this, name);
 }
 
 /*!
@@ -1513,14 +1552,14 @@ bool QContent::isDetached() const
 /*!
     \enum QContent::DocumentSystemConnection
 
-    Identifies how an application is connected to the Qtopia Document System.
+    Identifies how an application is connected to the Qt Extended Document System.
 
-    \value DocumentSystemClient The application performs document system operations by connecting to the Qtopia Document Server.
+    \value DocumentSystemClient The application performs document system operations by connecting to the Qt Extended Document Server.
     \value DocumentSystemDirect The application connects directly to the backing store and performs all document system operations locally.
 */
 
 /*!
-    Identifies whether the application connects to the Qtopia Document Server or performs Document System operations locally.
+    Identifies whether the application connects to the Qt Extended Document Server or performs Document System operations locally.
 */
 QContent::DocumentSystemConnection QContent::documentSystemConnection()
 {
@@ -1528,7 +1567,7 @@ QContent::DocumentSystemConnection QContent::documentSystemConnection()
 }
 
 /*!
-    Sets the type of \a connection the application has to the Qtopia Document System.
+    Sets the type of \a connection the application has to the Qt Extended Document System.
     Returns true if the connection type is set, false otherwise.
 
     Notes:
@@ -1596,26 +1635,6 @@ QDataStream& operator>>(QDataStream& ds, QContentId &id)
     ds >> id.first >> id.second;
     return ds;
 }
-
-#if defined(QTOPIA_DBUS_IPC)
-const QDBusArgument &operator>>(const QDBusArgument &a, QContentId &id)
-{
-    a.beginStructure();
-    a >> id.first >> id.second;
-    a.endStructure();
-
-    return a;
-}
-
-QDBusArgument &operator<<(QDBusArgument &a, const QContentId &id)
-{
-    a.beginStructure();
-    a << id.first << id.second;
-    a.endStructure();
-
-    return a;
-}
-#endif
 
 QTOPIA_EXPORT QDebug operator<<(QDebug debug, const QContent &content)
 {

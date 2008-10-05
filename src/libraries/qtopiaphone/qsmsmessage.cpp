@@ -1,32 +1,26 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <stdlib.h>
 
 #include <qsmsmessage.h>
-#ifdef PHONESIM
 #include "qsmsmessage_p.h"
-#else
-#include <qtopiaphone/private/qsmsmessage_p.h>
-#endif
 #include <qatutils.h>
 #include <qgsmcodec.h>
 #ifdef Q_WS_QWS
@@ -85,11 +79,7 @@ class QSMSMessagePrivate
 public:
     QSMSMessagePrivate()
     {
-#if QT_VERSION < 0x040400
-        ref.init(1);
-#else
         ref = 1;
-#endif
         mValidity = 2 * 24 * 60;        // 2 days
         mReplyRequest = false;
         mStatusReportRequested = false;
@@ -209,11 +199,7 @@ public:
         mHeaders = from->mHeaders;
     }
 
-#if QT_VERSION < 0x040400
-    QBasicAtomic ref;
-#else
     QAtomicInt ref;
-#endif
     QTextCodec *mCodec;
     QString mServiceCenter;
     QString mRecipient;
@@ -259,7 +245,8 @@ public:
 
 /*!
     \class QSMSMessagePart
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QSMSMessagePart class specifies a part within an SMS message.
 
     \ingroup telephony
@@ -407,7 +394,8 @@ template <typename Stream> void QSMSMessagePart::serialize(Stream &stream) const
 
 /*!
     \class QSMSMessage
-    \mainclass
+    \inpublicgroup QtTelephonyModule
+
     \brief The QSMSMessage class specifies the contents of an SMS message.
 
     This class is intended for use with QSMSReader and QSMSSender to process
@@ -1013,8 +1001,8 @@ void QSMSMessage::computeSize( uint& numMessages, uint& spaceLeftInLast ) const
     an application datagram, or -1 if not an application datagram.
 
     When an SMS message is received that has a destination port
-    number, Qtopia will attempt to find a QDS service that can handle it.
-    Qtopia first looks for a QDS service named \c push for the MIME type
+    number, Qt Extended will attempt to find a QDS service that can handle it.
+    Qt Extended first looks for a QDS service named \c push for the MIME type
     \c T from the WAP push header.  Next, it looks for a service named
     \c push for the MIME type \c{application/x-smsapp-N} where
     \c N is the port number in decimal.
@@ -1872,9 +1860,7 @@ QString QPDUMessage::address(bool SCAddress)
 
         skipOctet();
         if ( !SCAddress ) {
-            if ( at != SMS_Address_AlphaNumeric ) {
                 len = len / 2 + (len % 2);
-            }
         } else {
             len--;
         }

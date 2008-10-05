@@ -1,34 +1,78 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <qbluetoothsdprecord.h>
 #include <qbluetoothsdpuuid.h>
-#include <qtopiacomm/private/qsdpxmlparser_p.h>
+#include "qsdpxmlparser_p.h"
 
 #include <QString>
 #include <QUrl>
 
+static bool sdp_compare(const QVariant &lhs, const QVariant &rhs)
+{
+    if (lhs.userType() != rhs.userType())
+        return false;
+
+    if ((lhs.type() != QVariant::UserType) && (lhs != rhs))
+        return false;
+
+    if (lhs.userType() == qMetaTypeId<quint128>()) {
+        if (lhs.value<quint128>() == rhs.value<quint128>())
+            return false;
+    }
+    else if (lhs.userType() == qMetaTypeId<qint128>()) {
+        if (lhs.value<qint128>() != rhs.value<qint128>())
+            return false;
+    }
+    else if (lhs.userType() == qMetaTypeId<QBluetoothSdpUuid>()) {
+        if (lhs.value<QBluetoothSdpUuid>() != rhs.value<QBluetoothSdpUuid>())
+            return false;
+    }
+    else if (lhs.userType() == qMetaTypeId<QBluetoothSdpSequence>()) {
+        if (lhs.value<QBluetoothSdpSequence>() != rhs.value<QBluetoothSdpSequence>())
+            return false;
+    }
+    else if (lhs.userType() == qMetaTypeId<QBluetoothSdpAlternative>()) {
+        if (lhs.value<QBluetoothSdpAlternative>() != rhs.value<QBluetoothSdpAlternative>())
+            return false;
+    }
+
+    return true;
+}
+
+static bool sdp_compare(const QList<QVariant> &lhs, const QList<QVariant> &rhs)
+{
+    if (lhs.size() != rhs.size())
+        return false;
+
+    for (int i = 0; i < lhs.size(); i++) {
+        if (!sdp_compare(lhs[i], rhs[i]))
+            return false;
+    }
+
+    return true;
+}
+
 /*!
     \class QBluetoothSdpSequence
-    \mainclass
+    \inpublicgroup QtBluetoothModule
+
     \brief The QBluetoothSdpSequence class is a convenience wrapper used in QBluetoothSdpRecord.
 
     This class is a convenience class introduced for the purpose
@@ -44,8 +88,25 @@
 */
 
 /*!
+    Comparison operator.  Returns true if the current object is equal
+    to \a other.
+*/
+bool QBluetoothSdpSequence::operator==(const QBluetoothSdpSequence &other) const
+{
+    return sdp_compare(*this, other);
+}
+
+/*!
+    \fn bool QBluetoothSdpSequence::operator!=(const QBluetoothSdpSequence &other) const
+
+    Comparison operator.  Returns true if the current object is
+    not equal to \a other.
+*/
+
+/*!
     \class QBluetoothSdpAlternative
-    \mainclass
+    \inpublicgroup QtBluetoothModule
+
     \brief The QBluetoothSdpAlternative class is a convenience wrapper used in QBluetoothSdpRecord.
 
     This class is a convenience class introduced for the
@@ -61,8 +122,25 @@
  */
 
 /*!
+    Comparison operator.  Returns true if the current object is equal
+    to \a other.
+*/
+bool QBluetoothSdpAlternative::operator==(const QBluetoothSdpAlternative &other) const
+{
+    return sdp_compare(*this, other);
+}
+
+/*!
+    \fn bool QBluetoothSdpAlternative::operator!=(const QBluetoothSdpAlternative &other) const
+
+    Comparison operator.  Returns true if the current object is
+    not equal to \a other.
+*/
+
+/*!
     \class QBluetoothSdpRecord
-    \mainclass
+    \inpublicgroup QtBluetoothModule
+
     \brief The QBluetoothSdpRecord class represents a bluetooth SDP record.
 
     Each Bluetooth record is composed of zero or more attributes.  Each
@@ -202,6 +280,20 @@ QBluetoothSdpRecord &QBluetoothSdpRecord::operator=(const QBluetoothSdpRecord &o
  */
 bool QBluetoothSdpRecord::operator==(const QBluetoothSdpRecord &other) const
 {
+    if (m_attrs.size() != other.m_attrs.size())
+        return false;
+
+    QMap<quint16, QVariant>::const_iterator it1 = m_attrs.begin();
+    QMap<quint16, QVariant>::const_iterator it2 = other.m_attrs.begin();
+
+    while (it1 != m_attrs.end()) {
+        if (!(sdp_compare(it1.value(), it2.value())) || qMapLessThanKey(it1.key(), it2.key()) || qMapLessThanKey(it2.key(), it1.key()))
+            return false;
+        ++it2;
+        ++it1;
+    }
+    return true;
+
     return other.m_attrs == m_attrs;
 }
 

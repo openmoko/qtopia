@@ -1,25 +1,24 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "touchscreenlockdlg.h"
+#include "uifactory.h"
 #include <QVBoxLayout>
 #include <QDesktopWidget>
 #include <QApplication>
@@ -33,13 +32,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QTimeLine>
 #include <QFileInfo>
-#ifndef QT_NO_PICTURE
-#include <QPicture>
-#else
-#ifndef QTOPIA_NO_SVG
 #include <QSvgRenderer>
-#endif
-#endif
+#include <QPicture>
 
 class KeyItem : public QObject, public QGraphicsPixmapItem
 {
@@ -113,8 +107,25 @@ private:
     qreal initialY;
 };
 
-TouchScreenLockDialog::TouchScreenLockDialog(QWidget *parent, Qt::WFlags fl)
-  : QDialog(parent, fl), scene(0)
+/*!
+  \class TouchScreenLockDialog
+    \inpublicgroup QtUiModule
+  \brief The TouchScreenLockDialog class provides a dialog that is shown while a touchscreen-only 
+  device is locked.
+  \ingroup QtopiaServer::GeneralUI
+ 
+  The dialog allows the user to disengage the touchscreen lock via a specific move operation 
+  on the screen.
+
+  This class is part of the Qt Extended server and cannot be used by other applications. Any server 
+  component that uses this dialog should create an instance via UIFactory::createDialog().
+*/
+
+/*!
+  Constructs a TouchScreenLockDialog instance with the given \a parent and \a flags.
+*/
+TouchScreenLockDialog::TouchScreenLockDialog(QWidget *parent, Qt::WFlags flags)
+  : QDialog(parent, flags), scene(0)
 {
     //set palette before setting window state so we get correct transparency
     QPalette p = palette();
@@ -124,6 +135,7 @@ TouchScreenLockDialog::TouchScreenLockDialog(QWidget *parent, Qt::WFlags fl)
     setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint);
     setWindowState(Qt::WindowFullScreen);
     setAttribute(Qt::WA_DeleteOnClose);
+    setModal(true);
 
     QVBoxLayout *vb = new QVBoxLayout;
     vb->setMargin(0);
@@ -141,7 +153,7 @@ TouchScreenLockDialog::TouchScreenLockDialog(QWidget *parent, Qt::WFlags fl)
     int kw = (int)(scene->sceneRect().width() * 0.14);
     int kh = (int)(scene->sceneRect().height() * 0.21);
     KeyItem *key = new KeyItem(generatePixmap(":image/qpe/Key", kw, kh), 0);
-    QObject::connect (key, SIGNAL(unlocked()), this, SLOT(close()));
+    QObject::connect (key, SIGNAL(unlocked()), this, SLOT(accept()));
 
     int lw = (int)(scene->sceneRect().width() * 0.27);
     int lh = (int)(scene->sceneRect().height() * 0.29);
@@ -181,14 +193,12 @@ QPixmap TouchScreenLockDialog::generatePixmap(const QString &filename, int width
     painter.scale(qreal(width) / br.width(), qreal(height) / br.height());
     painter.drawPicture(0, 0, picture);
 #else
-#ifndef QTOPIA_NO_SVG
     QSvgRenderer renderer(fileInfo.filePath());
     renderer.render(&painter);
-#endif
 #endif
     painter.end();
     return QPixmap::fromImage(image);
 }
-
+UIFACTORY_REGISTER_WIDGET( TouchScreenLockDialog );
 #include "touchscreenlockdlg.moc"
 

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -96,8 +94,9 @@ private:
 
 /*!
   \class QNetworkState
-  \mainclass
-  \brief The QNetworkState class provides very generic information about the connectivity state of the Qtopia device.
+    \inpublicgroup QtBaseModule
+
+  \brief The QNetworkState class provides very generic information about the connectivity state of the Qt Extended device.
 
   In addition to QtopiaNetwork::online() which returns the current connectivity state
   QNetworkState provides the connected() and disconnected() signals which are emitted 
@@ -141,7 +140,7 @@ QNetworkState::~QNetworkState()
 
 /*!
   Returns the handle to the network interface that is currently used as default gateway for
-  network packages. If QtopiaNetwork::online() returns \c{FALSE} this function returns 
+  network packages. If QtopiaNetwork::online() returns \c{false} this function returns
   an empty string.
 */
 QString QNetworkState::gateway() const
@@ -161,7 +160,7 @@ QList<QString> QNetworkState::interfacesOnline() const
 /*!
   Returns the list of known network devices of \a type.
   If \a type is \c{QtopiaNetwork::Any} it returns all known devices. A device is considered
-  to be known if a configuration file exists for it. The returned Qtopia network interface handles
+  to be known if a configuration file exists for it. The returned Qt Extended network interface handles
   are equivalent to the full qualified path to the configuration file.
 
  \sa QtopiaNetwork::availableNetworkConfigs()
@@ -207,7 +206,7 @@ QString QNetworkState::defaultWapAccount() const
 /*!
   \fn void QNetworkState::connected()
 
-  This signal is emitted when Qtopia changes from offline to online.
+  This signal is emitted when Qt Extended changes from offline to online.
   If the connectivity state of a particular device is required \l QNetworkDevice::state()
   should be used.
 
@@ -217,7 +216,7 @@ QString QNetworkState::defaultWapAccount() const
 /*!
   \fn void QNetworkState::disconnected()
 
-  This signal is emitted when Qtopia changes from online to offline.
+  This signal is emitted when Qt Extended changes from online to offline.
   If the connectivity state of a particular device is required \l QNetworkDevice::state()
   should be used.
 

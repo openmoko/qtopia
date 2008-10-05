@@ -6,29 +6,22 @@ depotProject {
     isEmpty(VERSION):VERSION=$$QPE_VERSION
 }
 
-DEFINES+=QTOPIA_$$upper($$QTOPIA_EDITION)
 # FIXME hack
 platform:DEFINES+=QTOPIA_PHONE
 drmagent:DEFINES+=QTOPIA_DRM
-phone:enable_voip:DEFINES+=QTOPIA_VOIP
-phone:enable_modem:DEFINES+=QTOPIA_MODEM
-phone:enable_cell:DEFINES+=QTOPIA_CELL
-phone:enable_bluetooth:DEFINES+=QTOPIA_BLUETOOTH
+enable_voip:DEFINES+=QTOPIA_VOIP
+enable_cell:DEFINES+=QTOPIA_CELL
+enable_bluetooth:DEFINES+=QTOPIA_BLUETOOTH
 enable_infrared:DEFINES+=QTOPIA_INFRARED
 enable_vpn:DEFINES+=QTOPIA_VPN
-enable_dbusipc:DEFINES+=QTOPIA_DBUS_IPC
 !enable_sxe:DEFINES+=QT_NO_SXE
-DEFINES+=QTOPIA_KEYPAD_NAVIGATION
 desktop:DEFINES+=QTOPIA_HOST
+enable_dbus_ipc:DEFINES+=QTOPIA_DBUS_IPC
+enable_pictureflow:DEFINES+=USE_PICTUREFLOW
+
 
 # Stuff for apps
 app {
-    # Don't let force_quicklaunch apply to third party projects when SXE is enabled.
-    # Quicklaunch apps can't be installed by package manager so ignoring no_quicklaunch
-    # creates apps that can't be installed.
-    !depotProject:enable_sxe:CONFIG-=force_quicklaunch
-    # If quicklaunch is forced on, ignore no_quicklaunch from the .pro file
-    qtopia_main:force_quicklaunch:CONFIG-=no_quicklaunch
     # If we don't use the app macros, quicklaunch and singleexec won't work
     !qtopia_main {
         CONFIG+=no_quicklaunch

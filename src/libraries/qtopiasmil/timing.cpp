@@ -1,30 +1,29 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include "timing.h"
 #include "system.h"
-#include <qxml.h>
 #include <qobject.h>
 #include <QTimerEvent>
 #include <QMutableMapIterator>
+#include <QXmlStreamAttributes>
+#include <QDebug>
 
 class TimerEventManager : public QObject
 {
@@ -87,9 +86,7 @@ void TimerEventManager::timerEvent(QTimerEvent *e)
     }
 }
 
-//===========================================================================
-
-SmilPar::SmilPar(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilPar::SmilPar(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts)
 {
 }
@@ -105,7 +102,7 @@ void SmilPar::setState(State s)
     if (s == Active) {
         SmilElementList::ConstIterator it;
         for (it = chn.begin(); it != chn.end(); ++it) {
-            SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->module("Timing");
+            SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->moduleAttribute("Timing");
             if (ta)
                 ta->setState(Startup);
             else
@@ -116,7 +113,7 @@ void SmilPar::setState(State s)
         for (it = chn.begin(); it != chn.end(); ++it) {
             if ((*it)->state() >= SmilElement::Startup
                 && (*it)->state() <= SmilElement::Active) {
-                SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->module("Timing");
+                SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->moduleAttribute("Timing");
                 if (ta)
                     ta->setState(SmilElement::End);
                 else
@@ -129,7 +126,7 @@ void SmilPar::setState(State s)
 Duration SmilPar::implicitDuration()
 {
     Duration d;
-    SmilTimingAttribute *ta = (SmilTimingAttribute*)module("Timing");
+    SmilTimingAttribute *ta = (SmilTimingAttribute*)moduleAttribute("Timing");
     switch (ta->endSync.type()) {
         case EndSync::First:
             {
@@ -195,9 +192,7 @@ Duration SmilPar::implicitDuration()
     return d;
 }
 
-//===========================================================================
-
-SmilSeq::SmilSeq(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlAttributes &atts)
+SmilSeq::SmilSeq(SmilSystem *sys, SmilElement *p, const QString &n, const QXmlStreamAttributes &atts)
     : SmilElement(sys, p, n, atts)
 {
 }
@@ -211,7 +206,7 @@ void SmilSeq::process()
         tv.setType(TimingValue::SyncBase);
         tv.setElement(e);
         tv.setValue("end");
-        SmilTimingAttribute *ta = (SmilTimingAttribute*)module("Timing");
+        SmilTimingAttribute *ta = (SmilTimingAttribute*)moduleAttribute("Timing");
         if (ta) {
             ta->endList.append(tv);
             e->addListener(this);    // tell me when child end is resolved
@@ -233,7 +228,7 @@ void SmilSeq::setState(State s)
     if (s == Active) {
         SmilElementList::ConstIterator it;
         for (it = chn.begin(); it != chn.end(); ++it) {
-            SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->module("Timing");
+            SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->moduleAttribute("Timing");
             if (ta)
                 ta->setState(Startup);
             else
@@ -244,7 +239,7 @@ void SmilSeq::setState(State s)
         for (it = chn.begin(); it != chn.end(); ++it) {
             if ((*it)->state() >= SmilElement::Startup
                 && (*it)->state() <= SmilElement::Active) {
-                SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->module("Timing");
+                SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->moduleAttribute("Timing");
                 if (ta)
                     ta->setState(SmilElement::End);
                 else
@@ -253,8 +248,6 @@ void SmilSeq::setState(State s)
         }
     }
 }
-
-//===========================================================================
 
 class SmilTimingModulePrivate
 {
@@ -283,7 +276,7 @@ SmilTimingModule::~SmilTimingModule()
     delete d;
 }
 
-SmilElement *SmilTimingModule::beginParseElement(SmilSystem *sys, SmilElement *e, const QString &qName, const QXmlAttributes &atts)
+SmilElement *SmilTimingModule::beginParseElement(SmilSystem *sys, SmilElement *e, const QString &qName, const QXmlStreamAttributes &atts)
 {
     if (qName == "par") {
         return new SmilPar(sys, e, qName, atts);
@@ -294,16 +287,16 @@ SmilElement *SmilTimingModule::beginParseElement(SmilSystem *sys, SmilElement *e
     return 0;
 }
 
-bool SmilTimingModule::parseAttributes(SmilSystem *sys, SmilElement *e, const QXmlAttributes &atts)
+bool SmilTimingModule::parseAttributes(SmilSystem *sys, SmilElement *e, const QXmlStreamAttributes &atts)
 {
     if (e->name() == "body" || e->name() == "par" || e->name() == "seq"
-        || sys->module("Media")->elements().contains(e->name())) {
+        || sys->module("Media")->elementNames().contains(e->name())) {
         SmilTimingAttribute *tn = new SmilTimingAttribute(e, atts);
         addNode(tn);
         return true;
     }
-    for (int i = 0; i < atts.length(); i++) {
-        if (attributes().contains(atts.type(i))) {
+    for (int i = 0; i < atts.count(); i++) {
+        if (attributeNames().contains(atts.at(i).name().toString())) {
             SmilTimingAttribute *tn = new SmilTimingAttribute(e, atts);
             addNode(tn);
             return true;
@@ -319,7 +312,7 @@ void SmilTimingModule::endParseElement(SmilElement *e, const QString &/*qName*/)
         d->current = d->current->parent;
 }
 
-QStringList SmilTimingModule::elements() const
+QStringList SmilTimingModule::elementNames() const
 {
     QStringList l;
     l.append("par");
@@ -327,7 +320,7 @@ QStringList SmilTimingModule::elements() const
     return l;
 }
 
-QStringList SmilTimingModule::attributes() const
+QStringList SmilTimingModule::attributeNames() const
 {
     QStringList l;
     l.append("begin");
@@ -351,13 +344,15 @@ void SmilTimingModule::addNode(SmilTimingAttribute *n)
         d->current = n;
 }
 
-//===========================================================================
-
-SmilTimingAttribute::SmilTimingAttribute(SmilElement *e, const QXmlAttributes &atts)
-    : SmilModuleAttribute(e, atts), repeatCount(-1), parent(0), stateTimerId(0),
-        simpleTimerId(0)
+SmilTimingAttribute::SmilTimingAttribute(SmilElement *e, const QXmlStreamAttributes &atts)
+    :
+    SmilModuleAttribute(e, atts),
+    repeatCount(-1),
+    parent(0),
+    stateTimerId(0),
+    simpleTimerId(0)
 {
-    QString val = atts.value("begin");
+    QString val = atts.value("begin").toString();
     if (!val.isEmpty()) {
         QStringList list = val.split(';');
         for (QStringList::Iterator it = list.begin(); it != list.end(); ++it) {
@@ -365,10 +360,10 @@ SmilTimingAttribute::SmilTimingAttribute(SmilElement *e, const QXmlAttributes &a
             beginList.append(begin);
         }
     }
-    val = atts.value("dur");
+    val = atts.value("dur").toString();
     if (!val.isEmpty())
         dur.parse(val);
-    val = atts.value("end");
+    val = atts.value("end").toString();
     if (!val.isEmpty()) {
         QStringList list = val.split(';');
         for (QStringList::Iterator it = list.begin(); it != list.end(); ++it) {
@@ -376,28 +371,28 @@ SmilTimingAttribute::SmilTimingAttribute(SmilElement *e, const QXmlAttributes &a
             endList.append(end);
         }
     }
-    val = atts.value("repeatDur");
+    val = atts.value("repeatDur").toString();
     if (!val.isEmpty())
         repeatDur.parse(val);
-    val = atts.value("repeatCount");
+    val = atts.value("repeatCount").toString();
     if (!val.isEmpty())
         repeatCount = TimingValue::parseDecimal(val);
-    val = atts.value("min");
+    val = atts.value("min").toString();
     if (val.isEmpty())
         val = "0s";
     minTime.parse(val);
-    val = atts.value("max");
+    val = atts.value("max").toString();
     if (val.isEmpty())
         val = "indefinite";
     maxTime.parse(val);
-    val == atts.value("fill");
+    val == atts.value("fill").toString();
     fill = parseFill(val, DefaultFill);
-    val == atts.value("fillDefault");
+    val == atts.value("fillDefault").toString();
     fillDefault = parseFill(val, InheritFill);
     if (e->name() == "par") {
         // handle endsync
         if (dur.type() == TimingValue::Unspecified) {
-            val = atts.value("endsync");
+            val = atts.value("endsync").toString();
             if (val.isEmpty())
                 val = "last"; // default
             bool haveRptDur = repeatDur.type() != TimingValue::Unspecified;
@@ -503,7 +498,7 @@ void SmilTimingAttribute::timerEvent(int id)
             SmilElementList::ConstIterator it;
             for (it = element->children().begin(); it != element->children().end(); ++it) {
                 (*it)->reset();
-                SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->module("Timing");
+                SmilTimingAttribute *ta = (SmilTimingAttribute*)(*it)->moduleAttribute("Timing");
                 if (ta)
                     ta->setState(SmilElement::Startup);
                 else
@@ -728,7 +723,6 @@ void SmilTimingAttribute::calcCurrentEnd()
             break;
         }
     }
-
     element->setCurrentEnd(end);
 }
 
@@ -906,7 +900,38 @@ SmilTimingAttribute::Fill SmilTimingAttribute::parseFill(const QString &val, Fil
     return fill;
 }
 
-//===========================================================================
+static void resetElementTiming(SmilElement* e)
+{
+    e->simpleDuration = Duration();
+    e->activeDuration = Duration();
+    e->currentBegin = Duration();
+    e->currentEnd = Duration();
+}
+
+void SmilTimingAttribute::updateImplicitTiming()
+{
+    resetElementTiming(element);
+    reset();
+    instanceEndList.clear();
+    instanceBeginList.clear();
+    buildInstanceTimeLists();
+    calcCurrentInstance();
+
+    if (element->currentEnd.isValue() && element->state() == SmilElement::Active) {
+        Duration dur(element->currentEnd.duration() - startTime.elapsed());
+        clearTimer(stateTimerId);
+        stateTimerId = scheduleTimer(dur);
+    }
+
+    SmilElement* parentElement = element->parent();
+
+    if(parentElement)
+    {
+        SmilTimingAttribute* ta = static_cast<SmilTimingAttribute*>(parentElement->moduleAttribute("Timing"));
+        if(ta)
+            ta->updateImplicitTiming();
+    }
+}
 
 TimingValue::TimingValue()
     : t(Unspecified), tval(0), elmnt(0)
@@ -1094,8 +1119,6 @@ bool operator>(const TimingValue &tv1, const TimingValue &tv2)
 {
     return tv1.resolvedTime() > tv2.resolvedTime();
 }
-
-//===========================================================================
 
 void EndSync::parse(const QString &val)
 {

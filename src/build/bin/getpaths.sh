@@ -39,6 +39,8 @@ for check in "$(dirname $0)", "$PWD", "$(/bin/pwd)"; do
     fi
 done
 
+# The SDK defaults to $QPEDIR (but it can be changed)
+SDKROOT="$QPEDIR"
 if [ -z "$QPEDIR" ]; then
     echo "ERROR: Could not locate the Qtopia build tree."
     echo "       Did you run configure?"
@@ -51,6 +53,6 @@ if [ -z "$QPEDIR" ]; then
 fi
 
 # Use the values in config.cache
-commands="$(grep '^paths\.' $QPEDIR/config.cache | sed 's/^paths\./export /')"
+commands="$(grep '^paths\.' $QPEDIR/config.cache | sed 's/^paths\./export /' | sed 's/=/="/' | sed 's/$/"/')"
 eval "$commands"
 

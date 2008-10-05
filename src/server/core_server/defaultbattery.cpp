@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -26,6 +24,7 @@
 
 /*! 
    \class DefaultBattery
+    \inpublicgroup QtBaseModule
    \ingroup QtopiaServer::Task
    \brief The DefaultBattery class provides a proxy for another system battery.
 
@@ -40,7 +39,7 @@
    will proxy the first available QPowerSource::Battery typed power source.
 
    The DefaultBattery class provides the \c {DefaultBattery} task.
-   It is part of the Qtopia server and cannot be used by other Qtopia applications.
+   It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
   */
 
 /*!
@@ -53,19 +52,13 @@ DefaultBattery::DefaultBattery(QObject *parent)
     QSettings cfg(QLatin1String("Trolltech"), QLatin1String("HardwareAccessories"));
     m_primary = cfg.value(QLatin1String("PowerSources/PrimaryBatterySource")).toString();
 
-    if(m_primary.isEmpty()) {
-        // No configured default, use first battery
-        m_accessories = new QHardwareManager("QPowerSource", this);
-        QObject::connect(m_accessories, SIGNAL(providerAdded(QString)),
-                         this, SLOT(accessoryAdded(QString)));
-        QStringList accs = m_accessories->providers();
-        for(int ii = 0; m_accessories && ii < accs.count(); ++ii)
-            accessoryAdded(accs.at(ii));
-    } else {
-        m_powerSource = new QPowerSource(m_primary);
-        initPowerSource();
-    }
-        
+    m_accessories = new QHardwareManager("QPowerSource", this);
+    QObject::connect(m_accessories, SIGNAL(providerAdded(QString)),
+                     this, SLOT(accessoryAdded(QString)));
+    QStringList accs = m_accessories->providers();
+    for(int ii = 0; m_accessories && ii < accs.count(); ++ii)
+        accessoryAdded(accs.at(ii));
+
     syncPowerSource();
 }
 
@@ -99,12 +92,18 @@ void DefaultBattery::accessoryAdded(const QString &acc)
 {
     QPowerSource *ps = new QPowerSource(acc);
     if(ps->type() == Battery) {
-        m_powerSource = ps;
-        m_accessories->disconnect();
-        m_accessories->deleteLater();
-        m_accessories = 0;
-        initPowerSource();
-        syncPowerSource();
+        if (m_primary.isEmpty() || m_primary == acc) {
+            m_powerSource = ps;
+            m_accessories->disconnect();
+            m_accessories->deleteLater();
+            m_accessories = 0;
+            initPowerSource();
+            syncPowerSource();
+        } else {
+            delete ps;
+        }
+    } else {
+        delete ps;
     }
 }
 

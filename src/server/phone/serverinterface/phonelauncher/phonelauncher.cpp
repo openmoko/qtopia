@@ -1,111 +1,69 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-
-#include <qtopiaapplication.h>
-
 #include "qtopiaserverapplication.h"
 #include <qtopiaipcenvelope.h>
-#include <qtopiaipcadaptor.h>
-#include <QtopiaItemDelegate>
-#include <qtranslatablesettings.h>
 #include <qtopiaservices.h>
-#include <qdocumentproperties.h>
-#include <qcategoryselector.h>
 #include <qsoftmenubar.h>
 #include <qtopianamespace.h>
 #include <qtopiaservices.h>
 #include <qspeeddial.h>
 #include <qtopialog.h>
 #include <qtopianamespace.h>
-#include <custom.h>
-#include <themedview.h>
 #include <qdrmcontent.h>
-#include <qwaitwidget.h>
-#include <QPhoneProfile>
-#include <QPhoneProfileManager>
-#ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
+#include <custom.h>
 #include <QExportedBackground>
-#else
+#ifndef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
 #include <QGlobalPixmapCache>
 #endif
-#include <qpainter.h>
-#include <qdir.h>
 #include <qlabel.h>
 #include <qlayout.h>
-#include <qaction.h>
 #include <qevent.h>
 #include <qpixmapcache.h>
-#ifndef MEDIAPLAYER_RINGTONES
-#include <qsoundqss_qws.h>
-#endif
-#include <qscreen_qws.h>
-#include <qvariant.h>
-#include <QStackedWidget>
 #include <QTimer>
 #include <QDesktopWidget>
 #include <QDebug>
 #include <QMenu>
-#include <QScrollArea>
+#include <QScreenInformation>
 
 #include "phonelauncher.h"
 #include "windowmanagement.h"
-#include "contextlabel.h"
-#include "messagebox.h"
 
-#include "contentserver.h"
-#include "phonebrowser.h"
-#include "homescreencontrol.h"
-#include "qabstracthomescreen.h"
-#include "documentview.h"
-#include "phoneheader.h"
-#include "alarmcontrol.h"
-#include "taskmanagerservice.h"
-#include "themecontrol.h"
-#include "qabstractsecondarydisplay.h"
-#include "contentsetlauncherview.h"
-#include "themebackground_p.h"
-#include "lowmemorytask.h"
 #include "qtopiainputevents.h"
+#include "uifactory.h"
+
+#include "qabstractbrowserscreen.h"
+#include "qabstractcontextlabel.h"
+#include "qabstractheader.h"
+#include "qabstracthomescreen.h"
+#include "qabstractsecondarydisplay.h"
+#include "qabstracttaskmanager.h"
+
+#ifdef QTOPIA_TELEPHONY
 #include "qabstractcallpolicymanager.h"
-
-#ifdef QTOPIA_VOIP
-#include "voipmanager.h"
-#endif
-
-#ifdef QTOPIA_PHONEUI
-#include "ringcontrol.h"
+#include "qabstractcallhistory.h"
 #include "qabstractdialerscreen.h"
 #include "dialercontrol.h"
-#include "dialerservice.h"
-#include "callscreen.h"
-#if defined(QTOPIA_TELEPHONY)
-#include "callhistory.h"
-#endif
-#include "dialercontrol.h"
-#include "messagecontrol.h"
+#include "qabstractcallscreen.h"
+#include "dialproxy.h"
+#include "abstractaudiohandler.h"
 #endif
 
-#ifdef QTOPIA_CELL
-#include "gsmkeyactions.h"
-#endif
 
 static const int NotificationVisualTimeout = 0;  // e.g. New message arrived, 0 == No timeout
 static const int WarningTimeout = 5000;  // e.g. Cannot call
@@ -118,129 +76,45 @@ public:
 };
 
 
-// declare MultiTaskProxy
-class MultiTaskProxy : public TaskManagerService
-{
-Q_OBJECT
-public:
-    MultiTaskProxy(QObject * = 0);
+/*!
+    \class PhoneLauncher
+    \inpublicgroup QtUiModule
+    \brief The PhoneLauncher class implments the main UI widget for the Qt Extended.
+    \ingroup QtopiaServer::PhoneUI
 
-protected:
-    virtual void multitask();
-    virtual void showRunningTasks();
+    This class is a Qt Extended \l{QtopiaServerApplication#qt-extended-server-widgets}{server widget}.
+    It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
-signals:
-    void doMultiTask();
-    void doShowRunningTasks();
-};
-
-#ifdef QTOPIA_PHONEUI
-// declare DialerServiceProxy
-class DialerServiceProxy : public DialerService
-{
-Q_OBJECT
-public:
-    DialerServiceProxy(QObject * = 0);
-
-protected:
-    virtual void dialVoiceMail();
-    virtual void dial( const QString& name, const QString& number );
-    virtual void dial( const QString& number, const QUniqueId& contact );
-    virtual void showDialer( const QString& digits );
-
-signals:
-    void doDialVoiceMail();
-    void doDial( const QString& number );
-    void doDial( const QString& number, const QUniqueId& contact );
-    void doShowDialer( const QString& digits );
-};
-
-// define DialerServiceProxy
-DialerServiceProxy::DialerServiceProxy(QObject *parent)
-: DialerService(parent)
-{
-}
-
-void DialerServiceProxy::dialVoiceMail()
-{
-    emit doDialVoiceMail();
-}
-
-void DialerServiceProxy::dial( const QString&, const QString& number )
-{
-    emit doDial(number);
-}
-
-void DialerServiceProxy::dial( const QString& number, const QUniqueId& contact )
-{
-    emit doDial(number, contact);
-}
-
-void DialerServiceProxy::showDialer( const QString& digits )
-{
-    if( !DialerControl::instance()->hasIncomingCall() &&
-        !DialerControl::instance()->isDialing() ) {
-        emit doShowDialer(digits);
-    }
-}
-#endif
+    \sa QAbstractServerInterface
+*/
 
 /*!
-  \class PhoneLauncher
-  \brief The PhoneLauncher class implments the main UI widget for the Qtopia Phone Edition.
-  \ingroup QtopiaServer::PhoneUI
-
-  This class is a Qtopia \l{QtopiaServerApplication#qtopia-server-widgets}{server widget}. 
-  It is part of the Qtopia server and cannot be used by other Qtopia applications.
-
-  \sa QAbstractServerInterface
-  */
-
-/*!
-  \internal
-  */
+    \internal
+*/
 PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     : QAbstractServerInterface(parent, fl), updateTid(0), m_header(0),
-      m_context(0), stack(0), m_homeScreen(0), 
-      registrationMsgId(0),
-#ifdef QTOPIA_PHONEUI
-      messageCount(0), activeCalls(0),
-      newMessages("Communications/Messages/NewMessages"),
-#endif
-#ifdef QTOPIA_PHONEUI
-    serviceMsgBox(0), CBSMessageBox(0),
+        m_context(0), stack(0), m_homeScreen(0),
+#ifdef QTOPIA_TELEPHONY
+    activeCalls(0),
     mCallScreen(0), m_dialer(0),
 #endif
     secondDisplay(0),
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     mCallHistory(0),
-    missedMsgBox(0), messagesMsgBox(0), incomingMsgBox(0),
-    dialingMsgBox(0), callTypeMsgBox(0),
-#endif
-#ifdef QTOPIA_VOIP
-    voipNoPresenceMsgBox(0),
-#endif
-    warningMsgBox(0),
-#ifdef QTOPIA_PHONEUI
+    missedMsgBox(0),
     alertedMissed(0),
-    messageBoxFull(false),
-    isSysMsg(false),
-    queuedIncoming(false),
-    waitingVoiceMailNumber(false),
 #endif
     speeddialfeedback(0)
-#ifdef QTOPIA_CELL
-    , cellModem(0), gsmKeyActions(0)
-#endif
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     , dialerSpeedDialFeedbackActive(false)
 #endif
 {
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
 #ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
-    QExportedBackground::initExportedBackground(desktopRect.width(),
-                                                desktopRect.height(),
+    QSize desktopSize = QExportedBackground::exportedBackgroundSize(desktop->primaryScreen());
+    QExportedBackground::initExportedBackground(desktopSize.width(),
+                                                desktopSize.height(),
                                                 desktop->primaryScreen());
 #else
     {
@@ -253,28 +127,24 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     }
 
 #endif
-    // Create callscreen
-//    callScreen();
-
-#ifdef QTOPIA_CELL
-    CellBroadcastControl *cbc = CellBroadcastControl::instance();
-    connect(cbc,
-            SIGNAL(broadcast(CellBroadcastControl::Type,QString,QString)),
-            this,
-            SLOT(cellBroadcast(CellBroadcastControl::Type,QString,QString)));
-
-    QSupplementaryServices *supp = new QSupplementaryServices( "modem", this );
-    connect( supp, SIGNAL(unstructuredNotification(QSupplementaryServices::UnstructuredAction,QString)),
-             this, SLOT(unstructuredNotification(QSupplementaryServices::UnstructuredAction,QString)) );
-#endif
 
 #ifndef QT_NO_TRANSLATION //load translation for profile names
     QtopiaApplication::loadTranslations("QtopiaDefaults");
 #endif
+#ifdef QTOPIA_HOMEUI
+    setWindowState((windowState() & ~(Qt::WindowMinimized | Qt::WindowFullScreen))
+                    | Qt::WindowMaximized);
+#else
     setGeometry(desktopRect);
+#endif
 
-    QObject::connect(ThemeControl::instance(), SIGNAL(themeChanged()),
-                     this, SLOT(loadTheme()));
+    QObject* ctrl = QtopiaServerApplication::qtopiaTask("ThemeControl");
+    //ThemeControl *ctrl = qtopiaTask<ThemeControl>();
+    if (ctrl)
+        QObject::connect(ctrl, SIGNAL(themeChanged()),
+                        this, SLOT(loadTheme()));
+    else
+        qLog(Component) << "PhoneLauncher: ThemeControl not available, themes will not work";
 
     // Create phone header
     header();
@@ -282,212 +152,176 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     // Create phone context bar
     createContext();
 
+#ifdef QTOPIA_TELEPHONY
+    DialProxy *dialerServiceProxy = qtopiaTask<DialProxy>();
+#   ifdef QTOPIA_HOMEUI
+    if (dialerServiceProxy)
+        dialerServiceProxy->setCallScreenTriggers(DialProxy::CallDialing | DialProxy::CallAccepted);
+#   endif
+#endif
+
     // Create home screen
+    QVBoxLayout *layout = new QVBoxLayout(this);
     m_homeScreen = qtopiaWidget<QAbstractHomeScreen>(this);
+    if (!m_homeScreen)
+        qLog(Component) << "Phone Launcher: No homescreen available";
+    else
+        setObjectName("HomeScreen");
     // Homescreen covers the entire screen
-    if (m_homeScreen->geometry() != rect())
-        m_homeScreen->setGeometry(0, 0, width(), height());
-    HomeScreenControl::instance()->setHomeScreen(m_homeScreen);
+    layout->addWidget( m_homeScreen );
+    layout->setSpacing(0);
+    layout->setMargin(0);
 
     QObject::connect(m_homeScreen, SIGNAL(speedDial(QString)),
-                     this, SLOT(activateSpeedDial(QString)));
+                    this, SLOT(activateSpeedDial(QString)));
     QObject::connect(m_homeScreen, SIGNAL(showPhoneBrowser()),
-                     this, SLOT(showPhoneLauncher()));
-    QObject::connect(m_homeScreen, SIGNAL(keyLockedChanged(bool)),
-                     this, SLOT(keyStateChanged(bool)));
-#ifdef QTOPIA_PHONEUI
+                    this, SLOT(showPhoneLauncher()));
+    QObject::connect(m_homeScreen, SIGNAL(lockStateChanged(bool)),
+                    this, SLOT(keyStateChanged(bool)));
+#ifdef QTOPIA_TELEPHONY
     QObject::connect(m_homeScreen, SIGNAL(showCallScreen()),
-                     this, SLOT(showCallScreen()));
+                    this, SLOT(showCallScreen()));
     QObject::connect(m_homeScreen, SIGNAL(showMissedCalls()),
-                     this, SLOT(showMissedCalls()));
+                    this, SLOT(showMissedCalls()));
     QObject::connect(m_homeScreen, SIGNAL(showCallHistory()),
-                     this, SLOT(showCallHistory()));
+                    this, SLOT(showCallHistory()));
     QObject::connect(m_homeScreen, SIGNAL(dialNumber(QString)),
-                     this, SLOT(showSpeedDialer(QString)));
-    QObject::connect(m_homeScreen, SIGNAL(callEmergency(QString)),
-                    this, SLOT(requestDial(QString)));
+                    this, SLOT(showSpeedDialer(QString)));
+    QObject::connect(m_homeScreen, SIGNAL(hangupCall()),
+                    this, SLOT(hangupPressed()));
+
+    //Connect dial string processing/dialer service
+    if (dialerServiceProxy) {
+        QObject::connect(m_homeScreen, SIGNAL(callEmergency(QString)),
+                dialerServiceProxy, SLOT(requestDial(QString)));
+        QObject::connect(dialerServiceProxy, SIGNAL(doShowDialer(QString)),
+                this, SLOT(showDialer(QString)));
+        QObject::connect(dialerServiceProxy, SIGNAL(showCallScreen()),
+                this, SLOT(showCallScreen()));
+        QObject::connect(dialerServiceProxy, SIGNAL(resetScreen()),
+                this, SLOT(resetView()));
+    }
 #endif
 
     // Create secondary display
     secondaryDisplay();
 
-    // Implement multi task service
-    MultiTaskProxy *multiTaskProxy = new MultiTaskProxy(this);
-    connect(multiTaskProxy, SIGNAL(doMultiTask()),
+    // Create TaskManager
+    QAbstractTaskManager *taskManager = qtopiaWidget<QAbstractTaskManager>();
+    if (taskManager) {
+        connect(taskManager, SIGNAL(multitaskRequested()),
             this, SLOT(multitaskPressed()));
-    connect(multiTaskProxy, SIGNAL(doShowRunningTasks()),
+        connect(taskManager, SIGNAL(showRunningTasks()),
             this, SLOT(showRunningTasks()));
-
-#ifdef QTOPIA_PHONEUI
-    // Implement dialer service
-    DialerServiceProxy *dialerServiceProxy = new DialerServiceProxy(this);
-    connect(dialerServiceProxy, SIGNAL(doDialVoiceMail()),
-            this, SLOT(dialVoiceMail()));
-    connect(dialerServiceProxy, SIGNAL(doDial(QString)),
-            this, SLOT(requestDial(QString)));
-    connect(dialerServiceProxy, SIGNAL(doDial(QString,QUniqueId)),
-            this, SLOT(requestDial(QString,QUniqueId)));
-    connect(dialerServiceProxy, SIGNAL(doShowDialer(QString)),
-            this, SLOT(showDialer(QString)));
-#endif
+    }
 
     // Listen to system channel
     QtopiaChannel* sysChannel = new QtopiaChannel( "QPE/System", this );
-    connect( sysChannel, SIGNAL(received(QString,QByteArray)),
-             this, SLOT(sysMessage(QString,QByteArray)) );
+    connect(sysChannel, SIGNAL(received(QString,QByteArray)),
+            this, SLOT(sysMessage(QString,QByteArray)) );
 
     phoneBrowser()->resetToView("Main"); // better to get initial icon load cost now, rather then when user clicks.
 
     showHomeScreen(0);
-    m_homeScreen->setFocus();
 
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     connect(DialerControl::instance(), SIGNAL(missedCount(int)),
             this, SLOT(missedCount(int)));
-    connect(MessageControl::instance(), SIGNAL(messageCount(int,bool,bool,bool)),
-            this, SLOT(messageCountChanged(int,bool,bool,bool)));
-    connect(MessageControl::instance(), SIGNAL(smsMemoryFull(bool)),
-            this, SLOT(smsMemoryFull(bool)));
-    connect(MessageControl::instance(), SIGNAL(messageRejected()),
-            this, SLOT(messageRejected()));
     connect(DialerControl::instance(), SIGNAL(activeCount(int)),
             this, SLOT(activeCallCount(int)));
-    connect(DialerControl::instance(), SIGNAL(autoAnswerCall()),
-            this, SLOT(acceptIncoming()));
     connect(DialerControl::instance(), SIGNAL(stateChanged()),
             this, SLOT(stateChanged()));
-#endif
-
-#ifdef QTOPIA_CELL
-    cellModem = qtopiaTask<CellModemManager>();
-    connect(cellModem, SIGNAL(planeModeEnabledChanged(bool)),
-            this, SLOT(registrationChanged()));
-    gsmKeyActions = new GsmKeyActions(this);
-#endif
-
-#if defined(QTOPIA_TELEPHONY)
-    // Hook onto registration state changes for all call policy managers.
-    // The standard ones are CellModemManager and VoIPManager.
-    QList<QAbstractCallPolicyManager *> managers;
-    managers = qtopiaTasks<QAbstractCallPolicyManager>();
-    foreach (QAbstractCallPolicyManager *manager, managers) {
-        connect(manager,
-                SIGNAL(registrationChanged(QTelephony::RegistrationState)),
-                this,
-                SLOT(registrationChanged()));
-    }
-#endif
-
-#ifdef QTOPIA_PHONEUI
-    // Voice mail
-    serviceNumbers = new QServiceNumbers( QString(), this );
-    connect( serviceNumbers, SIGNAL(serviceNumber(QServiceNumbers::NumberId,QString)),
-             this, SLOT(serviceNumber(QServiceNumbers::NumberId,QString)) );
-
-    m_homeScreen->setNewMessages(newMessages.value().toInt());
-
-    connect(&newMessages, SIGNAL(contentsChanged()),
-            this, SLOT(newMessagesChanged()));
+    connect(DialerControl::instance(), SIGNAL(callDropped(QPhoneCall)),
+            this, SLOT(resetDialer()));
 
     // Don't alert user until count changes.
     alertedMissed = DialerControl::instance()->missedCallCount();
 #endif
-//    ThemeControl::instance()->refresh();
-
-    connect( ContentSetViewService::instance(), SIGNAL(showContentSet()),
-             this, SLOT(showContentSet()) );
-
-    LowMemoryTask* lmt = qtopiaTask<LowMemoryTask>();
-    if (!lmt)
-	qWarning() << "NO LOWMEMORYTASK";
-    connect(lmt,SIGNAL(showWarning(QString,QString)),this,SLOT(showWarning(QString,QString)));
-
-#ifdef QTOPIA_PHONEUI
-    registrationChanged();
-#endif
-
     loadTheme();
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 PhoneLauncher::~PhoneLauncher()
 {
     delete stack;
     delete m_header;
     delete m_context;
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     delete mCallScreen;
-#if defined(QTOPIA_TELEPHONY)
     if(mCallHistory)
         delete mCallHistory;
-#endif
     if( m_dialer )
         delete m_dialer;
-#endif
     delete speeddialfeedback;
+#endif
     if ( secondDisplay )
         delete secondDisplay;
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::showEvent(QShowEvent *e)
 {
     QTimer::singleShot(0, m_homeScreen, SLOT(show()));
-    QTimer::singleShot(0, m_homeScreen, SLOT(applyHomeScreenImage()));
-    QTimer::singleShot(0, this, SLOT(updateBackground()));
-    if (secondDisplay)
-        QTimer::singleShot(0, this, SLOT(applySecondaryBackgroundImage()));
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     QTimer::singleShot(0, this, SLOT(initializeCallHistory()));
+    QTimer::singleShot(0, this, SLOT(initializeDialerScreen()));
 #endif
-    header()->show();
-    if (QSoftMenuBar::keys().count())
-        context()->show();
+    if(m_header) {
+        m_header->raise();
+        m_header->show();
+    }
+
+    if (m_context && QSoftMenuBar::keys().count()) {
+        m_context->raise();
+        m_context->show();
+    }
     QWidget::showEvent(e);
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::callPressed()
 {
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     // Called if server windows are not on top
     showCallHistory();
 #endif
 }
 
-/*!
-  \internal
-  */
-void PhoneLauncher::hangupPressed()
+
+void PhoneLauncher::resetView()
 {
-    // Called if server windows are not on top
-#ifdef QTOPIA_PHONEUI
-    DialerControl *control = DialerControl::instance();
-    if (control->isConnected() || control->isDialing() ||
-        control->hasIncomingCall()) {
-        // We have an in-progress call, so hang it up rather than
-        // close all running applications.
-        showCallScreen();
-        control->endCall();
-    } else
-#endif
-    {
-        topLevelWidget()->raise();
-        QtopiaIpcEnvelope e("QPE/System","close()");
-        hideAll();
-        showHomeScreen(0);
-    }
+    raiseMe();
+    QtopiaIpcEnvelope e("QPE/System","close()");
+    hideAll();
+    showHomeScreen(0);
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
+void PhoneLauncher::hangupPressed()
+{
+    // Called if server windows are not on top
+    bool showHomeScreen = true;
+#ifdef QTOPIA_TELEPHONY
+    DialProxy *dialerServiceProxy = qtopiaTask<DialProxy>();
+    if (dialerServiceProxy)
+        showHomeScreen = !dialerServiceProxy->hangupPressed();
+#endif
+
+    if (showHomeScreen)
+        resetView();
+}
+
+/*!
+    \internal
+*/
 void PhoneLauncher::multitaskPressed()
 {
     // When pressed, home screen is shown (without quiting apps).
@@ -500,7 +334,7 @@ void PhoneLauncher::multitaskPressed()
     sortedapps.sort();
 
     int to_run=-1;
-    if ( m_homeScreen->isActiveWindow() ) {
+    if ( m_homeScreen && m_homeScreen->isActiveWindow() ) {
         // first application
         if ( sortedapps.count() == 0 ) {
             showRunningTasks(); // (gives error message)
@@ -519,7 +353,6 @@ void PhoneLauncher::multitaskPressed()
         multitaskingcursor=0;
         showHomeScreen(0);
     } else {
-
         QStringList sortedapps = runningApps;
         sortedapps.sort();
         QContent app(sortedapps[to_run], false);
@@ -530,29 +363,35 @@ void PhoneLauncher::multitaskPressed()
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::showRunningTasks()
 {
     // XXX Should:
-    // XXX  - Work out which app was on top when invoked.
-    // XXX  - Make "Back" go back to that app.
     // XXX  - Go above StaysOnTop windows (eg. menu popups, QCalendarWidget popups)
-    // XXX Difficult, because this is just a folderview.
 
-    hideAll();
-    phoneBrowser()->moveToView("Folder/Running");
-    phoneBrowser()->showMaximized();
-    phoneBrowser()->raise();
-    phoneBrowser()->activateWindow();
-    phoneBrowser()->topLevelWidget()->setWindowTitle(tr("Running"));
+    //callhistory & callscreen must not close as they count as applications and must
+    //appear in the task manager
+#ifdef QTOPIA_TELEPHONY
+    if (dialer(false))
+        dialer(false)->close();
+#endif
+
+    QAbstractTaskManager *tm = qtopiaWidget<QAbstractTaskManager>();
+    if (tm) {
+        tm->showMaximized();
+        tm->raise();
+        tm->activateWindow();
+    }
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::showContentSet()
 {
+    if ( !UIFactory::isAvailable("ContentSetLauncherView") )
+        return;
     hideAll();
     phoneBrowser()->moveToView("Folder/ContentSet");
     phoneBrowser()->showMaximized();
@@ -561,76 +400,88 @@ void PhoneLauncher::showContentSet()
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::loadTheme()
 {
-    bool v = isVisible();
-
     qLog(UI) << "Load theme";
-    m_homeScreen->hide();
+    if (m_homeScreen) m_homeScreen->hide();
+    layoutViews();
+    initInfo();
+}
+
+/*!
+    \internal
+*/
+void PhoneLauncher::layoutViews()
+{
+    bool v = isVisible();
 
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
 
+    QSize titleSize = m_header ? m_header->reservedSize() : QSize(0,0);
+    QSize contextSize = m_context ? m_context->reservedSize() : QSize(0,0);
+
     // header - not lazy
-    WindowManagement::dockWindow(header(), WindowManagement::Top, header()->reservedSize());
-    if ( v ) header()->show();
-
+    if (m_header) {
+        WindowManagement::dockWindow(m_header, WindowManagement::Top, titleSize);
+        if (v)
+            m_header->show();
+    }
     // context bar - not lazy
-    WindowManagement::dockWindow(context(), WindowManagement::Bottom, context()->reservedSize());
-    if (v && QSoftMenuBar::keys().count())
-        context()->show();
+    if (m_context) {
+        WindowManagement::dockWindow(m_context, 
+#ifdef QTOPIA_HOMEUI_WIDE
+    WindowManagement::Left
+#else
+    WindowManagement::Bottom 
+#endif
 
-    // home screen - not lazy
-    m_homeScreen->setGeometry(desktopRect);
-    m_homeScreen->updateInformation();
+    ,contextSize);
+        if (v && QSoftMenuBar::keys().count())
+            m_context->show();
+    }
 
-#ifdef QTOPIA_PHONEUI
-    // call screen - lazy
-    CallScreen *cs = callScreen(false);
-    if(cs) {
-        cs->setGeometry(desktopRect.x(), desktopRect.y()+header()->sizeHint().height(),
+#ifdef QTOPIA_TELEPHONY
+    // force call screen to be created immediately, because lazily creating it
+    // when a call comes in will result in poor user perception of performance.
+    QAbstractCallScreen *cs = callScreen(true);
+    if (cs) {
+        cs->setGeometry(desktopRect.x(), desktopRect.y() + titleSize.height(),
                         desktopRect.width(),
-                        desktopRect.height() - header()->sizeHint().height() - context()->height() );
+                        desktopRect.height() - titleSize.height() - contextSize.height() );
     }
 #endif
 
     // update position of launcher stack - lazy
-    if(phoneBrowser(false)) {
-        if ( !phoneBrowser()->isHidden() )
+    if (phoneBrowser(false)) {
+        if (!phoneBrowser()->isHidden())
             phoneBrowser()->showMaximized();
         else
-            phoneBrowser()->setGeometry(desktopRect.x(), desktopRect.y()+header()->sizeHint().height(),
-                        desktopRect.width(),
-                        desktopRect.height() - header()->sizeHint().height() - context()->height());
-    }
-
-    initInfo();
-
-    if ( v ) {
-        QTimer::singleShot(0, m_homeScreen, SLOT(show()));
-        QTimer::singleShot(0, this, SLOT(updateBackground()));
+            phoneBrowser()->setGeometry(desktopRect.x(), desktopRect.y() + titleSize.height(),
+                                        desktopRect.width(),
+                                        desktopRect.height() - titleSize.height() - contextSize.height());
     }
 }
 
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
 /*!
-  \internal
-  */
+    Displays the call history window. The missed calls tab will be on top.
+*/
 void PhoneLauncher::showMissedCalls()
 {
     showCallHistory(true);
 }
 
 /*!
-  \internal
-  Displays the call screen.
+    Displays the call screen.
 */
 void PhoneLauncher::showCallScreen()
 {
-    if( !callScreen()->sourceLoaded() ) {
-        callScreen()->loadSource();
+    if ( !callScreen() ) {
+        qLog(Component) << "Missing callscreen component -> cannot show callscreen";
+        return;
     }
     callScreen()->showMaximized();
     callScreen()->raise();
@@ -639,17 +490,15 @@ void PhoneLauncher::showCallScreen()
 #endif
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::initInfo()
 {
-    AlarmControl::instance();
-
     update();
 
     timerEvent(0);
 
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     int missCalls = DialerControl::instance()->missedCallCount();
     if ( missCalls != 0 )
         missedCount(missCalls);
@@ -657,64 +506,45 @@ void PhoneLauncher::initInfo()
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::resizeEvent(QResizeEvent *e)
 {
     QWidget::resizeEvent(e);
+    layoutViews();
 }
 
 /*!
-  \internal
-  */
-void PhoneLauncher::closeEvent(QCloseEvent *e)
-{
-    e->ignore();
-}
-
-/*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
 {
     QDataStream stream( data );
     if ( message == "showHomeScreen()" ) {
         hideAll();
         showHomeScreen(0);
+#ifdef QTOPIA_HOMEUI
+        setObjectName("HomeScreen");
+        setWindowTitle("HomeScreen");
+    } else if ( message == QLatin1String("setPhoneMode()")) {
+        hideAll();
+        showHomeScreen(0);
+        setObjectName("HomeScreen_Phone");
+        setWindowTitle("Phone");
+    } else if ( message == QLatin1String("showContextBar()")) {
+        if (m_context)
+            m_context->raise();
+#endif
+#ifdef QTOPIA_TELEPHONY
+    } else if ( message == QLatin1String("showCallScreen()")) {
+        showCallScreen();
+#endif
     } else if ( message == QLatin1String("showPhoneLauncher()")) {
         showPhoneLauncher();
     } else if ( message == QLatin1String("showHomeScreenAndToggleKeylock()") ) {
         showHomeScreen(2);
     } else if ( message == QLatin1String("showHomeScreenAndKeylock()") ) {
         showHomeScreen(3);
-    } else if ( message == "applyStyleSplash()" ) {
-        raise();
-        QWaitWidget *waitWidget = new QWaitWidget( this );
-        waitWidget->show();
-        qApp->processEvents();
-        ThemeControl::instance()->refresh();
-        polishWindows();
-        updateLauncherIconSize();
-        m_homeScreen->applyHomeScreenImage();
-        if (secondDisplay)
-            applySecondaryBackgroundImage();
-        delete waitWidget;
-        lower();
-    } else if ( message == "applyStyleNoSplash()" ) {
-        qApp->processEvents();
-        ThemeControl::instance()->refresh();
-        polishWindows();
-        updateLauncherIconSize();
-        m_homeScreen->applyHomeScreenImage();
-        if (secondDisplay)
-            applySecondaryBackgroundImage();
-    } else if ( message == "applyHomeScreenImage()" ) {
-        m_homeScreen->applyHomeScreenImage();
-        updateBackground();
-    } else if ( message == "applySecondaryBackgroundImage()" ) {
-        applySecondaryBackgroundImage();
-    } else if ( message == "updateHomeScreenInfo()" ) {
-        m_homeScreen->updateHomeScreenInfo();
     } else if ( message == "serverKey(int,int)" ) {
         int key,press;
         stream >> key >> press;
@@ -723,13 +553,26 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         } else if ( (key == Qt::Key_Hangup || key == Qt::Key_Flip) && press ) {
             hangupPressed();
         }
+    } else if ( message == "showContentSetView()" ) {
+        showContentSet();
     }
 }
 
+/*!
+    \internal
+*/
+void PhoneLauncher::raiseMe()
+{
+    topLevelWidget()->raise();
+    if (m_header)
+        QTimer::singleShot(0, m_header, SLOT(raise()));
+    if (m_context && QSoftMenuBar::keys().count())
+        QTimer::singleShot(0, m_context, SLOT(raise()));
+}
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::showHomeScreen(int state)
 {
     // state: 0 -> no screensaver calls
@@ -737,43 +580,53 @@ void PhoneLauncher::showHomeScreen(int state)
     //        2 -> showHomeScreen called when lock key is toggled
     //        3 -> showHomeScreen called to key lock
 
-#ifdef QTOPIA_PHONEUI
+    if (!m_homeScreen)
+        return;
+#ifdef QTOPIA_TELEPHONY
     if (state != 0 && activeCalls) {
         return;
     }
 #endif
 
+    bool hsWasLocked = m_homeScreen->locked();
+
+    if (m_context)
+        m_context->raise();
     rejectModalDialog();
-    topLevelWidget()->raise();
     m_homeScreen->raise();
     m_homeScreen->show();
+    topLevelWidget()->raise();
     m_homeScreen->setFocus();
     topLevelWidget()->activateWindow();
 
-    if(phoneBrowser(false)) {
+    if (phoneBrowser(false))
         phoneBrowser()->hide();
-    }
 
     if (state == 1) {
-        //QtopiaIpcEnvelope closeApps( "QPE/System", "close()" );
         if (!Qtopia::mousePreferred()) {
             QSettings c("Trolltech","qpe");
             c.beginGroup("HomeScreen");
             QString lockType = c.value( "AutoKeyLock", "Disabled" ).toString();
             if (lockType == "Enabled")
-                m_homeScreen->setKeyLocked(true);
+                m_homeScreen->setLocked(true);
         }
-    } else if (state == 2 || state == 3) {
-        if (!m_homeScreen->keyLocked())
-            m_homeScreen->setKeyLocked(true);
-        else if (state == 2)
-            QtopiaInputEvents::processKeyEvent(0, BasicKeyLock::lockKey(), 0, true, false);
+    } else if (state == 2) {
+        //Touchscreen uses a modal dialog to block screen
+        //the dlg was just rejected (see above) hence we need to
+        //check the previous state.
+        if (Qtopia::mousePreferred())
+            m_homeScreen->setLocked(!hsWasLocked);
+        else
+            m_homeScreen->setLocked(!m_homeScreen->locked());
+    } else if (state == 3) {
+        if (!m_homeScreen->locked())
+            m_homeScreen->setLocked(true);
     }
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::rejectModalDialog()
 {
     // Last resort.  We shouldn't have modal dialogs in the server, but
@@ -803,8 +656,8 @@ void PhoneLauncher::rejectModalDialog()
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::showPhoneLauncher()
 {
     phoneBrowser()->resetToView("Main");
@@ -814,15 +667,13 @@ void PhoneLauncher::showPhoneLauncher()
     phoneBrowser()->activateWindow();
 }
 
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
 /*!
-  \internal
-  */
-void PhoneLauncher::missedCount(int count)
+    \internal
+*/
+void PhoneLauncher::missedCount(int /*count*/)
 {
-    m_homeScreen->setMissedCalls(count);
-
-    if(m_homeScreen->keyLocked()
+    if(m_homeScreen && m_homeScreen->locked()
 #ifdef QTOPIA_CELL
         || m_homeScreen->simLocked()
 #endif
@@ -836,83 +687,18 @@ void PhoneLauncher::missedCount(int count)
 }
 
 /*!
-  \internal
-  */
-void PhoneLauncher::messageCountChanged(int count, bool full, bool fromSystem, bool notify)
-{ 
-    messageBoxFull = full;
-    isSysMsg = fromSystem;
-    if (count != messageCount) {
-        messageCount = count;
-        if (notify && messageCount) {
-            QtopiaServiceRequest req("Messages","viewNewMessages(bool)");
-            req << false;
-            req.send();
-        }
-    }
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::smsMemoryFull(bool full)
-{
-    m_homeScreen->setSmsMemoryFull(full);
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::messageRejected()
-{
-    showWarning(tr("Message Rejected"),
-                tr("<qt>An incoming message was rejected because "
-                   "there is insufficient space to store it.</qt>"));
-}
-
-/*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::activeCallCount(int count)
 {
     activeCalls = count;
 }
 
-/*!
-  \internal
-  */
-void PhoneLauncher::registrationChanged()
-{
-    QList<QAbstractCallPolicyManager *> managers;
-    QString pix;
-    QString msg;
-
-    managers = qtopiaTasks<QAbstractCallPolicyManager>();
-    foreach (QAbstractCallPolicyManager *manager, managers) {
-        if (pix.isEmpty())
-            pix = manager->registrationIcon();
-        QString newMsg = manager->registrationMessage();
-        if (!newMsg.isEmpty()) {
-            if (!msg.isEmpty())
-                msg += "<br>";
-            msg.append(newMsg);
-        }
-    }
-
-    if (registrationMsgId) {
-        m_homeScreen->clearInformation(registrationMsgId);
-        registrationMsgId = 0;
-    }
-
-    if (!msg.isEmpty())
-        registrationMsgId = m_homeScreen->showInformation(pix, msg);
-}
-
 #endif
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::timerEvent(QTimerEvent * tev)
 {
     if(tev && tev->timerId() == updateTid) {
@@ -928,16 +714,16 @@ void PhoneLauncher::timerEvent(QTimerEvent * tev)
     }
 }
 
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
 /*!
-  \internal
-  Shows the Missed Calls dialog if there are any missed calls.
+    \internal
+    Shows the Missed Calls dialog if there are any missed calls.
 */
 void PhoneLauncher::showAlertDialogs()
 {
     if (isVisible()) {
         if(DialerControl::instance()->missedCallCount() &&
-           DialerControl::instance()->missedCallCount() != alertedMissed) {
+                DialerControl::instance()->missedCallCount() != alertedMissed) {
             alertedMissed = DialerControl::instance()->missedCallCount();
             if (!missedMsgBox) {
                 QString missedMsg = tr("Do you wish to view missed calls?");
@@ -954,11 +740,11 @@ void PhoneLauncher::showAlertDialogs()
 #endif
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::keyStateChanged(bool locked)
 {
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     if(!locked)
         showAlertDialogs();
 #else
@@ -966,108 +752,71 @@ void PhoneLauncher::keyStateChanged(bool locked)
 #endif
 }
 
-/*!
-  \internal
-  */
-void PhoneLauncher::updateBackground()
-{
-    m_homeScreen->updateBackground();
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::applySecondaryBackgroundImage()
-{
-    if ( secondDisplay ) {
-        secondDisplay->applyBackgroundImage();
-        secondDisplay->updateBackground();
-    }
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::polishWindows()
-{
-    ThemeBackground::polishWindows(ThemeBackground::PrimaryScreen);
-    if ( secondDisplay ) {
-        ThemeBackground::polishWindows(ThemeBackground::SecondaryScreen);
-    }
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::paintEvent(QPaintEvent *)
-{
-    QPixmap pm(":image/qpelogo");
-    QPainter p(this);
-    p.drawPixmap((width()-pm.width())/2,( height()-pm.height())/2, pm);
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::updateLauncherIconSize()
-{
-}
-
 // Creation methods
 /*!
-  \internal
-  */
-PhoneHeader *PhoneLauncher::header()
+    \internal
+*/
+QAbstractHeader *PhoneLauncher::header()
 {
     if(!m_header) {
-        m_header = new PhoneHeader(0);
-        WindowManagement::protectWindow(m_header);
-        ThemeControl::instance()->registerThemedView(m_header, "Title");
+        m_header = qtopiaWidget<QAbstractHeader>();
+        if(!m_header) {
+            qLog(Component) << "Phone Launcher: QAbstractHeader not available";
+        } else {
+            WindowManagement::protectWindow(m_header);
+        }
     }
-
+    static bool initializeIM = true;
+    // instantiate InputMethods (usually belong to Phoneheader, but no
+    // phoneheader on some devices such as deskphones).
+    if ( initializeIM ) {
+        initializeIM = false;
+        if ( !m_header ) {
+            QWidget *imw = UIFactory::createWidget( "InputMethods", this );
+            if ( !imw )
+                qLog(Component) << "PhoneLauncher: Cannot load Inputmethod component";
+        }
+    }
     return m_header;
 }
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::createContext()
 {
-    Q_ASSERT(!m_context);
-
-    m_context = new ContextLabel(0, Qt::FramelessWindowHint |
-                                    Qt::Tool |
-                                    Qt::WindowStaysOnTopHint );
-
-    m_context->move(QApplication::desktop()->screenGeometry().topLeft()+QPoint(0,50)); // move to the correct screen
-    WindowManagement::protectWindow(m_context);
-    m_context->setAttribute(Qt::WA_GroupLeader);
-    ThemeControl::instance()->registerThemedView(m_context, "Context");
+    if(!m_context) {
+        m_context = qtopiaWidget<QAbstractContextLabel>();
+        if(!m_context) {
+            qLog(Component) << "Phone Launcher: QAbstractContextLabel not available";
+        } else {
+            WindowManagement::protectWindow(m_context);
+        }
+    }
 }
 
+
 /*!
-  \internal
-  */
-ContextLabel *PhoneLauncher::context()
+    \internal
+*/
+QAbstractContextLabel *PhoneLauncher::context()
 {
-    Q_ASSERT(m_context);
     return m_context;
 }
 
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
 /*!
-  \internal
-  */
+    The speed dialer is displayed, preloaded with \a digits, when this slot is invoked.
+*/
 void PhoneLauncher::showSpeedDialer(const QString &digits)
 {
     showDialer(digits, true);
 }
 
 /*!
-  \internal
-  Displays the dialer, preloaded with \a digits.  If \a speedDial
-  is true, the digits will be considered for use in speed dial (press and
-  hold).
+    Displays the dialer, preloaded with \a digits.  If \a speedDial
+    is true, the digits will be considered for use in speed dial (press and
+    hold).
 */
 void PhoneLauncher::showDialer(const QString &digits, bool speedDial)
 {
@@ -1081,707 +830,235 @@ void PhoneLauncher::showDialer(const QString &digits, bool speedDial)
         dialer()->setDigits(digits);
     }
 
-    if ( callScreen() )
-        dialer()->setGeometry( callScreen()->geometry() );
-
     dialer()->showMaximized();
     dialer()->raise();
+    dialer()->activateWindow();
 }
 
 /*!
-  \internal
-  Displays the call history window.  If \a missed is true, the missed
-  calls tab will be on top.  If \a hint is not empty, it is used to
-  highlight a matching call.
+    \internal
+    Resets the audio handlers.
 */
-void PhoneLauncher::showCallHistory(bool missed, const QString &hint)
+void PhoneLauncher::resetDialer()
 {
-#if defined(QTOPIA_TELEPHONY)
+    dialer()->reset();
+}
+
+/*!
+    \fn QPointer<QAbstractCallhistory> PhoneLauncher::callHistory() const
+
+    Returns the associated call history or 0 if it hasn't been instanciated yet.
+*/
+
+/*!
+    Displays the call history window.  If \a missed is true, the missed
+    calls tab will be on top.
+*/
+void PhoneLauncher::showCallHistory(bool missed)
+{
     if ( !callHistory() )
         initializeCallHistory();
+    if( callHistory() ) {
+        callHistory()->reset();
+        if (missed || DialerControl::instance()->missedCallCount() > 0)
+            callHistory()->showMissedCalls();
 
-    callHistory()->reset();
-    if (missed || DialerControl::instance()->missedCallCount() > 0)
-        callHistory()->showMissedCalls();
-    if( hint.length() )
-        callHistory()->setFilter( hint );
+        callHistory()->refresh();
 
-    callHistory()->refresh();
-
-    if( !callHistory()->isHidden() )
-    {
-        callHistory()->raise();
+        if( !callHistory()->isHidden() )
+        {
+            callHistory()->raise();
+        }
+        else
+        {
+            callHistory()->showMaximized();
+        }
     }
-    else
-    {
-        callHistory()->showMaximized();
-    }
-#else
-    Q_UNUSED(missed);
-    Q_UNUSED(hint);
-#endif
+    callHistory()->activateWindow();
 }
 
 /*!
-  \internal
-  Initialize call history window.
-  This delayed initilization will shorten the first launch time.
+    \internal
+    Initialize call history window.
+    This delayed initialization will shorten the first launch time.
 */
 void PhoneLauncher::initializeCallHistory()
 {
-#if defined(QTOPIA_TELEPHONY)
     if ( !mCallHistory ) {
-        mCallHistory = new CallHistory(DialerControl::instance()->callList(), 0);
-        connect(callHistory(), SIGNAL(viewedMissedCalls()),
+        mCallHistory = qtopiaWidget<QAbstractCallHistory>();
+        if( !mCallHistory) {
+            qLog(Component) << "Phone Launcher: No Call History Available";
+        } else {
+            connect(callHistory(), SIGNAL(viewedMissedCalls()),
                 this, SLOT(resetMissedCalls()) );
-        connect(callHistory(), SIGNAL(viewedMissedCalls()),
+            connect(callHistory(), SIGNAL(viewedMissedCalls()),
                 DialerControl::instance(), SLOT(resetMissedCalls()) );
-        connect(callHistory(),
-                SIGNAL(requestedDial(QString,QUniqueId)),
-                this,
-                SLOT(requestDial(QString,QUniqueId)));
-    }
-#endif
-}
-#endif
 
-#ifdef QTOPIA_CELL
-
-/*!
-  \internal
-  */
-void PhoneLauncher::unstructuredNotification
-    ( QSupplementaryServices::UnstructuredAction action, const QString& data )
-{
-    QString text;
-    if ( !data.isEmpty() ) {
-        text = data;
-    } else {
-        switch ( action ) {
-            case QSupplementaryServices::TerminatedByNetwork:
-                text = tr("Operation terminated by network");
-                break;
-
-            case QSupplementaryServices::OtherLocalClientResponded:
-                text = tr("Other local client has responded");
-                break;
-
-            case QSupplementaryServices::OperationNotSupported:
-                text = tr("Operation is not supported");
-                break;
-
-            case QSupplementaryServices::NetworkTimeout:
-                text = tr("Operation timed out");
-                break;
-
-            default:
-                text = tr("Network response: %1").arg((int)action);
-                break;
+            DialProxy *dialerServiceProxy = qtopiaTask<DialProxy>();
+            if (dialerServiceProxy)
+                connect(callHistory(), SIGNAL(requestedDial(QString,QUniqueId)),
+                    dialerServiceProxy, SLOT(requestDial(QString,QUniqueId)));
         }
     }
-    ussdMessage(text);
 }
 
-#endif // QTOPIA_CELL
-
-#ifdef QTOPIA_PHONEUI
 /*!
-  \internal
-  */
-void PhoneLauncher::ussdMessage(const QString &text)
+    \internal
+    Initialize dialer screen.
+*/
+void PhoneLauncher::initializeDialerScreen() const
 {
-    QString title = tr("Service request");
-    QString displayText = "<qt>" + text + "</qt>";
-    if (!serviceMsgBox) {
-        serviceMsgBox = QAbstractMessageBox::messageBox(0, title, displayText,
-                                       QAbstractMessageBox::Information);
-    } else {
-        serviceMsgBox->setWindowTitle(title);
-        serviceMsgBox->setText(displayText);
+    m_dialer = qtopiaWidget<QAbstractDialerScreen>(0);
+    if (!m_dialer) {
+        qLog(UI) << "Unable to create the Dialer Screen";
+        return;
     }
-    QtopiaApplication::showDialog(serviceMsgBox);
+    m_dialer->move(QApplication::desktop()->screenGeometry().topLeft());
+
+    DialProxy *dialerServiceProxy = qtopiaTask<DialProxy>();
+    if (dialerServiceProxy) {
+        connect(m_dialer, SIGNAL(requestDial(QString,QUniqueId)),
+                dialerServiceProxy, SLOT(requestDial(QString,QUniqueId)));
+        connect(dialerServiceProxy, SIGNAL(onHookGesture()),
+                m_dialer, SLOT(doOnHook()));
+        connect(dialerServiceProxy, SIGNAL(offHookGesture()),
+                m_dialer, SLOT(doOffHook()));
+    }
+
+    connect(m_dialer, SIGNAL(speedDial(QString)),
+            this, SLOT(speedDial(QString)) );
+
 }
+
 #endif
 
-#ifdef QTOPIA_CELL
-
 /*!
-  \internal
-  */
-void PhoneLauncher::cellBroadcast(CellBroadcastControl::Type type,
-                                  const QString &chan, const QString &text)
-{
-    if(type != CellBroadcastControl::Popup)
-        return;
-
-    // remove the previous message box if there is any
-    // user will see the latest one only
-    if (CBSMessageBox) {
-        delete CBSMessageBox;
-        CBSMessageBox = 0;
-    }
-    CBSMessageBox = QAbstractMessageBox::messageBox(m_homeScreen, chan,
-                                   text, QAbstractMessageBox::Information,
-                                   QAbstractMessageBox::No);
-    QtopiaApplication::showDialog(CBSMessageBox);
-}
-
-#endif // QTOPIA_CELL
-
-
-/*!
-  \internal
-  Hides the Call History, Dialer and Call Screen.
+    \internal
+    Hides the Call History, Dialer and Call Screen.
 */
 void PhoneLauncher::hideAll()
 {
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     if (callScreen(false))
         callScreen(false)->close();
-#if defined(QTOPIA_TELEPHONY)
     if (callHistory())
         callHistory()->close();
-#endif
     if (dialer(false))
         dialer(false)->close();
 #endif
 }
 
-#ifdef QTOPIA_PHONEUI
 /*!
-  \internal
-  */
+    Returns the associated homescreen or 0 if it hasn't been instanciated yet.
+*/
+QAbstractHomeScreen *PhoneLauncher::homeScreen() const
+{
+    return m_homeScreen;
+}
+
+#ifdef QTOPIA_TELEPHONY
+/*!
+    \internal
+*/
 void PhoneLauncher::stateChanged()
 {
     callScreen()->stateChanged(); // We must know that this is updated before we continue
-
-    if (DialerControl::instance()->hasIncomingCall()) {
-        if ((callTypeMsgBox && callTypeMsgBox->isVisible())
-#ifdef QTOPIA_VOIP
-            || (voipNoPresenceMsgBox && voipNoPresenceMsgBox->isVisible())
-#endif
-            ) {
-            // assume the request to call is cancelled
-            queuedCall = QString();
-            queuedCallType = QString();
-            queuedCallContact = QUniqueId();
-        }
-        showCallScreen();
-    }
-
-    if (queuedIncoming && !DialerControl::instance()->hasIncomingCall()) {
-        // incoming call has gone away
-        queuedIncoming = false;
-        delete incomingMsgBox;
-        incomingMsgBox = 0;
-    }
-
-    if (queuedIncoming || !queuedCall.isEmpty()) {
-        bool haveFg = DialerControl::instance()->hasActiveCalls();
-        if (haveFg && !DialerControl::instance()->hasCallsOnHold()) {
-            DialerControl::instance()->hold();
-        } else if (!haveFg) {
-            showCallScreen();
-            if (queuedIncoming) {
-                queuedIncoming = false;
-                DialerControl::instance()->accept();
-            } else {
-                QString n(queuedCall);
-                queuedCall = QString();
-                queuedCallContact = QUniqueId();
-                DialerControl::instance()->dial(n,DialerControl::instance()->callerIdNeeded(n), queuedCallType, queuedCallContact);
-            }
-        }
-    }
 }
 
 /*!
-  \internal
-  */
-void PhoneLauncher::acceptIncoming()
-{
-    if (DialerControl::instance()->hasIncomingCall()) {
-        showCallScreen();
-        if(DialerControl::instance()->hasActiveCalls() &&
-           DialerControl::instance()->hasCallsOnHold()) {
-            if (!incomingMsgBox) {
-                incomingMsgBox = QAbstractMessageBox::messageBox(
-                    callScreen(),
-                    tr("End current call?"),
-                    tr("<qt>Do you wish to end the current call before answering the incoming call?</qt>"),
-                    QAbstractMessageBox::Warning, QAbstractMessageBox::Yes, QAbstractMessageBox::No);
-                connect(incomingMsgBox, SIGNAL(finished(int)), this, SLOT(messageBoxDone(int)));
-            }
-            QtopiaApplication::showDialog(incomingMsgBox);
-            queuedIncoming = true;
-        } else {
-            DialerControl::instance()->accept();
-        }
-    }
-}
-
-/*!
-  \internal
-  Accepts an incoming call.  Has no affect if an incoming call is not
-  currently available.
+    \internal
+    Accepts an incoming call.  Has no affect if an incoming call is not
+    currently available.
 */
 void PhoneLauncher::messageBoxDone(int r)
 {
     QAbstractMessageBox *box = (QAbstractMessageBox*)sender();
     if (box == missedMsgBox && r == QAbstractMessageBox::Yes) {
         showCallHistory(true);
-    } else if (box == dialingMsgBox) {
-        if (r == QAbstractMessageBox::Yes)
-            DialerControl::instance()->endCall();
-        else
-        {
-            queuedCall = QString();
-            queuedCallContact = QUniqueId();
-        }
-    } else if (box == incomingMsgBox) {
-        if (r == QAbstractMessageBox::Yes) {
-            DialerControl::instance()->endCall();
-        } else {
-            queuedIncoming = false;
-            if (DialerControl::instance()->hasIncomingCall())
-                DialerControl::instance()->incomingCall().hangup();
-        }
-    } else if (box == callTypeMsgBox) {
-        switch(r) {
-        case 0:
-            queuedCallType = "Voice";     // No tr
-            dialNumber(queuedCall, queuedCallContact, queuedCallType);
-            break;
-        case 1:
-            queuedCallType = "VoIP";      // No tr
-#ifdef QTOPIA_VOIP
-            if ( VoIPManager::instance()->isAvailable( queuedCall ) ) {
-                dialNumber(queuedCall, queuedCallContact, queuedCallType);
-            } else {
-                if (!voipNoPresenceMsgBox) {
-                    voipNoPresenceMsgBox = QAbstractMessageBox::messageBox(callScreen(), tr("Unavailable"),
-                        tr("<qt>The selected contact appears to be unavailable. Do you still wish to make a call?</qt>"),
-                        QAbstractMessageBox::Warning, QAbstractMessageBox::Yes, QAbstractMessageBox::No);
-                    connect(voipNoPresenceMsgBox, SIGNAL(finished(int)), this, SLOT(messageBoxDone(int)));
-                }
-                QtopiaApplication::showDialog(voipNoPresenceMsgBox);
-            }
-#endif
-            break;
-        default:
-            break;
-        }
     }
-#ifdef QTOPIA_VOIP
-    else if (box == voipNoPresenceMsgBox) {
-        if (r == QAbstractMessageBox::Yes) {
-            dialNumber(queuedCall, queuedCallContact, queuedCallType);
-        } else {
-            queuedCall = QString();
-            queuedCallType = QString();
-            queuedCallContact = QUniqueId();
-        }
-    }
-#endif
-}
-#endif
-
-/*!
-  \internal
-  This function is now a public slot.
- */
-void PhoneLauncher::showWarning(const QString &title, const QString &text)
-{
-    if (!warningMsgBox)
-        warningMsgBox =
-	    QAbstractMessageBox::messageBox(0,title,text,
-					    QAbstractMessageBox::Warning);
-    warningMsgBox->setWindowTitle(title);
-    warningMsgBox->setText(text);
-    warningMsgBox->setTimeout(WarningTimeout,QAbstractMessageBox::NoButton);
-    QtopiaApplication::showDialog(warningMsgBox);
 }
 
-#ifdef QTOPIA_PHONEUI
 /*!
-  Dials number \a n.  The current call state is first checked to confirm
-  that it is possible to make a call.  If it is not possible to make a
-  call, the user will be notified, otherwise the call screen will be shown
-  and the call initiated.
-  \internal
+    \internal
 */
-void PhoneLauncher::dialNumber(const QString &n, const QUniqueId &c, const QString &callType)
-{
-    if (callType.isEmpty() || n.isEmpty())
-        return;
-
-    // Save service request history.
-    /*
-    QtopiaServiceRequest req("Dialer", "dial(QString,QUniqueId)");
-    req << n << c;
-    QString label;
-    QString icon(":icon/phone/phone"); // no tr
-    if (!c.isNull()) {
-        QContactModel *m = ServerContactModel::instance();
-        QContact contact = m->contact(c);
-        label = tr("Call %1").arg(contact.label());
-        QMap<QContact::PhoneType, QString> numbers = contact.phoneNumbers();
-        QMap<QContact::PhoneType, QString>::iterator it;
-        for (it = numbers.begin(); it != numbers.end(); ++it) {
-            if (*it == n) {
-                icon = contact.phoneIconResource(it.key());
-                break;
-            }
-        }
-    } else {
-        label = tr("Call %1").arg(n);
-    }
-    QtopiaServiceHistoryModel::insert(req, label, icon);
-    */
-
-    showCallScreen();
-
-    if (DialerControl::instance()->hasActiveCalls() && DialerControl::instance()->hasCallsOnHold()) {
-        if (!dialingMsgBox) {
-            dialingMsgBox = QAbstractMessageBox::messageBox(
-                    callScreen(),
-                    tr("End current call?"),
-                    tr("<qt>Do you wish to end the current call before begining the new call?</qt>"),
-                    QAbstractMessageBox::Warning, QAbstractMessageBox::Yes, QAbstractMessageBox::No);
-             connect(dialingMsgBox, SIGNAL(finished(int)), this, SLOT(messageBoxDone(int)));
-        }
-        QtopiaApplication::showDialog(dialingMsgBox);
-    } else if (DialerControl::instance()->hasActiveCalls()) {
-        DialerControl::instance()->hold();
-    } else {
-        DialerControl::instance()->dial( n, DialerControl::instance()->callerIdNeeded(n), callType, c );
-    }
-}
-
-class CallTypeSelector : public PhoneMessageBox
-{
-    Q_OBJECT
-public:
-    CallTypeSelector( const QList<QAbstractCallPolicyManager *>& managers,
-                      QWidget *parent = 0 );
-    ~CallTypeSelector();
-
-    QAbstractCallPolicyManager *selectedPolicyManager() const;
-
-private slots:
-    void itemActivated();
-
-private:
-    QListWidget *list;
-    QList<QAbstractCallPolicyManager *> managers;
-};
-
-CallTypeSelector::CallTypeSelector
-    ( const QList<QAbstractCallPolicyManager *>& managers, QWidget *parent )
-    : PhoneMessageBox( parent )
-{
-    this->managers = managers;
-
-    setIcon(QAbstractMessageBox::Warning);
-    setText(tr("Which type of call do you wish to make?"));
-
-    list = new QListWidget(this);
-    list->setSortingEnabled(true);
-    list->setItemDelegate(new QtopiaItemDelegate);
-    list->setFrameStyle(QFrame::NoFrame);
-    addContents(list);
-
-    foreach ( QAbstractCallPolicyManager *manager, managers ) {
-        QListWidgetItem *item = new QListWidgetItem(list);
-        item->setText(manager->trCallType());
-        item->setIcon(QIcon(":icon/" + manager->callTypeIcon()));
-        item->setData(Qt::UserRole, manager->callType());
-        list->addItem(item);
-    }
-    list->setCurrentItem(list->item(0));
-
-    connect(list, SIGNAL(itemActivated(QListWidgetItem*)),
-            this, SLOT(itemActivated()));
-}
-
-CallTypeSelector::~CallTypeSelector()
-{
-}
-
-QAbstractCallPolicyManager *CallTypeSelector::selectedPolicyManager() const
-{
-    QListWidgetItem *current = list->currentItem();
-    if ( !current )
-        return 0;
-    QString callType = current->data(Qt::UserRole).toString();
-    foreach ( QAbstractCallPolicyManager *manager, managers ) {
-        if ( manager->callType() == callType )
-            return manager;
-    }
-    return 0;
-}
-
-void CallTypeSelector::itemActivated()
-{
-    done(QAbstractMessageBox::Yes);
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::requestDial(const QString &n, const QUniqueId &c)
-{
-    if (n.isEmpty())
-        return;
-
-    int numberAtSymbol = n.count('@');
-    if (numberAtSymbol > 1) {
-        showWarning(tr("Incorrect Number format"),
-                tr("<qt>Unable to make a phone call.</qt>"));
-        return;
-    }
-
-    // Ask all of the call policy managers what they want to do
-    // with this phone number.
-    QAbstractCallPolicyManager::CallHandling handling;
-    QList<QAbstractCallPolicyManager *> managers;
-    QList<QAbstractCallPolicyManager *> candidates;
-    QAbstractCallPolicyManager *chosenManager = 0;
-    managers = qtopiaTasks<QAbstractCallPolicyManager>();
-    foreach (QAbstractCallPolicyManager *manager, managers) {
-        handling = manager->handling(n);
-        if ( handling == QAbstractCallPolicyManager::MustHandle ) {
-            chosenManager = manager;
-            break;
-        } else if ( handling == QAbstractCallPolicyManager::NeverHandle ) {
-            chosenManager = 0;
-            candidates.clear();
-            break;
-        } else if ( handling == QAbstractCallPolicyManager::CanHandle ) {
-            candidates.append( manager );
-        }
-    }
-
-    // Bail out if nothing can dial this number at this time.
-    if (!chosenManager && candidates.isEmpty()) {
-        showWarning(tr("No GSM/VoIP Network"),
-                tr("<qt>No phone call is possible.</qt>"));
-        return;
-    }
-
-    queuedCall = n;
-    queuedCallType = QString();
-    queuedCallContact = c;
-
-#ifdef QTOPIA_CELL
-    if(cellModem->planeModeEnabled()) {
-        // At the moment, plane mode is the only way to turn
-        // the GSM module off.
-        showWarning(tr("Airplane Mode"),
-            tr("<qt>Phone calls cannot be made in Airplane Mode.</qt>"));
-        return;
-    }
-#endif
-
-    // Determine which call policy manager to use.
-    if (!chosenManager) {
-        if (candidates.size() == 1) {
-            // Only one call policy manager is active, so use that.
-            chosenManager = candidates[0];
-        } else {
-            // Clear queued call information while the dialog is up
-            // to prevent the call from being automatically dialed
-            // if we get to PhoneLauncher::stateChanged() while
-            // the dialog is on-screen.
-            queuedCall = QString();
-            queuedCallType = QString();
-            queuedCallContact = QUniqueId();
-
-            // More than one is active, so we have to ask the user.
-            CallTypeSelector selector( candidates );
-            if (QtopiaApplication::execDialog(&selector) != QAbstractMessageBox::Yes) {
-                return;
-            }
-            chosenManager = selector.selectedPolicyManager();
-            if ( !chosenManager ) {
-                // Shouldn't happen, but recover gracefully anyway.
-                return;
-            }
-
-            // Re-instate the queued call information.
-            queuedCall = n;
-            queuedCallType = QString();
-            queuedCallContact = c;
-        }
-    }
-
-    // Get the chosen call type.
-    queuedCallType = chosenManager->callType();
-
-#ifdef QTOPIA_VOIP
-    // Ask the user to confirm if the called party is not present.
-    if (!chosenManager->isAvailable(queuedCall)) {
-        if (!voipNoPresenceMsgBox) {
-            voipNoPresenceMsgBox = QAbstractMessageBox::messageBox(callScreen(), tr("Unavailable"),
-                tr("<qt>The selected contact appears to be unavailable. Do you still wish to make a call?</qt>"),
-                QAbstractMessageBox::Warning, QAbstractMessageBox::Yes, QAbstractMessageBox::No);
-            connect(voipNoPresenceMsgBox, SIGNAL(finished(int)), this, SLOT(messageBoxDone(int)));
-        }
-        QtopiaApplication::showDialog(voipNoPresenceMsgBox);
-        return;
-    }
-#endif
-
-    // Dial the specified number.
-    dialNumber(queuedCall, queuedCallContact, queuedCallType);
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::serviceNumber(QServiceNumbers::NumberId id, const QString& number)
-{
-    if ( id == QServiceNumbers::VoiceMail ) {
-        // The "waitingVoiceMailNumber" flag is used to prevent
-        // false positives when the "phonesettings" program
-        // queries for the voice mail number.
-        if ( waitingVoiceMailNumber ) {
-            waitingVoiceMailNumber = false;
-            if ( number.length() > 0 ) {
-                requestDial( number );
-            } else {
-                showWarning(tr("Voice Mail"),
-                            tr("<qt>Voice mail number is not set.</qt>"));
-            }
-        }
-    }
-}
-
-/*!
-  \internal
-    Dial the voice mail number in the SIM.
-*/
-void PhoneLauncher::dialVoiceMail()
-{
-    waitingVoiceMailNumber = true;
-    if ( serviceNumbers->available() )
-        serviceNumbers->requestServiceNumber( QServiceNumbers::VoiceMail );
-    else
-        serviceNumber( QServiceNumbers::VoiceMail, QString() );
-}
-
-/*!
-  \internal
-  */
 void PhoneLauncher::resetMissedCalls()
 {
     alertedMissed = 0;
 }
 
 /*!
-  \internal
-  */
-QAbstractHomeScreen *PhoneLauncher::homeScreen() const
-{
-    return m_homeScreen;
-}
+    Returns the associated dialer screen or 0 if it hasn't been instanciated yet.
 
-/*!
-  \internal
-  */
+    If \a create is true, the call screen will be created if it doesn't exist yet.
+    This allows the delayed initialization of subcomponents.
+*/
 QAbstractDialerScreen *PhoneLauncher::dialer(bool create) const
 {
-    if(create && !m_dialer) {
-        m_dialer = qtopiaWidget<QAbstractDialerScreen>(0);
-        if (!m_dialer) {
-            qLog(UI) << "Unable to create the Dialer Screen";
-            return 0;
-        }
-        m_dialer->move(QApplication::desktop()->screenGeometry().topLeft());
-
-        connect(m_dialer,
-                SIGNAL(requestDial(QString,QUniqueId)),
-                this,
-                SLOT(requestDial(QString,QUniqueId)));
-        connect(m_dialer, SIGNAL(speedDial(QString)),
-                this, SLOT(speedDial(QString)) );
-
-    #ifdef QTOPIA_CELL
-        if(gsmKeyActions)
-            gsmKeyActions->setDialer(m_dialer);
-    #endif
-    }
+    if(create && !m_dialer)
+        initializeDialerScreen();
 
     return m_dialer;
 }
 
 /*!
-  \internal
-  */
-CallScreen *PhoneLauncher::callScreen(bool create) const
+    Returns the associated call screen or 0 if it hasn't been instanciated yet.
+
+    If \a create is true, the call screen will be created if it doesn't exist yet.
+    This allows the delayed initialization of subcomponents.
+*/
+QAbstractCallScreen *PhoneLauncher::callScreen(bool create) const
 {
     if(create && !mCallScreen) {
-        mCallScreen = new CallScreen(DialerControl::instance(), 0);
-        mCallScreen->move(QApplication::desktop()->screenGeometry().topLeft());
-        RingControl *rc = qtopiaTask<RingControl>();
-        if(rc)
-            QObject::connect(mCallScreen, SIGNAL(muteRing()),
-                             rc, SLOT(muteRing()));
-        QObject::connect(mCallScreen, SIGNAL(listEmpty()),
-                         mCallScreen, SLOT(hide()));
-        QObject::connect(mCallScreen, SIGNAL(acceptIncoming()),
-                         this, SLOT(acceptIncoming()));
-        ThemeControl::instance()->registerThemedView(mCallScreen, "CallScreen");
-
-#ifdef QTOPIA_CELL
-        if (gsmKeyActions) {
-            QObject::connect( mCallScreen, SIGNAL(filterKeys(QString,bool&)),
-                    gsmKeyActions, SLOT(filterKeys(QString,bool&)) );
-            QObject::connect( mCallScreen, SIGNAL(filterSelect(QString,bool&)),
-                    gsmKeyActions, SLOT(filterSelect(QString,bool&)) );
-            QObject::connect( mCallScreen, SIGNAL(testKeys(QString,bool&)),
-                    gsmKeyActions, SLOT(testKeys(QString,bool&)) );
+        mCallScreen = qtopiaWidget<QAbstractCallScreen>(0);
+        if (!mCallScreen) {
+            qLog(Component) << "PhoneLauncher: Callscreen not available";
+            return 0;
         }
-#endif
+        mCallScreen->move(QApplication::desktop()->screenGeometry().topLeft());
+        QObject::connect(mCallScreen, SIGNAL(hangupCall()),
+                this, SLOT(hangupPressed()));
+        DialProxy *dialerServiceProxy = qtopiaTask<DialProxy>();
+        if (dialerServiceProxy)
+            connect(mCallScreen, SIGNAL(acceptIncoming()),
+                    dialerServiceProxy, SLOT(acceptIncoming()));
     }
     return mCallScreen;
 
 }
 
+#endif
+
 void PhoneLauncher::speedDialActivated()
 {
+#ifdef QTOPIA_TELEPHONY
     if (dialerSpeedDialFeedbackActive && dialer(false)) {
         dialer(false)->reset();
         dialer(false)->hide();
     }
+#endif
     dialerSpeedDialFeedbackActive = false;
 }
 
-#endif
 
 /*!
-  \internal
-  */
+    \internal
+*/
 void PhoneLauncher::speedDial( const QString& input )
 {
     if (activateSpeedDial(input)) {
-#ifdef QTOPIA_PHONEUI
         dialerSpeedDialFeedbackActive = true;
-#endif
     }
 }
 
 /*!
-  \internal
-  Activate speed dial associated with \a input.
- */
+    Activates speed dial associated with \a input and returns true if a matching
+    speeddial action was found.
+*/
 bool PhoneLauncher::activateSpeedDial( const QString& input )
 {
     if ( !speeddialfeedback ) {
         speeddialfeedback = new QSpeedDialFeedback;
-#ifdef QTOPIA_PHONEUI
         connect(speeddialfeedback, SIGNAL(requestSent()), this, SLOT(speedDialActivated()));
-#endif
     }
 
     QString sel = input;
@@ -1809,8 +1086,11 @@ bool PhoneLauncher::activateSpeedDial( const QString& input )
 
 
 /*!
-  \internal
-  */
+    Returns the associated browser screen or 0 if it hasn't been instanciated yet.
+
+    If \a create is true the browser screen will be created if it doesn't exist yet.
+    This allows the delayed initialization of subcomponents.
+*/
 QAbstractBrowserScreen *PhoneLauncher::phoneBrowser(bool create) const
 {
     if(!stack && create) {
@@ -1825,45 +1105,40 @@ QAbstractBrowserScreen *PhoneLauncher::phoneBrowser(bool create) const
 }
 
 /*!
-  \internal
-  */
+    Returns the associated secondary display or 0 if it hasn't been instanciated yet.
+
+    If \a create is true the secondary display will be created if it doesn't exist yet
+    and if the device supports a secondary display. The \a create parameter allows the 
+    delayed initialization of subcomponents.
+*/
 QAbstractSecondaryDisplay *PhoneLauncher::secondaryDisplay(bool create) const
 {
     QDesktopWidget *desktop = QApplication::desktop();
     if (!secondDisplay && create && desktop->numScreens() > 1) {
-        secondDisplay = qtopiaWidget<QAbstractSecondaryDisplay>(0,
-                                            Qt::FramelessWindowHint | Qt::Tool);
-        if (secondDisplay){
-            secondDisplay->setGeometry(desktop->screenGeometry(1));
-            secondDisplay->show();
-        }else{
-            qLog(UI) << "Unable to create the Secondary Display";
+        // Search for a normal (i.e. non-television) screen to create
+        // the secondary display.
+        int secondScreen = -1;
+        for (int screen = 0; screen < desktop->numScreens(); ++screen) {
+            QScreenInformation info(screen);
+            if (screen != desktop->primaryScreen() &&
+                info.type() == QScreenInformation::Normal) {
+                secondScreen = screen;
+                break;
+            }
+        }
+        if (secondScreen != -1) {
+            secondDisplay = qtopiaWidget<QAbstractSecondaryDisplay>(0,
+                                                Qt::FramelessWindowHint | Qt::Tool);
+            if (secondDisplay){
+                secondDisplay->setGeometry(desktop->screenGeometry(secondScreen));
+                secondDisplay->show();
+            }else{
+                qLog(UI) << "Unable to create the Secondary Display";
+            }
         }
     }
 
     return secondDisplay;
-}
-
-void PhoneLauncher::newMessagesChanged()
-{
-    m_homeScreen->setNewMessages(newMessages.value().toInt());
-}
-
-
-// define MultiTaskProxy
-MultiTaskProxy::MultiTaskProxy(QObject *parent)
-: TaskManagerService(parent)
-{
-}
-
-void MultiTaskProxy::multitask()
-{
-    emit doMultiTask();
-}
-
-void MultiTaskProxy::showRunningTasks()
-{
-    emit doShowRunningTasks();
 }
 
 // define QSpeedDialFeedback
@@ -1892,14 +1167,15 @@ void QSpeedDialFeedback::setBlindFeedback(bool on)
 void QSpeedDialFeedback::show(QWidget* center, const QString& input, const QtopiaServiceDescription& r)
 {
     req = r.request();
-#ifdef QTOPIA_PHONEUI
+#ifdef QTOPIA_TELEPHONY
     if ( blind ) {
-        RingControl *rc = qtopiaTask<RingControl>();
+        QtopiaServiceRequest sRequest("Ringtone", "startRingtone(QString)");
         if ( req.isNull() ) {
-            if(rc) rc->playSound(":sound/speeddial/nak");
+            sRequest << QString(":sound/speeddial/nak");
         } else {
-            if(rc) rc->playSound(":sound/speeddial/ack");
+            sRequest << QString(":sound/speeddial/ack");
         }
+        sRequest.send();
     }
 #endif
     if ( req.isNull() ) {

@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -87,18 +85,31 @@ SlideInMessageBoxPrivate::SlideInMessageBoxPrivate()
   yesKey(0)
 {
 }
+/*!
+    \class SlideInMessageBox
+    \inpublicgroup QtBaseModule
+    \brief The SlideInMessageBox class implements a sliding message box.
+    \ingroup QtopiaServer::PhoneUI
 
-// define SlideInMessageBox
-SlideInMessageBox::SlideInMessageBox(QWidget *parent, Qt::WFlags)
-: QAbstractMessageBox(parent, Qt::FramelessWindowHint),
+    An image of this message box can be found in the \l{Server Widget Classes}{server widget gallery}.
+
+    This class is a Qt Extended \l{QtopiaServerApplication#qt-extended-server-widgets}{server widget}.
+    It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+    \sa QAbstractMessageBox
+*/
+
+/*!
+    Creates a new SlideInMessageBox instance with the given \a parent
+    and widget \a flags.
+*/
+SlideInMessageBox::SlideInMessageBox(QWidget *parent, Qt::WFlags flags)
+: QAbstractMessageBox(parent, flags|Qt::FramelessWindowHint),
   d(new SlideInMessageBoxPrivate)
 {
-    QPalette mpal = palette();
-    mpal.setBrush(QPalette::Window, QBrush(QColor(0,0,0,0)));
-    setPalette(mpal);
     d->fillColor = QColor(50, 50, 50, 200);
 
-    d->m_timeline.setDuration(200);
+    d->m_timeline.setDuration(300);
     d->m_timeline.setCurveShape(QTimeLine::LinearCurve);
     QObject::connect(&d->m_timeline, SIGNAL(valueChanged(qreal)), this, SLOT(valueChanged(qreal)));
 
@@ -106,6 +117,9 @@ SlideInMessageBox::SlideInMessageBox(QWidget *parent, Qt::WFlags)
                  QApplication::desktop()->availableGeometry().height());
 }
 
+/*!
+    \internal
+*/
 SlideInMessageBox::~SlideInMessageBox()
 {
     delete d;
@@ -151,11 +165,17 @@ void SlideInMessageBox::renderBox()
     d->renderedBox = pix;
 }
 
+/*!
+    \reimp
+*/
 QString SlideInMessageBox::text() const
 {
     return d->m_text;
 }
 
+/*!
+    \reimp
+*/
 void SlideInMessageBox::setText(const QString &text)
 {
     d->m_text = text;
@@ -163,12 +183,18 @@ void SlideInMessageBox::setText(const QString &text)
     update();
 }
 
+/*!
+    Returns the messagebox pixmap.
+*/
 QPixmap SlideInMessageBox::pixmap() const
 {
     return d->m_icon;
 }
 
-void SlideInMessageBox::setPixmap(const QPixmap &icon)
+/*!
+    \reimp
+*/
+void SlideInMessageBox::setIconPixmap(const QPixmap &icon)
 {
     d->m_icon = icon;
     d->m_iconEnum = NoIcon;
@@ -176,11 +202,17 @@ void SlideInMessageBox::setPixmap(const QPixmap &icon)
     update();
 }
 
+/*!
+    \reimp
+*/
 QString SlideInMessageBox::title() const
 {
     return d->m_title;
 }
 
+/*!
+    \reimp
+*/
 void SlideInMessageBox::setTitle(const QString &title)
 {
     d->m_title = title;
@@ -201,32 +233,41 @@ void SlideInMessageBox::valueChanged(qreal val)
     update();
 }
 
+/*!
+    \reimp
+*/
 SlideInMessageBox::Icon SlideInMessageBox::icon() const
 {
     return d->m_iconEnum;
 }
 
+/*!
+    \reimp
+*/
 void SlideInMessageBox::setIcon(SlideInMessageBox::Icon icon)
 {
     switch(icon) {
         case NoIcon:
-            setPixmap(QPixmap());
+            setIconPixmap(QPixmap());
             break;
         case Information:
-            setPixmap(QPixmap(":image/alert_info"));
+            setIconPixmap(QPixmap(":image/alert_info"));
             break;
         case Warning:
-            setPixmap(QPixmap(":image/alert_warning"));
+            setIconPixmap(QPixmap(":image/alert_warning"));
             break;
         case Question:
         case Critical:
-            setPixmap(QMessageBox::standardIcon((QMessageBox::Icon)icon));
+            setIconPixmap(QMessageBox::standardIcon((QMessageBox::Icon)icon));
             break;
     }
 
     d->m_iconEnum = icon;
 }
 
+/*!
+    \reimp
+*/
 void SlideInMessageBox::setButtons(Button btn0, Button btn1)
 {
     d->m_button1 = btn0;
@@ -252,6 +293,10 @@ void SlideInMessageBox::setButtons(Button btn0, Button btn1)
         }
     }
 }
+
+/*!
+    \reimp
+*/
 void SlideInMessageBox::setButtons(const QString &button0Text, const QString &button1Text, const QString &button2Text,
         int defaultButtonNumber, int escapeButtonNumber)
 {
@@ -299,8 +344,10 @@ void SlideInMessageBox::drawFrame(QPainter *painter, const QRect &r, const QStri
     painter->setClipPath(clipPath);
 
     QLinearGradient lg(0, 0, 0, r.height());
-    lg.setColorAt(0, QColor(224,224,224));
-    lg.setColorAt(1, QColor(255,255,255));
+    QColor c1 = palette().color(QPalette::Window);
+    QColor c2 = palette().color(QPalette::Highlight);
+    lg.setColorAt(0, c1);
+    lg.setColorAt(1, c2);
     painter->setPen(Qt::NoPen);
     painter->setBrush(lg);
     painter->drawRect(r.adjusted(0, d->titleStretch.height()/2, 0, 0));
@@ -361,6 +408,9 @@ void SlideInMessageBox::drawFrame(QPainter *painter, const QRect &r, const QStri
     }
 }
 
+/*!
+    \reimp
+*/
 void SlideInMessageBox::paintEvent(QPaintEvent *)
 {
     renderBox();
@@ -376,12 +426,27 @@ void SlideInMessageBox::paintEvent(QPaintEvent *)
     painter.drawPixmap(0, ypos, d->renderedBox);
 }
 
+/*!
+  \reimp
+  */
+QSize SlideInMessageBox::sizeHint() const
+{
+    return QSize(QApplication::desktop()->availableGeometry().width(),
+                 QApplication::desktop()->availableGeometry().height());
+}
+
+/*!
+    \reimp
+*/
 void SlideInMessageBox::showEvent(QShowEvent *e)
 {
     animate();
     QWidget::showEvent(e);
 }
 
+/*!
+    \reimp
+*/
 void SlideInMessageBox::keyPressEvent(QKeyEvent *ke)
 {
     if (d->customButton) {

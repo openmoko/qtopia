@@ -1,32 +1,31 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
 #include <qsignalintercepter.h>
-#include <QtCore/qmetaobject.h>
-#include <QtCore/qmetatype.h>
-#include <QtCore/qobjectdefs.h>
+#include <qmetaobject.h>
+#include <qmetatype.h>
+#include <qobjectdefs.h>
 
 /*!
     \class QSignalIntercepter
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \brief The QSignalIntercepter class provides an interface for intercepting signals as meta-calls
 
     IPC mechanisms need to intercept signals and convert them into protocol
@@ -80,7 +79,9 @@ QSignalIntercepter::QSignalIntercepter
 
     // Resolve the indices of the signals we are interested in.
     if ( sender && signal.size() > 0 ) {
-        if ( ( signal[0] - '0' ) != QSIGNAL_CODE ) {
+        // '2' is QSIGNAL_CODE in Qt 4.4 and below,
+        // '6' is QSIGNAL_CODE in Qt 4.5 and higher.
+        if ( signal[0] != '2' && signal[0] != '6' ) {
             qWarning( "QSignalIntercepter: `%s' is not a valid signal "
                       "specification", signal.constData() );
             return;

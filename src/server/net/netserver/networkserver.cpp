@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2007-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -66,7 +64,7 @@ public:
         //make sure that we don't block the shutdown process when our network interfaces don't come down
         //the timeout should be a couple of seconds as the shutdown requires the execution of
         //shell scripts
-        QTimer::singleShot( 8000, this, SLOT(finished()) );//just in case
+        QTimer::singleShot( SystemShutdownHandler::timeout(), this, SLOT(finished()) );//just in case
         return false;
     }
 
@@ -191,9 +189,11 @@ void QtopiaNetworkSession::interfaceStateChanged()
 /*!
   \internal
   \class QtopiaNetworkSession
+  \inpublicgroup QtConnectivityModule
+  \inpublicgroup QtBluetoothModule
   \brief This class keeps track of requested network sessions.
   
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 */
 
 /*!
@@ -386,23 +386,25 @@ void QtopiaSessionManager::invalidateSession( const QByteArray& ifaceHandle )
 
 /*!
   \class QtopiaNetworkServer
+  \inpublicgroup QtBluetoothModule
+  \inpublicgroup QtConnectivityModule
   \ingroup QtopiaServer::Task
   \brief The QtopiaNetworkServer class manages all network interfaces.
 
-  This server task synchronizes the network access across all Qtopia applications.
+  This server task synchronizes the network access across all Qt Extended applications.
   Client applications request network functions via QtopiaNetwork which
   forwards the requests to this network server. The network server creates 
   and keeps the references to the various QtopiaNetworkInterface instance. All
   forwarded network requests are directly executed by this server class. 
 
   The network server ensures the automated start-up of network interfaces during 
-  Qtopia's start phase, stops all network interfaces when Qtopia shuts down and 
+  the system start phase, stops all network interfaces when the system shuts down and 
   manages the network sessions for all network devices.
   External network devices such as PCMCIA cards are automatically detected and initialized 
-  by the network server when they are plugged into the Qtopia device.
+  by the network server when they are plugged into the Qt Extended device.
 
-  The QtopiaNetworkServer is a Qtopia server task and is automatically started by the server.
-  It is part of the Qtopia server and cannot be used by other Qtopia applications.
+  The QtopiaNetworkServer is a Qt Extended server task and is automatically started by the server.
+  It is part of the Qt Extended server and cannot be used by other Qt Extended applications.
 
   \sa QtopiaNetwork, QtopiaNetworkInterface
 */
@@ -484,6 +486,13 @@ void QtopiaNetworkServer::shutdownNetwork()
     QStringList configList = QtopiaNetwork::availableNetworkConfigs();
     foreach( QString config, configList )
     {
+
+        QSettings netConfig(config, QSettings::IniFormat);
+        if (netConfig.value("Properties/DebugInterface", false).toBool()) {
+            qLog(Network) << "Not stopping network interface used for debugging" << config;
+            continue;
+        }
+
         privilegedInterfaceStop( config );
     }
 
@@ -796,7 +805,7 @@ void QtopiaNetworkServer::setDefaultGateway( const QString& handle, bool exclude
   \internal
 
   This function marks \a handle as a permanent interface. A permanent interface is not stopped
-  by Qtopia's network session management if the application which started the interface crashes
+  by network session management if the application which started the interface crashes
   or quits.
 
   Currently only applications in SXE's netconfig domain are able to call this function. This feature

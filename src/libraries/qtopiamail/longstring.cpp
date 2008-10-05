@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -154,20 +152,58 @@ static const int PageSize = ::getpagesize();
 class LongStringFileMapping : public QSharedData
 {
 public:
-    LongStringFileMapping(const QString& filename);
+    LongStringFileMapping();
+    LongStringFileMapping(const QString& name);
     ~LongStringFileMapping();
 
     const QByteArray toQByteArray() const;
 
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
+
 private:
+    void init();
+
+    QString filename;
     const char* buffer;
     int len;
 };
 
-LongStringFileMapping::LongStringFileMapping(const QString& filename)
+template <typename Stream> 
+Stream& operator<<(Stream &stream, const LongStringFileMapping& mapping) { mapping.serialize(stream); return stream; }
+
+template <typename Stream> 
+Stream& operator>>(Stream &stream, LongStringFileMapping& mapping) { mapping.deserialize(stream); return stream; }
+
+LongStringFileMapping::LongStringFileMapping(const QString& name)
+    : QSharedData(),
+      filename(name),
+      buffer(0),
+      len(0)
+{
+    init();
+}
+
+LongStringFileMapping::LongStringFileMapping()
     : QSharedData(),
       buffer(0),
       len(0)
+{
+}
+
+LongStringFileMapping::~LongStringFileMapping()
+{
+    if (buffer)
+    {
+        int mapLength = ((len + (PageSize - 1)) / PageSize) * PageSize;
+        if (munmap(const_cast<char*>(buffer), mapLength) == -1)
+        {
+            qWarning() << "Unable to munmap" << mapLength << "bytes from buffer at" << reinterpret_cast<const void*>(buffer) << ':' << errno;
+        }
+    }
+}
+
+void LongStringFileMapping::init()
 {
     QFileInfo fi(filename);
     if (fi.exists() && fi.isFile() && fi.isReadable() && fi.size())
@@ -195,22 +231,23 @@ LongStringFileMapping::LongStringFileMapping(const QString& filename)
         qWarning() << "Unable to mmap:" << fi.absoluteFilePath();
 }
 
-LongStringFileMapping::~LongStringFileMapping()
-{
-    if (buffer)
-    {
-        int mapLength = ((len + (PageSize - 1)) / PageSize) * PageSize;
-        if (munmap(const_cast<char*>(buffer), mapLength) == -1)
-        {
-            qWarning() << "Unable to munmap" << mapLength << "bytes from buffer at" << reinterpret_cast<const void*>(buffer) << ':' << errno;
-        }
-    }
-}
-
 const QByteArray LongStringFileMapping::toQByteArray() const
 {
     // Does not create a copy:
     return QByteArray::fromRawData(buffer, len);
+}
+
+template <typename Stream> 
+void LongStringFileMapping::serialize(Stream &stream) const
+{
+    stream << filename;
+}
+
+template <typename Stream> 
+void LongStringFileMapping::deserialize(Stream &stream)
+{
+    stream >> filename;
+    init();
 }
 
 
@@ -235,6 +272,9 @@ public:
     QDataStream* dataStream() const;
     QTextStream* textStream() const;
 
+    template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void deserialize(Stream &stream);
+
 private:
     QSharedDataPointer<LongStringFileMapping> mapping;
     QByteArray data;
@@ -242,10 +282,15 @@ private:
     int len;
 };
 
+template <typename Stream> 
+Stream& operator<<(Stream &stream, const LongStringPrivate& ls) { ls.serialize(stream); return stream; }
+
+template <typename Stream> 
+Stream& operator>>(Stream &stream, LongStringPrivate& ls) { ls.deserialize(stream); return stream; }
+
 LongStringPrivate::LongStringPrivate()
     : QSharedData(),
       mapping(0),
-      data(),
       offset(0), 
       len(0) 
 {
@@ -337,6 +382,37 @@ QTextStream* LongStringPrivate::textStream() const
     return new QTextStream(input);
 }
 
+template <typename Stream> 
+void LongStringPrivate::serialize(Stream &stream) const
+{
+    bool usesMapping(mapping != 0);
+
+    stream << usesMapping;
+    if (usesMapping) {
+        stream << *mapping;
+    } else {
+        stream << data;
+    }
+    stream << offset;
+    stream << len;
+}
+
+template <typename Stream> 
+void LongStringPrivate::deserialize(Stream &stream)
+{
+    bool usesMapping;
+
+    stream >> usesMapping;
+    if (usesMapping) {
+        mapping = new LongStringFileMapping();
+        stream >> *mapping;
+        data = mapping->toQByteArray();
+    } else {
+        stream >> data;
+    }
+    stream >> offset;
+    stream >> len;
+}
 
 
 LongString::LongString()
@@ -419,4 +495,21 @@ QTextStream* LongString::textStream() const
 {
     return d->textStream();
 }
+
+template <typename Stream> 
+void LongString::serialize(Stream &stream) const
+{
+    d->serialize(stream);
+}
+
+template <typename Stream> 
+void LongString::deserialize(Stream &stream)
+{
+    d->deserialize(stream);
+}
+
+
+// We need to instantiate serialization functions for QDataStream
+template void LongString::serialize<QDataStream>(QDataStream&) const;
+template void LongString::deserialize<QDataStream>(QDataStream&);
 

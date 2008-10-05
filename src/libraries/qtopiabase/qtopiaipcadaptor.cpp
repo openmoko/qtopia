@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -33,7 +31,7 @@
 #include <qmetaobject.h>
 #include <qdatastream.h>
 #include <QDebug>
-#if !defined(QTOPIA_HOST) && !defined(QTOPIA_DBUS_IPC)
+#if !defined(QTOPIA_HOST)
 #if defined(Q_WS_QWS)
 #include <qcopchannel_qws.h>
 #define QTOPIA_REGULAR_QCOP
@@ -42,12 +40,16 @@
 #define QTOPIA_REGULAR_QCOP
 #endif
 #endif
+#ifdef QTOPIA_DBUS_IPC
+#include <QDBusInterface>
+#endif
 
 /*!
     \class QtopiaIpcAdaptor
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \ingroup ipc
-    \brief The QtopiaIpcAdaptor class provides an interface to messages on a Qtopia IPC channel
+    \brief The QtopiaIpcAdaptor class provides an interface to messages on a Qt Extended IPC channel
     which simplifies remote signal and slot invocations.
 
     Using this class, it is very easy to convert a signal emission into an IPC
@@ -286,7 +288,7 @@ void QtopiaIpcSignalIntercepter::activated( const QList<QVariant>& args )
 }
 
 /*!
-    Construct a Qtopia IPC message object for \a channel and attach it to \a parent.
+    Construct a Qt Extended IPC message object for \a channel and attach it to \a parent.
     If \a channel is empty, then messages are taken from the application's
     \c{appMessage} channel.
 */
@@ -297,7 +299,7 @@ QtopiaIpcAdaptor::QtopiaIpcAdaptor( const QString& channel, QObject *parent )
 }
 
 /*!
-    Destroy this Qtopia IPC messaging object.
+    Destroy this Qt Extended IPC messaging object.
 */
 QtopiaIpcAdaptor::~QtopiaIpcAdaptor()
 {
@@ -311,7 +313,7 @@ QtopiaIpcAdaptor::~QtopiaIpcAdaptor()
 
     If either \a sender or \a receiver are instances of
     QtopiaIpcAdaptor, this function will arrange for the signal
-    to be delivered over a Qtopia IPC channel.  If both \a sender and
+    to be delivered over a Qt Extended IPC channel.  If both \a sender and
     \a receiver are local, this function is identical
     to QObject::connect().
 
@@ -368,7 +370,7 @@ bool QtopiaIpcAdaptor::connect( QObject *sender, const QByteArray& signal,
 
 /*!
     Publishes the signal or slot called \a member on this object on
-    the Qtopia IPC channel represented by this QtopiaIpcAdaptor.
+    the Qt Extended IPC channel represented by this QtopiaIpcAdaptor.
 
     If \a member is a slot, then whenever an application sends a
     message to the channel with that name, the system will arrange
@@ -384,7 +386,9 @@ bool QtopiaIpcAdaptor::connect( QObject *sender, const QByteArray& signal,
 */
 bool QtopiaIpcAdaptor::publish( const QByteArray& member )
 {
-    if ( member.size() >= 1 && member[0] == '1' ) {
+    // '1' is QSLOT_CODE in Qt 4.4 and below,
+    // '5' is QSLOT_CODE in Qt 4.5 and higher.
+    if ( member.size() >= 1 && ( member[0] == '1' || member[0] == '5' ) ) {
         // Exporting a slot.
         return connectRemoteToLocal( "3" + member.mid(1), this, member );
     } else {
@@ -439,7 +443,7 @@ void QtopiaIpcAdaptor::publishAll( QtopiaIpcAdaptor::PublishType type )
 }
 
 /*!
-    Sends a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qt Extended IPC channel which will cause the invocation
     of \a member on receiving objects.  The return value can be used
     to add arguments to the message before transmission.
 */
@@ -450,7 +454,7 @@ QtopiaIpcSendEnvelope QtopiaIpcAdaptor::send( const QByteArray& member )
 }
 
 /*!
-    Sends a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qt Extended IPC channel which will cause the invocation
     of the single-argument \a member on receiving objects, with the
     argument \a arg1.
 */
@@ -462,7 +466,7 @@ void QtopiaIpcAdaptor::send( const QByteArray& member, const QVariant &arg1 )
 }
 
 /*!
-    Sends a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qt Extended IPC channel which will cause the invocation
     of the double-argument \a member on receiving objects, with the
     arguments \a arg1 and \a arg2.
 */
@@ -475,7 +479,7 @@ void QtopiaIpcAdaptor::send( const QByteArray& member, const QVariant &arg1, con
 }
 
 /*!
-    Sends a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qt Extended IPC channel which will cause the invocation
     of the triple-argument \a member on receiving objects, with the
     arguments \a arg1, \a arg2, and \a arg3.
 */
@@ -490,7 +494,7 @@ void QtopiaIpcAdaptor::send( const QByteArray& member, const QVariant &arg1,
 }
 
 /*!
-    Sends a message on the Qtopia IPC channel which will cause the invocation
+    Sends a message on the Qt Extended IPC channel which will cause the invocation
     of the multi-argument \a member on receiving objects, with the
     argument list \a args.
 */
@@ -500,7 +504,7 @@ void QtopiaIpcAdaptor::send( const QByteArray& member, const QList<QVariant>& ar
 }
 
 /*!
-    Returns true if the message on the Qtopia IPC channel corresponding to \a signal
+    Returns true if the message on the Qt Extended IPC channel corresponding to \a signal
     has been connected to a local slot; otherwise returns false.
 */
 bool QtopiaIpcAdaptor::isConnected( const QByteArray& signal )
@@ -509,7 +513,7 @@ bool QtopiaIpcAdaptor::isConnected( const QByteArray& signal )
 }
 
 /*!
-    Converts a signal or slot \a member name into a Qtopia IPC message name.
+    Converts a signal or slot \a member name into a Qt Extended IPC message name.
     The default implementation strips the signal or slot prefix number
     from \a member and then normalizes the name to convert types
     such as \c{const QString&} into QString.
@@ -579,7 +583,6 @@ void QtopiaIpcAdaptor::received( const QString& msg, const QByteArray& data )
     #endif
     }
 
-#if !defined(QTOPIA_DBUS_IPC)
     if ( msg == "__query_qcop_messages(QString,QString)" ) {
         // The "qcop" command-line tool is querying us to get a
         // list of messages that we can respond to.
@@ -602,7 +605,6 @@ void QtopiaIpcAdaptor::received( const QString& msg, const QByteArray& data )
             env << *iter2;
         }
     }
-#endif
     priv->Release();
 }
 
@@ -715,10 +717,11 @@ void QtopiaIpcAdaptor::send( const QStringList& channels,
 
 /*!
     \class QtopiaIpcSendEnvelope
-    \mainclass
+    \inpublicgroup QtBaseModule
+
     \ingroup ipc
-    \brief The QtopiaIpcSendEnvelope class provides a mechanism to send Qtopia IPC messages with an argument number of arguments.
-    \mainclass
+    \brief The QtopiaIpcSendEnvelope class provides a mechanism to send Qt Extended IPC messages with an argument number of arguments.
+
 
     This class operates in a similar fashion to QtopiaIpcEnvelope.
     The most common way to use this class is to call QtopiaIpcAdaptor::send(),
@@ -736,6 +739,9 @@ void QtopiaIpcAdaptor::send( const QStringList& channels,
 class QtopiaIpcSendEnvelopePrivate
 {
 public:
+#if defined(QTOPIA_DBUS_IPC)
+    QDBusInterface *iface;
+#endif
     QStringList channels;
     QString message;
     bool shouldBeSent;
@@ -746,10 +752,26 @@ QtopiaIpcSendEnvelope::QtopiaIpcSendEnvelope
         ( const QStringList& channels, const QString& message )
 {
     d = new QtopiaIpcSendEnvelopePrivate();
+#if defined(QTOPIA_DBUS_IPC)
+    d->iface = 0;
+#endif
     d->channels = channels;
     d->message = message;
     d->shouldBeSent = true;
 }
+
+#if defined(QTOPIA_DBUS_IPC)
+
+QtopiaIpcSendEnvelope::QtopiaIpcSendEnvelope
+        ( QDBusInterface *iface, const QString& message )
+{
+    d = new QtopiaIpcSendEnvelopePrivate();
+    d->iface = iface;
+    d->message = message;
+    d->shouldBeSent = true;
+}
+
+#endif
 
 /*!
     Construct an empty QtopiaIpcSendEnvelope.
@@ -766,6 +788,9 @@ QtopiaIpcSendEnvelope::QtopiaIpcSendEnvelope()
 QtopiaIpcSendEnvelope::QtopiaIpcSendEnvelope( const QtopiaIpcSendEnvelope& value )
 {
     d = new QtopiaIpcSendEnvelopePrivate();
+#if defined(QTOPIA_DBUS_IPC)
+    d->iface = value.d->iface;
+#endif
     d->channels = value.d->channels;
     d->message = value.d->message;
     d->arguments = value.d->arguments;
@@ -788,8 +813,14 @@ QtopiaIpcSendEnvelope::QtopiaIpcSendEnvelope( const QtopiaIpcSendEnvelope& value
 */
 QtopiaIpcSendEnvelope::~QtopiaIpcSendEnvelope()
 {
-    if (d->shouldBeSent)
-        QtopiaIpcAdaptor::send( d->channels, d->message, d->arguments );
+    if (d->shouldBeSent) {
+#if defined(QTOPIA_DBUS_IPC)
+        if (d->iface)
+            d->iface->callWithArgumentList( QDBus::NoBlock, d->message, d->arguments );
+        else
+#endif
+            QtopiaIpcAdaptor::send( d->channels, d->message, d->arguments );
+    }
     delete d;
 }
 
@@ -801,6 +832,9 @@ QtopiaIpcSendEnvelope& QtopiaIpcSendEnvelope::operator=( const QtopiaIpcSendEnve
     if ( &value == this )
         return *this;
 
+#if defined(QTOPIA_DBUS_IPC)
+    d->iface = value.d->iface;
+#endif
     d->channels = value.d->channels;
     d->message = value.d->message;
     d->arguments = value.d->arguments;
@@ -816,12 +850,12 @@ QtopiaIpcSendEnvelope& QtopiaIpcSendEnvelope::operator=( const QtopiaIpcSendEnve
     \fn QtopiaIpcSendEnvelope& QtopiaIpcSendEnvelope::operator<<( const char *value )
 
     \overload
-    Add \a value to the arguments for this Qtopia IPC message.
+    Add \a value to the arguments for this Qt Extended IPC message.
 */
 
 /*!
     \fn QtopiaIpcSendEnvelope& QtopiaIpcSendEnvelope::operator<<( const T &value )
-    Add \a value to the arguments for this Qtopia IPC message.
+    Add \a value to the arguments for this Qt Extended IPC message.
  */
 
 void QtopiaIpcSendEnvelope::addArgument( const QVariant& value )

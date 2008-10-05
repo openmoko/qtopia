@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -30,10 +28,10 @@
 #include <qvibrateaccessory.h>
 #include <qtimer.h>
 #include <qsound.h>
+#include <QtopiaIpcEnvelope>
 
 #ifdef MEDIA_SERVER
 #include <qsoundcontrol.h>
-#include "videoringtone.h"
 #define SERVER_CHANNEL "QPE/MediaServer"
 #else
 #include <qsoundqss_qws.h>
@@ -61,12 +59,14 @@ protected:
     virtual void stopMessageRingtone();
     virtual void startRingtone(const QString& fileName);
     virtual void stopRingtone(const QString& fileName);
+    virtual void muteRing();
 
 signals:
     void doStartMessageRingtone();
     void doStopMessageRingtone();
     void doStartRingtone(const QString& fileName);
     void doStopRingtone(const QString& fileName);
+    void doMuteRing();
 };
 
 // define RingtoneServiceProxy
@@ -95,6 +95,11 @@ void RingtoneServiceProxy::stopRingtone( const QString& fileName )
     emit doStopRingtone(fileName);
 }
 
+void RingtoneServiceProxy::muteRing()
+{
+    emit doMuteRing();
+}
+
 
 // declare RingControlPrivate
 class RingControlPrivate
@@ -120,6 +125,7 @@ public:
 #elif defined(Q_WS_QWS)
         , soundclient(0)
 #endif
+        , videoAdaptor(0)
     {}
 
     bool callEnabled;
@@ -146,15 +152,17 @@ public:
 #elif defined(Q_WS_QWS)
     QWSSoundClient *soundclient;
 #endif
+    QtopiaIpcAdaptor *videoAdaptor;
 };
 
 /*!
   \class RingControl
+    \inpublicgroup QtTelephonyModule
   \brief The RingControl class controls the system ring for incoming calls and
          messages.
-  \ingroup QtopiaServer::Task
+  \ingroup QtopiaServer::Telephony
 
-  The RingControl provides a Qtopia Server Task.  Qtopia Server Tasks are
+  The RingControl provides a Qt Extended Server Task.  Qt Extended Server Tasks are
   documented in full in the QtopiaServerApplication class documentation.
 
   \table
@@ -173,7 +181,13 @@ public:
   is in progress when an incoming call is received, the message ring is stopped
   and the phone ring commenced.
 
-  This class is part of the Qtopia server and cannot be used by other Qtopia applications.
+  The RingControl class utilizes video ringtones if the VideoRingtone task is deployed.
+  The communications between the two classes is based on messages on the \c QPE/VideoRingtone
+  QCop channel. For more details see VideoRingtone.
+
+  This class is part of the Qt Extended server and cannot be used by other Qt Extended applications.
+
+  \sa VideoRingtone
 */
 
 /*!
@@ -273,6 +287,9 @@ RingControl::RingControl(QObject *parent)
 : QObject(parent)
 {
     d = new RingControlPrivate;
+    d->videoAdaptor = new QtopiaIpcAdaptor( "QPE/VideoRingtone", this );
+    QtopiaIpcAdaptor::connect( d->videoAdaptor, MESSAGE(videoRingtoneFailed()),
+                               this, SLOT(videoRingtoneFailed()) );
 
     d->profileManager = new QPhoneProfileManager(this);
     QPhoneProfile prof = d->profileManager->activeProfile();
@@ -290,11 +307,6 @@ RingControl::RingControl(QObject *parent)
     QObject::connect(qtopiaTask<SystemSuspend>(), SIGNAL(systemSuspending()),
             this, SLOT(stopMessageAlert()));
 
-#ifdef MEDIA_SERVER
-    QObject::connect(VideoRingtone::instance(), SIGNAL(videoRingtoneFailed()),
-            this, SLOT(videoRingtoneFailed()) );
-#endif
-
     // Implement ringtone service
     RingtoneServiceProxy *ringtoneServiceProxy = new RingtoneServiceProxy(this);
     connect(ringtoneServiceProxy, SIGNAL(doStartMessageRingtone()),
@@ -305,6 +317,8 @@ RingControl::RingControl(QObject *parent)
             this, SLOT(startRingtone(QString)));
     connect(ringtoneServiceProxy, SIGNAL(doStopRingtone(QString)),
             this, SLOT(stopRingtone(QString)));
+    connect(ringtoneServiceProxy, SIGNAL(doMuteRing()),
+            this, SLOT(muteRing()));
 
     d->curAlertType = QPhoneProfile::Off;
 }
@@ -480,7 +494,8 @@ void RingControl::startRinging(RingType t)
             d->soundcontrol->sound()->play();
         } else {
             qLog(Media) << "Video ringtone selected" << d->curRingTone;
-            VideoRingtone::instance()->playVideo( d->curRingTone );
+            QtopiaIpcSendEnvelope env = d->videoAdaptor->send( MESSAGE(playVideo(QString)) );
+            env << d->curRingTone;
         }
 #elif defined(Q_WS_QWS)
         if(d->soundclient)
@@ -629,6 +644,21 @@ void RingControl::nextRing()
         }
 #endif
     }
+#ifdef MEDIA_SERVER
+    else {
+        if (d->soundcontrol)
+        {
+            if(d->soundcontrol) {
+                d->soundcontrol->sound()->stop();
+                disconnect(d->soundcontrol, SIGNAL(done()), this,
+                        SLOT(nextRing()) );
+                delete d->soundcontrol->sound();
+                delete d->soundcontrol;
+                d->soundcontrol = 0;
+            }
+        }
+    }
+#endif
 
     // we need to stop the vibration timer when using ring once
     if (d->curAlertType == QPhoneProfile::Once)
@@ -654,6 +684,9 @@ void RingControl::playSound(const QString &soundFile)
     }
 
     d->soundcontrol = new QSoundControl(new QSound(soundFile));
+
+    connect(d->soundcontrol, SIGNAL(done()), this, SLOT(nextRing()) );
+
     d->soundcontrol->setPriority(QSoundControl::RingTone);
     d->soundcontrol->setVolume(volmap[d->ringVolume]);
     d->soundcontrol->sound()->play();
@@ -725,7 +758,7 @@ void RingControl::stateChanged()
         if (ringType() == RingControl::Call) {
 #ifdef MEDIA_SERVER
             if ( d->videoTone )
-                VideoRingtone::instance()->stopVideo();
+                QtopiaIpcSendEnvelope env = d->videoAdaptor->send(MESSAGE(stopVideo()));
 #endif
             stopRing();
         }

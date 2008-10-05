@@ -1,5 +1,9 @@
+qbuild{
+SOURCEPATH+=serial
+} else {
 PREFIX=SERIAL
 VPATH+=serial
+}
 
 SERIAL_HEADERS+=\
     qgsm0710multiplexer.h\
@@ -43,13 +47,13 @@ SERIAL_SOURCES+=\
     qpassthroughserialiodevice.cpp\
     gsm0710.c
 
+qbuild{
+HEADERS+=$$SERIAL_HEADERS
+SOURCES+=$$SERIAL_SOURCES
+PRIVATE_HEADERS+=$$SERIAL_PRIVATE_HEADERS
+} else {
 sdk_serial_headers.files=$$SERIAL_HEADERS
 sdk_serial_headers.path=/include/qtopia/serial
 sdk_serial_headers.hint=sdk headers
 INSTALLS+=sdk_serial_headers
-
-sdk_serial_private_headers.files=$$SERIAL_PRIVATE_HEADERS
-sdk_serial_private_headers.path=/include/qtopiacomm/private
-sdk_serial_private_headers.hint=sdk headers
-INSTALLS+=sdk_serial_private_headers
-
+}

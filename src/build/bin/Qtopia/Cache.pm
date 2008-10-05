@@ -7,6 +7,7 @@ use Cwd;
 use File::Basename;
 use Qtopia::Paths;
 use Qtopia::Vars;
+use Qtopia::File;
 use Carp;
 #perl2exe_include Carp::Heavy
 $Carp::CarpLevel = 1;
@@ -30,6 +31,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
     $depotpath
     $QPEDIR
+    $SDKROOT
     $qt_depot_path
     $QTEDIR
     $DQTDIR
@@ -40,6 +42,7 @@ our $VERSION = '0.01';
 # imported variables
 our $depotpath;
 our $QPEDIR;
+our $SDKROOT;
 our $qt_depot_path;
 our $QTEDIR;
 our $DQTDIR;
@@ -50,10 +53,10 @@ use constant TRACE => 0;
 sub read_config_cache()
 {
     TRACE and print "Qtopia::Cache::read_config_cache()\n";
-    if ( ! $QPEDIR ) {
+    if ( ! $SDKROOT ) {
         croak "You must load Qtopia::Paths and call get_paths() before using Qtopia::Cache\n";
     }
-    my $config_cache_file = $QPEDIR."/config.cache";
+    my $config_cache_file = $SDKROOT."/config.cache";
     if ( ! -f $config_cache_file ) {
         croak "You must run configure before you can run ".basename($0)."\n";
     }
@@ -69,27 +72,28 @@ sub write_config_cache(@)
     TRACE and print "Qtopia::Cache::write_config_cache()\n";
     my ( @cache ) = @_;
 
-    if ( ! $QPEDIR ) {
+    if ( ! $SDKROOT ) {
         croak "You must load Qtopia::Paths and call get_paths() before using Qtopia::Cache\n";
     }
-    my $config_cache_file = $QPEDIR."/config.cache";
-    if ( -f $config_cache_file ) {
-        unlink $config_cache_file or die $!;
+    for my $config_cache_file ( "$SDKROOT/config.cache", "$QPEDIR/config.cache" ) {
+        if ( -e $config_cache_file ) {
+            unlink $config_cache_file or die $!;
+        }
+        open CACHE, ">".$config_cache_file or die "Can't write $config_cache_file";
+        print CACHE join("\n", grep { ! /^\s*$/ } @cache)."\n";
+        close CACHE;
     }
-    open CACHE, ">".$config_cache_file or die "Can't write $config_cache_file";
-    print CACHE join("\n", grep { ! /^\s*$/ } @cache)."\n";
-    close CACHE;
 }
 
 sub replace($$)
 {
     TRACE and print "Qtopia::Cache::replace()\n";
     my ( $prefix, $data ) = @_;
-    if ( ! $QPEDIR ) {
+    if ( ! $SDKROOT ) {
         croak "You must load Qtopia::Paths and call get_paths() before using Qtopia::Cache\n";
     }
     my @cache;
-    if ( -f $QPEDIR."/config.cache" ) {
+    if ( -f $SDKROOT."/config.cache" ) {
         @cache = grep { ! /^\Q$prefix\E\./; } read_config_cache();
     }
     push(@cache, split(/\n/, $data));
@@ -109,38 +113,3 @@ sub load
 
 # Make this file require()able.
 1;
-__END__
-
-=head1 NAME
-
-Qtopia::Cache - Support for reading/writing config.cache
-
-=head1 SYNOPSIS
-
-    use Qtopia::Cache;
-    Qtopia::Cache::
-
-=head1 DESCRIPTION
-
-This is just a global variable holder.
-
-=head2 EXPORT
-
-    $QPEDIR
-    $depotpath
-    $QTEDIR
-    $DQTDIR
-    $qt_depot_path
-    $cwd
-    $isWindows
-    $isMac
-
-=head1 AUTHOR
-
-Trolltech AS
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2006 TROLLTECH ASA. All rights reserved.
-
-=cut

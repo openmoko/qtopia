@@ -1,31 +1,31 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#ifndef __CONTACTVIEW_H__
-#define __CONTACTVIEW_H__
 
-#include <qtopia/pim/qcontact.h>
-#include <qtopia/pim/qcontactmodel.h>
-#include <qtopia/pim/qpimdelegate.h>
+#ifndef QCONTACTVIEW_H
+#define QCONTACTVIEW_H
+
+#include <qcontact.h>
+#include <qcontactmodel.h>
+#include <qpimdelegate.h>
 
 #include <QListView>
+#include <QSmoothList>
 #include <QStandardItem>
 #include <QStandardItemModel>
 #include <QMap>
@@ -129,6 +129,44 @@ private:
     QContactListViewPrivate *d;
 };
 
+class QSmoothContactListViewPrivate;
+class QTOPIAPIM_EXPORT QSmoothContactListView : public QSmoothList
+{
+    Q_OBJECT
+
+public:
+    explicit QSmoothContactListView(QWidget *parent = 0);
+    ~QSmoothContactListView();
+
+    void setModel( QAbstractItemModel * );
+
+    QContact currentContact() const
+    {
+        if (contactModel() && currentIndex().isValid())
+            return contactModel()->contact(currentIndex());
+        return QContact();
+    }
+
+    //QList<QContact> selectedContacts() const;
+    //QList<QUniqueId> selectedContactIds() const;
+
+    QContactModel *contactModel() const { return qobject_cast<QContactModel *>(model()); }
+
+    QContactDelegate *contactDelegate() const { return qobject_cast<QContactDelegate *>(itemDelegate()); }
+
+    void setTextEntryProxy(QTextEntryProxy *);
+    QTextEntryProxy *textEntryProxy() const;
+
+private slots:
+    void currentContactChanged(const QModelIndex& newIdx);
+
+private slots:
+    void setFilterText();
+
+private:
+    QSmoothContactListViewPrivate *d;
+};
+
 class QContactSelectorPrivate;
 class QTOPIAPIM_EXPORT QContactSelector : public QDialog
 {
@@ -199,4 +237,4 @@ private:
     QString verboseIfEmpty( const QString &number );
 };
 
-#endif//__CONTACTVIEW_H__
+#endif

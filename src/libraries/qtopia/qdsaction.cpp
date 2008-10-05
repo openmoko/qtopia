@@ -1,21 +1,19 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** This file is part of the Qt Extended Opensource Package.
 **
-** This file is part of the Opensource Edition of the Qtopia Toolkit.
+** Copyright (C) 2008 Trolltech ASA.
 **
-** This software is licensed under the terms of the GNU General Public
-** License (GPL) version 2.
+** Contact: Qt Extended Information (info@qtextended.org)
 **
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** This file may be used under the terms of the GNU General Public License
+** version 2.0 as published by the Free Software Foundation and appearing
+** in the file LICENSE.GPL included in the packaging of this file.
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** Please review the following information to ensure GNU General Public
+** Licensing requirements will be met:
+**     http://www.fsf.org/licensing/licenses/info/GPLv2.html.
 **
-**
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 
@@ -296,15 +294,16 @@ void QDSActionPrivate::connectToAction( QDSAction* action )
 
 /*!
     \class QDSAction
-    \mainclass
-    \brief The QDSAction class provides an interface for requesting Qtopia Data Sharing (QDS)
+    \inpublicgroup QtBaseModule
+
+    \brief The QDSAction class provides an interface for requesting Qt Extended Data Sharing (QDS)
     services.
 
     Applications can use the QDSAction class to make a request for a QDS service.
     The request can be made either synchronously (using QDSAction::exec())
     or asynchronously (using QDSAction::invoke()).
 
-    \sa QDSServiceInfo, {Qtopia Data Sharing (QDS)}
+    \sa QDSServiceInfo, {Qt Extended Data Sharing (QDS)}
 
     \ingroup ipc
 */
@@ -369,7 +368,7 @@ QDSAction::QDSAction( const QDSAction& other )
 }
 
 /*!
-    Constructs a QDSAction object for the QDS service \a name and the Qtopia service
+    Constructs a QDSAction object for the QDS service \a name and the Qt Extended service
     \a service. The action is attached to \a parent.
 */
 QDSAction::QDSAction( const QString& name,
