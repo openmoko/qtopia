@@ -20,7 +20,7 @@
 ****************************************************************************/
 
 #include "predictivekeyboard.h"
-#include "keyboard.h"
+#include "predkeyboard.h"
 #include <QVariant>
 #include <QAction>
 #include <QtopiaApplication>

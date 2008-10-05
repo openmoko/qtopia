@@ -5,13 +5,13 @@ CONFIG+=no_singleexec
 HEADERS		= predictivekeyboard.h \
 		  predictivekeyboardimpl.h\
                   pred.h \
-                  keyboard.h \
+                  predkeyboard.h \
                   proxyscreen.h
 
 SOURCES		= predictivekeyboard.cpp \
 		  predictivekeyboardimpl.cpp\
                   pred.cpp \
-                  keyboard.cpp \
+                  predkeyboard.cpp \
                   proxyscreen.cpp
 x11 {
     depends(libraries/qtopiainputmethod)

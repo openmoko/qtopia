@@ -501,16 +501,16 @@ x11 {
     HEADERS += predictivekeyboard.h \
                predictivekeyboardimpl.h\
                pred.h \
-               keyboard.h \
-               proxyscreen.h \
-               qwsinputmethod_x11.h
+               predkeyboard.h \
+               proxyscreen.h
 
     SOURCES += predictivekeyboard.cpp \
                predictivekeyboardimpl.cpp\
                pred.cpp \
-               keyboard.cpp \
-               proxyscreen.cpp \
-               qwsinputmethod_x11.cpp
+               predkeyboard.cpp \
+               proxyscreen.cpp
+
+    depends(libraries/qtopiainputmethod)
 }
 
 depends(libraries/qtopiaphone)

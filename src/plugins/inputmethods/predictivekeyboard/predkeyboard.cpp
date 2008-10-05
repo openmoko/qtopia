@@ -46,7 +46,7 @@
 #include <QExportedBackground>
 #include <ThemedView>
 #include <qtopialog.h>
-#include "keyboard.h"
+#include "predkeyboard.h"
 #include "pred.h"
 
 #define PREFIX_PREEDIT
@@ -2125,4 +2125,4 @@ bool KeyboardWidget::filter ( int unicode, int keycode, int modifiers, bool isPr
     return false;
 }
 
-#include "keyboard.moc"
+#include "predkeyboard.moc"

@@ -45,7 +45,7 @@
 #include "predictivekeyboardimpl.h"
 //#include "predictivekeyboardwidget.h"
 #include "predictivekeyboard.h"
-#include "keyboard.h"
+#include "predkeyboard.h"
 
 PredictiveKeyboardInputMethod::PredictiveKeyboardInputMethod(QObject *parent)
     : QtopiaInputMethod(parent), input(0)
