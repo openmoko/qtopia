@@ -274,7 +274,12 @@ QTOPIA_SOURCES+=\
         phonedecoration.cpp
 } else {
     QTOPIA_SOURCES+=\
+        odeviceusage.cpp \
         qexportedbackground_x11.cpp
+    QTOPIA_HEADERS+=\
+        odeviceusage.h
+
+    depends(3rdparty/libraries/qtdbus)
 }
 
 depends(3rdparty/libraries/zlib)

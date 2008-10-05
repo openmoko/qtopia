@@ -29,6 +29,7 @@ class QTimer;
 class QLabel;
 class QDialog;
 class QEvent;
+class ODeviceUsage;
 
 class Alarm : public QWidget, Ui::AlarmBase
 {
@@ -50,6 +51,14 @@ private slots:
     void changeAlarmDays();
 
 protected:
+#ifdef Q_WS_X11
+    void allowSuspend();
+    void disableSuspend();
+#else
+    void allowSuspend() {}
+    void disableSuspend() {}
+#endif
+
     QDateTime nextAlarm( int h, int m );
     QString getAlarmDaysText() const;
     void resetAlarmDaysText();
@@ -63,6 +72,10 @@ private:
     QLabel* alarmDlgLabel;
     bool init;
     QHash<int, bool> daysSettings;
+
+#ifdef Q_WS_X11
+    ODeviceUsage* m_cpuUsage;
+#endif
 };
 
 #endif

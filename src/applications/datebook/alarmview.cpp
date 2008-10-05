@@ -27,6 +27,8 @@
 #include <qtopiaapplication.h>
 #include <qtimestring.h>
 
+#include <ODeviceUsage>
+
 #include <qtimer.h>
 #include <QFormLayout>
 #include <QListView>
@@ -94,6 +96,9 @@ private:
 AlarmView::AlarmView( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f ),
     mAlarmCount(0), mModel(0), mAlarmList(0)
+#ifdef Q_WS_X11
+    , mCpuUsage(new ODeviceUsage(QLatin1String("cpu"), QLatin1String("qpe-datebook"), this))
+#endif
 {
     init();
 }
@@ -176,6 +181,9 @@ void AlarmView::formatDateTime(const QOccurrence& ev, bool useStartTime, QString
 void AlarmView::snoozeClicked()
 {
     mAlarmTimer.stop();
+#ifdef Q_WS_X11
+    mCpuUsage->unlock();
+#endif
 
     /* Snooze for some amount of time (configured in settings, say) */
     int snoozeindex = mSnoozeChoices->currentIndex();
@@ -321,6 +329,9 @@ bool AlarmView::updateAlarms()
     // If we actually got any matching alarms...
     if (rowCount > 0) {
         if (playSound) {
+#ifdef Q_WS_X11
+            mCpuUsage->lock();
+#endif
             Qtopia::soundAlarm();
             mAlarmTimer.start(5000,this);
         }
@@ -340,6 +351,9 @@ void AlarmView::timerEvent(QTimerEvent *e)
             mAlarmCount++;
         } else {
             mAlarmTimer.stop();
+#ifdef Q_WS_X11
+            mCpuUsage->unlock();
+#endif
         }
     } else {
         QWidget::timerEvent(e);
@@ -348,6 +362,9 @@ void AlarmView::timerEvent(QTimerEvent *e)
 void AlarmView::keyPressEvent( QKeyEvent * ke)
 {
     mAlarmTimer.stop();
+#ifdef Q_WS_X11
+    mCpuUsage->unlock();
+#endif
 
     switch (ke->key()) {
         case Qt::Key_Select:
@@ -386,6 +403,10 @@ void AlarmView::currentAlarmChanged(const QModelIndex &idx)
 void AlarmView::alarmSelected(const QModelIndex& idx)
 {
     mAlarmTimer.stop();
+#ifdef Q_WS_X11
+    mCpuUsage->unlock();
+#endif
+
     mAlarmList->setCurrentIndex(idx);
     if (mModel && mAlarmList->currentIndex().isValid()) {
         emit showAlarmDetails(selectedOccurrence());

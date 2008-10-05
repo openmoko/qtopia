@@ -32,6 +32,7 @@
 #include <qtimer.h>
 #include <QDateTimeEdit>
 #include <QSoundControl>
+#include <ODeviceUsage>
 
 #ifdef Q_WS_X11
 #include <qcopchannel_x11.h>
@@ -51,6 +52,9 @@ void Alarm::setRingPriority(bool v)
 
 Alarm::Alarm( QWidget * parent, Qt::WFlags f )
     : QWidget( parent, f ), init(false) // No tr
+#ifdef Q_WS_X11
+    , m_cpuUsage(new ODeviceUsage(QLatin1String("cpu"), QLatin1String("qpe-alarm"), this))
+#endif
 {
     setupUi(this);
     alarmDlg = 0;
@@ -144,7 +148,9 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
         // don't confirm the dialog.
         applyDailyAlarm();
         if ( !alarmDlg->isVisible() ) {
+            allowSuspend();
             QtopiaApplication::execDialog(alarmDlg);
+            disableSuspend();
             alarmt->stop();
             setRingPriority(false);
         }
@@ -332,6 +338,18 @@ void Alarm::changeAlarmDays()
         resetAlarmDaysText();
     }
 }
+
+#ifdef Q_WS_X11
+void Alarm::allowSuspend()
+{
+    m_cpuUsage->lock();
+}
+
+void Alarm::disableSuspend()
+{
+    m_cpuUsage->unlock();
+}
+#endif
 
 
 #include "alarm.moc"

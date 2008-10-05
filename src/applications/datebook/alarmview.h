@@ -32,6 +32,7 @@ class QStandardItemModel;
 class QComboBox;
 class QPushButton;
 class QScrollArea;
+class ODeviceUsage;
 
 class AlarmView : public QWidget
 {
@@ -72,6 +73,9 @@ private:
     QPushButton *mSnoozeButton;
     QScrollArea *scrollArea;
     QListView *mAlarmList;
+#ifdef Q_WS_X11
+    ODeviceUsage *mCpuUsage;
+#endif
 };
 
 
