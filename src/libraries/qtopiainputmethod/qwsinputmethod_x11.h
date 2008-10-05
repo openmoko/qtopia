@@ -13,6 +13,8 @@
 #ifndef QWSInputMethodX11_h
 #define QWSInputMethodX11_h
 
+#include <qtopiaglobal.h>
+
 #include <QObject>
 #include <QPoint>
 
@@ -20,7 +22,7 @@
  * Currently this is a dummy QWSInputMethod. It can just send key events
  * using fakekey. No special input method handling is supported for now...
  */
-class QWSInputMethod : public QObject {
+class QTOPIA_VISIBILITY QWSInputMethod : public QObject {
 public:
     QWSInputMethod();
 
