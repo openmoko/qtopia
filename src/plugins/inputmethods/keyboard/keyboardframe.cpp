@@ -48,7 +48,7 @@ enum { BSCode = 0x80, TabCode, CapsCode, RetCode,
        UpCode, LeftCode, DownCode, RightCode, Blank, Expand,
        Opti, ResetDict,
        Divide, Multiply, Add, Subtract, Decimal, Equal,
-       Percent, Sqrt, Inverse, Escape };
+       Percent, Sqrt, Inverse };
 
 typedef struct SpecialMap {
     int qcode;
@@ -96,7 +96,7 @@ static SpecialMap specialM[] = {
     {   Sqrt,                   0,      "^1/2",  NULL, 0 },
     {   Inverse,                0,      "1/x",   NULL, 0 },
 
-    {   Escape,                 27,     "ESC",   "escape", 0 },
+    {   Qt::Key_Escape,        27,     "ESC",   "escape", 0 },
     {   0,                      0,      NULL,    NULL, 0}
 };
 
