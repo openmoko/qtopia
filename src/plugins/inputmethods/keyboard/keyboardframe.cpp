@@ -475,7 +475,6 @@ void KeyboardFrame::drawKeyboard( QPainter &p, const QRect& clip, int key )
                             pressed = alt;
                         }
                     } else {
-    #if defined(Q_WS_QWS) || defined(Q_WS_QWS)
     /*
                         s = QChar( shift^lock ? QWSServer::keyMap()[k].shift_unicode :
                                    QWSServer::keyMap()[k].unicode);
@@ -491,7 +490,6 @@ void KeyboardFrame::drawKeyboard( QPainter &p, const QRect& clip, int key )
                             shifted = toupper( k );
                         }
                         s = QChar( shift^lock ? shifted : k );
-    #endif
                     }
 
                     if (!blank) {
