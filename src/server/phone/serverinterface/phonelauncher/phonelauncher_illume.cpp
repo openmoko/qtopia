@@ -108,7 +108,7 @@
 #include "profiledbusexporter.h"
 #include "smsstatusdbusexporter.h"
 
-#include "predictivekeyboard.h"
+#include "keyboardhandler.h"
 
 #include <QX11Info>
 #include <X11/Xlib.h>
@@ -376,17 +376,10 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     QDBusConnection::sessionBus().registerService("org.openmoko.qtopia.Phonestatus");
 
     // Create a virtual keyboard
-    if (qgetenv("QTOPIA_NO_VIRTUAL_KEYBOARD").isEmpty()) {
-        PredictiveKeyboard* keyboard = new PredictiveKeyboard(this);
-
-        Atom keyboardAtom = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD", False);
-        unsigned char data = 1;
-        QWidget* widget = keyboard->widget();
-        XChangeProperty(QX11Info::display(), widget->winId(), keyboardAtom,
-                XA_CARDINAL, 32, PropModeReplace, &data, 1);
-        widget->setFocusPolicy(Qt::NoFocus);
-        widget->show();
-    }
+    if (qgetenv("QTOPIA_NO_VIRTUAL_KEYBOARD").isEmpty())
+        QDBusConnection::sessionBus().registerObject("/Keyboards",
+                                                     new KeyboardHandler(this),
+                                                     QDBusConnection::ExportScriptableContents);
 #endif
 
     loadTheme();

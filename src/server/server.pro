@@ -527,6 +527,10 @@ x11 {
                pickboardcfg.cpp \
                pickboardpicks.cpp
 
+    # keyboard management
+    HEADERS += keyboardhandler.h
+    SOURCES += keyboardhandler.cpp
+
     depends(libraries/qtopiainputmethod)
 }
 
