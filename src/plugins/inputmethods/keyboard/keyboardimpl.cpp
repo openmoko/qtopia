@@ -19,13 +19,15 @@
 **
 ****************************************************************************/
 
-#include <QWSServer>
 #include <qapplication.h>
 #include <qpixmap.h>
 #include "keyboard.h"
 #include "keyboardimpl.h"
 #include <qtopialog.h>
 #include <QVariant>
+#ifdef Q_WS_QWS
+#include <QWSServer>
+#endif
 
 /* XPM */
 static const char * kb_xpm[] = {

@@ -21,7 +21,9 @@
 
 #include "keyboard.h"
 #include <QVariant>
+#ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
+#endif
 #include <QAction>
 
 #include <QDebug>
@@ -55,7 +57,9 @@ QWidget* Keyboard::frame(){
 
 void Keyboard::checkMicroFocus()
 {
+#ifdef Q_WS_QWS
     qwsServer->sendIMQuery ( Qt::ImMicroFocus );
+#endif
 }
 
 void Keyboard::queryResponse ( int property, const QVariant & result )
@@ -85,7 +89,7 @@ void Keyboard::swapPosition(bool){
 
 void Keyboard::updateHandler(int type)
 {
-
+#ifdef Q_WS_QWS
     switch(type){
         case QWSInputMethod::Update:
             break;
@@ -98,6 +102,7 @@ void Keyboard::updateHandler(int type)
         case QWSInputMethod::Destroyed:
             break;
     };
+#endif
 };
 
 void Keyboard::menuActionActivated(int v)

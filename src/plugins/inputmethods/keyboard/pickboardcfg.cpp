@@ -36,6 +36,8 @@
 #include <QScrollArea>
 #ifdef Q_WS_QWS
 #include <QWSServer>
+#else
+#include <qwsinputmethod_x11.h>
 #endif
 
 const int intermatchmargin=5;
@@ -74,12 +76,21 @@ void PickboardConfig::generateText(const QString& s)
         qwsServer->sendKeyEvent(s[i].unicode(), code, 0, true, false);
         qwsServer->sendKeyEvent(s[i].unicode(), code, 0, false, false);
     }
+#else
+    for (int i=0; i<(int)s.length(); i++) {
+        uint code = 0;
+        if ( s[i].unicode() >= 'a' && s[i].unicode() <= 'z' ) {
+            code = s[i].unicode() - 'a' + Qt::Key_A;
+        }
+        QWSServer::sendKeyEvent(s[i].unicode(), code, 0, true, false);
+        QWSServer::sendKeyEvent(s[i].unicode(), code, 0, false, false);
+    }
 #endif
 }
 void PickboardConfig::generateKey( int uni, int k )
 {
-    qwsServer->sendKeyEvent(uni, k, 0, true, false);
-    qwsServer->sendKeyEvent(uni, k, 0, false, false);
+    QWSServer::sendKeyEvent(uni, k, 0, true, false);
+    QWSServer::sendKeyEvent(uni, k, 0, false, false);
 }
 
 void PickboardConfig::pickPoint(const QPoint& p, bool press)
@@ -427,16 +438,16 @@ void DictFilterConfig::pick(bool press, int row, int item)
                 lit0 = item;
                 if ( othermodes[item] == PickboardPicks::tr("Space") ) {
                     updateItem(row,item);
-                    qwsServer->sendKeyEvent( ' ', Qt::Key_Space, 0, true, false );
-                    qwsServer->sendKeyEvent( ' ', Qt::Key_Space, 0, false, false );
+                    QWSServer::sendKeyEvent( ' ', Qt::Key_Space, 0, true, false );
+                    QWSServer::sendKeyEvent( ' ', Qt::Key_Space, 0, false, false );
                 } else if ( othermodes[item] == PickboardPicks::tr("Back") ) {
                     updateItem(row,item);
-                    qwsServer->sendKeyEvent( 8, Qt::Key_Backspace, 0, true, false );
-                    qwsServer->sendKeyEvent( 8, Qt::Key_Backspace, 0, false, false );
+                    QWSServer::sendKeyEvent( 8, Qt::Key_Backspace, 0, true, false );
+                    QWSServer::sendKeyEvent( 8, Qt::Key_Backspace, 0, false, false );
                 } else if ( othermodes[item] == PickboardPicks::tr("Enter") ) {
                     updateItem(row,item);
-                    qwsServer->sendKeyEvent( 8, Qt::Key_Backspace, 0, true, false );
-                    qwsServer->sendKeyEvent( 8, Qt::Key_Backspace, 0, false, false );
+                    QWSServer::sendKeyEvent( 8, Qt::Key_Backspace, 0, true, false );
+                    QWSServer::sendKeyEvent( 8, Qt::Key_Backspace, 0, false, false );
                 } else if ( othermodes[item] == PickboardPicks::tr("Shift") ) {
                     updateItem(row,item);
                     shift = (shift+1)%3;

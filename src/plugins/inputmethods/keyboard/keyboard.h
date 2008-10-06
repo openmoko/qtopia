@@ -21,10 +21,15 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
-#include <qwindowsystem_qws.h>
 #include "keyboardframe.h"
 #include <qtopiaipcenvelope.h>
 #include <QDebug> //tmp
+
+#ifdef Q_WS_QWS
+#include <qwindowsystem_qws.h>
+#else
+#include <qwsinputmethod_x11.h>
+#endif
 
 /*
     Keyboard is an input method for Qtopia.  Keyboard displays a popup widget depiciting keys onscreen (KeyboardFrame), and converts them into key events.
