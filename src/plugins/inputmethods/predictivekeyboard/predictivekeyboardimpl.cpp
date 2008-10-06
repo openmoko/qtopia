@@ -145,4 +145,6 @@ void PredictiveKeyboardInputMethod::setHint(QString const& hint, bool)
     input->mKeyboard->setHint(hint);
 }
 
+#ifndef QPE_BUILTIN_KEYBOARD
 QTOPIA_EXPORT_PLUGIN(PredictiveKeyboardInputMethod);
+#endif

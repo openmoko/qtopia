@@ -163,4 +163,6 @@ QList<QIMActionDescription*> KeyboardInputMethod::menuDescription()
 };
 
 
+#ifndef QPE_BUILTIN_KEYBOARD
 QTOPIA_EXPORT_PLUGIN(KeyboardInputMethod);
+#endif

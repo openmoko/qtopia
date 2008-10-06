@@ -496,6 +496,8 @@ enable_bluetooth {
 
 # Commit a crime and force the predictivekeyboard to be build in
 x11 {
+    # predictivekeyboard
+    DEFINES+=QPE_BUILTIN_KEYBOARD
     VPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/predictivekeyboard
     INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/predictivekeyboard
     HEADERS += predictivekeyboard.h \
@@ -509,6 +511,21 @@ x11 {
                pred.cpp \
                predkeyboard.cpp \
                proxyscreen.cpp
+
+
+    # plain keyboard
+    VPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/keyboard
+    INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/keyboard
+    HEADERS += keyboardframe.h \
+               keyboard.h \
+               keyboardimpl.h \
+               pickboardcfg.h \
+               pickboardpicks.h
+    SOURCES += keyboard.cpp \
+               keyboardframe.cpp \
+               keyboardimpl.cpp \
+               pickboardcfg.cpp \
+               pickboardpicks.cpp
 
     depends(libraries/qtopiainputmethod)
 }
