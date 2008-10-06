@@ -742,7 +742,7 @@ bool QContactSimContext::importContacts(const QPimSource &s, const QList<QContac
                 QString label;
                 QUniqueId oldpos;
                 if (contact.phoneNumbers().count() == 1) {
-                    label = contact.label().left(mSync->labelLimit()-3);
+                    label = contact.label().left(mSync->labelLimit());
                     oldpos = findLabel(label);
                 } else {
                     label = contact.label().left(mSync->labelLimit()-3) + typeToSIMExtension(f);
