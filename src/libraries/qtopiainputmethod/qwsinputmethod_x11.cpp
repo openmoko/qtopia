@@ -73,10 +73,30 @@ static void sendKeySym(KeySym keysym, int modifiers, int keycode, bool isPress)
     // Convert the X keysym into an X keycode.
     Display* dpy = QX11Info::display();
     KeyCode xkeycode = XKeysymToKeycode(dpy, keysym);
+
+    // assign a mapping if we need to.
     if (xkeycode == NoSymbol) {
-        qWarning("X keysym 0x%x could not be mapped to an X keycode",
-                 (int)keysym);
-        return;
+        int keycode_min, keycode_max, keycode_num;
+        XDisplayKeycodes(dpy, &keycode_min, &keycode_max);
+        KeySym* keysyms = XGetKeyboardMapping(dpy, keycode_min, keycode_max - keycode_min + 1, &keycode_num);
+
+        // try to find a free spot
+        for (int i = 0; i <= keycode_max - keycode_min - 1; ++i) {
+            int index = (keycode_max - keycode_min - i - 1) * keycode_num;
+            if (keysyms[index] != NoSymbol)
+                continue;
+
+            xkeycode = keycode_max - i - 1;
+            keysyms[index] = keysym;
+            break;
+        }
+
+        XChangeKeyboardMapping(dpy, keycode_min, keycode_num, keysyms, (keycode_max - keycode_min));
+        XSync(dpy, False);
+        XFree(keysyms);
+
+        qWarning("X keysym 0x%x could not be mapped to an X keycode. now mapped to 0x%x %d",
+                 (int)keysym, xkeycode, xkeycode);
     }
 
     // Determine if we need to fake shift keys as well.
