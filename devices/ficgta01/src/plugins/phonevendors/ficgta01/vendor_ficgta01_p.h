@@ -128,6 +128,7 @@ public:
 
 private slots:
     void csq( const QString& msg );
+    void csqTimeOut();
     void firstCsqQuery();
 
     void ctzv( const QString& msg );
@@ -148,6 +149,7 @@ private:
 
     bool m_phoneBookIsReady;
     bool m_smsIsReady;
+    QTimer *csqTimer;
 };
 
 class  Ficgta01VibrateAccessory : public QVibrateAccessoryProvider

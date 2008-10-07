@@ -52,6 +52,7 @@ protected slots:
 
 private slots:
     void cregNotify( const QString& msg );
+    void cregTimeOut();
     void cregQuery( bool ok, const QAtResult& result );
     void copsDone( bool ok, const QAtResult& result );
     void copsNumericDone( bool ok, const QAtResult& result );

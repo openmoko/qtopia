@@ -40,6 +40,7 @@ private slots:
     void resetModem();
     void cgregQuery( bool ok, const QAtResult& result );
     void cgregNotify( const QString& msg );
+    void cgregTimeOut();
 
 private:
     QModemGprsNetworkRegistrationPrivate *d;

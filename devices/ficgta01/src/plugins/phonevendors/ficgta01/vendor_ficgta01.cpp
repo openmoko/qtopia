@@ -462,6 +462,11 @@ Ficgta01ModemService::Ficgta01ModemService
 
     chat("AT+COPS=0");
 
+// Enable the work-around for the bouncy rubber calypso problem
+    csqTimer = new QTimer( this );
+    csqTimer->setSingleShot( true );
+    connect ( csqTimer, SIGNAL(timeout()), this, SLOT(csqTimeOut()) );
+
     // Setup the default text codec to UCS2 for none English langs
     chat( "AT+CSCS=\"UCS2\"" );
 
@@ -474,6 +479,7 @@ Ficgta01ModemService::Ficgta01ModemService
 
 Ficgta01ModemService::~Ficgta01ModemService()
 {
+    delete csqTimer;
 }
 
 void Ficgta01ModemService::initialize()
@@ -524,9 +530,33 @@ void Ficgta01ModemService::csq( const QString& msg )
     if ( msg.contains( QChar(',') ) ) {
         uint posn = 6;
         uint rssi = QAtUtils::parseNumber( msg, posn );
-        indicators()->setSignalQuality( (int)rssi, 31 );
+
+        // An rssi of "99" indicates invalid (i.e. loss of signal).
+        // We wish to be careful about reporting that, because the
+        // silly calypso will report that each and every time it
+        // changes cell sites, followed almost immediately by a new
+        // (valid) signal report.  So we defer reporting the invalid
+        // signal, and wait to see if we get an new one first.
+        qLog(AtChat)<< "percentCSQ event, rssi: " << (int)(rssi);
+        if ( rssi == 99 ) {
+            if ( !csqTimer->isActive() )
+	        csqTimer->start( 8000 );  // 8 second one-shot timer
+        } else {
+            if ( csqTimer->isActive() ) {
+                csqTimer->stop();
+                indicators()->setSignalQuality( (int)rssi, 31 );
+            }
+        }
     }
 }
+
+void Ficgta01ModemService::csqTimeOut()
+{
+    // Timeout on a signal quality notification, it must have been real
+    qLog(AtChat)<< "percentCSQ timer expired; reporting loss";
+    indicators()->setSignalQuality( -1, 31 );
+}
+
 
 void Ficgta01ModemService::firstCsqQuery()
 {
@@ -614,10 +644,16 @@ void Ficgta01ModemService::suspend()
     chat( "AT+CREG=0" );
     chat( "AT+CGREG=0" );
 
-    chat( "AT%CREG=0" );
-    chat( "AT%CGREG=0" );
+    // Don't need these, just clutter (nothing uses these
+    // proprietary commands yet -- MJW)
+    //chat( "AT%CREG=0" );
+    //chat( "AT%CGREG=0" );
 
     // Turn off cell broadcast location messages.
+
+    // Make sure the (useless) CIEV notifications are disabled too.
+    chat( "AT+CMER=0,0,0,0,0" );
+
     chat( "AT%CSQ=0", this, SLOT(sendSuspendDone()) );
 }
 

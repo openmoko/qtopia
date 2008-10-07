@@ -25,6 +25,8 @@
 #include <qatresult.h>
 #include <qatresultparser.h>
 #include <qatutils.h>
+#include <qtopialog.h>
+#include <qtimer.h>
 
 /*!
     \class QModemGprsNetworkRegistration
@@ -45,6 +47,7 @@ class QModemGprsNetworkRegistrationPrivate
 {
 public:
     QModemService *service;
+    QTimer *cgregTimer;
 };
 
 /*!
@@ -60,6 +63,12 @@ QModemGprsNetworkRegistration::QModemGprsNetworkRegistration
     service->primaryAtChat()->registerNotificationType
         ( "+CGREG:", this, SLOT(cgregNotify(QString)), true );
     connect( service, SIGNAL(resetModem()), this, SLOT(resetModem()) );
+
+    // Set up the one-shot timer that can be used to filter out outages
+    // (i.e. the "bouncy rubber calypso" problem with the Openmoko GTA01/GTA02)
+    d->cgregTimer = new QTimer( this );
+    d->cgregTimer->setSingleShot( true );
+    connect ( d->cgregTimer, SIGNAL(timeout ()), this, SLOT(cgregTimeOut()) );
 }
 
 /*!
@@ -105,12 +114,38 @@ void QModemGprsNetworkRegistration::cgregNotify( const QString& msg )
     uint stat = QAtUtils::parseNumber( msg, posn );
     QString lac = QAtUtils::nextString( msg, posn );
     QString ci = QAtUtils::nextString( msg, posn );
-    if ( !lac.isEmpty() && !ci.isEmpty() ) {
-        // We have location information after the state value.
-        updateRegistrationState( (QTelephony::RegistrationState)stat,
-                                 lac.toInt( 0, 16 ), ci.toInt( 0, 16 ) );
-    } else {
-        // We don't have any location information.
-        updateRegistrationState( (QTelephony::RegistrationState)stat );
-    }
+
+    // Don't be too hasty to call out a loss of network registration.
+    // Instead, start a one-shot timer -- and cancel the timer if
+    // if we get a positive registration before it expires.
+    if ( stat == 0 ) {
+        if ( !d->cgregTimer->isActive() ) {
+            d->cgregTimer->start( 10000 );  // 10 second one-shot timer
+            qLog(Modem) << "Started GPRS Loss-of-Registration timer.";
+       }
+     } else {
+        if ( d->cgregTimer->isActive() ) {
+            d->cgregTimer->stop();
+            qLog(Modem) << "Cancelled GPRS Loss-of-Registration timer.";
+       }
+        // If we have a positive registration here, go ahead and update
+        // the registration status.
+        if ( stat != 0 ) {
+            if ( !lac.isEmpty() && !ci.isEmpty() ) {
+                // We have location information after the state value.
+                updateRegistrationState( (QTelephony::RegistrationState)stat,
+                                          lac.toInt( 0, 16 ), ci.toInt( 0, 16 ) );
+            } else {
+                // We don't have any location information.
+                updateRegistrationState( (QTelephony::RegistrationState)stat );
+            }
+        }
+     }
+}
+
+void QModemGprsNetworkRegistration::cgregTimeOut()
+{
+    // Timeout on a de-register event; must have been legitimate; report it now.
+    qLog(Modem) << "GPRS Loss-of-Registration timer expired; reporting.";
+    updateRegistrationState( (QTelephony::RegistrationState)0 );
 }
