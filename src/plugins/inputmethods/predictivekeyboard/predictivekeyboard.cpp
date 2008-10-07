@@ -268,3 +268,11 @@ bool PredictiveKeyboard::filter ( int unicode, int keycode, int modifiers, bool 
     return false;
 }
 
+
+#if defined(Q_WS_X11)
+#include <QtopiaApplication>
+#include <QX11Info>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+X11_KEYBOARD_APP(PredictiveKeyboard, widget())
+#endif

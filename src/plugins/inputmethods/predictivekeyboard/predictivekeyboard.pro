@@ -1,21 +1,26 @@
-qtopia_project(qtopia plugin)
+qtopia_project(qtopia app)
+!x11:qtopia_project(qtopia plugin)
 TARGET=qpredictivekeyboard
 CONFIG+=no_singleexec
 
 HEADERS		= predictivekeyboard.h \
-		  predictivekeyboardimpl.h\
                   pred.h \
                   predkeyboard.h \
                   proxyscreen.h
 
 SOURCES		= predictivekeyboard.cpp \
-		  predictivekeyboardimpl.cpp\
                   pred.cpp \
                   predkeyboard.cpp \
                   proxyscreen.cpp
 x11 {
     depends(libraries/qtopiainputmethod)
 }
+
+!x11 {
+    HEADERS += predictivekeyboardimpl.h
+    SOURCES += predictivekeyboardimpl.cpp
+}
+
 
 pkg.name=qpe-predictivekeyboard
 pkg.domain=trusted

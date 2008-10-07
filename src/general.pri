@@ -92,6 +92,7 @@ PROJECTS*=\
         plugins/content/exif \
         plugins/content/threegpp \
         plugins/inputmethods/predictivekeyboard \
+        plugins/inputmethods/keyboard \
         # Qtmail stuff
         applications/qtmail \
         libraries/qtopiamail \

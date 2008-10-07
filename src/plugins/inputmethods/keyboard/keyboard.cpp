@@ -128,3 +128,11 @@ void Keyboard::menuActionActivated(int v)
             qLog(Input) << "Keyboard IM recieved unrecognised menu action";
     };
 }
+
+#if defined(Q_WS_X11)
+#include <QtopiaApplication>
+#include <QX11Info>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+X11_KEYBOARD_APP(Keyboard, frame())
+#endif

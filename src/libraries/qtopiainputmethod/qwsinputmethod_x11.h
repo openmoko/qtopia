@@ -35,4 +35,22 @@ struct QWSServer {
     static void sendKeyEvent(int unicode, int keycode, int mod, bool isPress, bool autoRepeat);
 };
 
+#define X11_KEYBOARD_APP(Keyboard, widget)                           \
+int main(int argc, char** argv) {                                    \
+        QtopiaApplication app(argc, argv);                           \
+        Keyboard keyboard;                                           \
+        QWidget* wid = keyboard.widget;                              \
+        wid->setFocusPolicy(Qt::NoFocus);                            \
+        Atom keyboardAtom = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD", False); \
+        unsigned char data = 1;                                      \
+        XChangeProperty(QX11Info::display(),                         \
+                        wid->winId(), keyboardAtom,                  \
+                        XA_CARDINAL, 32, PropModeReplace, &data, 1); \
+        wid->show();                                                 \
+        return app.exec();                                           \
+}
+
+
+        
+
 #endif
