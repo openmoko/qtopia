@@ -1,8 +1,1 @@
 #!/bin/sh
-TOOLCHAIN=/opt/toolchains/arm920t-eabi
-#TOOLCHAIN=/opt/toolchains/arm920t
-USE_TB=1
-TB_CC_PREFIX=arm-linux-
-TB_CC_VER=auto
-TB_SYS=neo:eabi
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PKG_CONFIG_PREFIX/lib/pkgconfig
