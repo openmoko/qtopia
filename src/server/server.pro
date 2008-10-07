@@ -494,43 +494,7 @@ enable_bluetooth {
     SOURCES+=$$BLUETOOTH_PHONE_SOURCES
 }
 
-# Commit a crime and force the predictivekeyboard to be build in
 x11 {
-    # predictivekeyboard
-    DEFINES+=QPE_BUILTIN_KEYBOARD
-    VPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/predictivekeyboard
-    INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/predictivekeyboard
-    HEADERS += predictivekeyboard.h \
-               predictivekeyboardimpl.h\
-               pred.h \
-               predkeyboard.h \
-               proxyscreen.h
-
-    SOURCES += predictivekeyboard.cpp \
-               predictivekeyboardimpl.cpp\
-               pred.cpp \
-               predkeyboard.cpp \
-               proxyscreen.cpp
-
-
-    # plain keyboard
-    VPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/keyboard
-    INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/keyboard
-    HEADERS += keyboardframe.h \
-               keyboard.h \
-               keyboardimpl.h \
-               pickboardcfg.h \
-               pickboardpicks.h
-    SOURCES += keyboard.cpp \
-               keyboardframe.cpp \
-               keyboardimpl.cpp \
-               pickboardcfg.cpp \
-               pickboardpicks.cpp
-
-    # keyboard management
-    HEADERS += keyboardhandler.h
-    SOURCES += keyboardhandler.cpp
-
     depends(libraries/qtopiainputmethod)
 }
 
