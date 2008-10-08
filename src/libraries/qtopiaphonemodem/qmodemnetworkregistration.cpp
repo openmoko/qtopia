@@ -56,7 +56,7 @@ public:
         currentCi = "";
 
         nTotalLosses = 0;
-
+        nRecentBounces = 0;
         nTotalBounces = 0;
         tShortestBounceTime = 0;
         tLongestBounceTime = 0;
@@ -78,7 +78,7 @@ public:
     QString currentCi;
     QTimer *cregTimer;
     QTime lastTime;
-
+    int nRecentBounces;
     int nTotalLosses;
     int nTotalBounces;
     int tShortestBounceTime;
@@ -242,6 +242,7 @@ void QModemNetworkRegistration::cregNotify( const QString& msg )
             qLog(Modem) << "LoR -> Timer cancelled. (ms=" << t << ")";
 
             d->nTotalBounces++;
+            d->nRecentBounces++;
             d->tTotalBounceTime = d->tTotalBounceTime + t;
             if (t > d->tLongestBounceTime)
                 d->tLongestBounceTime = t;
@@ -297,6 +298,17 @@ void QModemNetworkRegistration::cregNotify( const QString& msg )
             "ms=(" << d->tShortestBounceTime << "/" <<
             (d->nTotalBounces ? (d->tTotalBounceTime / d->nTotalBounces) : 0) <<
             "/" << d->tLongestBounceTime << ")";
+
+        // See if we have begun bouncing; three bounces and we'll disable deep sleep.
+        if (d->nRecentBounces > 2) {
+            d->nRecentBounces = 0;
+            qLog(Modem) << "LoR -> Bouncing detected; limiting sleep.";
+            // Disable deep sleep mode.
+            // TODO: We really should find a good place in the code to attempt
+            // to re-enable deep sleep mode, but since we don't know the root
+            // cause at this time it is difficult to know when to attempt this.
+            d->service->chat("AT%SLEEP=2");
+        }            
     }
 }
  
@@ -309,6 +321,12 @@ void QModemNetworkRegistration::cregTimeOut()
     qLog(Modem) << "LoR -> Timer expired (registration lost).";
     d->nTotalLosses++;
     updateRegistrationState( (QTelephony::RegistrationState)0 );
+    // If we de-registered for real, we may be in weak signal area, this is a
+    // good reason to restart whatever progress has happened to disabling deep
+    // sleep mode.
+    // TODO: There should be other "disablers" too, but we don't yet
+    // know what the best heuristics for this might actually be...
+    d->nRecentBounces = 0;    
 }
 
 void QModemNetworkRegistration::cregQuery( bool, const QAtResult& result )
