@@ -36,6 +36,8 @@
 
 static bool supportsStk = false;
 
+#define DEFAULT_CHARSET QLatin1String("UCS2")
+
 Ficgta01CallProvider::Ficgta01CallProvider( QModemService *service )
     : QModemCallProvider( service )
 {
@@ -468,7 +470,8 @@ Ficgta01ModemService::Ficgta01ModemService
     connect ( csqTimer, SIGNAL(timeout()), this, SLOT(csqTimeOut()) );
 
     // Setup the default text codec to UCS2 for none English langs
-    chat( "AT+CSCS=\"UCS2\"" );
+    setDefaultCharset(DEFAULT_CHARSET);
+    chat( "AT+CSCS=\""+ DEFAULT_CHARSET + "\"" );
 
     // Turn on status notification messages for finding out when
     // the SIM/phonebook/SMS is ready to use.

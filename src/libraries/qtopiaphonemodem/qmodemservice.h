@@ -67,6 +67,8 @@ public:
 
     QModemIndicators *indicators() const;
 
+    QString defaultCharset() const;
+
 protected slots:
     virtual void needSms();
     virtual void suspend();
@@ -77,6 +79,9 @@ protected slots:
 signals:
     void posted( const QString& item );
     void resetModem();
+
+protected:
+    void setDefaultCharset(const QString&);
 
 private:
     void init( QSerialIODeviceMultiplexer *mux );

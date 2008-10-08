@@ -131,6 +131,7 @@ public:
     QModemCallProvider *provider;
     QModemIndicators *indicators;
     bool firstInitDone;
+    QString defaultCharset;
 };
 
 /*!
@@ -221,6 +222,16 @@ void QModemService::init( QSerialIODeviceMultiplexer *mux )
 QModemService::~QModemService()
 {
     delete d;
+}
+
+QString QModemService::defaultCharset() const
+{
+    return d->defaultCharset;
+}
+
+void QModemService::setDefaultCharset(const QString& charset)
+{
+    d->defaultCharset = charset;
 }
 
 /*!
