@@ -1147,10 +1147,27 @@ QString QAtUtils::decodeString( const QString& value, uint dcs )
 {
     // Extract just the alphabet bits.
     QSMSDataCodingScheme scheme;
-    if ((dcs & 0xC0) == 0)
-        scheme = QSMS_DefaultAlphabet;  // Other bits indicate 7-bit GSM language.
-    else
-        scheme = (QSMSDataCodingScheme)(dcs & 0x0C);
+    if ((dcs & 0xF0) == 0xF0) {
+        // 1111 x1xx  <- 8 bit data
+        if ((dcs & QSMS_8BitAlphabet))
+            scheme == QSMS_8BitAlphabet;
+        else 
+            scheme = QSMS_DefaultAlphabet;
+    } else if ((dcs & 0xC0)) {
+        // a) 01xx xxxx
+        // b) WAP form,  not handled
+        // c) 1000..1101 reserved
+        if ((dcs & 0xC0) == 0x40)
+            scheme = (QSMSDataCodingScheme)(dcs & 0x0C);
+        else if ((dcs & 0xF0) == 0xE0)
+            scheme = QSMS_DefaultAlphabet;
+        else 
+            scheme = QSMS_DefaultAlphabet;
+    } else if ((dcs & 0xFF) == 0x11) 
+        scheme = QSMS_UCS2Alphabet;
+    else 
+        scheme = QSMS_DefaultAlphabet;
+
     if ( scheme == QSMS_UCS2Alphabet ) {
         // The string is hex-encoded UCS-2.
         return codec("ucs2")->toUnicode( value.toLatin1() );
