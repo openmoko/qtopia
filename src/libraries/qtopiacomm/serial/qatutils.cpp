@@ -1143,7 +1143,7 @@ enum QSMSDataCodingScheme {
     \sa nextString()
     \since 4.3.3
 */
-QString QAtUtils::decodeString( const QString& value, uint dcs )
+QString QAtUtils::decodeString( const QString& value, uint dcs, const QString& defaultCodec )
 {
     // Extract just the alphabet bits.
     QSMSDataCodingScheme scheme;
@@ -1176,6 +1176,6 @@ QString QAtUtils::decodeString( const QString& value, uint dcs )
         return QTextCodec::codecForLocale()->toUnicode( value.toLatin1() );
     } else {
         // Assume that everything else is in the default GSM alphabet.
-        return codec("gsm")->toUnicode( value.toLatin1() );
+        return codec(defaultCodec)->toUnicode( value.toLatin1() );
     }
 }

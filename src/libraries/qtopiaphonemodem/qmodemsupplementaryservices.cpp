@@ -137,9 +137,10 @@ void QModemSupplementaryServices::cssu( const QString& msg )
 void QModemSupplementaryServices::cusd( const QString& msg )
 {
     uint posn = 6;
+    QString defaultCodec = service->defaultCharset(); 
     uint mflag = QAtUtils::parseNumber( msg, posn );
     QString value = QAtUtils::nextString( msg, posn );
     uint dcs = QAtUtils::parseNumber( msg, posn );
-    value = QAtUtils::decodeString( value, dcs );
+    value = QAtUtils::decodeString( value, dcs, defaultCodec );
     emit unstructuredNotification( (UnstructuredAction)mflag, value );
 }
