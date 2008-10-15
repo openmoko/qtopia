@@ -168,8 +168,6 @@ public slots:
     void setVibrateOnRing( const bool value );
 };
 
-
-
 class Ficgta01CallVolume : public QModemCallVolume
 {
       Q_OBJECT
@@ -211,7 +209,22 @@ public Q_SLOTS:
     void setChannels(const QList<int>& list);
 };
 
+class Ficgta01ModemHiddenFeatures
+{
+public:
+    Ficgta01ModemHiddenFeatures( QAtChat* );
+    ~Ficgta01ModemHiddenFeatures();
 
+    void sendHiddenFeatureCommand( int );
+    void enableAEC( int, bool );
+    void enableNoiseReduction( int );
+    void enableNoiseReductionAEC();
+    void disableNoiseReductionAEC();
+
+private:
+    QAtChat * m_atChat;
+    const QString atPrefix;
+};
 
 
 #endif

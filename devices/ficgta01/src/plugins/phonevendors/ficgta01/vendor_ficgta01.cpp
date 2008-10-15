@@ -770,9 +770,10 @@ void Ficgta01ModemService::modemDied()
 
 void Ficgta01ModemService::echoCancellation(QAtChat * atChat)
 {
-        atChat->chat( "AT@ST=\"-26\"" ); // audio side tone: set to minimum
-        atChat->chat( "AT%N028B" );      // Long Echo Cancellation: active, -6db
-        atChat->chat( "AT%N0125" );      // Noise reduction: active, -6db
+    Ficgta01ModemHiddenFeatures* hs = new Ficgta01ModemHiddenFeatures(atChat);
+    atChat->chat( "AT@ST=\"-26\"" ); // audio side tone: set to minimum
+    atChat->chat( "AT%N028B" );      // Long Echo Cancellation: active, -6db
+    atChat->chat( "AT%N0125" );      // Noise reduction: active, -6db
 }
 
  Ficgta01VibrateAccessory::Ficgta01VibrateAccessory
@@ -908,3 +909,50 @@ Ficgta01PreferredNetworkOperators::Ficgta01PreferredNetworkOperators( QModemServ
 Ficgta01PreferredNetworkOperators::~Ficgta01PreferredNetworkOperators()
 {
 }
+
+Ficgta01ModemHiddenFeatures::Ficgta01ModemHiddenFeatures(QAtChat* atChat) :
+    atPrefix( "AT%N" )
+{
+    m_atChat = atChat;
+}
+
+Ficgta01ModemHiddenFeatures::~Ficgta01ModemHiddenFeatures()
+{
+}
+
+void Ficgta01ModemHiddenFeatures::sendHiddenFeatureCommand(int code)
+{
+    m_atChat->chat(atPrefix + QString::number(code, 16).toUpper().rightJustified(4, '0'));
+}
+
+void Ficgta01ModemHiddenFeatures::enableAEC(int type, bool longAEC = true)
+{
+    if (type <= 0 && type >= -18 && (-type) % 6 == 0) {
+        int code = 0x0083 + (((-type) / 6) * 0x8);
+        
+        if (longAEC)
+            code += 0x0200;
+            
+         sendHiddenFeatureCommand(code);
+    }
+}
+
+void Ficgta01ModemHiddenFeatures::enableNoiseReduction(int type)
+{
+    if (type <= 0 && type >= -18 && (-type) % 6 == 0) {
+        int code = 0x0105 + (((-type) / 6) * 0x20);
+            
+        sendHiddenFeatureCommand(code);
+    }
+}
+
+void Ficgta01ModemHiddenFeatures::enableNoiseReductionAEC()
+{
+    sendHiddenFeatureCommand(0x0187);
+}
+
+void Ficgta01ModemHiddenFeatures::disableNoiseReductionAEC()
+{
+    sendHiddenFeatureCommand(0x0001);
+}
+
