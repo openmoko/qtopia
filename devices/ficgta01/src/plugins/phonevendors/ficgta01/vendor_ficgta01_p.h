@@ -53,6 +53,8 @@ protected:
     QModemCallProvider::AtdBehavior atdBehavior() const;
     void abortDial( uint modemIdentifier, QPhoneCall::Scope scope );
     QString dialServiceCommand(const QDialOptions&) const;
+    QString dialVoiceCommand(const QDialOptions&) const;
+    QString acceptCallCommand( bool otherActiveCalls ) const;
 
     // reimplementation
     void resetModem();
@@ -126,6 +128,7 @@ public:
     ~Ficgta01ModemService();
 
     void initialize();
+    static void echoCancellation( QAtChat* );
 
 private slots:
     void csq( const QString& msg );

@@ -186,6 +186,20 @@ QString Ficgta01CallProvider::dialServiceCommand(const QDialOptions& options) co
     return cmd.arg(QAtUtils::quote(options.number(), codec));
 }
 
+// Use the enable the echo suppression for TI Calypso before dialing
+QString Ficgta01CallProvider::dialVoiceCommand(const QDialOptions& options) const
+{
+	Ficgta01ModemService::echoCancellation(atchat());
+	return QModemCallProvider::dialVoiceCommand(options);
+}
+
+// Use the enable the echo suppression for TI Calypso before accepting calls
+QString Ficgta01CallProvider::acceptCallCommand( bool otherActiveCalls ) const
+{
+	Ficgta01ModemService::echoCancellation(atchat());
+	return QModemCallProvider::acceptCallCommand(otherActiveCalls);
+}
+
 Ficgta01PhoneBook::Ficgta01PhoneBook( QModemService *service )
     : QModemPhoneBook( service )
     , m_phoneBookWasReady(false)
@@ -452,10 +466,6 @@ Ficgta01ModemService::Ficgta01ModemService
 
     // Enable %CPRI for ciphering indications.
 //    chat( "AT%CPRI=1" );
-
-    // Set the side to the minimum value, enable echo/noise reduction
-    chat("AT@ST=\"-26\"" );
-    chat("AT%N0187" );
 
     // Make the modem send unsolicited reports at any time
     // the "user is not typing".  i.e. don't intersperse unsolicited
@@ -756,6 +766,13 @@ void Ficgta01ModemService::modemDied()
                                 "Please restart the device."), QMessageBox::Ok);
     if (m_vibratorService)
         m_vibratorService->setVibrateNow(false);
+}
+
+void Ficgta01ModemService::echoCancellation(QAtChat * atChat)
+{
+        atChat->chat( "AT@ST=\"-26\"" ); // audio side tone: set to minimum
+        atChat->chat( "AT%N028B" );      // Long Echo Cancellation: active, -6db
+        atChat->chat( "AT%N0125" );      // Noise reduction: active, -6db
 }
 
  Ficgta01VibrateAccessory::Ficgta01VibrateAccessory
