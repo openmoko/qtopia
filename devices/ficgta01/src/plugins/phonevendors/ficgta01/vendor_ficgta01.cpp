@@ -449,7 +449,7 @@ Ficgta01ModemService::Ficgta01ModemService
 
     // Attempt to reset the modem
     chat("AT%CWUP=1");
-    chat("AT+CFUN=0");
+    chat("AT+CFUN=1");
 
 
     // Turn on dynamic signal quality notifications.
