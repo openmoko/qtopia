@@ -729,7 +729,7 @@ void Ficgta01ModemService::cstatNotification( const QString& msg )
         m_phoneBookIsReady = status;
     }
 
-    if  (m_smsIsReady && m_phoneBookIsReady) {
+    if  (m_smsIsReady || m_phoneBookIsReady) {
         post("simready"); 
 
         if (m_phoneBook)
