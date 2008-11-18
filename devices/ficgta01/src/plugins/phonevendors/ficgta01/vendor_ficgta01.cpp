@@ -242,7 +242,6 @@ void Ficgta01PhoneBook::slotQueryFailed(const QString& book)
 Ficgta01PinManager::Ficgta01PinManager( QModemService *service )
     : QModemPinManager( service )
 {
-    setShouldSendSimReady(false);
 }
 
 Ficgta01PinManager::~Ficgta01PinManager()
@@ -449,7 +448,7 @@ Ficgta01ModemService::Ficgta01ModemService
 
     // Attempt to reset the modem
     chat("AT%CWUP=1");
-    chat("AT+CFUN=1");
+    chat("AT+CFUN=0");
 
 
     // Turn on dynamic signal quality notifications.
@@ -480,8 +479,6 @@ Ficgta01ModemService::Ficgta01ModemService
 
 // Turn on call progress indications, with phone number information.
     chat( "AT%CPI=2" );
-
-    chat("AT+COPS=0");
 
 // Enable the work-around for the bouncy rubber calypso problem
     csqTimer = new QTimer( this );
@@ -729,7 +726,7 @@ void Ficgta01ModemService::cstatNotification( const QString& msg )
         m_phoneBookIsReady = status;
     }
 
-    if  (m_smsIsReady || m_phoneBookIsReady) {
+    if  (m_smsIsReady && m_phoneBookIsReady) {
         post("simready"); 
 
         if (m_phoneBook)
