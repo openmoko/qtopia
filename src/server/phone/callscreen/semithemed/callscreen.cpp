@@ -48,6 +48,7 @@
 #include <QList>
 #include <QLabel>
 #include <QProcess>
+#include <QCallVolume>
 
 #include <QAudioStateConfiguration>
 #include <QAudioStateInfo>
@@ -373,6 +374,9 @@ public:
     void addOptionsToMenu(QMenu *menu);
     void callStateChanged(bool enableAudio);
 
+public slots:
+    void setVolume(int volume);
+
 private slots:
     void actionTriggered(QAction *action);
     void availabilityChanged();
@@ -507,6 +511,12 @@ void CallAudioHandler::callStateChanged(bool enableAudio)
     }
 }
 
+void CallAudioHandler::setVolume(int volume) 
+{
+    QtopiaIpcAdaptor e("QPE/AudioVolumeManager");
+    e.send("setVolume(int)", volume);
+}
+
 //===========================================================================
 CallScreenView::CallScreenView(QWidget* parent)
     : PhoneThemedView(parent)
@@ -535,6 +545,68 @@ void CallScreenView::themeLoaded(const QString& fn)
     emit themeWasLoaded(fn);
 }
 
+//===========================================================================
+class CallScreenVolumeView : public QWidget
+{
+    Q_OBJECT
+public:
+    CallScreenVolumeView(QWidget *parent=0);
+    ~CallScreenVolumeView();
+
+public slots:
+    void setVolume(int volume);
+
+signals:
+    void volumeChange(int volume);
+
+private:
+    int __volume;
+    QLabel *m_setVolumeDown;
+    QLabel *m_setVolumeUp;
+    QSlider *m_volume;
+    QHBoxLayout *layout;
+    QVBoxLayout *vlayout;
+};
+
+CallScreenVolumeView::CallScreenVolumeView(QWidget *parent) : QWidget( parent )
+{
+    vlayout = new QVBoxLayout;
+    layout = new QHBoxLayout;
+    m_setVolumeDown = new QLabel ( tr("Down") , this);
+    m_volume = new QSlider(Qt::Horizontal, this);
+    m_setVolumeUp = new QLabel ( tr("Up") , this);
+
+    m_volume->setRange(0 , 5);
+    __volume = 4;
+
+    m_volume->setTickInterval(1);
+    m_volume->setSingleStep( 1 );
+    m_volume->setPageStep( 1 );
+    m_volume->setValue(__volume);
+    vlayout->addWidget(m_volume, 1);
+    layout->addWidget(m_setVolumeDown);
+    layout->addStretch();
+    layout->addWidget(m_setVolumeUp);
+    vlayout->addLayout(layout);
+    setLayout(vlayout);
+    QObject::connect(m_volume, SIGNAL(valueChanged(int)), this, SLOT(setVolume(int)));
+}
+
+CallScreenVolumeView::~CallScreenVolumeView() 
+{
+    delete m_setVolumeDown;
+    delete m_setVolumeUp;
+    delete m_volume;
+    delete layout;
+    delete vlayout;
+}
+
+void CallScreenVolumeView::setVolume(int volume)
+{
+    __volume = volume;
+    m_volume->setValue(volume);
+    emit volumeChange(__volume);
+}
 
 
 //===========================================================================
@@ -640,10 +712,14 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     connect(m_digits, SIGNAL(textChanged(QString)),
             this, SLOT(updateLabels()) );
 
+    m_volumeView = new CallScreenVolumeView(this);
+    m_volumeView->setVisible(false);
+
     QVBoxLayout* lay = new QVBoxLayout(this);
     lay->setMargin(0);
     lay->addWidget(m_view);
     lay->addWidget(m_digits);
+    lay->addWidget(m_volumeView);
     
 
     m_contextMenu = QSoftMenuBar::menuFor(this);
@@ -698,6 +774,7 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     m_actionTransfer->setVisible(false);
     m_contextMenu->addAction(m_actionTransfer);
 
+
     m_audioConf = new QAudioStateConfiguration(this);
 
     if (m_audioConf->isInitialized())
@@ -705,6 +782,8 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     else
         QObject::connect(m_audioConf, SIGNAL(configurationInitialized()),
                          this, SLOT(initializeAudioConf()));
+
+    QObject::connect(m_volumeView, SIGNAL(volumeChange(int)), m_callAudioHandler, SLOT(setVolume(int)));
 
     setWindowTitle(tr("Calls"));
 
@@ -1120,6 +1199,7 @@ void CallScreen::stateChanged()
     m_actionResume->setVisible(m_holdCount && !m_incoming && !dialing);
     m_actionEnd->setVisible((m_activeCount || m_holdCount || dialing) && !m_incoming);
     m_actionEndAll->setVisible(m_activeCount && m_holdCount && !m_incoming);
+    m_volumeView->setVisible((m_activeCount || m_holdCount));
     m_actionMerge->setVisible(m_activeCount && m_holdCount &&
                             m_activeCount < MAX_JOINED_CALLS &&
                             m_holdCount < MAX_JOINED_CALLS && !m_incoming);
@@ -1181,6 +1261,7 @@ void CallScreen::stateChanged()
         m_dtmfActiveCall = QString();
     update();
     
+    m_volumeView->setVolume(currentProfile.volume());
     // If there is no ring tone, we skip the muteRing action
     if (currentProfile.volume() == 0)
         muteRingSelected();
@@ -1282,6 +1363,7 @@ void CallScreen::splitCall()
     m_actionHold->setVisible(false);
     m_actionResume->setVisible(false);
     m_actionEnd->setVisible(false);
+    m_volumeView->setVisible(false);
     m_actionEndAll->setVisible(false);
     m_actionMerge->setVisible(false);
     m_actionSplit->setVisible(false);

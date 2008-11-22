@@ -45,6 +45,7 @@ class QPhoneCall;
 class QSimToolkit;
 class QAbstractMessageBox;
 class MouseControlDialog;
+class CallScreenVolumeView;
 
 class CallScreenView : public PhoneThemedView {
     Q_OBJECT
@@ -153,6 +154,7 @@ private:
     QAction *m_actionSplit;
     QAction *m_actionTransfer;
     QAction *m_actionGsm;
+    CallScreenVolumeView *m_volumeView;
 
     // call handling
     DialerControl *m_control;

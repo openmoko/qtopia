@@ -832,13 +832,23 @@ Ficgta01CallVolume::Ficgta01CallVolume(Ficgta01ModemService *service)
 {
    this->service = service;
 
-
     QtopiaIpcAdaptor *adaptor
             = new QtopiaIpcAdaptor( "QPE/Ficgta01Modem", this );
+
+    // Set default, then query real value
+    setSpeakerVolumeRange(0, 5);
+    currentVolumeLevel = 3;
+    minVolumeLevel = 0; 
+    maxVolumeLevel = 255;
+    currentVolumeLevel = 153;
+
+    service->primaryAtChat()->chat("AT+CLVL=?", this, SLOT(volumeLevelRangeQueryDone(bool,QAtResult)) );
+    service->primaryAtChat()->chat("AT+CLVL?", this, SLOT(volumeLevelQueryDone(bool,QAtResult)) );
 
     QtopiaIpcAdaptor::connect
             ( adaptor, MESSAGE(setSpeakerVolumeRange(int, int)),
               this, SLOT(setSpeakerVolumeRange(int,int)) );
+
     QtopiaIpcAdaptor::connect
             ( adaptor, MESSAGE(setMicVolumeRange(int, int)),
               this, SLOT(setMicVolumeRange(int,int)) );
@@ -864,10 +874,16 @@ bool Ficgta01CallVolume::hasDelayedInit() const
 
 void Ficgta01CallVolume::setSpeakerVolume( int volume )
 {
+    int volumeLevel;
     int boundedVolume = qBound(value("MinimumSpeakerVolume").toInt(), volume,
                                value("MaximumSpeakerVolume").toInt());
 
     setValue( "SpeakerVolume", boundedVolume );
+    volumeLevel = virtual2real(boundedVolume);
+    if (currentVolumeLevel == volumeLevel)
+        return;
+    currentVolumeLevel = volumeLevel;
+    service->primaryAtChat()->chat("AT+CLVL="+QString::number(currentVolumeLevel));
     emit speakerVolumeChanged(boundedVolume);
 }
 
@@ -891,6 +907,65 @@ void Ficgta01CallVolume::setMicVolumeRange(int min,int max)
 {
     setValue( "MinimumMicrophoneVolume", min );
     setValue( "MaximumMicrophoneVolume", max );
+}
+
+void Ficgta01CallVolume::volumeLevelRangeQueryDone(bool ok,const QAtResult & result)
+{
+    if (!ok)
+        return;
+    QAtResultParser parser( result );
+    if ( parser.next( "+CLVL:" ) ) {
+        QList<QAtResultParser::Node> nodes = parser.readList();
+        if (!nodes.isEmpty()) {
+            if (nodes.at(0).isRange()) {
+                minVolumeLevel = nodes.at(0).asFirst();
+                maxVolumeLevel = nodes.at(0).asLast();
+            }
+        }
+    }
+}
+
+void Ficgta01CallVolume::volumeLevelQueryDone(bool ok,const QAtResult & result) 
+{
+    int volumeLevel;
+    if (!ok)
+        return;
+    QAtResultParser parser( result );
+    if ( parser.next( "+CLVL:" )) {
+        volumeLevel = (int) parser.readNumeric();
+        if (volumeLevel != currentVolumeLevel) {
+            currentVolumeLevel = volumeLevel;
+            setSpeakerVolume(real2virtual(currentVolumeLevel));
+        }
+    }
+}
+
+int Ficgta01CallVolume::virtual2real(int volume)
+{
+    int ans;
+    int min = value("MinimumSpeakerVolume").toInt();
+    int max = value("MaximumSpeakerVolume").toInt();
+    if (minVolumeLevel >= maxVolumeLevel)
+        return 0;
+    if (min >= max)
+        return 0;
+    ans = volume * (maxVolumeLevel - minVolumeLevel);
+    ans = ans / (max - min);
+    return ans;
+}
+
+int Ficgta01CallVolume::real2virtual(int volumeLevel)
+{
+    int ans;
+    int min = value("MinimumSpeakerVolume").toInt();
+    int max = value("MaximumSpeakerVolume").toInt();
+    if (minVolumeLevel >= maxVolumeLevel)
+        return 0;
+    if (min >= max)
+        return 0;
+    ans = volumeLevel * (max - min);
+    ans = ans / (maxVolumeLevel - minVolumeLevel);
+    return ans;
 }
 
 Ficgta01PreferredNetworkOperators::Ficgta01PreferredNetworkOperators( QModemService *service )

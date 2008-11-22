@@ -182,13 +182,19 @@ public slots:
     void setSpeakerVolumeRange(int,int);
     void setMicVolumeRange(int,int);
 
+protected slots:
+    void volumeLevelRangeQueryDone(bool ok, const QAtResult & result );
+    void volumeLevelQueryDone(bool ok, const QAtResult & result );
+
 protected:
     bool hasDelayedInit() const;
     
 private:
+    int virtual2real(int volume);
+    int real2virtual(int volumeLevel);
     Ficgta01ModemService *service;
-
-
+    int minVolumeLevel, maxVolumeLevel;
+    int currentVolumeLevel;
 };
 
 class Ficgta01PreferredNetworkOperators : public QModemPreferredNetworkOperators
