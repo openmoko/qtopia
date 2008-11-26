@@ -753,6 +753,10 @@ bool QContactSimContext::importContacts(const QPimSource &s, const QList<QContac
                             untypedLabelUpdated = true;
                     }
                 }
+                // Show a warning if we change the name
+                if (label != contact.label()) {
+                    QMessageBox::warning(0, tr("Import contact"), tr("Name modified to \"%1\"").arg(label));
+                }
                 if (!oldpos.isNull()) {
                     QContact c = mAccess->contact(oldpos);
                     c.setFirstName(label);
