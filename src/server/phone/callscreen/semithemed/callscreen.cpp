@@ -1260,11 +1260,12 @@ void CallScreen::stateChanged()
     else
         m_dtmfActiveCall = QString();
     update();
-    
-    m_volumeView->setVolume(currentProfile.volume());
+
     // If there is no ring tone, we skip the muteRing action
     if (currentProfile.volume() == 0)
         muteRingSelected();
+
+    m_volumeView->setVolume(currentProfile.callVolume());
 }
 
 /*!
