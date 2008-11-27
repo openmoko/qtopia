@@ -112,6 +112,7 @@ public:
     QString name() const;
     bool isSystemProfile() const;
     int volume() const;
+    int callVolume() const;
     bool vibrate() const;
     AlertType callAlert() const;
     AlertType msgAlert() const;
@@ -136,6 +137,7 @@ public:
     void setName(const QString &);
     void setIsSystemProfile(bool);
     void setVolume(int);
+    void setCallVolume(int);
     void setVibrate(bool);
     void setCallAlert(AlertType);
     void setMsgAlert(AlertType );

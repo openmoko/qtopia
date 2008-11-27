@@ -228,7 +228,7 @@ class QPhoneProfilePrivate : public QSharedData
 {
 public:
     QPhoneProfilePrivate()
-    : mSaveId(-1), mIsSystemProfile(false), mVolume(3), mVibrate(true),
+    : mSaveId(-1), mIsSystemProfile(false), mVolume(3), mCallVolume(4), mVibrate(true),
       mCallAlert(QPhoneProfile::Continuous), mMsgAlert(QPhoneProfile::Once),
       mMsgAlertDuration(5000), mAutoAnswer(false), mPlaneMode(false) {}
     QPhoneProfilePrivate &operator=(const QPhoneProfilePrivate &o);
@@ -237,6 +237,7 @@ public:
     int mSaveId;
     bool mIsSystemProfile;
     int mVolume;
+    int mCallVolume;
     bool mVibrate;
     QPhoneProfile::AlertType mCallAlert;
     QPhoneProfile::AlertType mMsgAlert;
@@ -259,6 +260,7 @@ QPhoneProfilePrivate &QPhoneProfilePrivate::operator=(const QPhoneProfilePrivate
     mName = o.mName;
     mIsSystemProfile = o.mIsSystemProfile;
     mVolume = o.mVolume;
+    mCallVolume = o.mCallVolume;
     mVibrate = o.mVibrate;
     mCallAlert = o.mCallAlert;
     mMsgAlert = o.mMsgAlert;
@@ -321,6 +323,7 @@ QPhoneProfilePrivate &QPhoneProfilePrivate::operator=(const QPhoneProfilePrivate
 static const QString cName("Name"); // no tr
 static const QString cSystem("System"); // no tr
 static const QString cVolume("Volume"); // no tr
+static const QString cCallVolume("CallVolume"); // no tr
 static const QString cVibrate("Vibrate"); // no tr
 static const QString cCallA("CallAlert"); // no tr
 static const QString cMsgA("MsgAlert"); // no tr
@@ -419,6 +422,7 @@ bool QPhoneProfile::operator==(const QPhoneProfile &o) const
     return d->mName == o.d->mName &&
            d->mIsSystemProfile == o.d->mIsSystemProfile &&
            d->mVolume == o.d->mVolume &&
+           d->mCallVolume == o.d->mCallVolume &&
            d->mVibrate == o.d->mVibrate &&
            d->mCallAlert == o.d->mCallAlert &&
            d->mMsgAlert == o.d->mMsgAlert &&
@@ -485,6 +489,14 @@ bool QPhoneProfile::isSystemProfile() const
 int QPhoneProfile::volume() const
 {
     return d->mVolume;
+}
+
+/*!
+  Returns the call volume for this profile.
+ */
+int QPhoneProfile::callVolume() const
+{
+    return d->mCallVolume;
 }
 
 /*!
@@ -677,6 +689,14 @@ void QPhoneProfile::setVolume(int volume)
 }
 
 /*!
+  Sets the profile \a call volume. Valid values are from 0 to 5.
+  */
+void QPhoneProfile::setCallVolume(int volume)
+{
+    d->mCallVolume = qMin(5, qMax(0, volume));
+}
+
+/*!
   Sets the profile vibration to \a vibrate.
   */
 void QPhoneProfile::setVibrate(bool vibrate)
@@ -817,6 +837,7 @@ void QPhoneProfile::read(QTranslatableSettings &c)
     d->mName=c.value(cName).toString();
     setIsSystemProfile(c.value(cSystem).toBool());
     setVolume(c.value(cVolume).toInt());
+    setCallVolume(c.value(cCallVolume).toInt());
     setVibrate(c.value(cVibrate).toBool());
     setCallAlert((QPhoneProfile::AlertType)c.value(cCallA).toInt());
     setMsgAlert((QPhoneProfile::AlertType)c.value(cMsgA).toInt());
@@ -890,6 +911,7 @@ void QPhoneProfile::write(QSettings &c) const
         c.setValue(cName, d->mName);
     c.setValue(cSystem, isSystemProfile());
     c.setValue(cVolume, volume());
+    c.setValue(cCallVolume, callVolume());
     c.setValue(cVibrate, vibrate());
     c.setValue(cCallA, (int)callAlert());
     c.setValue(cMsgA, (int)msgAlert());
