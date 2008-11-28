@@ -837,10 +837,6 @@ Ficgta01CallVolume::Ficgta01CallVolume(Ficgta01ModemService *service)
 
     // Set default, then query real value
     setSpeakerVolumeRange(0, 5);
-    currentVolumeLevel = 3;
-    minVolumeLevel = 0; 
-    maxVolumeLevel = 255;
-    currentVolumeLevel = 153;
 
     service->primaryAtChat()->chat("AT+CLVL=?", this, SLOT(volumeLevelRangeQueryDone(bool,QAtResult)) );
     service->primaryAtChat()->chat("AT+CLVL?", this, SLOT(volumeLevelQueryDone(bool,QAtResult)) );
@@ -933,10 +929,8 @@ void Ficgta01CallVolume::volumeLevelQueryDone(bool ok,const QAtResult & result)
     QAtResultParser parser( result );
     if ( parser.next( "+CLVL:" )) {
         volumeLevel = (int) parser.readNumeric();
-        if (volumeLevel != currentVolumeLevel) {
-            currentVolumeLevel = volumeLevel;
-            setSpeakerVolume(real2virtual(currentVolumeLevel));
-        }
+        currentVolumeLevel = volumeLevel;
+        setSpeakerVolume(real2virtual(currentVolumeLevel));
     }
 }
 
