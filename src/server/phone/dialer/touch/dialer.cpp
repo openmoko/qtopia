@@ -373,7 +373,11 @@ void Dialer::selectContact()
 {
     QContactSelector contactSelector( false, this );
     contactSelector.setModel(ServerContactModel::instance());
+#ifdef Q_WS_X11
+    contactSelector.show();
+#else
     contactSelector.showMaximized();
+#endif
     if( QtopiaApplication::execDialog( &contactSelector ) && contactSelector.contactSelected() )
     {
         QContact cnt = contactSelector.selectedContact();
