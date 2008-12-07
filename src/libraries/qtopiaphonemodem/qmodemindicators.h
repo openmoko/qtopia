@@ -52,7 +52,7 @@ public:
 public slots:
     void setSignalQuality( int value, int maxValue );
     void setBatteryCharge( int value, int maxValue,
-                           QModemIndicators::ChargeState value );
+                           QModemIndicators::ChargeState value2 );
     void setSmsMemoryFull( QModemIndicators::SmsMemoryFullStatus value );
     void setNetworkTimeZone( int zone, int dst );
     void setNetworkTime( uint time, int zone, int dst );
