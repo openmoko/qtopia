@@ -197,6 +197,8 @@ private:
         QString freezeWord;
     };
     QList<KeyOccurance> m_occuranceHistory;
+    QRect m_switchPosition;
+    QImage m_switchImage;
 };
 
 #endif // _KEYBOARD_H_

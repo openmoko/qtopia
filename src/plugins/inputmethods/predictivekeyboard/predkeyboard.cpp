@@ -1184,9 +1184,16 @@ void KeyboardWidget::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
 
-    p.setClipRect(m_boardRect);
-
     if(!m_boards.isEmpty()) {
+        /*
+         * Cheat. Assume that the board does not overlap with the
+         * switch. So we can draw before we do painter translation. This way
+         * one does not need to undo the translation when drawing the switcher.
+         * Let us figure out how well this works
+         */
+        if (!m_switchImage.isNull())
+            p.drawImage(m_switchPosition, m_switchImage);
+
         if(m_boardChangeTimeline.state() == QTimeLine::Running) {
             if(m_boardUp) {
                 p.translate(0, m_boardRect.height() * (1.0f - m_boardChangeTimeline.currentValue()));
@@ -1540,6 +1547,11 @@ void KeyboardWidget::mouseClick(const QPoint &p)
         }
     }
 
+    if(m_switchPosition.contains(p)) {
+        stroke(StrokeDown);
+        return;
+    }
+
     if(m_boards.at(m_currentBoard)->type() == Numeric) {
         pressAndHoldChar(closestCharacter(p, m_boards.at(m_currentBoard)));
         return;
@@ -1867,6 +1879,10 @@ void KeyboardWidget::acceptWord()
 
 void KeyboardWidget::resizeEvent(QResizeEvent *)
 {
+    static const int Size = 32;
+    static const int Margin = 4;
+    m_switchPosition = QRect(width() - Size - Margin, height() - Size - Margin, Size, Size);
+    m_switchImage = QImage(":image/predictivekeyboard/predswitch").scaled(Size, Size);
     positionOptionsWindow();
 }
 
